@@ -25,11 +25,11 @@ class CustomTabManager: NSObject {
     static let shared = CustomTabManager()
     static let viewTag = 999999961
     
-    weak var delegate: FeedPageNavigationDelegate?
+    var delegate: FeedPageNavigationDelegate?
     
-    weak var hDelegate: HomePageNavigationDelegate?
+    var hDelegate: HomePageNavigationDelegate?
     
-    weak var mDelegate: MoreNavigationDelegate?
+    var mDelegate: MoreNavigationDelegate?
     
     // MARK: - Private Properties -
     private var curVController = UIViewController()
@@ -87,6 +87,7 @@ class CustomTabManager: NSObject {
     }
     
     @objc func tapOnMore(_ sender: UIButton) {
+        mDelegate?.tapOnMore()
         CustomTabManager.shared.customTabbar.selectedIndex = 2
         CustomTabManager.shared.curVController.tabBarController?.selectedIndex = 2
         CustomTabManager.shared.customTabbar.setSelectedTabBar()

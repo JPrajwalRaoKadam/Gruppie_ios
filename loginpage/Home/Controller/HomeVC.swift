@@ -1,8 +1,9 @@
 import UIKit
 import SDWebImage
 
-class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllIconsTableViewCellDelegate {
-    
+class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllIconsTableViewCellDelegate,FeedPageNavigationDelegate, HomePageNavigationDelegate, MoreNavigationDelegate {
+  
+    var indexPath: IndexPath?
     var name: String?
     var groupId: String?
     var school: School? // School object to hold school data
@@ -29,6 +30,9 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         tableView.register(UINib(nibName: "BannerAndProfileTableViewCell", bundle: nil), forCellReuseIdentifier: "BannerAndProfileTableViewCell")
         tableView.register(UINib(nibName: "AllIconsTableViewCell", bundle: nil), forCellReuseIdentifier: "AllIconsTableViewCell")
         
+        CustomTabManager.shared.delegate = self
+        CustomTabManager.shared.hDelegate = self
+        CustomTabManager.shared.mDelegate = self
         // Print the image URLs to verify their content
         print("Image URLs: \(imageUrls)")
         
@@ -60,22 +64,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         
     }
     
-    @IBAction func paymrntAction(_ sender: Any) {
-        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-        guard let payVC = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as? PaymentClassListingVC else {
-            print("ViewController with identifier 'PaymentClassListingVC' not found.")
-            return
-        }
-        payVC.groupId = school?.id ?? ""
-        self.navigationController?.pushViewController(payVC, animated: true)
-    }
-    
     @IBAction func backAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
-    }
-    
-    @IBAction func feedVCButton(_ sender: Any) {
-        tapforFeeds()
     }
     
     func tapforFeeds() {
@@ -90,6 +80,17 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     
+    func getHomedata(indexpath: IndexPath) {
+            if let homeVC = self.navigationController?.viewControllers.first(where: { $0 is HomeVC }) {
+                self.navigationController?.popToViewController(homeVC, animated: true)
+            } else {
+                print("HomeVC not found in the navigation stack.")
+            }
+    }
+    
+    func tapOnMore() {
+        
+    }
     
     // MARK: - UITableView Data Source
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -124,7 +125,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             let allIconCell = tableView.dequeueReusableCell(withIdentifier: "AllIconsTableViewCell", for: indexPath) as! AllIconsTableViewCell
             allIconCell.delegate = self // Set the delegate
             allIconCell.configureActivityNames(indexPath: indexPath, activity: groupDatas)
-            
+            self.indexPath = indexPath
             return allIconCell
         }
         return UITableViewCell()
@@ -165,6 +166,14 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchStaffDataAndNavigate()
         case "Student Register":
             fetchStudentDataAndNavigate()
+        case "Fees New":
+            let storyboard = UIStoryboard(name: "Payment", bundle: nil)
+            guard let payVC = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as? PaymentClassListingVC else {
+                print("ViewController with identifier 'PaymentClassListingVC' not found.")
+                return
+            }
+            payVC.groupId = school?.id ?? ""
+            self.navigationController?.pushViewController(payVC, animated: true)
         default:
             print("No navigation configured for type: \(featureIcon.type)")
         }
