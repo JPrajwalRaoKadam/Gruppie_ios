@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="51" id="KGk-i7-Jjw" customClass="HolidayTableViewCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="388" height="51"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="388" height="51"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="i6s-D1-4Xb">
+                        <rect key="frame" x="0.0" y="0.0" width="388" height="50"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="1kI-de-Jdk">
+                                <rect key="frame" x="10" y="5" width="370" height="40"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Title" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="I2A-Xb-CIa">
+                                        <rect key="frame" x="0.0" y="0.0" width="180" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="180" id="FBf-4j-dIs"/>
+                                            <constraint firstAttribute="height" constant="40" id="tAQ-bg-Vu0"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="dd-mm-yyyy" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="vBJ-O9-3Q2">
+                                        <rect key="frame" x="190" y="0.0" width="180" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="180" id="XS3-iA-AiA"/>
+                                            <constraint firstAttribute="height" constant="40" id="daX-4F-GLU"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="370" id="XhR-vW-v9Z"/>
+                                    <constraint firstAttribute="height" constant="40" id="oxl-gu-h4R"/>
+                                </constraints>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemGrayColor"/>
+                        <constraints>
+                            <constraint firstItem="1kI-de-Jdk" firstAttribute="top" secondItem="i6s-D1-4Xb" secondAttribute="top" constant="5" id="Ypj-7d-WDG"/>
+                            <constraint firstAttribute="bottom" secondItem="1kI-de-Jdk" secondAttribute="bottom" constant="5" id="hng-wb-Pto"/>
+                            <constraint firstItem="1kI-de-Jdk" firstAttribute="leading" secondItem="i6s-D1-4Xb" secondAttribute="leading" constant="10" id="riE-PZ-Ztk"/>
+                            <constraint firstAttribute="height" constant="50" id="uqU-EI-1uW"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="i6s-D1-4Xb" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="E9e-TA-7Mw"/>
+                    <constraint firstItem="i6s-D1-4Xb" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="O6X-hV-17D"/>
+                    <constraint firstItem="i6s-D1-4Xb" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="cAq-Cz-OhI"/>
+                    <constraint firstAttribute="trailing" secondItem="i6s-D1-4Xb" secondAttribute="trailing" id="k56-mN-erN"/>
+                    <constraint firstItem="i6s-D1-4Xb" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="kKd-wg-1Xb"/>
+                    <constraint firstAttribute="trailing" secondItem="i6s-D1-4Xb" secondAttribute="trailing" id="vRQ-Rg-a9r"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="holidayDates" destination="vBJ-O9-3Q2" id="NVl-Vd-M01"/>
+                <outlet property="holidayList" destination="I2A-Xb-CIa" id="mO3-9l-IZb"/>
+            </connections>
+            <point key="canvasLocation" x="181.15942028985509" y="-147.65625"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemGrayColor">
+            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

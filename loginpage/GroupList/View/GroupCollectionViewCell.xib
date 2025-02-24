@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="HelveticaNeue.ttc">
+            <string>HelveticaNeue</string>
+        </array>
+        <array key="Inter-SemiBold.ttf">
+            <string>Inter-SemiBold</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="GroupCollectionViewCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="103" height="103"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yYk-fK-DY6" userLabel="containerView" customClass="GroupCollectionViewCell" customModule="loginpage" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="0.0" width="103" height="103"/>
+                    <subviews>
+                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="G" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qdh-Qa-t3k">
+                            <rect key="frame" x="24" y="6" width="55" height="55"/>
+                            <color key="backgroundColor" red="0.1730872691" green="0.41759634020000003" blue="0.53030461070000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <rect key="contentStretch" x="1" y="1" width="1" height="1"/>
+                            <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="30"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.94999998807907104" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FG0-lB-lGu">
+                            <rect key="frame" x="24" y="6" width="55" height="55"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="55" id="Dtj-bc-mi1"/>
+                                <constraint firstAttribute="height" constant="55" id="yYO-v6-5ZG"/>
+                            </constraints>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text=" Label Label Label" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="6" translatesAutoresizingMaskIntoConstraints="NO" id="PDA-LT-GOY" userLabel="Title">
+                            <rect key="frame" x="8" y="63" width="87" height="40"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="40" id="sDe-hb-4Q8"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" name="Inter-SemiBold" family="Inter" pointSize="12"/>
+                            <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <accessibility key="accessibilityConfiguration" identifier="GroupCollectionViewCell"/>
+                    <constraints>
+                        <constraint firstItem="PDA-LT-GOY" firstAttribute="top" secondItem="FG0-lB-lGu" secondAttribute="bottom" constant="2" id="BzF-tG-1RF"/>
+                        <constraint firstItem="PDA-LT-GOY" firstAttribute="centerX" secondItem="Qdh-Qa-t3k" secondAttribute="centerX" id="Cn1-yO-9ij"/>
+                        <constraint firstItem="Qdh-Qa-t3k" firstAttribute="trailing" secondItem="FG0-lB-lGu" secondAttribute="trailing" id="Jg1-1L-b2K"/>
+                        <constraint firstAttribute="bottom" secondItem="PDA-LT-GOY" secondAttribute="bottom" id="SgO-1E-vHz"/>
+                        <constraint firstItem="Qdh-Qa-t3k" firstAttribute="leading" secondItem="FG0-lB-lGu" secondAttribute="leading" id="SmB-rW-Ovy"/>
+                        <constraint firstItem="FG0-lB-lGu" firstAttribute="centerX" secondItem="yYk-fK-DY6" secondAttribute="centerX" id="d5V-wF-3e6"/>
+                        <constraint firstItem="Qdh-Qa-t3k" firstAttribute="top" secondItem="FG0-lB-lGu" secondAttribute="top" id="nm7-Ya-LgM"/>
+                        <constraint firstItem="PDA-LT-GOY" firstAttribute="leading" secondItem="yYk-fK-DY6" secondAttribute="leadingMargin" id="v6G-nB-vVP"/>
+                        <constraint firstItem="Qdh-Qa-t3k" firstAttribute="bottom" secondItem="FG0-lB-lGu" secondAttribute="bottom" id="xvf-9X-MFO"/>
+                    </constraints>
+                    <connections>
+                        <outlet property="imgTeamNameIcon" destination="Qdh-Qa-t3k" id="2hn-C9-u9q"/>
+                    </connections>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="yYk-fK-DY6" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="CCh-ST-UY2"/>
+                <constraint firstItem="yYk-fK-DY6" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" id="QVj-E3-ynq"/>
+                <constraint firstItem="yYk-fK-DY6" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="SyX-Yu-Sli"/>
+                <constraint firstItem="yYk-fK-DY6" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="Wmc-9z-odi"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="aLabelTeamNameIcon" destination="PDA-LT-GOY" id="eFY-sP-bk6"/>
+                <outlet property="anImageIcon" destination="FG0-lB-lGu" id="wbS-a1-Lg2"/>
+                <outlet property="imgTeamNameIcon" destination="Qdh-Qa-t3k" id="bTk-FF-r4t"/>
+            </connections>
+            <point key="canvasLocation" x="-183.33333333333334" y="-94.084821428571431"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
