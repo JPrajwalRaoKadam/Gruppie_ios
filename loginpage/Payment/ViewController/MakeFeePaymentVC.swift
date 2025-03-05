@@ -70,6 +70,22 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         paymentTableView.reloadData()
     }
     
+    @IBAction func payButtonAction(_ sender: Any) {
+        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
+           if let amountPaymentVC = storyboard.instantiateViewController(withIdentifier: "AmountPaymentVC") as? AmountPaymentVC {
+               amountPaymentVC.feePaymentData = self.feePaymentData
+               amountPaymentVC.groupID = self.groupId
+               amountPaymentVC.teamID = self.teamId
+               amountPaymentVC.userID = self.userId
+               amountPaymentVC.studentName = feePaymentData?.name
+               amountPaymentVC.customerMobileNo = feePaymentData?.phone
+               amountPaymentVC.demandTotalAmount = self.demandAmount.text
+               amountPaymentVC.dueAmpount = self.overdueAmount.text
+               navigationController?.pushViewController(amountPaymentVC, animated: true)
+           }
+    }
+    
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return feePaymentData?.feeData.feePaidDetails.count ?? 0
     }
@@ -80,9 +96,10 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             self.receiptLabel.isHidden = false
             
             // Ensure feePaidDetails is not nil and has enough data
-            if let paidDate = feePaymentData?.feeData.feePaidDetails[safe: indexPath.row] {
+            if let paidDate = feePaymentData?.feeData.feePaidDetails[safe: indexPath.row], let status = feePaymentData?.feeData.feePaidDetails[indexPath.row] {
                 cell.dateLabel.text = paidDate.paidDate
                 cell.amountLabel.text = "\(paidDate.amountPaidWithFine)"
+                cell.statusButton.setTitle(status.status, for: .normal)
             } else {
                 cell.dateLabel.text = "--"
                 cell.amountLabel.text = "--"
@@ -102,7 +119,7 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
 
     
     func fetchConsolidatedFeeData(groupId: String, teamId: String, userId: String, completion: @escaping (FeePaymentData?) -> Void) {
-        let urlString = "https://gcc.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/user/\(userId)/consolidate/fee/get/new"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/user/\(userId)/consolidate/fee/get/new"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL")

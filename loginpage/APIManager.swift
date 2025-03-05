@@ -11,7 +11,7 @@ class APIManager {
     static let shared = APIManager()
     
     // Define the base URL here
-    let baseURL = "https://api.gruppie.in/api/v1/"
+    let baseURL = "https://demo.gruppie.in/api/v1/"
     
     private init() {} // Prevents others from creating another instance
 }

@@ -349,3 +349,9 @@ struct DueeDate: Codable {
     let date: String
     let amount: String
 }
+
+struct EasebuzzPaymentResponse: Codable {
+    let status: Int
+    let redirectionUrl: String
+    let data: String
+}

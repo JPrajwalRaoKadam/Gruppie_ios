@@ -7,7 +7,7 @@ target 'loginpage' do
   pod 'SDWebImage', '~> 5.20.0' # Updated to the latest version
   pod 'FSCalendar', '~> 2.8.4' # Updated to the latest version
   pod 'youtube-ios-player-helper' # Add YouTube Player Helper
-
+pod 'EasebuzzPaymentSDK-V2', '~> 1.3' # Fixed syntax issue
   target 'loginpageTests' do
     inherit! :search_paths
     # Pods for testing
