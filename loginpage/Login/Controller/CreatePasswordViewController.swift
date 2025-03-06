@@ -13,6 +13,7 @@ class CreatePasswordViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.isNavigationBarHidden = true
         butttonStyles()
         if let number = phoneNumber {
             print("Received phone number: \(number)")

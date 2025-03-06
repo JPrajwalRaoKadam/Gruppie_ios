@@ -13,6 +13,7 @@ class OTPViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationItem.hidesBackButton = true
         butttonStyles()
         if let number = phoneNumber {
             phoneNumberTextField.text = number

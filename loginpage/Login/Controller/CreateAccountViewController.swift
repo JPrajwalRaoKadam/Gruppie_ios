@@ -11,13 +11,21 @@ class CreateAccountViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.isNavigationBarHidden = true
         butttonStyles()
         // Display the received phone number
         if let number = phoneNumber {
             phoneNumberTextField.text = number // Set the phone number directly to the text field
             print("Received phone number: \(number)")
         }
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+            view.addGestureRecognizer(tapGesture)
     }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     func butttonStyles(){
         NextOutlet.layer.cornerRadius = 10
         nameTextField.layer.cornerRadius = 10
