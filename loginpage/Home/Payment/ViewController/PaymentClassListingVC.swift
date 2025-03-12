@@ -78,8 +78,10 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ClassesTableViewCell", for: indexPath) as! ClassesTableViewCell
-        let teamData = teamData?[indexPath.row]
-        cell.className.text = teamData?.className
+        if let teamData = teamData?[indexPath.row] {
+            cell.configurePayment(with: teamData)
+            cell.nameLabel.text = teamData.className
+        }
         return cell
     }
     

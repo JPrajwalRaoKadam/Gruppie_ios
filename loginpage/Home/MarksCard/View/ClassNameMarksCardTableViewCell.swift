@@ -1,19 +1,18 @@
 //
-//  ClassesTableViewCell.swift
+//  ClassNameMarksCardTableViewCell.swift
 //  loginpage
 //
-//  Created by Prajwal rao Kadam J on 06/02/25.
+//  Created by apple on 11/03/25.
 //
 
 import UIKit
 
-class ClassesTableViewCell: UITableViewCell {
-
+class ClassNameMarksCardTableViewCell: UITableViewCell {
     
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var imageLabel: UILabel!
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
 
@@ -31,18 +30,25 @@ class ClassesTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
 
-    func configure(with student: StudentFinancialData) {
-        nameLabel.text = student.name
-            iconImageView.image = generateImage(from: student.name)  // This triggers the fallback image
+    func configure(with subject: SubjectData) {
+        nameLabel.text = subject.name
+
+        if let imageURL = subject.image, let url = URL(string: imageURL) {
+            loadImage(from: url)
+            imageLabel.isHidden = true
+            iconImageView.isHidden = false
+        } else {
+            iconImageView.image = generateImage(from: subject.name)  // This triggers the fallback image
             iconImageView.isHidden = false
             imageLabel.isHidden = true  // Optionally, hide the label
+        }
     }
     
-    func configurePayment(with teamData: TeamData ) {
-        nameLabel.text = teamData.className
-        iconImageView.image = generateImage(from: teamData.className ?? "")  // This triggers the fallback image
-            iconImageView.isHidden = false
-            imageLabel.isHidden = true  // Optionally, hide the label
+    func configureExam(with exam: ExamData) {
+        nameLabel.text = exam.title
+        iconImageView.image = generateImage(from: exam.title ?? "")  // This triggers the fallback image
+        iconImageView.isHidden = false
+        imageLabel.isHidden = true  // Optionally, hide the label
     }
 
     // Method to load image from URL (you can use libraries like SDWebImage or use URLSession for this)
@@ -91,6 +97,4 @@ class ClassesTableViewCell: UITableViewCell {
         
         return image
     }
-    
 }
-

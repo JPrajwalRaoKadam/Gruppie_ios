@@ -9,6 +9,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var school: School? // School object to hold school data
     var imageUrls: [String] = [] // Array to hold multiple image URLs
     var groupDatas: [GroupData] = []
+    var studentTeams: [StudentTeam] = []
+    var featureIcon: FeatureIcon?
     
     @IBOutlet weak var tableView: UITableView! // TableView outlet
     @IBOutlet weak var menu: UIImageView!
@@ -157,6 +159,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     func didSelectIcon(_ featureIcon: FeatureIcon) {
+        self.featureIcon = featureIcon
         switch featureIcon.type {
         case "Calendar":
             navigateToCalendarViewController()
@@ -166,6 +169,12 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchStaffDataAndNavigate()
         case "Student Register":
             fetchStudentDataAndNavigate()
+        case "Subject Register":
+            fetchSubjectDataAndNavigate()
+        case "Hostel":
+            fetchSubjectDataAndNavigate()
+        case "Gallery":
+            navigateToGalleryViewController()
         case "Fees New":
             let storyboard = UIStoryboard(name: "Payment", bundle: nil)
             guard let payVC = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as? PaymentClassListingVC else {
@@ -177,6 +186,152 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         default:
             print("No navigation configured for type: \(featureIcon.type)")
         }
+    }
+    
+    func navigateToGalleryViewController() {
+            let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
+            if let galleryVC = storyboard.instantiateViewController(withIdentifier: "GalleryViewController") as? GalleryViewController {
+                galleryVC.groupId = school?.id ?? ""
+                galleryVC.token = TokenManager.shared.getToken() ?? ""
+
+                print("Navigating to GalleryViewController with:")
+                print("Group ID: \(galleryVC.groupId)")
+                print("Token: \(galleryVC.token)")
+
+                navigationController?.pushViewController(galleryVC, animated: true)
+            } else {
+                print("Failed to instantiate GalleryViewController")
+            }
+        }
+    
+    private func fetchSubjectDataAndNavigate() {
+        guard let token = TokenManager.shared.getToken(), !token.isEmpty,
+              let groupId = school?.id, !groupId.isEmpty else {
+            print("❌ Token or Group ID is missing")
+            return
+        }
+        
+        let subjectURL = APIManager.shared.baseURL + "groups/\(groupId)/class/get"
+        print("📜 Request URL: \(subjectURL)") // Print the final URL
+        
+        let dispatchGroup = DispatchGroup()
+        var subjects: [SubjectData] = []
+        var teamIds: [String] = [] // Store multiple teamIds
+        
+        dispatchGroup.enter()
+        fetchSubjectData(from: subjectURL, token: token) { fetchedSubjects, fetchedTeamIds in
+            subjects = fetchedSubjects
+            teamIds = fetchedTeamIds // Store all teamIds
+            
+            print("📚 Total subjects fetched: \(subjects.count)") // Print count in console
+            print("🆔 Fetched Team IDs: \(teamIds)") // Print all teamIds in console
+            
+            dispatchGroup.leave()
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            print("🚀 Navigating to SubjectViewController with Team IDs: \(teamIds)")
+            switch self.featureIcon?.type {
+            case "Subject Register":
+                self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
+            case "Hostel":
+                self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
+            default:
+                print("No navigation configured for type: \(self.featureIcon?.type)")
+                
+            }
+        }
+    }
+        
+    private func fetchSubjectData(from urlString: String, token: String, completion: @escaping ([SubjectData], [String]) -> Void) {
+        guard let url = URL(string: urlString) else {
+            print("❌ Invalid URL: \(urlString)")
+            completion([], [])
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Error fetching subject data: \(error.localizedDescription)")
+                completion([], [])
+                return
+            }
+            
+            guard let data = data else {
+                print("❌ No data received.")
+                completion([], [])
+                return
+            }
+            
+            // Print raw JSON response
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📜 Raw JSON Response: \(jsonString)")
+            } else {
+                print("❌ Failed to convert data to String.")
+            }
+            
+            // Decode JSON response
+            let decoder = JSONDecoder()
+            do {
+                let subjectResponse = try decoder.decode(SubjectResponse.self, from: data)
+                let subjects = subjectResponse.data
+                
+                // Extract all teamIds
+                let teamIds = subjects.compactMap { $0.teamId }
+                
+                print("📚 Total subjects fetched: \(subjects.count)")
+                print("🆔 Extracted Team IDs: \(teamIds)")
+                
+                for subject in subjects {
+                    print("📖 Subject Name: \(subject.name)")
+                }
+                
+                completion(subjects, teamIds) // Return subjects and all teamIds
+            } catch {
+                print("❌ Error decoding subject data: \(error)")
+                completion([], []) // Return empty array and empty teamIds in case of error
+            }
+        }.resume()
+    }
+        
+    func navigateToSubjectRegister(subjects: [SubjectData], teamIds: [String]) {
+        let storyboard = UIStoryboard(name: "Subject", bundle: nil)
+        guard let subjectRegisterVC = storyboard.instantiateViewController(withIdentifier: "SubjectViewController") as? SubjectViewController else {
+            print("❌ Failed to instantiate SubjectViewController")
+            return
+        }
+        
+        subjectRegisterVC.subjects = subjects
+        subjectRegisterVC.token = TokenManager.shared.getToken() ?? ""
+        subjectRegisterVC.groupId = school?.id ?? ""
+        subjectRegisterVC.teamIds = teamIds
+        
+        print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
+        print("✅ Passing Group ID to SubjectViewController: \(subjectRegisterVC.groupId)") // Fix: Use subjectRegisterVC.groupId
+        
+        self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
+    }
+    
+    func navigateToMarksCard(subjects: [SubjectData], teamIds: [String]) {
+        let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
+        guard let MarksCardVC = storyboard.instantiateViewController(withIdentifier: "ClassListMarksCardVC") as? ClassListMarksCardVC else {
+            print("❌ Failed to instantiate SubjectViewController")
+            return
+        }
+        
+        MarksCardVC.subjects = subjects
+        MarksCardVC.token = TokenManager.shared.getToken() ?? ""
+        MarksCardVC.groupId = school?.id ?? ""
+        MarksCardVC.teamIds = teamIds
+        
+        print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
+        print("✅ Passing Group ID to SubjectViewController: \(MarksCardVC.groupId)") // Fix: Use subjectRegisterVC.groupId
+        
+        self.navigationController?.pushViewController(MarksCardVC, animated: true)
     }
     
     func navigateToCalendarViewController() {
@@ -361,6 +516,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             
             dispatchGroup.notify(queue: .main) {
                 self.navigateToStudentRegister(studentTeams: studentTeams)
+                self.studentTeams = studentTeams
             }
         }
     

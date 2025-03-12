@@ -48,6 +48,16 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="keyboardrightarrow"/>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LMQ-39-qc5">
+                                <rect key="frame" x="15" y="15.999999999999998" width="30" height="31.333333333333329"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="31.329999999999998" id="Yt3-iU-0IB"/>
+                                    <constraint firstAttribute="width" constant="30" id="yqV-MD-AxR"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
@@ -58,9 +68,11 @@
                             <constraint firstAttribute="bottom" secondItem="v0t-JY-Tdg" secondAttribute="bottom" constant="22" id="FNn-Ra-kjr"/>
                             <constraint firstItem="FfJ-zi-MSR" firstAttribute="top" secondItem="Bdo-ej-uRC" secondAttribute="top" constant="16" id="QnJ-2Z-nHc"/>
                             <constraint firstItem="FfJ-zi-MSR" firstAttribute="leading" secondItem="Bdo-ej-uRC" secondAttribute="leading" constant="15" id="RRz-iE-Lev"/>
+                            <constraint firstItem="LMQ-39-qc5" firstAttribute="leading" secondItem="Bdo-ej-uRC" secondAttribute="leading" constant="15" id="Tgl-xg-hEj"/>
                             <constraint firstAttribute="height" constant="64" id="VD5-Rs-vaX"/>
                             <constraint firstAttribute="bottom" secondItem="FfJ-zi-MSR" secondAttribute="bottom" constant="16.670000000000002" id="YU7-eu-OZT"/>
                             <constraint firstAttribute="bottom" secondItem="pzs-PV-561" secondAttribute="bottom" constant="17" id="kxK-RH-AuN"/>
+                            <constraint firstItem="LMQ-39-qc5" firstAttribute="top" secondItem="Bdo-ej-uRC" secondAttribute="top" constant="16" id="yqx-ZP-HoX"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -73,8 +85,9 @@
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
-                <outlet property="classImage" destination="FfJ-zi-MSR" id="19A-kw-CxE"/>
-                <outlet property="className" destination="v0t-JY-Tdg" id="dcf-jg-aDQ"/>
+                <outlet property="iconImageView" destination="FfJ-zi-MSR" id="lBf-lr-Mlz"/>
+                <outlet property="imageLabel" destination="LMQ-39-qc5" id="PlE-NG-q3w"/>
+                <outlet property="nameLabel" destination="v0t-JY-Tdg" id="qHr-nB-QPF"/>
             </connections>
             <point key="canvasLocation" x="170.99236641221373" y="26.760563380281692"/>
         </tableViewCell>

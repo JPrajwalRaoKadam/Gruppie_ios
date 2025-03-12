@@ -70,8 +70,8 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         let cell = tableView.dequeueReusableCell(withIdentifier: "ClassesTableViewCell", for: indexPath) as! ClassesTableViewCell
         let student = studentFees[indexPath.row]
         
-        // Only set the name
-        cell.className.text = student.name
+        cell.configure(with: student)
+        cell.nameLabel.text = student.name
         
         return cell
     }
