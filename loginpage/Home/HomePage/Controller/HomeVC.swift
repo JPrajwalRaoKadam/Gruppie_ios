@@ -167,6 +167,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             navigateToMangementViewController()
         case "Staff Register":
             fetchStaffDataAndNavigate()
+        case "Feed Back": // New case for Feedback navigation
+            navigateToFeedBackViewController()
         case "Student Register":
             fetchStudentDataAndNavigate()
         case "Subject Register":
@@ -185,6 +187,22 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             self.navigationController?.pushViewController(payVC, animated: true)
         default:
             print("No navigation configured for type: \(featureIcon.type)")
+        }
+    }
+    
+    func navigateToFeedBackViewController() {
+        let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
+        if let feedbackVC = storyboard.instantiateViewController(withIdentifier: "FeedBackViewController") as? FeedBackViewController {
+            feedbackVC.groupId = school?.id ?? ""
+            feedbackVC.token = TokenManager.shared.getToken() ?? ""
+            
+            print("Navigating to FeedBackViewController with:")
+            print("Group ID: \(feedbackVC.groupId)")
+            print("Token: \(feedbackVC.token)")
+            
+            navigationController?.pushViewController(feedbackVC, animated: true)
+        } else {
+            print("Failed to instantiate FeedBackViewController")
         }
     }
     

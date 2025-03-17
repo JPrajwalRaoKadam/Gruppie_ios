@@ -17,6 +17,7 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     var teamId: String?
     var offlineTestExamId: String?
     var studentMarkExamDataResponse: [StudentMarksData] = []
+    var selectedExamTitle = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,6 +32,30 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         self.navigationController?.popViewController(animated: true)
     }
     
+    // MARK: - Table View Setup
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return examDataResponse.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ClassNameMarksCardTableViewCell", for: indexPath) as? ClassNameMarksCardTableViewCell else {
+            return UITableViewCell()
+        }
+        
+        let examName = examDataResponse[indexPath.row]
+        self.offlineTestExamId = examName.offlineTestExamId
+        cell.nameLabel?.text = examName.title
+        cell.configureExam(with: examName)
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let offlineTestExamId = examDataResponse[indexPath.row]
+        self.selectedExamTitle = offlineTestExamId.title ?? ""
+        fetchExamData(offlineTestExamId: offlineTestExamId.offlineTestExamId ?? "")
+    }
+    
     // MARK: - API Call without Manager
     func fetchExamData(offlineTestExamId: String) {
         guard let teamId = teamId else {
@@ -38,7 +63,7 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             return
         }
         
-        let urlString = "https://demo.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/offline/testexam/\(offlineTestExamId)/student/markscard/get"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/offline/testexam/\(offlineTestExamId)/student/markscard/get"
         guard let url = URL(string: urlString) else { return }
         
         var request = URLRequest(url: url)
@@ -72,29 +97,6 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             }
         }.resume()
     }
-
-    // MARK: - Table View Setup
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return examDataResponse.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ClassNameMarksCardTableViewCell", for: indexPath) as? ClassNameMarksCardTableViewCell else {
-            return UITableViewCell()
-        }
-        
-        let examName = examDataResponse[indexPath.row]
-        self.offlineTestExamId = examName.offlineTestExamId
-        cell.nameLabel?.text = examName.title
-        cell.configureExam(with: examName)
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let offlineTestExamId = examDataResponse[indexPath.row]
-        fetchExamData(offlineTestExamId: offlineTestExamId.offlineTestExamId ?? "")
-    }
     
     func navigateToMarksCard() {
         let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
@@ -102,8 +104,9 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             print("❌ Failed to instantiate SubjectViewController")
             return
         }
-        
+        studentMarksDetailVC.examDataResponse = self.examDataResponse
         studentMarksDetailVC.studentMarkExamDataResponse = self.studentMarkExamDataResponse
+        studentMarksDetailVC.passedExamTitle = selectedExamTitle
         self.navigationController?.pushViewController(studentMarksDetailVC, animated: true)
     }
 }
