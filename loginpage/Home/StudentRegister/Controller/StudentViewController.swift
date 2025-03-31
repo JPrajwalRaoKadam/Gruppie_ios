@@ -6,6 +6,123 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         navigationController?.popViewController(animated: true)
     }
     
+    @IBAction func AddButton(_ sender: Any) {
+        let actionSheet = UIAlertController(title: "Add Class", message: "Choose an option", preferredStyle: .actionSheet)
+        
+        let addRegularClassAction = UIAlertAction(title: "Add Regular class", style: .default) { _ in
+            self.fetchClassDataForRegularClass()
+        }
+        
+        let addCombinedClassAction = UIAlertAction(title: "Add Combined class", style: .default) { _ in
+            self.addCombinedClass()
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        actionSheet.addAction(addRegularClassAction)
+        actionSheet.addAction(addCombinedClassAction)
+        actionSheet.addAction(cancelAction)
+        
+        self.present(actionSheet, animated: true, completion: nil)
+    }
+    
+    func fetchClassDataForRegularClass() {
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/get/class/list") else {
+            print("❌ Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        print("🔍 Requesting: \(url)")
+        print("🔑 Auth Token: \(token)")
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Network Error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Invalid response from server")
+                return
+            }
+
+            print("📡 Response Status Code: \(httpResponse.statusCode)")
+
+            guard let data = data else {
+                print("❌ No data received")
+                return
+            }
+
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(ClassListResponse.self, from: data)
+
+                // Extract classTypeId and className from the first available ClassType
+                guard let firstClassData = response.data.first?.classes.first else {
+                    print("❌ No class data found")
+                    return
+                }
+
+                let classData = response.data.first?.classes ?? []
+                let classTypeId = firstClassData.classTypeId
+                let className = firstClassData.classList.first?.className ?? "Unknown" // You can modify this based on your requirement
+
+                DispatchQueue.main.async {
+                    self.navigateToAddRegularClass(
+                        withClassData: classData,
+                        classTypeId: classTypeId,
+                        className: className
+                    )
+                }
+            } catch {
+                print("❌ Error decoding JSON: \(error)")
+            }
+        }
+
+        task.resume()
+    }
+    func navigateToAddRegularClass(withClassData classData: [ClassType], classTypeId: String, className: String) {
+        let storyboard = UIStoryboard(name: "Student", bundle: nil)
+        guard let addRegularClassVC = storyboard.instantiateViewController(withIdentifier: "AddRegularClass") as? AddRegularClass else {
+            print("❌ Failed to instantiate AddRegularClass from Student.storyboard")
+            return
+        }
+
+        // Pass data to the view controller
+        addRegularClassVC.classData = classData
+        addRegularClassVC.classTypeId = classTypeId
+        addRegularClassVC.className = className
+        addRegularClassVC.groupId = groupIds
+        addRegularClassVC.token = token
+
+        self.navigationController?.pushViewController(addRegularClassVC, animated: true)
+    }
+    func addCombinedClass() {
+        print("✅ Adding Combined class")
+        
+        // Instantiate AddCombineClass from storyboard
+        let storyboard = UIStoryboard(name: "Student", bundle: nil)
+        guard let addCombineClassVC = storyboard.instantiateViewController(withIdentifier: "AddCombineClass") as? AddCombineClass else {
+            print("❌ Failed to instantiate AddCombineClass from Student.storyboard")
+            return
+        }
+
+        // Pass data to the AddCombineClass view controller
+        addCombineClassVC.token = self.token
+        addCombineClassVC.groupIds = self.groupIds
+        
+        // Optionally, pass any other data needed for AddCombineClass
+        addCombineClassVC.studentTeams = self.studentTeams
+        addCombineClassVC.filteredStudentTeams = self.filteredStudentTeams
+        addCombineClassVC.combinedStudentTeams = self.combinedStudentTeams
+        
+        // Navigate to AddCombineClass view controller
+        self.navigationController?.pushViewController(addCombineClassVC, animated: true)
+    }
     var studentTeams: [StudentTeam] = []
     var filteredStudentTeams: [StudentTeam] = []
     var combinedStudentTeams: [CombinedStudentTeam] = []
@@ -56,9 +173,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             
             let studentTeam = filteredStudentTeams[indexPath.row]
-            
             let iconImage: UIImage? = UIImage(named: "default_profile")
-            let teacherName = studentTeam.teacherName ?? "Unknown"
             let phoneNumber = studentTeam.phone.isEmpty ? "N/A" : studentTeam.phone
 
             cell.configure(name: studentTeam.name, designation: studentTeam.members, icon: iconImage, phoneNumber: phoneNumber)
@@ -70,12 +185,10 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
 
             let combinedTeam = combinedStudentTeams[indexPath.row]
-            
             let iconImage: UIImage? = UIImage(named: "default_profile")
-            let teacherName = combinedTeam.teacherName ?? "Unknown"
             let phoneNumber = combinedTeam.phone.isEmpty ? "N/A" : combinedTeam.phone
             
-            cell.configure(name: combinedTeam.name, designation: teacherName, icon: iconImage, phoneNumber: phoneNumber)
+            cell.configure(name: combinedTeam.name, designation: combinedTeam.teacherName ?? "Unknown", icon: iconImage, phoneNumber: phoneNumber)
             
             return cell
         }
@@ -144,14 +257,10 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         if selectedIndex == 0 {
             let selectedStudentTeam = filteredStudentTeams[indexPath.row]
-            self.teamId = selectedStudentTeam.teamId
-            let teamName = selectedStudentTeam.name
-            navigateToDetailViewController(withTeamId: selectedStudentTeam.teamId, name: teamName)
+            navigateToDetailViewController(withTeamId: selectedStudentTeam.teamId, name: selectedStudentTeam.name)
         } else {
             let selectedCombinedTeam = combinedStudentTeams[indexPath.row]
-            self.teamId = selectedCombinedTeam.teamId
-            let teamName = selectedCombinedTeam.name
-            navigateToDetailViewController(withTeamId: selectedCombinedTeam.teamId, name: teamName)
+            navigateToDetailViewController(withTeamId: selectedCombinedTeam.teamId, name: selectedCombinedTeam.name)
         }
     }
 
@@ -176,7 +285,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return
             }
 
-            // Print raw API response data
+            // Print raw API response
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("API Response to detailView: \(jsonString)")
             }
@@ -184,25 +293,30 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
             do {
                 let decoder = JSONDecoder()
                 let response = try decoder.decode(StudentDataResponse.self, from: data)
-                
-                // Print decoded response data
-                print("Decoded Response: \(response)")
 
                 DispatchQueue.main.async {
-                    if let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController {
-                        detailVC.token = self.token
-                        detailVC.groupIds = self.groupIds
-                        detailVC.teamId = teamId
-                        detailVC.studentName = name
-                        detailVC.studentDetails = response.data // Assign the student data array
-                        self.navigationController?.pushViewController(detailVC, animated: true)
+                    if let firstStudent = response.data.first {
+                        let studentDbId = firstStudent.studentDbId ?? "N/A"
+                        print("Student Database ID: \(studentDbId)")
+
+                        if let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController {
+                            detailVC.token = self.token
+                            detailVC.groupIds = self.groupIds
+                            detailVC.teamId = teamId
+                            detailVC.studentName = name
+                            detailVC.studentDbId = studentDbId
+                            detailVC.studentDetails = response.data
+                            self.navigationController?.pushViewController(detailVC, animated: true)
+                        }
+                    } else {
+                        print("No student data found")
                     }
                 }
             } catch {
                 print("Error decoding data: \(error)")
             }
         }
-        
+
         task.resume()
     }
 }

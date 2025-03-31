@@ -149,20 +149,22 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
 
         DispatchQueue.main.async {
             if let moreDetailVC = managementStoryboard.instantiateViewController(withIdentifier: "MoreDetailViewController") as? MoreDetailViewController {
-                moreDetailVC.token = self.token!
+                moreDetailVC.token = self.token ?? ""
                 moreDetailVC.groupIds = self.groupIds
                 moreDetailVC.member = member
+                moreDetailVC.userId = member.userId // Pass userId separately
 
                 print("Navigating to MoreDetailViewController with member: \(member)")
 
-//                self.navigationController?.pushViewController(moreDetailVC, animated: true)
-                
-                self.present(moreDetailVC, animated: true, completion: nil)
+                let navController = UINavigationController(rootViewController: moreDetailVC)
+                navController.modalPresentationStyle = .fullScreen
+                self.present(navController, animated: true, completion: nil)
             } else {
                 print("Failed to instantiate MoreDetailViewController from Management storyboard.")
             }
         }
     }
+
 
     func callAddManagementAPI() {
         guard let token = token else {

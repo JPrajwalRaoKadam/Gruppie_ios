@@ -40,7 +40,7 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
             return
         }
         
-        let apiUrl = APIManager.shared.baseURL + "admin/groups/\(groupId)/users/\(staffId)/allow/post"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/users/\(staffId)/allow/post"
         
         var request = URLRequest(url: URL(string: apiUrl)!)
         request.httpMethod = "PUT"
@@ -119,7 +119,7 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
             return
         }
         
-        let apiUrl = APIManager.shared.baseURL + "\(groupId)/staff/\(staffId)/delete?type=staff"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/staff/\(staffId)/delete?type=staff"
         
         // Create URL request
         var request = URLRequest(url: URL(string: apiUrl)!)

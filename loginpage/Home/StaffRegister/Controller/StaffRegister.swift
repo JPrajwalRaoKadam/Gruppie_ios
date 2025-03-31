@@ -11,9 +11,13 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     var nonTeachingStaffData: [Staff] = []
     var token: String?
     var groupIds = ""
+    @IBAction func BackButton(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
 
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("Received groupId: \(groupIds)")
 
         staffRegister.register(UINib(nibName: "TeachingStaff", bundle: nil), forCellReuseIdentifier: "TeachingStaffCell")
         staffRegister.register(UINib(nibName: "NonTeachingStaff", bundle: nil), forCellReuseIdentifier: "NonTeachingStaffCell")
@@ -29,9 +33,6 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
 
-    @IBAction func backButton(_ sender: UIButton) {
-        dismiss(animated: true, completion: nil)
-    }
 
     @IBAction func segmentControllerChanged(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 1 {
@@ -118,6 +119,10 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
 
     private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
         let urlString = APIManager.shared.baseURL + "groups/\(groupIds)/user/\(staffId)/profile/get?type=staff"
+
+        // Print the API URL
+        print("Fetching staff details from: \(urlString)")
+
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
             completion(nil)
@@ -128,11 +133,20 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         request.httpMethod = "GET"
         request.setValue("Bearer \(TokenManager.shared.getToken() ?? "")", forHTTPHeaderField: "Authorization")
 
-        URLSession.shared.dataTask(with: request) { data, _, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpResponse = response as? HTTPURLResponse {
+                print("HTTP Status Code: \(httpResponse.statusCode)") // Print the status code
+            }
+
             guard let data = data, error == nil else {
                 print("Error fetching staff details:", error?.localizedDescription ?? "Unknown error")
                 completion(nil)
                 return
+            }
+
+            // Print the raw API response
+            if let rawResponse = String(data: data, encoding: .utf8) {
+                print("Raw API Response: \(rawResponse)")
             }
 
             do {

@@ -42,6 +42,7 @@ class passwordViewController: UIViewController {
             return
         }
 
+        savePasswordToKeychain(password: passwordText)
         // Constructing the payload
         let payload: [String: Any] = [
             "userName": [
@@ -54,6 +55,24 @@ class passwordViewController: UIViewController {
         // Call the API
         callLoginAPI(with: payload)
     }
+    
+    func savePasswordToKeychain(password: String) {
+            let passwordData = Data(password.utf8)
+            let keychainQuery: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrAccount as String: "userPassword",
+                kSecValueData as String: passwordData
+            ]
+
+            SecItemDelete(keychainQuery as CFDictionary)
+            let status = SecItemAdd(keychainQuery as CFDictionary, nil)
+            
+            if status == errSecSuccess {
+                print("Password saved to Keychain")
+            } else {
+                print("Failed to save password to Keychain")
+            }
+        }
 
     func callLoginAPI(with payload: [String: Any]) {
         // API URL
@@ -98,6 +117,9 @@ class passwordViewController: UIViewController {
                                     // Save the token using the Singleton
                                     TokenManager.shared.setToken(token)
 
+                                    UserDefaults.standard.setValue(self.phoneData?.phone, forKey: "loggedInPhone")
+                                    UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                                    
                                     // Proceed to SetPINViewController
                                     DispatchQueue.main.async {
                                         self.navigateToSetPIN()

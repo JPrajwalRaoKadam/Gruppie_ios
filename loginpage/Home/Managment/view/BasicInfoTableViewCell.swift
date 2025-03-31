@@ -2,73 +2,58 @@ import UIKit
 
 class BasicInfoTableViewCell: UITableViewCell {
     @IBOutlet weak var name: UITextField!
-    @IBOutlet weak var phone: UITextField!
-    @IBOutlet weak var staffId: UITextField!
     @IBOutlet weak var designation: UITextField!
-    @IBOutlet weak var doj: UITextField!
-    @IBOutlet weak var profession: UITextField!
+    @IBOutlet weak var country: UITextField!
+    @IBOutlet weak var phoneNo: UITextField!
+    @IBOutlet weak var alternativeNo: UITextField!
+    @IBOutlet weak var email: UITextField!
     @IBOutlet weak var gender: UITextField!
-    @IBOutlet weak var qualification: UITextField!
     @IBOutlet weak var dob: UITextField!
-    @IBOutlet weak var address: UITextField!
-    @IBOutlet weak var religion: UITextField!
-    @IBOutlet weak var bloodGroup: UITextField!
-    @IBOutlet weak var emailId: UITextField!
+    @IBOutlet weak var doj: UITextField!
     @IBOutlet weak var aadharNo: UITextField!
-    @IBOutlet weak var fatherName: UITextField!
-    @IBOutlet weak var motherName: UITextField!
-    @IBOutlet weak var emerContact: UITextField!
-    @IBOutlet weak var disability: UITextField!
+    @IBOutlet weak var bloodGroup: UITextField!
+    @IBOutlet weak var panNo: UITextField!
+    @IBOutlet weak var address: UITextField!
 
     func populate(with member: Member, isEditingEnabled: Bool) {
         name.text = member.name
-        phone.text = member.phone
-        staffId.text = member.staffId
         designation.text = member.designation
-        doj.text = member.dateOfJoining
-        profession.text = member.profession
+        country.text = member.country
+        phoneNo.text = member.phone
+        alternativeNo.text = member.alternativePhone
+        email.text = member.email
         gender.text = member.gender
-        qualification.text = member.qualification
         dob.text = member.dateOfBirth
-        address.text = member.address
-        religion.text = member.religion
-        bloodGroup.text = member.bloodGroup
-        emailId.text = member.emailId
+        doj.text = member.dateOfJoining
         aadharNo.text = member.aadharNumber
-        fatherName.text = member.fatherName
-        motherName.text = member.motherName
-        emerContact.text = member.emergencyContact
-        disability.text = member.disability
+        bloodGroup.text = member.bloodGroup
+        panNo.text = member.panNumber
+        address.text = member.address
 
         let fields: [UITextField] = [
-            name, phone, staffId, designation, doj, profession, gender, qualification, dob,
-            address, religion, bloodGroup, emailId, aadharNo, fatherName, motherName, emerContact, disability
+            name, designation, country, phoneNo, alternativeNo, email, gender, dob, doj,
+            aadharNo, bloodGroup, panNo, address
         ]
-        
-        // Enable or disable user interaction based on the editing mode
+
+        // Enable or disable text fields based on editing mode
         fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
     }
 
     func collectUpdatedData() -> [String: Any] {
         return [
             "name": name.text ?? "",
-            "phone": phone.text ?? "",
-            "staffId": staffId.text ?? "",
             "designation": designation.text ?? "",
-            "dateOfJoining": doj.text ?? "",
-            "profession": profession.text ?? "",
+            "country": country.text ?? "",
+            "phone": phoneNo.text ?? "",
+            "alternativePhone": alternativeNo.text ?? "",
+            "email": email.text ?? "",
             "gender": gender.text ?? "",
-            "qualification": qualification.text ?? "",
             "dateOfBirth": dob.text ?? "",
-            "address": address.text ?? "",
-            "religion": religion.text ?? "",
-            "bloodGroup": bloodGroup.text ?? "",
-            "emailId": emailId.text ?? "",
+            "dateOfJoining": doj.text ?? "",
             "aadharNumber": aadharNo.text ?? "",
-            "fatherName": fatherName.text ?? "",
-            "motherName": motherName.text ?? "",
-            "emergencyContact": emerContact.text ?? "",
-            "disability": disability.text ?? ""
+            "bloodGroup": bloodGroup.text ?? "",
+            "panNumber": panNo.text ?? "",
+            "address": address.text ?? ""
         ]
     }
 }

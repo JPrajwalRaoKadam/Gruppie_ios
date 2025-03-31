@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="AddRegularClassCell" rowHeight="218" id="KGk-i7-Jjw" customClass="AddRegularClassCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="384" height="218"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="384" height="218"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="S4o-OS-PfX">
+                        <rect key="frame" x="0.0" y="0.0" width="384" height="218"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QfT-bZ-2dS">
+                                <rect key="frame" x="0.0" y="0.0" width="384" height="53"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Class Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tsB-YC-09P">
+                                        <rect key="frame" x="17" y="14" width="94" height="39"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Of Sections" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H4s-0F-Tdg">
+                                        <rect key="frame" x="248" y="14" width="119" height="39"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="tsB-YC-09P" firstAttribute="top" secondItem="QfT-bZ-2dS" secondAttribute="top" constant="14" id="4dT-4G-aTR"/>
+                                    <constraint firstItem="H4s-0F-Tdg" firstAttribute="baseline" secondItem="tsB-YC-09P" secondAttribute="baseline" id="9aw-IH-7Qz"/>
+                                    <constraint firstAttribute="trailing" secondItem="H4s-0F-Tdg" secondAttribute="trailing" constant="17" id="9wS-QR-4nl"/>
+                                    <constraint firstAttribute="bottom" secondItem="tsB-YC-09P" secondAttribute="bottom" id="BnM-MX-RCF"/>
+                                    <constraint firstItem="tsB-YC-09P" firstAttribute="leading" secondItem="QfT-bZ-2dS" secondAttribute="leading" constant="17" id="X4c-99-Qjg"/>
+                                    <constraint firstItem="H4s-0F-Tdg" firstAttribute="firstBaseline" secondItem="tsB-YC-09P" secondAttribute="firstBaseline" id="xiz-il-SzH"/>
+                                </constraints>
+                            </view>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Pyc-Ng-xOv">
+                                <rect key="frame" x="0.0" y="53" width="384" height="165"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="QfT-bZ-2dS" firstAttribute="leading" secondItem="S4o-OS-PfX" secondAttribute="leading" id="6KP-W8-tfX"/>
+                            <constraint firstAttribute="trailing" secondItem="Pyc-Ng-xOv" secondAttribute="trailing" id="8T9-Yu-7zG"/>
+                            <constraint firstAttribute="bottom" secondItem="Pyc-Ng-xOv" secondAttribute="bottom" id="EF7-GJ-VgI"/>
+                            <constraint firstItem="Pyc-Ng-xOv" firstAttribute="top" secondItem="QfT-bZ-2dS" secondAttribute="bottom" id="J9z-4c-Bu8"/>
+                            <constraint firstAttribute="trailing" secondItem="QfT-bZ-2dS" secondAttribute="trailing" id="R1q-Hh-792"/>
+                            <constraint firstItem="QfT-bZ-2dS" firstAttribute="top" secondItem="S4o-OS-PfX" secondAttribute="top" id="UmW-u3-4Sv"/>
+                            <constraint firstItem="Pyc-Ng-xOv" firstAttribute="leading" secondItem="S4o-OS-PfX" secondAttribute="leading" id="YMz-JD-YNQ"/>
+                            <constraint firstAttribute="bottom" secondItem="QfT-bZ-2dS" secondAttribute="bottom" constant="165" id="haM-lb-WyE"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="S4o-OS-PfX" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="JGC-im-T2U"/>
+                    <constraint firstItem="S4o-OS-PfX" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="Oxc-1K-QFL"/>
+                    <constraint firstAttribute="bottom" secondItem="S4o-OS-PfX" secondAttribute="bottom" id="dpJ-UJ-npu"/>
+                    <constraint firstAttribute="trailing" secondItem="S4o-OS-PfX" secondAttribute="trailing" id="u5e-KQ-rpZ"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="TableView" destination="Pyc-Ng-xOv" id="cRG-po-97X"/>
+                <outlet property="className" destination="tsB-YC-09P" id="r7Y-kr-o1F"/>
+                <outlet property="noOfSection" destination="H4s-0F-Tdg" id="Nmk-7G-D0Y"/>
+            </connections>
+            <point key="canvasLocation" x="187.78625954198472" y="80.281690140845072"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

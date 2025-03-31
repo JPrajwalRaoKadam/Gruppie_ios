@@ -10,10 +10,30 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        callAPIAndNavigate { [weak self] in
+                print("API call finished, reloading collection view...")
+                self?.teamCollectionView.reloadData()
+            }
         print("Received schools data: \(schools)")
         teamCollectionView.register(UINib(nibName: "GroupCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "GroupCollectionViewCell")
         teamCollectionView.reloadData()
     }
+    
+    @IBAction func logoutTapped(_ sender: UIButton) {
+//            UserDefaults.standard.removeObject(forKey: "loggedInPhone")
+//            let loginVC = storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+//        navigationController?.setViewControllers([loginVC], animated: true)
+        
+        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+            UserDefaults.standard.removeObject(forKey: "loggedInPhone")
+
+            // Return to login screen
+            if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate {
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+                sceneDelegate.window?.rootViewController = UINavigationController(rootViewController: loginVC)
+            }
+        }
     
     
     // MARK: - Collection View Data Source
@@ -361,5 +381,68 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
                 completion(nil)
             }
         }.resume()
+    }
+    
+    private func callAPIAndNavigate(completion: @escaping () -> Void) {
+        guard let token = TokenManager.shared.getToken() else {
+            print("Token is nil. Cannot proceed with API call.")
+            completion()  // Ensure completion is called even on failure
+            return
+        }
+
+        let urlString = APIManager.shared.baseURL + "groups?category=school"
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL.")
+            completion()
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("API call failed with error: \(error.localizedDescription)")
+                completion()
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                print("API call failed with response: \(response.debugDescription)")
+                completion()
+                return
+            }
+
+            guard let data = data else {
+                print("No data received.")
+                completion()
+                return
+            }
+
+            do {
+                let decoder = JSONDecoder()
+                let schoolResponse = try decoder.decode(SchoolResponse.self, from: data)
+
+                guard let schoolsData = schoolResponse.data else {
+                    print("No schools data found.")
+                    completion()
+                    return
+                }
+
+                self.schools = schoolsData.compactMap { School(from: $0) }
+                print("Fetched Schools: \(self.schools.map { $0.shortName })")
+
+                DispatchQueue.main.async {
+                    completion()  // Notify when data is ready
+                }
+
+            } catch {
+                print("Failed to decode API response: \(error.localizedDescription)")
+                completion()
+            }
+        }
+
+        task.resume()
     }
 }

@@ -1,460 +1,302 @@
-//import UIKit
-//
-//class StudentDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-//    
-//    @IBOutlet weak var TableView: UITableView!
-//    @IBOutlet weak var SegmentController: UISegmentedControl!
-//    @IBOutlet weak var editButton: UIButton!
-//    
-//    var student: StudentData?
-//    var token: String = ""
-//    var groupId: String = ""
-//    var teamId: String = ""
-//    var userId: String = ""
-//    var isEditingEnabled = false
-//    
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        
-//        print("StudentDetailViewController Loaded")
-//        print("User ID: \(userId), Group ID: \(groupId), Team ID: \(teamId), Token: \(token)")
-//        print("Initial Segment Index: \(SegmentController.selectedSegmentIndex)")
-//        
-//        TableView.register(UINib(nibName: "BasicInfoCell", bundle: nil), forCellReuseIdentifier: "BasicInfoCell")
-//        TableView.register(UINib(nibName: "OtherInfoCell", bundle: nil), forCellReuseIdentifier: "OtherInfoCell")
-//        TableView.register(UINib(nibName: "FamilyInfoCell", bundle: nil), forCellReuseIdentifier: "FamilyInfoCell")
-//        
-//        TableView.delegate = self
-//        TableView.dataSource = self
-//        TableView.reloadData()
-//    }
-//    
-//    @IBAction func BackButton(_ sender: UIButton) {
-//        navigationController?.popViewController(animated: true)
-//    }
-//    
-//    @IBAction func segmentChangeAction(_ sender: Any) {
-//        print("Segment Changed to Index: \((sender as AnyObject).selectedSegmentIndex)")
-//        TableView.reloadData()
-//    }
-//    
-//    @IBAction func EditButton(_ sender: UIButton) {
-//        isEditingEnabled.toggle()
-//        sender.setTitle(isEditingEnabled ? "Save" : "Edit", for: .normal)
-//        TableView.reloadData()
-//        
-//        if !isEditingEnabled {
-//            updateStudentProfile()
-//        }
-//    }
-//    
-//    func updateStudentProfile() {
-//        guard let student = student else {
-//            print("Error: No student data available")
-//            return
-//        }
-//        
-//        var mergedUpdatedData: [String: Any] = [:]
-//
-//        // Collect Basic Info
-//        if let basicCell = TableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? BasicInfoCell {
-//            let basicInfo = basicCell.collectUpdatedData()
-//            let basicData: [String: Any] = [
-//                "name": basicInfo.name,
-//                "countryCode": basicInfo.country,
-//                "phone": basicInfo.phone,
-//                "satsNumber": basicInfo.satsNumber,
-//                "admissionNumber": basicInfo.admissionNumber,
-//                "rollNumber": basicInfo.rollNo,
-//                "dob": basicInfo.dob,
-//                "doj": basicInfo.doj
-//            ]
-//            mergedUpdatedData.merge(basicData) { _, new in new }
-//        }
-//
-//        // Collect Other Info
-//        if let otherCell = TableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? OtherInfoCell {
-//            let otherInfo = otherCell.collectUpdatedData()
-//            let otherData: [String: Any] = [
-//                "nationality": otherInfo.nationality,
-//                "bloodGroup": otherInfo.bloodGroup,
-//                "religion": otherInfo.religion,
-//                "caste": otherInfo.caste,
-//                "subCaste": otherInfo.subCaste,
-//                "category": otherInfo.category,
-//                "address": otherInfo.address,
-//                "aadharNumber": otherInfo.aadharNo
-//            ]
-//            mergedUpdatedData.merge(otherData) { _, new in new }
-//        }
-//
-//        // Collect Family Info
-//        if let familyCell = TableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? FamilyInfoCell {
-//            let familyInfo = familyCell.collectUpdatedData()
-//            let familyData: [String: Any] = [
-//                "fatherName": familyInfo.fatherName,
-//                "fatherPhone": familyInfo.fatherPhone,
-//                "fatherEducation": familyInfo.fatherEducation,
-//                "fatherOccupation": familyInfo.fatherOccupation,
-//                "fatherAadhar": familyInfo.fatherAadhar,
-//                "motherName": familyInfo.motherName,
-//                "motherPhone": familyInfo.motherPhone,
-//                "motherOccupation": familyInfo.motherOccupation
-//            ]
-//            mergedUpdatedData.merge(familyData) { _, new in new }
-//        }
-//
-//        if mergedUpdatedData.isEmpty {
-//            print("No changes detected, skipping API request.")
-//            return
-//        }
-//
-//        print("Merged Updated Data: \(mergedUpdatedData)")
-//
-//        // Construct API Request
-//        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/edit/profile?user_id=\(userId)"
-//
-//        guard let url = URL(string: apiUrl) else {
-//            print("Invalid API URL")
-//            return
-//        }
-//        
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "PUT"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//        
-//        let requestBody: [String: Any] = ["studentData": [mergedUpdatedData]]
-//        
-//        do {
-//            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-//        } catch {
-//            print("Error encoding request body: \(error.localizedDescription)")
-//            return
-//        }
-//        
-//        // Send API Request
-//        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//            if let error = error {
-//                print("Error in API Call: \(error.localizedDescription)")
-//                return
-//            }
-//            
-//            guard let httpResponse = response as? HTTPURLResponse else {
-//                print("Invalid response")
-//                return
-//            }
-//            
-//            if httpResponse.statusCode == 200 {
-//                print("Student data updated successfully!")
-//            } else {
-//                print("Failed to update student data. Status Code: \(httpResponse.statusCode)")
-//            }
-//            
-//            if let data = data, let responseString = String(data: data, encoding: .utf8) {
-//                print("Response: \(responseString)")
-//            }
-//        }
-//        
-//        task.resume()
-//    }
-//
-//    // ✅ TableView DataSource Methods
-//    
-//    func numberOfSections(in tableView: UITableView) -> Int {
-//        return 1
-//    }
-//    
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return 1
-//    }
-//    
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        print("Current Segment Index in cellForRowAt: \(SegmentController.selectedSegmentIndex)")
-//        
-//        guard let student = student else {
-//            print("Error: Student data is nil")
-//            return UITableViewCell()
-//        }
-//        
-//        switch SegmentController.selectedSegmentIndex {
-//        case 0:
-//            let cell = tableView.dequeueReusableCell(withIdentifier: "BasicInfoCell", for: indexPath) as! BasicInfoCell
-//            let basicInfo = BasicInfoModel(
-//                name: student.name ?? "",
-//                country: student.countryCode ?? "",
-//                phone: student.phone ?? "",
-//                satsNumber: student.satsNumber ?? "",
-//                admissionNumber: student.admissionNumber ?? "",
-//                rollNo: student.rollNumber ?? "",
-//                dob: student.dob ?? "",
-//                doj: student.doj ?? ""
-//            )
-//            cell.populate(with: basicInfo, isEditingEnabled: isEditingEnabled)
-//            return cell
-//            
-//        case 1:
-//            let cell = tableView.dequeueReusableCell(withIdentifier: "OtherInfoCell", for: indexPath) as! OtherInfoCell
-//            let otherInfo = OtherInfoModel(
-//                nationality: student.nationality ?? "",
-//                bloodGroup: student.bloodGroup ?? "",
-//                religion: student.religion ?? "",
-//                caste: student.caste ?? "",
-//                subCaste: student.subCaste ?? "",
-//                category: student.category ?? "",
-//                address: student.address ?? "",
-//                aadharNo: student.aadharNumber ?? ""
-//            )
-//            cell.populate(with: otherInfo, isEditingEnabled: isEditingEnabled)
-//            return cell
-//            
-//        case 2:
-//            let cell = tableView.dequeueReusableCell(withIdentifier: "FamilyInfoCell", for: indexPath) as! FamilyInfoCell
-//            let familyInfo = FamilyInfoModel(
-//                fatherName: student.fatherName ?? "",
-//                fatherPhone: student.fatherPhone ?? "",
-//                fatherEducation: student.fatherEducation ?? "",
-//                fatherOccupation: student.fatherOccupation ?? "",
-//                fatherAadhar: student.fatherAadharNumber ?? "",
-//                motherName: student.motherName ?? "",
-//                motherPhone: student.motherPhone ?? "",
-//                motherOccupation: student.motherOccupation ?? ""
-//            )
-//            cell.populate(with: familyInfo, isEditingEnabled: isEditingEnabled)
-//            return cell
-//            
-//        default:
-//            return UITableViewCell()
-//        }
-//    }
-//}
-
-
 import UIKit
 
 class StudentDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var TableView: UITableView!
-    @IBOutlet weak var SegmentController: UISegmentedControl!
-    @IBOutlet weak var editButton: UIButton!
+    @IBOutlet weak var EditButton: UIButton! // Connect this in Interface Builder
 
+
+    @IBAction func whatsappButtonTapped(_ sender: UIButton) {
+        guard let phoneNumber = student?.phone, !phoneNumber.isEmpty else {
+            print("Error: Phone number is missing")
+            return
+        }
+        
+        let formattedPhoneNumber = "+\(phoneNumber)"
+        let whatsappURL = "whatsapp://send?phone=\(formattedPhoneNumber)"
+        
+        if let url = URL(string: whatsappURL), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        } else {
+            print("Error: WhatsApp is not installed or URL is malformed")
+        }
+    }
+    @IBAction func callButtonTapped(_ sender: UIButton) {
+        guard let phoneNumber = student?.phone, !phoneNumber.isEmpty else {
+            print("Error: Phone number is missing")
+            return
+        }
+
+        let formattedNumber = "tel://\(phoneNumber)"
+        if let url = URL(string: formattedNumber), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        } else {
+            print("Error: Cannot open dialer")
+        }
+    }
+
+    @IBAction func DeleteButton(_ sender: Any) {
+        let alert = UIAlertController(title: "Delete Student", message: "Are you sure you want to delete this student?", preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            self.deleteStudent()
+        }))
+        
+        present(alert, animated: true, completion: nil)
+    }
+
+    func deleteStudent() {
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/\(userId)/delete"
+        print("API URL: \(urlString)") // ✅ Print API URL
+
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Response Status Code: \(httpResponse.statusCode)") // ✅ Print status code
+            }
+
+            guard let data = data else {
+                print("Error: No data received")
+                return
+            }
+
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("API Response: \(responseString)") // ✅ Print API response
+            }
+
+            // ✅ Check if deletion was successful
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                DispatchQueue.main.async {
+                    print("✅ Student deleted successfully")
+                    self.navigationController?.popViewController(animated: true)
+                }
+            } else {
+                print("❌ Error: Failed to delete student")
+            }
+        }
+
+        task.resume()
+    }
+    @IBAction func BackButton(_ sender: Any) {
+        navigationController?.popViewController(animated: true)
+    }
+    @IBOutlet weak var designation: UILabel!
+    @IBOutlet weak var name: UILabel!
     var student: StudentData?
-    var token: String = ""
-    var groupId: String = ""
-    var teamId: String = ""
-    var userId: String = ""
-    var isEditingEnabled = false
+        var isEditingEnabled = false
+        var token: String = "" // Add this line
+        var groupId: String = "" // If needed
+        var teamId: String = "" // If needed
+        var userId: String = "" // If needed
+        var studentDbId: String = ""
 
-    // Store collected data from different segments
-    var basicInfoData: [String: Any] = [:]
-    var otherInfoData: [String: Any] = [:]
-    var familyInfoData: [String: Any] = [:]
 
-    // Track visited segments
-    var visitedSegments: Set<Int> = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Apply rounded corners to EditButton
+        EditButton.layer.cornerRadius = 10 // Adjust the radius as needed
+            EditButton.clipsToBounds = true
 
         print("StudentDetailViewController Loaded")
-        print("User ID: \(userId), Group ID: \(groupId), Team ID: \(teamId), Token: \(token)")
-        print("Initial Segment Index: \(SegmentController.selectedSegmentIndex)")
-
+        if let student = student {
+                name.text = student.name
+            designation.text = student.rollNumber ?? ""
+            } else {
+                print("Error: Student data is nil")
+            }
+        // Register TableView Cells
         TableView.register(UINib(nibName: "BasicInfoCell", bundle: nil), forCellReuseIdentifier: "BasicInfoCell")
-        TableView.register(UINib(nibName: "OtherInfoCell", bundle: nil), forCellReuseIdentifier: "OtherInfoCell")
-        TableView.register(UINib(nibName: "FamilyInfoCell", bundle: nil), forCellReuseIdentifier: "FamilyInfoCell")
+        TableView.register(UINib(nibName: "EducationInfoCell", bundle: nil), forCellReuseIdentifier: "EducationInfoCell")
+        TableView.register(UINib(nibName: "AccountInfoCell", bundle: nil), forCellReuseIdentifier: "AccountInfoCell")
 
         TableView.delegate = self
         TableView.dataSource = self
         TableView.reloadData()
     }
 
-    @IBAction func BackButton(_ sender: UIButton) {
-        navigationController?.popViewController(animated: true)
-    }
+ 
 
-    @IBAction func segmentChangeAction(_ sender: UISegmentedControl) {
-        print("Segment Changed to Index: \(sender.selectedSegmentIndex)")
-        visitedSegments.insert(sender.selectedSegmentIndex) // Mark segment as visited
-        TableView.reloadData()
-    }
-
-    @IBAction func EditButton(_ sender: UIButton) {
-        isEditingEnabled.toggle()
-        sender.setTitle(isEditingEnabled ? "Save" : "Edit", for: .normal)
-        TableView.reloadData()
-
-        if !isEditingEnabled {
-            collectDataFromAllSegments()
-        }
-    }
-
-    /// Collect data from all segments before updating the API
-    func collectDataFromAllSegments() {
-        guard let student = student else {
-            print("Error: No student data available")
-            return
-        }
-
-        // Ensure all segments are visited before saving
-        if visitedSegments.count < 3 {
-            showAlert(title: "Incomplete Data", message: "Please visit all segments before saving the data.")
-            return
-        }
-
-        // Collect Basic Info
-        if let basicCell = TableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? BasicInfoCell {
-            let basicInfo = basicCell.collectUpdatedData()
-            basicInfoData = [
-                "name": basicInfo.name,
-                "countryCode": basicInfo.countryCode,
-                "phone": basicInfo.phone,
-                "satsNumber": basicInfo.satsNumber,
-                "admissionNumber": basicInfo.admissionNumber,
-                "rollNumber": basicInfo.rollNumber,
-                "dob": basicInfo.dob,
-                "doj": basicInfo.doj
-            ]
-        }
-
-        // Collect Other Info
-        if let otherCell = TableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? OtherInfoCell {
-            let otherInfo = otherCell.collectUpdatedData()
-            otherInfoData = [
-                "nationality": otherInfo.nationality,
-                "bloodGroup": otherInfo.bloodGroup,
-                "religion": otherInfo.religion,
-                "caste": otherInfo.caste,
-                "subCaste": otherInfo.subCaste,
-                "category": otherInfo.category,
-                "address": otherInfo.address,
-                "aadharNumber": otherInfo.aadharNumber
-            ]
-        }
-
-        // Collect Family Info
-        if let familyCell = TableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? FamilyInfoCell {
-            let familyInfo = familyCell.collectUpdatedData()
-            familyInfoData = [
-                "fatherName": familyInfo.fatherName,
-                "fatherPhone": familyInfo.fatherPhone,
-                "fatherEducation": familyInfo.fatherEducation,
-                "fatherOccupation": familyInfo.fatherOccupation,
-                "fatherAadhar": familyInfo.fatherAadhar,
-                "motherName": familyInfo.motherName,
-                "motherPhone": familyInfo.motherPhone,
-                "motherOccupation": familyInfo.motherOccupation
-            ]
-        }
-
-        // Proceed with updating the profile
-        updateStudentProfile()
-    }
-
-    func updateStudentProfile() {
-        var mergedUpdatedData = basicInfoData.merging(otherInfoData) { (_, new) in new }
-        mergedUpdatedData.merge(familyInfoData) { (_, new) in new }
-
-        if mergedUpdatedData.isEmpty {
-            print("No changes detected, skipping API request.")
-            return
-        }
-
-        print("Merged Updated Data: \(mergedUpdatedData)")
-
-        // Construct API Request
-        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/edit/profile?user_id=\(userId)"
-        
-        guard let url = URL(string: apiUrl) else {
-            print("Invalid API URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let requestBody: [String: Any] = ["studentData": [mergedUpdatedData]]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-        } catch {
-            print("Error encoding request body: \(error.localizedDescription)")
-            return
-        }
-        
-        // Send API Request
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error in API Call: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("Invalid response")
-                return
-            }
-            
-            if httpResponse.statusCode == 200 {
-                print("Student data updated successfully!")
-            } else {
-                print("Failed to update student data. Status Code: \(httpResponse.statusCode)")
-            }
-            
-            if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                print("Response: \(responseString)")
-            }
-        }
-        
-        task.resume()
-    }
-
-    // Helper function to show alerts
-    func showAlert(title: String, message: String) {
-        DispatchQueue.main.async {
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }
-    }
-
-    // ✅ TableView DataSource Methods
-
+    // MARK: - TableView DataSource Methods
+    
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 3  // Three sections: Basic, Education, Account
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return 1 // Each section contains a single row
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        print("Current Segment Index in cellForRowAt: \(SegmentController.selectedSegmentIndex)")
-
         guard let student = student else {
             print("Error: Student data is nil")
             return UITableViewCell()
         }
 
-        switch SegmentController.selectedSegmentIndex {
-        case 0:
+        switch indexPath.section {
+        case 0: // Basic Info
             let cell = tableView.dequeueReusableCell(withIdentifier: "BasicInfoCell", for: indexPath) as! BasicInfoCell
             cell.populate(with: student, isEditingEnabled: isEditingEnabled)
             return cell
-
-        case 1:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "OtherInfoCell", for: indexPath) as! OtherInfoCell
-            cell.populate(with: student, isEditingEnabled: isEditingEnabled)
+            
+        case 1: // Education Info
+            let cell = tableView.dequeueReusableCell(withIdentifier: "EducationInfoCell", for: indexPath) as! EducationInfoCell
+            cell.populate(with: student.educationInfo, isEditingEnabled: isEditingEnabled)
             return cell
-
-        case 2:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "FamilyInfoCell", for: indexPath) as! FamilyInfoCell
-            cell.populate(with: student, isEditingEnabled: isEditingEnabled)
+            
+        case 2: // Account Info
+            let cell = tableView.dequeueReusableCell(withIdentifier: "AccountInfoCell", for: indexPath) as! AccountInfoCell
+            cell.populate(with: student.accountInfo, isEditingEnabled: isEditingEnabled)
             return cell
 
         default:
             return UITableViewCell()
         }
     }
+
+    // MARK: - TableView Delegate Methods
+
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch section {
+        case 0: return "Basic Info"
+        case 1: return "Other Info"
+        case 2: return "Family Info"
+        default: return nil
+        }
+    }
+    @IBAction func EditButton(_ sender: Any) {
+            if isEditingEnabled {
+                // Collect updated data from text fields
+                let updatedStudentData = collectUpdatedData()
+                updateStudentProfile(with: updatedStudentData)
+            } else {
+                isEditingEnabled = true
+                TableView.reloadData()
+            }
+        }
+
+    func collectUpdatedData() -> [String: Any] {
+        var updatedData: [String: Any] = [:]
+
+        // Get visible cells and extract data from text fields
+        for cell in TableView.visibleCells {
+            if let basicInfoCell = cell as? BasicInfoCell {
+                updatedData["name"] = basicInfoCell.name.text ?? ""
+                updatedData["gender"] = basicInfoCell.gender.text ?? ""
+                updatedData["className"] = basicInfoCell.studentClass.text ?? ""
+                updatedData["section"] = basicInfoCell.section.text ?? ""
+                updatedData["rollNumber"] = basicInfoCell.rollNo.text ?? ""
+                updatedData["email"] = basicInfoCell.email.text ?? ""
+                updatedData["phone"] = basicInfoCell.phone.text ?? ""
+                updatedData["dateOfJoining"] = basicInfoCell.doj.text ?? ""
+            } else if let educationInfoCell = cell as? EducationInfoCell {
+                updatedData["nationality"] = educationInfoCell.nationality.text ?? ""
+                updatedData["bloodGroup"] = educationInfoCell.bloodGroup.text ?? ""
+                updatedData["religion"] = educationInfoCell.religion.text ?? ""
+                updatedData["caste"] = educationInfoCell.caste.text ?? ""
+                updatedData["category"] = educationInfoCell.category.text ?? ""
+                updatedData["disability"] = educationInfoCell.disability.text ?? ""
+                updatedData["dateOfBirth"] = educationInfoCell.dob.text ?? ""
+                updatedData["admissionNumber"] = educationInfoCell.admissionNo.text ?? ""
+                updatedData["satsNumber"] = educationInfoCell.satsNumber.text ?? ""
+                updatedData["address"] = educationInfoCell.address.text ?? ""
+                updatedData["aadharNumber"] = educationInfoCell.aadharNo.text ?? ""
+            } else if let accountInfoCell = cell as? AccountInfoCell {
+                updatedData["fatherName"] = accountInfoCell.fatherName.text ?? ""
+                updatedData["motherName"] = accountInfoCell.motherName.text ?? ""
+                updatedData["fatherPhone"] = accountInfoCell.fatherPhone.text ?? ""
+                updatedData["motherPhone"] = accountInfoCell.motherPhone.text ?? ""
+                updatedData["fatherEmail"] = accountInfoCell.fatherEmail.text ?? ""
+                updatedData["motherEmail"] = accountInfoCell.motherEmail.text ?? ""
+                updatedData["fatherQualification"] = accountInfoCell.fatherQualification.text ?? ""
+                updatedData["motherQualification"] = accountInfoCell.motherQualification.text ?? ""
+                updatedData["fatherOccupation"] = accountInfoCell.fatherOccupation.text ?? ""
+                updatedData["motherOccupation"] = accountInfoCell.motherOccupation.text ?? ""
+                updatedData["fatherAadharNo"] = accountInfoCell.fatherAadharNo.text ?? ""
+                updatedData["motherAadharNo"] = accountInfoCell.motherAadharNo.text ?? ""
+                updatedData["fatherIncome"] = accountInfoCell.fatherIncome.text ?? ""
+                updatedData["motherIncome"] = accountInfoCell.motherIncome.text ?? ""
+            }
+        }
+
+        return updatedData
+    }
+    
+    func updateStudentProfile(with updatedData: [String: Any]) {
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/edit/profile?user_id=\(userId)"
+        print("API URL: \(urlString)")
+        
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let token = TokenManager.shared.getToken() ?? "" // Fetching the token
+        print("🔑 Token Used: Bearer \(token)") // ✅ Debugging the token
+        
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: updatedData, options: .prettyPrinted)
+            
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("🚀 Request Body Sent: \(jsonString)") // ✅ Debugging Request Data
+            }
+            
+            request.httpBody = jsonData
+        } catch {
+            print("❌ Error: Failed to serialize JSON")
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Response Status Code: \(httpResponse.statusCode)")
+            }
+
+            guard let data = data else {
+                print("Error: No data received")
+                return
+            }
+
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("API Response: \(responseString)")
+            }
+
+            DispatchQueue.main.async {
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    print("✅ Student profile updated successfully")
+                    self.navigationController?.popViewController(animated: true)
+                }
+            }
+        }
+
+        task.resume()
+    }
+
 }
+

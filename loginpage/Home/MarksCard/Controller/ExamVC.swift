@@ -28,6 +28,13 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let teamId = teamId, let offlineTestExamId = offlineTestExamId, studentMarkExamDataResponse.isEmpty {
+            fetchExamData(offlineTestExamId: offlineTestExamId)
+        }
+    }
+    
     @IBAction func backButtonAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
@@ -58,32 +65,37 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     // MARK: - API Call without Manager
     func fetchExamData(offlineTestExamId: String) {
-        guard let teamId = teamId else {
-            print("❌ Missing teamId ")
-            return
-        }
+        let loadingIndicator = UIActivityIndicatorView(style: .large)
+        loadingIndicator.center = view.center
+        view.addSubview(loadingIndicator)
+        loadingIndicator.startAnimating()
+        
+        guard let teamId = teamId else { return }
         
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/offline/testexam/\(offlineTestExamId)/student/markscard/get"
         guard let url = URL(string: urlString) else { return }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        
+
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            
+            DispatchQueue.main.async {
+                loadingIndicator.stopAnimating()
+                loadingIndicator.removeFromSuperview()
+            }
+
             if let error = error {
                 print("❌ Error fetching data: \(error.localizedDescription)")
                 return
             }
-            
+
             guard let data = data else {
                 print("❌ No data received")
                 return
             }
-            
+
             do {
                 let decodedResponse = try JSONDecoder().decode(ExamMarkDataResponse.self, from: data)
                 DispatchQueue.main.async {
@@ -97,7 +109,7 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             }
         }.resume()
     }
-    
+
     func navigateToMarksCard() {
         let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
         guard let studentMarksDetailVC = storyboard.instantiateViewController(withIdentifier: "StudentMarksDetailVC") as? StudentMarksDetailVC else {
@@ -107,6 +119,9 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         studentMarksDetailVC.examDataResponse = self.examDataResponse
         studentMarksDetailVC.studentMarkExamDataResponse = self.studentMarkExamDataResponse
         studentMarksDetailVC.passedExamTitle = selectedExamTitle
+        studentMarksDetailVC.groupId = self.groupId
+        studentMarksDetailVC.teamId = self.teamId
+        studentMarksDetailVC.offlineTestExamId = self.offlineTestExamId
         self.navigationController?.pushViewController(studentMarksDetailVC, animated: true)
     }
 }

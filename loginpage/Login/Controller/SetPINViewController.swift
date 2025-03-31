@@ -55,12 +55,14 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
 
     @IBAction func next(_ sender: UIButton) {
         if validatePIN() && validatePIN2() {
-        callAPIAndNavigate()
+//        callAPIAndNavigate()
+            self.navigateToGroupViewController()
         }
     }
 
     @IBAction func skip(_ sender: UIButton) {
-        callAPIAndNavigate()
+//        callAPIAndNavigate()
+        self.navigateToGroupViewController()
     }
 
     private func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
@@ -134,77 +136,9 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
         present(alert, animated: true, completion: nil)
     }
 
-
-     private func callAPIAndNavigate() {
-        // Retrieve token from UserDefaults or singleton
-        guard let token = TokenManager.shared.getToken() else {
-            print("Token is nil. Cannot proceed with API call.")
-            return
-        }
-
-        let urlString = APIManager.shared.baseURL + "groups?category=school"
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL.")
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("API call failed with error: \(error.localizedDescription)")
-                return
-            }
-
-            // Handle invalid HTTP status codes
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                print("API call failed with response: \(response.debugDescription)")
-                return
-            }
-
-            // Check if data is received
-            guard let data = data else {
-                print("No data received.")
-                return
-            }
-
-            do {
-                // Decode the response
-                let decoder = JSONDecoder()
-                let schoolResponse = try decoder.decode(SchoolResponse.self, from: data)
-
-                // Safely handle optional data array
-                guard let schoolsData = schoolResponse.data else {
-                    print("No schools data found.")
-                    return
-                }
-
-                // Map school data to School objects
-                let schools = schoolsData.compactMap { schoolData -> School? in
-                    return School(from: schoolData)
-                }
-                // Print the ID of each school to the console
-                schools.forEach { school in
-                    //print("School ID: \(school.id)")
-                }
-
-                // Update UI on the main thread
-                DispatchQueue.main.async {
-                    self.navigateToGroupViewController(with: schools)
-                }
-            } catch {
-                print("Failed to decode API response: \(error.localizedDescription)")
-            }
-        }
-        task.resume()
-    }
-    private func navigateToGroupViewController(with schools: [School]) {
+    private func navigateToGroupViewController() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let groupVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as? GrpViewController {
-            groupVC.schools = schools
-            print("Passed schools data: \(schools)")
             self.navigationController?.pushViewController(groupVC, animated: true)
         }
     }

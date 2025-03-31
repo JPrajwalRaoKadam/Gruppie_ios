@@ -59,7 +59,7 @@ struct StudentMarksData: Codable {
     let admissionNumber: String?
     let fatherNumber: String?
     let studentName: String?
-    let subjectMarksDetails: [SubjectMarkDetail]?
+    var subjectMarksDetails: [SubjectMarkDetail]?
     let motherNumber: String?
     let sectionHeadings: [String]?
     let totalAttendance: Int?
@@ -97,7 +97,7 @@ struct SubjectMarkDetail: Codable {
     let subjectId: String?
     let subMarks: [String]?
     let startTime: String?
-    let obtainedMarks: String?
+    var obtainedMarks: String?
     let isLanguage: Bool?
     let endTime: String?
     let date: String?

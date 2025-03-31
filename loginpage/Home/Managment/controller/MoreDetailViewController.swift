@@ -2,30 +2,25 @@ import UIKit
 
 class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-    @IBOutlet weak var backButton: UIButton!
+    
+    
     @IBOutlet weak var name: UILabel!
-    @IBOutlet weak var image: UIImageView!
-    @IBOutlet weak var MoreDetailsTableView: UITableView!
-    @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var editButton: UIButton!
+    @IBOutlet weak var designation: UILabel!
+    @IBOutlet weak var moreDetailsTableView: UITableView!
+    @IBOutlet weak var imageView: UIImageView!
 
     var groupIds = ""
     var token: String = ""
     var member: Member?
-    var selectedSegmentIndex = 0
     var isEditingEnabled = false
     var members: [Member]?
-
-    // For storyboard-based instantiation
-    @IBAction func deleteButton(_ sender: UIButton) {
-        showDeleteMessage()
-    }
+    var userId: String?
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
 
-    // Custom initializer for programmatic instantiation
     init(groupIds: String, token: String, member: Member?) {
         self.groupIds = groupIds
         self.token = token
@@ -35,28 +30,39 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
 
     override func viewDidLoad() {
         super.viewDidLoad()
+                
+        print("Group ID MoreDetail:", groupIds)
+        print("User ID MoreDetail:", userId ?? "User ID is nil")
+        print("Token MoreDetail:", token)
+
+        editButton.layer.cornerRadius = 10
+        editButton.clipsToBounds = true
 
         // Register cells
-        MoreDetailsTableView.register(UINib(nibName: "AccountInfoTableViewCell", bundle: nil), forCellReuseIdentifier: "AccountInfoCell")
-        MoreDetailsTableView.register(UINib(nibName: "BasicInfoTableViewCell", bundle: nil), forCellReuseIdentifier: "BasicInfoCell")
+        moreDetailsTableView.register(UINib(nibName: "BasicInfoTableViewCell", bundle: nil), forCellReuseIdentifier: "BasicInfoCell")
+        moreDetailsTableView.register(UINib(nibName: "EducationTableViewCell", bundle: nil), forCellReuseIdentifier: "EducationCell")
+        moreDetailsTableView.register(UINib(nibName: "AccountInfoTableViewCell", bundle: nil), forCellReuseIdentifier: "AccountInfoCell")
 
-        MoreDetailsTableView.delegate = self
-        MoreDetailsTableView.dataSource = self
+        moreDetailsTableView.delegate = self
+        moreDetailsTableView.dataSource = self
+        moreDetailsTableView.separatorStyle = .none
+        moreDetailsTableView.estimatedRowHeight = UITableView.automaticDimension
+        moreDetailsTableView.rowHeight = UITableView.automaticDimension
 
         roundImageView()
 
         if let member = member {
             name.text = member.name
+            designation.text = member.designation
+
             if let imageUrlString = member.image, let imageUrl = URL(string: imageUrlString) {
                 if let data = try? Data(contentsOf: imageUrl) {
-                    image.image = UIImage(data: data)
+                    imageView.image = UIImage(data: data)
                 }
             } else {
-                image.image = createFallbackImage(from: member.name)
+                imageView.image = createFallbackImage(from: member.name)
             }
         }
-
-        updateTableViewForSelectedSegment()
     }
 
     func createFallbackImage(from name: String) -> UIImage? {
@@ -84,20 +90,34 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
     }
 
     func roundImageView() {
-        image.layer.cornerRadius = image.frame.size.width / 2
-        image.clipsToBounds = true
+        imageView.layer.cornerRadius = imageView.frame.size.width / 2
+        imageView.clipsToBounds = true
     }
 
+    // MARK: - TableView Data Source
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 3
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
 
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch section {
+        case 0: return "Basic Info"
+        case 1: return "Education and Profession"
+        case 2: return "Account Info"
+        default: return nil
+        }
+    }
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch selectedSegmentIndex {
+        switch indexPath.section {
         case 0:
             if let cell = tableView.dequeueReusableCell(withIdentifier: "BasicInfoCell", for: indexPath) as? BasicInfoTableViewCell {
                 if let member = member {
@@ -105,63 +125,59 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
                 }
                 return cell
             }
+            return UITableViewCell() 
         case 1:
-            if let cell = tableView.dequeueReusableCell(withIdentifier: "AccountInfoCell", for: indexPath) as? AccountInfoTableViewCell {
-                return cell
-            }
+            return tableView.dequeueReusableCell(withIdentifier: "EducationCell", for: indexPath) as? EducationTableViewCell ?? UITableViewCell()
+        case 2:
+            return tableView.dequeueReusableCell(withIdentifier: "AccountInfoCell", for: indexPath) as? AccountInfoTableViewCell ?? UITableViewCell()
         default:
-            break
+            return UITableViewCell()
         }
-        
-        // Fallback to returning a default UITableViewCell
-        let fallbackCell = UITableViewCell(style: .default, reuseIdentifier: "FallbackCell")
-        fallbackCell.textLabel?.text = "Error loading cell"
-        fallbackCell.textLabel?.textColor = .red
-        return fallbackCell
     }
 
-    @IBAction func segmentButton(_ sender: UISegmentedControl) {
-        selectedSegmentIndex = sender.selectedSegmentIndex
-        updateTableViewForSelectedSegment()
-    }
-
-    func updateTableViewForSelectedSegment() {
-        MoreDetailsTableView.reloadData()
-    }
-
+    // MARK: - Edit & Save
     @IBAction func Edit(_ sender: UIButton) {
         isEditingEnabled.toggle()
-        
-        // Toggle the button text
+
         editButton.setTitle(isEditingEnabled ? "Save" : "Edit", for: .normal)
 
-        // Reload the table to update the cells for editing
-        MoreDetailsTableView.reloadData()
-        
-        if !isEditingEnabled {
-            // When "Save" is clicked, collect updated data and call the API
-            saveUpdatedData()
+        moreDetailsTableView.reloadData()
 
-            // After saving, navigate back to the previous view controller
-            navigateToManagementViewController()
+        if !isEditingEnabled {
+            saveUpdatedData()
         }
     }
 
     func saveUpdatedData() {
-        if let cell = MoreDetailsTableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? BasicInfoTableViewCell {
-            let updatedData = cell.collectUpdatedData()
+        guard let cell = moreDetailsTableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? BasicInfoTableViewCell else { return }
+        
+        let updatedData = cell.collectUpdatedData()
 
-            let requestBody: [String: Any] = [
-                "name": updatedData["name"] ?? "",
-                // Other fields here...
-            ]
+        let requestBody: [String: Any] = [
+            "name": updatedData["name"] ?? "",
+            "fatherName": updatedData["fatherName"] ?? "",
+            "admissionType": updatedData["admissionType"] ?? "",
+            "phone": updatedData["phone"] ?? "",
+            "countryCode": updatedData["countryCode"] ?? "",
+            "cCode": updatedData["cCode"] ?? 0
+        ]
 
-            callEditAPI(requestBody)
-        }
+        callEditAPI(requestBody)
     }
 
     func callEditAPI(_ requestBody: [String: Any]) {
-        guard let url = URL(string: APIManager.shared.baseURL + "groups/62b32f1197d24b31c4fa7a1a/user/65ded3c194521b7be87234be/management/edit") else { return }
+        guard let userId = userId, !userId.isEmpty else {
+            print("❌ User ID is nil or empty")
+            return
+        }
+        
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/user/\(userId)/management/edit") else {
+            print("❌ Invalid API URL")
+            return
+        }
+
+        print("🌍 API URL: \(url.absoluteString)")
+        print("📩 Request Body: \(requestBody)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
@@ -169,136 +185,100 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         do {
-            let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-            request.httpBody = jsonData
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
         } catch {
-            print("Error serializing data: \(error.localizedDescription)")
+            print("❌ JSON Serialization Error: \(error.localizedDescription)")
             return
         }
 
         let session = URLSession.shared
         session.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("API call failed with error: \(error.localizedDescription)")
+                print("❌ API Error: \(error.localizedDescription)")
                 return
             }
 
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                DispatchQueue.main.async {
-                    print("API call successful")
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 API Response Status Code: \(httpResponse.statusCode)")
+            }
+
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("📨 API Response Data: \(responseString)")
+            }
+
+            DispatchQueue.main.async {
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    print("✅ Data successfully saved into API.")
+                    self.navigateToManagementViewController()
+                } else {
+                    print("❌ API call failed. Data not saved.")
                 }
-            } else {
-                print("API call failed")
             }
         }.resume()
     }
 
-    func showDeleteMessage() {
-        let alertController = UIAlertController(
-            title: "Delete",
-            message: "Are you sure you want to permanently delete this?",
-            preferredStyle: .alert
-        )
-        
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alertController.addAction(UIAlertAction(title: "OK", style: .destructive, handler: { _ in
+    func navigateToManagementViewController() {
+        navigationController?.popViewController(animated: true)
+    }
+    @IBAction func backButtonTapped(_ sender: UIButton) {
+        navigationController?.popViewController(animated: true)
+        print("back button pressed")
+    }
+    @IBAction func deleteButtonTapped(_ sender: UIButton) {
+        print("delete button pressed")
+
+        let alert = UIAlertController(title: "Delete Management",
+                                      message: "Are you sure you want to delete this management?",
+                                      preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
             self.callDeleteAPI()
         }))
 
-        self.present(alertController, animated: true, completion: nil)
+        present(alert, animated: true, completion: nil)
     }
 
     func callDeleteAPI() {
-        guard let member = member else {
-            print("Error: No member data available for deletion.")
+        guard let userId = userId, !userId.isEmpty else {
+            print("❌ User ID is nil or empty")
             return
         }
 
-        guard let url = URL(string: APIManager.shared.baseURL + "groups/62b32f1197d24b31c4fa7a1a/user/65ded3c194521b7be87234be/management/delete?type=management") else {
-            print("Invalid URL")
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupIds)/user/\(userId)/management/delete?type=management"
+
+        guard let url = URL(string: apiUrl) else {
+            print("❌ Invalid API URL")
             return
         }
+
+        print("🌍 API URL: \(url.absoluteString)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Prepare the request body using the Member model
-        let body: [String: Any] = [
-            "userId": member.userId // Member's userId will be passed for deletion
-        ]
-
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
-            request.httpBody = jsonData
-        } catch {
-            print("Error serializing data: \(error.localizedDescription)")
-            return
-        }
-
         let session = URLSession.shared
-        session.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-
+        session.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Error: \(error.localizedDescription)")
+                print("❌ API Error: \(error.localizedDescription)")
                 return
             }
 
             if let httpResponse = response as? HTTPURLResponse {
+                print("📡 API Response Status Code: \(httpResponse.statusCode)")
                 if httpResponse.statusCode == 200 {
                     DispatchQueue.main.async {
-                        print("Member successfully deleted: \(member.name)")
-                        
-                        // Remove the member from local model (in MoreDetailViewController)
-                        self.removeMemberFromLocalModel(member)
-
-                        // Reload table view if you're displaying the members in a table
-                        self.MoreDetailsTableView.reloadData()
-
-                        // Navigate back to the management view controller
+                        print("✅ Management deleted successfully.")
                         self.navigateToManagementViewController()
                     }
                 } else {
-                    print("Failed to delete member: \(member.name), Status Code: \(httpResponse.statusCode)")
+                    print("❌ API call failed. Unable to delete management.")
                 }
-            } else {
-                print("No valid response received.")
             }
         }.resume()
     }
 
-
-    func removeMemberFromLocalModel(_ member: Member) {
-        // Assuming you have a local model array like `members` (update accordingly)
-        if let index = members?.firstIndex(where: { $0.userId == member.userId }) {
-            // Remove member from local model
-            self.members?.remove(at: index)
-            print("Removed member from local model: \(member.name)")
-        } else {
-            print("Member not found in local model")
-        }
-    }
-
-    func navigateToManagementViewController() {
-        if let navigationController = self.navigationController {
-            for viewController in navigationController.viewControllers {
-                if let managementVC = viewController as? ManagementViewController {
-                    // Pass updated members array back
-                    managementVC.members = self.members ?? []
-                    
-                    // Reload table view in ManagementViewController
-                    managementVC.tableView.reloadData()
-                    
-                    navigationController.popToViewController(managementVC, animated: true)
-                    return
-                }
-            }
-            navigationController.popToRootViewController(animated: true)
-        } else {
-            self.dismiss(animated: true, completion: nil)
-        }
-    }
-
+    
 }

@@ -223,44 +223,113 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         }
     
     private func fetchSubjectDataAndNavigate() {
-        guard let token = TokenManager.shared.getToken(), !token.isEmpty,
-              let groupId = school?.id, !groupId.isEmpty else {
-            print("❌ Token or Group ID is missing")
-            return
-        }
-        
-        let subjectURL = APIManager.shared.baseURL + "groups/\(groupId)/class/get"
-        print("📜 Request URL: \(subjectURL)") // Print the final URL
-        
-        let dispatchGroup = DispatchGroup()
-        var subjects: [SubjectData] = []
-        var teamIds: [String] = [] // Store multiple teamIds
-        
-        dispatchGroup.enter()
-        fetchSubjectData(from: subjectURL, token: token) { fetchedSubjects, fetchedTeamIds in
-            subjects = fetchedSubjects
-            teamIds = fetchedTeamIds // Store all teamIds
-            
-            print("📚 Total subjects fetched: \(subjects.count)") // Print count in console
-            print("🆔 Fetched Team IDs: \(teamIds)") // Print all teamIds in console
-            
-            dispatchGroup.leave()
-        }
-        
-        dispatchGroup.notify(queue: .main) {
-            print("🚀 Navigating to SubjectViewController with Team IDs: \(teamIds)")
-            switch self.featureIcon?.type {
-            case "Subject Register":
-                self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
-            case "Hostel":
-                self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
-            default:
-                print("No navigation configured for type: \(self.featureIcon?.type)")
-                
+            // Ensure token and group ID are available
+            guard let token = TokenManager.shared.getToken(), !token.isEmpty,
+                  let groupId = school?.id, !groupId.isEmpty else {
+                print("❌ Token or Group ID is missing")
+                return
             }
+
+            let subjectURL = APIManager.shared.baseURL + "/groups/\(groupId)/class/get"
+            print("📜 Request URL: \(subjectURL)")
+
+            guard let url = URL(string: subjectURL) else {
+                print("❌ Invalid URL: \(subjectURL)")
+                return
+            }
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("❌ Error fetching subject data: \(error.localizedDescription)")
+                    return
+                }
+
+                guard let data = data else {
+                    print("❌ No data received.")
+                    return
+                }
+
+                // Print raw JSON response
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("📜 Raw JSON Response: \(jsonString)")
+                } else {
+                    print("❌ Failed to convert data to String.")
+                }
+
+                // Decode JSON response using JSONSerialization
+                do {
+                    guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                          let dataArray = json["data"] as? [[String: Any]] else {
+                        print("❌ Invalid JSON structure.")
+                        return
+                    }
+
+                    var subjects: [SubjectData] = []
+                    var teamIds: [String] = []
+
+                    for item in dataArray {
+                        let subject = SubjectData(
+                            totalNoOfStaffAssigned: item["totalNoOfStaffAssigned"] as? Int,
+                            teamId: item["teamId"] as? String ?? "",
+                            teacherName: item["teacherName"] as? String ?? "",
+                            subjectRequired: item["subjectRequired"] as? Bool ?? false,
+                            subjectId: item["subjectId"] as? Bool ?? false,
+                            studentAssignedStatus: item["studentAssignedStatus"] as? String,
+                            staffAssignedStatus: item["staffAssignedStatus"] as? String,
+                            sortBy: item["sortBy"] as? String ?? "",
+                            role: item["role"] as? String ?? "",
+                            phone: item["phone"] as? String ?? "",
+                            numberOfTimeAttendance: item["numberOfTimeAttendance"] as? Int ?? 0,
+                            name: item["name"] as? String ?? "",
+                            members: item["members"] as? Int ?? 0,
+                            jitsiToken: item["jitsiToken"] as? Bool ?? false,
+                            image: item["image"] as? String,
+                            gruppieClassName: item["gruppieClassName"] as? String ?? "",
+                            enableAttendance: item["enableAttendance"] as? Bool ?? false,
+                            ebookId: item["ebookId"] as? Bool ?? false,
+                            downloadedCount: item["downloadedCount"] as? Int ?? 0,
+                            departmentUserId: item["departmentUserId"] as? String ?? "",
+                            departmentHeadName: item["departmentHeadName"] as? String ?? "",
+                            department: item["department"] as? String ?? "",
+                            classTypeId: item["classTypeId"] as? String ?? "",
+                            classTeacherId: item["classTeacherId"] as? String ?? "",
+                            classSort: item["classSort"] as? String,
+                            category: item["category"] as? String,
+                            admissionTeam: item["admissionTeam"] as? Bool ?? false,
+                            adminName: item["adminName"] as? String ?? ""
+                        )
+
+                        subjects.append(subject)
+                        teamIds.append(subject.teamId)
+                    }
+
+                    print("✅ Successfully parsed \(subjects.count) subjects.")
+                    
+                    // Navigate to Subject Register after fetching
+                    DispatchQueue.main.async {
+                        print("🚀 Navigating to SubjectViewController with Team IDs: \(teamIds)")
+                        switch self.featureIcon?.type {
+                        case "Subject Register":
+                            self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
+                        case "Hostel":
+                            self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
+                        case "Syllabus Tracker": break
+//                            self.navigateToSyllabusTracker(subjects: subjects, teamIds: teamIds)
+                        default:
+                            print("No navigation configured for type: \(self.featureIcon?.type)")
+                            
+                        }
+                    }
+
+                } catch {
+                    print("❌ Error decoding subject data: \(error.localizedDescription)")
+                }
+            }.resume()
         }
-    }
-        
     private func fetchSubjectData(from urlString: String, token: String, completion: @escaping ([SubjectData], [String]) -> Void) {
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL: \(urlString)")

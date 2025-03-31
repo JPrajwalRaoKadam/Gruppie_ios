@@ -5,9 +5,11 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet weak var TableView: UITableView!
     @IBOutlet weak var name: UILabel!
     
+    var studentDbId: String?
     var token: String = ""
     var groupIds: String = ""
     var teamId: String = ""
+    var userId: String = ""
     var studentDetails: [StudentData] = []
     var studentName: String?
     var newStudent: StudentData?
@@ -16,26 +18,11 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         let alertController = UIAlertController(title: "Select Option", message: "Choose an action", preferredStyle: .actionSheet)
 
         let addStudentAction = UIAlertAction(title: "Add Student", style: .default) { _ in
-            print("Add Student tapped")
-            
-            if self.teamId.isEmpty {
-                self.teamId = ""
-            }
-            
-            print("Navigating with teamId: \(self.teamId), groupId: \(self.groupIds), token: \(self.token)")
-
-            let storyboard = UIStoryboard(name: "Student", bundle: nil)
-            if let addStudentVC = storyboard.instantiateViewController(withIdentifier: "AddStudentViewController") as? AddStudentViewController {
-                addStudentVC.token = self.token
-                addStudentVC.groupId = self.groupIds
-                addStudentVC.teamId = self.teamId
-                addStudentVC.newStudentDetails = self.studentDetails
-                self.navigationController?.pushViewController(addStudentVC, animated: true)
-            }
+            self.navigateToAddStudentViewController()
         }
 
         let addStaffAction = UIAlertAction(title: "Add Staff", style: .default) { _ in
-            print("Add Staff tapped")
+            self.navigateToAddStaffViewController()
         }
 
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -46,7 +33,96 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
 
         present(alertController, animated: true, completion: nil)
     }
+
+    private func navigateToAddStudentViewController() {
+        print("Navigating with teamId: \(self.teamId), groupId: \(self.groupIds), token: \(self.token)")
+
+        let storyboard = UIStoryboard(name: "Student", bundle: nil)
+        if let addStudentVC = storyboard.instantiateViewController(withIdentifier: "AddStudentViewController") as? AddStudentViewController {
+            addStudentVC.token = self.token
+            addStudentVC.groupId = self.groupIds
+            addStudentVC.teamId = self.teamId
+            addStudentVC.newStudentDetails = self.studentDetails
+            self.navigationController?.pushViewController(addStudentVC, animated: true)
+        }
+    }
     
+    private func navigateToAddStaffStudent(with staffList: [StaffMember]) {
+        let storyboard = UIStoryboard(name: "Student", bundle: nil)
+        if let addStaffVC = storyboard.instantiateViewController(withIdentifier: "AddStaffStudent") as? AddStaffStudent {
+            addStaffVC.token = self.token
+            addStaffVC.groupId = self.groupIds
+            addStaffVC.userId = self.userId
+            addStaffVC.staffList = staffList // Pass fetched staff data
+            self.navigationController?.pushViewController(addStaffVC, animated: true)
+        }
+    }
+
+    private func navigateToAddStaffViewController() {
+        print("Fetching staff data before navigation...")
+
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/staff/get?type=teaching") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(self.token)", forHTTPHeaderField: "Authorization")
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error fetching staff data:", error.localizedDescription)
+                return
+            }
+
+            guard let data = data else {
+                print("No data received")
+                return
+            }
+
+            do {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("Raw API Response: \(jsonString)")
+                }
+                
+                let decodedResponse = try JSONDecoder().decode(StaffDataResponse.self, from: data)
+
+                if let staffList = decodedResponse.data, !staffList.isEmpty {
+                    // Fetch and store userId from the first staff member
+                    if let firstUser = staffList.first {
+                        self.userId = firstUser.userId ?? ""
+                        print("Fetched User ID: \(self.userId)")
+                    }
+
+                    DispatchQueue.main.async {
+                        self.navigateToAddStaffStudent(with: staffList)
+                    }
+                } else {
+                    print("No staff data available.")
+                }
+            } catch {
+                print("Error decoding JSON:", error)
+                if let decodingError = error as? DecodingError {
+                    switch decodingError {
+                    case .keyNotFound(let key, let context):
+                        print("Key '\(key)' not found:", context.debugDescription)
+                    case .typeMismatch(let type, let context):
+                        print("Type '\(type)' mismatch:", context.debugDescription)
+                    case .valueNotFound(let type, let context):
+                        print("Value '\(type)' not found:", context.debugDescription)
+                    case .dataCorrupted(let context):
+                        print("Data corrupted:", context.debugDescription)
+                    @unknown default:
+                        print("Unknown decoding error")
+                    }
+                }
+            }
+        }
+
+        task.resume()
+    }
+
     @IBAction func backButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
@@ -54,12 +130,13 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
+
         if let studentName = studentName {
             name.text = studentName
         }
 
         print("DetailViewController loaded")
-        print("groupIds: \(groupIds), teamId: \(teamId), token: \(token)")
+        print("groupIds: \(groupIds), teamId: \(teamId), token: \(token), studentDbId: \(studentDbId ?? "N/A")")
         
         TableView.register(UINib(nibName: "DetailTableViewCell", bundle: nil), forCellReuseIdentifier: "DetailTableViewCell")
         
@@ -96,7 +173,9 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             return
         }
 
-        print("Navigating with userId: \(userId), teamId: \(teamId), groupId: \(groupIds), token: \(token)")
+        let selectedStudentDbId = selectedStudent.studentDbId ?? "N/A"
+        
+        print("Navigating with userId: \(userId), studentDbId: \(selectedStudentDbId), teamId: \(teamId), groupId: \(groupIds), token: \(token)")
 
         DispatchQueue.main.async {
             let storyboard = UIStoryboard(name: "Student", bundle: nil)
@@ -106,8 +185,9 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
                 studentDetailVC.token = self.token
                 studentDetailVC.groupId = self.groupIds
                 studentDetailVC.teamId = self.teamId
-                studentDetailVC.userId = userId // Pass userId here
-                
+                studentDetailVC.userId = userId
+                studentDetailVC.studentDbId = selectedStudentDbId
+
                 self.navigationController?.pushViewController(studentDetailVC, animated: true)
             }
         }

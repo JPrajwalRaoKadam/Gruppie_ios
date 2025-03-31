@@ -25,4 +25,5 @@ struct UserProfile {
 
 protocol EditableCell {
     func setEditable(_ isEditable: Bool)
+    func collectUpdatedData() -> [String: String]
 }

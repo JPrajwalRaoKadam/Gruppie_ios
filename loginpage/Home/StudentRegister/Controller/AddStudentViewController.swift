@@ -52,7 +52,7 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
         print("User entered data: Admission Type: \(admissionType), Father Name: \(fatherName), Name: \(name), Phone: \(phone)")
         
         let countryCode = "IN"
-        let studentData = StudentData(phone: phone, name: name, groupId: groupId, fatherName: fatherName.isEmpty ? nil : fatherName, admissionType: admissionType, countryCode: countryCode)
+        let studentData = StudentData(groupId: groupId, name: name, phone: phone, countryCode: countryCode, admissionType: admissionType, fatherName: fatherName.isEmpty ? nil : fatherName)
         let studentRegisterRequest = StudentRegisterRequest(studentData: [studentData])
 
         showLoadingIndicator()

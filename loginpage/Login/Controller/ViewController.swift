@@ -1,4 +1,6 @@
 import UIKit
+import CoreData
+
 struct PhoneData: Codable {
     var phone: String
     var countryCode: String
@@ -43,8 +45,23 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
 
         let phoneData = PhoneData(phone: phoneNumber, countryCode: "IN")
+        savePhoneNumberToCoreData(phoneData: phoneData)
         checkUserExistence(with: phoneData)
     }
+    
+    func savePhoneNumberToCoreData(phoneData: PhoneData) {
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+            let context = appDelegate.persistentContainer.viewContext
+            let entity = NSEntityDescription.entity(forEntityName: "User", in: context)!
+            let user = NSManagedObject(entity: entity, insertInto: context)
+            user.setValue(phoneData.phone, forKey: "phone")
+            
+            do {
+                try context.save()
+            } catch {
+                print("Failed to save phone number: \(error)")
+            }
+        }
 
     func checkUserExistence(with phoneData: PhoneData) {
         guard let url = URL(string: APIManager.shared.baseURL + "user/exist/category/app?category=school&appName=GC2") else {
