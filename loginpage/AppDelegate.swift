@@ -14,12 +14,29 @@ import CoreData
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        return true
-    }
+            
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            
+            if let phone = UserDefaults.standard.string(forKey: "loggedInPhone"),
+               let _ = KeychainHelper.shared.retrieve(service: "app_password", account: phone) {
+                
+                // User is already logged in — show GroupsVC
+                let groupsVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as! GrpViewController
+                let navController = UINavigationController(rootViewController: groupsVC)
+                window?.rootViewController = navController
+            } else {
+                // Show LoginVC as default
+                let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+                let navController = UINavigationController(rootViewController: loginVC)
+                window?.rootViewController = navController
+            }
+
+            window?.makeKeyAndVisible()
+            return true
+        }
 
     // MARK: UISceneSession Lifecycle
 
