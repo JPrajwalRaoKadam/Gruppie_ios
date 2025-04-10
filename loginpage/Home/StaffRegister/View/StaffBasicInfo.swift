@@ -1,6 +1,7 @@
 import UIKit
 
 class StaffBasicInfo: UITableViewCell, UITextFieldDelegate {
+
     @IBOutlet weak var name: UITextField!
     @IBOutlet weak var country: UITextField!
     @IBOutlet weak var phone: UITextField!
@@ -17,6 +18,12 @@ class StaffBasicInfo: UITableViewCell, UITextFieldDelegate {
     @IBOutlet weak var emailId: UITextField!
     @IBOutlet weak var aadharNo: UITextField!
     @IBOutlet weak var type: UITextField!
+    
+    // Newly added fields
+//    @IBOutlet weak var emergencyContact: UITextField!
+//    @IBOutlet weak var fatherName: UITextField!
+//    @IBOutlet weak var motherName: UITextField!
+//    @IBOutlet weak var profession: UITextField!
 
     private var allTextFields: [UITextField] = []
 
@@ -28,8 +35,7 @@ class StaffBasicInfo: UITableViewCell, UITextFieldDelegate {
     private func setupTextFields() {
         allTextFields = [
             name, country, phone, staffId, doj, Class, gender, qualification, dob,
-            address, religion, caste, bloodgroup, emailId, aadharNo, type
-        ]
+            address, religion, caste, bloodgroup, emailId, aadharNo, type        ]
         allTextFields.forEach { $0.delegate = self }
     }
 
@@ -50,6 +56,10 @@ class StaffBasicInfo: UITableViewCell, UITextFieldDelegate {
         emailId.text = basicInfo.emailId
         aadharNo.text = basicInfo.aadharNo
         type.text = basicInfo.type
+//        emergencyContact.text = basicInfo.emergencyContact
+//        fatherName.text = basicInfo.fatherName
+//        motherName.text = basicInfo.motherName
+//        profession.text = basicInfo.profession
 
         // Enable or disable user interaction based on editing mode
         allTextFields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
@@ -72,9 +82,16 @@ class StaffBasicInfo: UITableViewCell, UITextFieldDelegate {
             bloodGroup: bloodgroup.text ?? "",
             emailId: emailId.text ?? "",
             aadharNo: aadharNo.text ?? "",
-            type: type.text ?? ""
-        )
+            type: type.text ?? "" )
+//            emergencyContact: emergencyContact.text ?? "",
+//            fatherName: fatherName.text ?? "",
+//            motherName: motherName.text ?? "",
+//            profession: profession.text ?? ""
+        
     }
+    // Inside StaffBasicInfo.swift
+    
+
 
     // Dismiss keyboard when pressing "Return"
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

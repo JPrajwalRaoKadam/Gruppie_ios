@@ -3,7 +3,8 @@ import UIKit
 class AddStudentViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var TableView: UITableView!
-    
+    @IBOutlet weak var addButton: UIButton! 
+
     var token: String = ""
     var groupId: String = ""
     var teamId: String = ""
@@ -13,6 +14,10 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
     override func viewDidLoad() {
         super.viewDidLoad()
         print("groupId: \(groupId), teamId: \(teamId), token: \(token)")
+        
+        addButton.layer.cornerRadius = 10 // Adjust the value as needed
+            addButton.layer.masksToBounds = true
+
 
         TableView.register(UINib(nibName: "AddStudentTableViewCell", bundle: nil), forCellReuseIdentifier: "AddStudentTableViewCell")
         TableView.delegate = self

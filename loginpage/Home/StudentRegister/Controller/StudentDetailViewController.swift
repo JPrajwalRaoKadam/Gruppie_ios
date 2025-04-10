@@ -48,7 +48,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func deleteStudent() {
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/\(userId)/delete"
+        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/student/\(userId)/delete"
         print("API URL: \(urlString)") // ✅ Print API URL
 
         guard let url = URL(string: urlString) else {
@@ -115,12 +115,14 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
             EditButton.clipsToBounds = true
 
         print("StudentDetailViewController Loaded")
-        if let student = student {
-                name.text = student.name
+         if let student = student {
+            print("Student Data: \(student)") // ✅ Print student data
+            name.text = student.name
             designation.text = student.rollNumber ?? ""
-            } else {
-                print("Error: Student data is nil")
-            }
+        } else {
+            print("Error: Student data is nil")
+        }
+
         // Register TableView Cells
         TableView.register(UINib(nibName: "BasicInfoCell", bundle: nil), forCellReuseIdentifier: "BasicInfoCell")
         TableView.register(UINib(nibName: "EducationInfoCell", bundle: nil), forCellReuseIdentifier: "EducationInfoCell")
@@ -172,13 +174,31 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
 
     // MARK: - TableView Delegate Methods
 
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 40))
+        headerView.backgroundColor = UIColor.white // Background color for header
+
+        let titleLabel = UILabel(frame: CGRect(x: 16, y: 5, width: tableView.frame.width - 32, height: 30))
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 18) // Bold font
+        titleLabel.textColor = UIColor.black // Black color
+
         switch section {
-        case 0: return "Basic Info"
-        case 1: return "Other Info"
-        case 2: return "Family Info"
-        default: return nil
+        case 0:
+            titleLabel.text = "Basic Info"
+        case 1:
+            titleLabel.text = "Other Info"
+        case 2:
+            titleLabel.text = "Family Info"
+        default:
+            return nil
         }
+
+        headerView.addSubview(titleLabel)
+        return headerView
+    }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 40 // Adjust height as needed
     }
     @IBAction func EditButton(_ sender: Any) {
             if isEditingEnabled {
@@ -194,52 +214,62 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     func collectUpdatedData() -> [String: Any] {
         var updatedData: [String: Any] = [:]
 
-        // Get visible cells and extract data from text fields
-        for cell in TableView.visibleCells {
-            if let basicInfoCell = cell as? BasicInfoCell {
-                updatedData["name"] = basicInfoCell.name.text ?? ""
-                updatedData["gender"] = basicInfoCell.gender.text ?? ""
-                updatedData["className"] = basicInfoCell.studentClass.text ?? ""
-                updatedData["section"] = basicInfoCell.section.text ?? ""
-                updatedData["rollNumber"] = basicInfoCell.rollNo.text ?? ""
-                updatedData["email"] = basicInfoCell.email.text ?? ""
-                updatedData["phone"] = basicInfoCell.phone.text ?? ""
-                updatedData["dateOfJoining"] = basicInfoCell.doj.text ?? ""
-            } else if let educationInfoCell = cell as? EducationInfoCell {
-                updatedData["nationality"] = educationInfoCell.nationality.text ?? ""
-                updatedData["bloodGroup"] = educationInfoCell.bloodGroup.text ?? ""
-                updatedData["religion"] = educationInfoCell.religion.text ?? ""
-                updatedData["caste"] = educationInfoCell.caste.text ?? ""
-                updatedData["category"] = educationInfoCell.category.text ?? ""
-                updatedData["disability"] = educationInfoCell.disability.text ?? ""
-                updatedData["dateOfBirth"] = educationInfoCell.dob.text ?? ""
-                updatedData["admissionNumber"] = educationInfoCell.admissionNo.text ?? ""
-                updatedData["satsNumber"] = educationInfoCell.satsNumber.text ?? ""
-                updatedData["address"] = educationInfoCell.address.text ?? ""
-                updatedData["aadharNumber"] = educationInfoCell.aadharNo.text ?? ""
-            } else if let accountInfoCell = cell as? AccountInfoCell {
-                updatedData["fatherName"] = accountInfoCell.fatherName.text ?? ""
-                updatedData["motherName"] = accountInfoCell.motherName.text ?? ""
-                updatedData["fatherPhone"] = accountInfoCell.fatherPhone.text ?? ""
-                updatedData["motherPhone"] = accountInfoCell.motherPhone.text ?? ""
-                updatedData["fatherEmail"] = accountInfoCell.fatherEmail.text ?? ""
-                updatedData["motherEmail"] = accountInfoCell.motherEmail.text ?? ""
-                updatedData["fatherQualification"] = accountInfoCell.fatherQualification.text ?? ""
-                updatedData["motherQualification"] = accountInfoCell.motherQualification.text ?? ""
-                updatedData["fatherOccupation"] = accountInfoCell.fatherOccupation.text ?? ""
-                updatedData["motherOccupation"] = accountInfoCell.motherOccupation.text ?? ""
-                updatedData["fatherAadharNo"] = accountInfoCell.fatherAadharNo.text ?? ""
-                updatedData["motherAadharNo"] = accountInfoCell.motherAadharNo.text ?? ""
-                updatedData["fatherIncome"] = accountInfoCell.fatherIncome.text ?? ""
-                updatedData["motherIncome"] = accountInfoCell.motherIncome.text ?? ""
+        for section in 0..<TableView.numberOfSections {
+            let indexPath = IndexPath(row: 0, section: section)
+            
+            if let cell = TableView.cellForRow(at: indexPath) {
+                if let basicInfoCell = cell as? BasicInfoCell {
+                    updatedData["name"] = basicInfoCell.name.text ?? ""
+                    updatedData["gender"] = basicInfoCell.gender.text ?? ""
+                    updatedData["className"] = basicInfoCell.studentClass.text ?? ""
+                    updatedData["section"] = basicInfoCell.section.text ?? ""
+                    updatedData["rollNumber"] = basicInfoCell.rollNo.text ?? ""
+                    updatedData["email"] = basicInfoCell.email.text ?? ""
+                    updatedData["phone"] = basicInfoCell.phone.text ?? ""
+                    updatedData["dateOfJoining"] = basicInfoCell.doj.text ?? ""
+                } else if let educationInfoCell = cell as? EducationInfoCell {
+                    func getValidValue(_ text: String?) -> Any {
+                        return (text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true) ? NSNull() : text!
+                    }
+                    updatedData["nationality"] = educationInfoCell.nationality.text ?? ""
+                    updatedData["bloodGroup"] = educationInfoCell.bloodGroup.text ?? ""
+                    updatedData["religion"] = educationInfoCell.religion.text ?? ""
+                    updatedData["caste"] = educationInfoCell.caste.text ?? ""
+                    updatedData["category"] = educationInfoCell.category.text ?? ""
+                    updatedData["disability"] = educationInfoCell.disability.text ?? ""
+                    updatedData["dateOfBirth"] = educationInfoCell.dob.text ?? ""
+                    updatedData["admissionNumber"] = educationInfoCell.admissionNo.text ?? ""
+                    updatedData["satsNumber"] = educationInfoCell.satsNumber.text ?? ""
+                    updatedData["address"] = educationInfoCell.address.text ?? ""
+                    updatedData["aadharNumber"] = educationInfoCell.aadharNo.text ?? ""
+                } else if let accountInfoCell = cell as? AccountInfoCell {
+                    func getValidValue(_ text: String?) -> Any {
+                        return (text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true) ? NSNull() : text!
+                    }
+
+                    updatedData["fatherName"] = getValidValue(accountInfoCell.fatherName.text ?? "")
+                    updatedData["motherName"] = getValidValue(accountInfoCell.motherName.text ?? "")
+                    updatedData["fatherPhone"] = getValidValue(accountInfoCell.fatherPhone.text ?? "")
+                    updatedData["motherPhone"] = getValidValue(accountInfoCell.motherPhone.text ?? "")
+                    updatedData["fatherEmail"] = getValidValue(accountInfoCell.fatherEmail.text ?? "")
+                    updatedData["motherEmail"] = getValidValue(accountInfoCell.motherEmail.text ?? "")
+                    updatedData["fatherQualification"] = getValidValue(accountInfoCell.fatherQualification.text ?? "")
+                    updatedData["motherQualification"] = getValidValue(accountInfoCell.motherQualification.text ?? "")
+                    updatedData["fatherOccupation"] = getValidValue(accountInfoCell.fatherOccupation.text ?? "")
+                    updatedData["motherOccupation"] = getValidValue(accountInfoCell.motherOccupation.text ?? "")
+                    updatedData["fatherAadharNo"] = getValidValue(accountInfoCell.fatherAadharNo.text ?? "")
+                    updatedData["motherAadharNo"] = getValidValue(accountInfoCell.motherAadharNo.text ?? "")
+                    updatedData["fatherIncome"] = getValidValue(accountInfoCell.fatherIncome.text ?? "")
+                    updatedData["motherIncome"] = getValidValue(accountInfoCell.motherIncome.text ?? "")
+                }
+
             }
         }
-
         return updatedData
     }
-    
+
     func updateStudentProfile(with updatedData: [String: Any]) {
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/edit/profile?user_id=\(userId)"
+        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/student/edit/profile?user_id=\(userId)"
         print("API URL: \(urlString)")
         
         guard let url = URL(string: urlString) else {

@@ -35,7 +35,6 @@ class BasicInfoTableViewCell: UITableViewCell {
             aadharNo, bloodGroup, panNo, address
         ]
 
-        // Enable or disable text fields based on editing mode
         fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
     }
 

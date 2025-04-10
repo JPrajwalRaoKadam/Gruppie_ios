@@ -14,8 +14,13 @@ class CombineTableViewCell: UITableViewCell {
         // Make the iconImageView circular and setup fallback appearance
         iconImageView.layer.cornerRadius = iconImageView.frame.size.width / 2
         iconImageView.clipsToBounds = true
-        iconImageView.backgroundColor = .systemGray // Grey background for fallback
-        imageLabel.isHidden = true // Hide fallback text by default
+        iconImageView.backgroundColor = .link // System link color for fallback
+
+        // Configure fallback text label
+        imageLabel.isHidden = true
+        imageLabel.textAlignment = .center
+        imageLabel.textColor = .white
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -34,16 +39,14 @@ class CombineTableViewCell: UITableViewCell {
         } else {
             // Remove any previous image and set a fallback background color
             iconImageView.image = nil
-            iconImageView.backgroundColor = .systemGray // Grey background for fallback
+            iconImageView.backgroundColor = .link // System link color for fallback
             
             // Set the first letter of name as fallback text
             imageLabel.text = String(name.prefix(1)).uppercased() // Display first letter of name
             imageLabel.textColor = .white // White text color for fallback
             imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
+            imageLabel.textAlignment = .center // Ensure text is centered
             imageLabel.isHidden = false // Show fallback text
         }
-        
-        // Set phone number label
-        imageLabel.text = phoneNumber
     }
 }

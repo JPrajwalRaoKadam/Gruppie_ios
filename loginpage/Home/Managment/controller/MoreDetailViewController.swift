@@ -1,14 +1,12 @@
 import UIKit
 
 class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
-    
     
     @IBOutlet weak var name: UILabel!
     @IBOutlet weak var editButton: UIButton!
     @IBOutlet weak var designation: UILabel!
     @IBOutlet weak var moreDetailsTableView: UITableView!
-    @IBOutlet weak var imageView: UIImageView!
+//    @IBOutlet weak var imageView: UIImageView!
 
     var groupIds = ""
     var token: String = ""
@@ -49,21 +47,80 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
         moreDetailsTableView.estimatedRowHeight = UITableView.automaticDimension
         moreDetailsTableView.rowHeight = UITableView.automaticDimension
 
-        roundImageView()
-
+//        roundImageView()
         if let member = member {
             name.text = member.name
             designation.text = member.designation
 
-            if let imageUrlString = member.image, let imageUrl = URL(string: imageUrlString) {
-                if let data = try? Data(contentsOf: imageUrl) {
-                    imageView.image = UIImage(data: data)
-                }
-            } else {
-                imageView.image = createFallbackImage(from: member.name)
-            }
+//            if let imageUrlString = member.image, let imageUrl = URL(string: imageUrlString) {
+//                if let data = try? Data(contentsOf: imageUrl) {
+//                    imageView.image = UIImage(data: data)
+//                }
+//            } else {
+//                imageView.image = createFallbackImage(from: member.name)
+//            }
         }
     }
+    @IBAction func deleteButtonTapped(_ sender: UIButton) {
+        print("delete button pressed")
+
+        let alert = UIAlertController(title: "Delete Management",
+                                      message: "Are you sure you want to delete this management?",
+                                      preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            self.callDeleteAPI()
+        }))
+
+        present(alert, animated: true, completion: nil)
+    }
+
+    func callDeleteAPI() {
+        guard let userId = userId, !userId.isEmpty else {
+            print("❌ User ID is nil or empty")
+            return
+        }
+        
+        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupIds)/user/\(userId)/management/delete?type=management"
+        
+        guard let url = URL(string: apiUrl) else {
+            print("❌ Invalid API URL")
+            return
+        }
+        
+        print("🌍 API URL: \(url.absoluteString)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let session = URLSession.shared
+        session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ API Error: \(error.localizedDescription)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 API Response Status Code: \(httpResponse.statusCode)")
+                if httpResponse.statusCode == 200 {
+                    DispatchQueue.main.async {
+                        print("✅ Management deleted successfully.")
+                        self.navigateToManagementViewController()
+                    }
+                } else {
+                    print("❌ API call failed. Unable to delete management.")
+                }
+            }
+        }.resume()
+    }
+    @IBAction func BackButton(_ sender: UIButton) {
+        navigationController?.popViewController(animated: true)
+    }
+
+    
 
     func createFallbackImage(from name: String) -> UIImage? {
         let firstLetter = name.prefix(1).uppercased()
@@ -89,10 +146,10 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
         return fallbackImage
     }
 
-    func roundImageView() {
-        imageView.layer.cornerRadius = imageView.frame.size.width / 2
-        imageView.clipsToBounds = true
-    }
+//    func roundImageView() {
+//        imageView.layer.cornerRadius = imageView.frame.size.width / 2
+//        imageView.clipsToBounds = true
+//    }
 
     // MARK: - TableView Data Source
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -107,14 +164,38 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
         return UITableView.automaticDimension
     }
 
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        switch section {
-        case 0: return "Basic Info"
-        case 1: return "Education and Profession"
-        case 2: return "Account Info"
-        default: return nil
-        }
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let headerView = UIView()
+        headerView.backgroundColor = .white  // Set background color if needed
+
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .black
+        label.font = UIFont.boldSystemFont(ofSize: 16)  // Bold font
+        label.text = {
+            switch section {
+            case 0: return "Basic Info"
+            case 1: return "Education and Profession"
+            case 2: return "Account Info"
+            default: return nil
+            }
+        }()
+        
+        headerView.addSubview(label)
+        
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+            label.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
+            label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
+            label.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
+        ])
+        
+        return headerView
     }
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 40  // Adjust height as needed
+    }
+
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.section {
@@ -171,7 +252,7 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
             return
         }
         
-        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/user/\(userId)/management/edit") else {
+        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupIds)/user/\(userId)/management/edit") else {
             print("❌ Invalid API URL")
             return
         }
@@ -220,65 +301,4 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
     func navigateToManagementViewController() {
         navigationController?.popViewController(animated: true)
     }
-    @IBAction func backButtonTapped(_ sender: UIButton) {
-        navigationController?.popViewController(animated: true)
-        print("back button pressed")
-    }
-    @IBAction func deleteButtonTapped(_ sender: UIButton) {
-        print("delete button pressed")
-
-        let alert = UIAlertController(title: "Delete Management",
-                                      message: "Are you sure you want to delete this management?",
-                                      preferredStyle: .alert)
-
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
-            self.callDeleteAPI()
-        }))
-
-        present(alert, animated: true, completion: nil)
-    }
-
-    func callDeleteAPI() {
-        guard let userId = userId, !userId.isEmpty else {
-            print("❌ User ID is nil or empty")
-            return
-        }
-
-        let apiUrl = APIManager.shared.baseURL + "groups/\(groupIds)/user/\(userId)/management/delete?type=management"
-
-        guard let url = URL(string: apiUrl) else {
-            print("❌ Invalid API URL")
-            return
-        }
-
-        print("🌍 API URL: \(url.absoluteString)")
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let session = URLSession.shared
-        session.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ API Error: \(error.localizedDescription)")
-                return
-            }
-
-            if let httpResponse = response as? HTTPURLResponse {
-                print("📡 API Response Status Code: \(httpResponse.statusCode)")
-                if httpResponse.statusCode == 200 {
-                    DispatchQueue.main.async {
-                        print("✅ Management deleted successfully.")
-                        self.navigateToManagementViewController()
-                    }
-                } else {
-                    print("❌ API call failed. Unable to delete management.")
-                }
-            }
-        }.resume()
-    }
-
-    
 }

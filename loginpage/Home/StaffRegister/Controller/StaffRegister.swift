@@ -1,10 +1,16 @@
 import UIKit
 
-class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
 
     @IBOutlet weak var staffRegister: UITableView!
     @IBOutlet weak var segmentController: UISegmentedControl!
     
+    @IBOutlet weak var searchField: UITextField!
+    
+    var filteredTeachingStaff: [Staff] = []
+    var filteredNonTeachingStaff: [Staff] = []
+    var isSearching = false
+
     var staffDetails: StaffDetailsData?
     
     var teachingStaffData: [Staff] = []
@@ -18,6 +24,10 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         print("Received groupId: \(groupIds)")
+        
+        searchField.delegate = self
+        searchField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+
 
         staffRegister.register(UINib(nibName: "TeachingStaff", bundle: nil), forCellReuseIdentifier: "TeachingStaffCell")
         staffRegister.register(UINib(nibName: "NonTeachingStaff", bundle: nil), forCellReuseIdentifier: "NonTeachingStaffCell")
@@ -31,6 +41,26 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         if segmentController.selectedSegmentIndex == 1 {
             fetchNonTeachingStaffData()
         }
+    }
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        guard let searchText = textField.text, !searchText.isEmpty else {
+            isSearching = false
+            staffRegister.reloadData()
+            return
+        }
+        
+        isSearching = true
+        if segmentController.selectedSegmentIndex == 0 {
+            filteredTeachingStaff = teachingStaffData.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        } else {
+            filteredNonTeachingStaff = nonTeachingStaffData.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        }
+        staffRegister.reloadData()
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 
 
@@ -48,26 +78,32 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return segmentController.selectedSegmentIndex == 0 ? teachingStaffData.count : max(1, nonTeachingStaffData.count)
+        if segmentController.selectedSegmentIndex == 0 {
+            return isSearching ? filteredTeachingStaff.count : teachingStaffData.count
+        } else {
+            let data = isSearching ? filteredNonTeachingStaff : nonTeachingStaffData
+            return max(1, data.count)
+        }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if segmentController.selectedSegmentIndex == 0 {
-            let staff = teachingStaffData[indexPath.row]
+            let staff = isSearching ? filteredTeachingStaff[indexPath.row] : teachingStaffData[indexPath.row]
             let cell = tableView.dequeueReusableCell(withIdentifier: "TeachingStaffCell", for: indexPath)
             if let teachingCell = cell as? TeachingStaff {
                 teachingCell.configureCell(with: staff)
             }
             return cell
         } else {
-            if nonTeachingStaffData.isEmpty {
+            let data = isSearching ? filteredNonTeachingStaff : nonTeachingStaffData
+            if data.isEmpty {
                 let emptyCell = UITableViewCell(style: .default, reuseIdentifier: "EmptyCell")
                 emptyCell.textLabel?.text = "No Data Available"
                 emptyCell.textLabel?.textColor = .gray
                 emptyCell.selectionStyle = .none
                 return emptyCell
             } else {
-                let staff = nonTeachingStaffData[indexPath.row]
+                let staff = data[indexPath.row]
                 let cell = tableView.dequeueReusableCell(withIdentifier: "NonTeachingStaffCell", for: indexPath)
                 if let nonTeachingCell = cell as? NonTeachingStaff {
                     nonTeachingCell.configureCell(with: staff)
@@ -78,13 +114,15 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedStaff = segmentController.selectedSegmentIndex == 0 ? teachingStaffData[indexPath.row] : nonTeachingStaffData[indexPath.row]
-
-        print("Selected Staff: \(selectedStaff.name)")
+        let selectedStaff: Staff
+        if segmentController.selectedSegmentIndex == 0 {
+            selectedStaff = isSearching ? filteredTeachingStaff[indexPath.row] : teachingStaffData[indexPath.row]
+        } else {
+            selectedStaff = isSearching ? filteredNonTeachingStaff[indexPath.row] : nonTeachingStaffData[indexPath.row]
+        }
 
         fetchStaffDetails(staffId: selectedStaff.userId) { [weak self] staffDetails in
             guard let self = self, let staffDetails = staffDetails else { return }
-
             DispatchQueue.main.async {
                 self.navigateToStaffDetailViewController(with: staffDetails)
             }
@@ -96,7 +134,7 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
             print("Error: StaffDetailViewController could not be instantiated")
             return
         }
-
+        print("staffDetals passing:\(staffDetails)")
         staffDetailVC.staffDetails = staffDetails
         staffDetailVC.token = token
         staffDetailVC.groupId = groupIds
@@ -105,7 +143,7 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
 
     private func fetchNonTeachingStaffData() {
-        let nonTeachingURL = APIManager.shared.baseURL + "groups/\(groupIds)/staff/get?type=nonteaching"
+        let nonTeachingURL = "https://api.gruppie.in/api/v1/groups/\(groupIds)/staff/get?type=nonteaching"
 
         print("Fetching non-teaching staff from: \(nonTeachingURL)")
 
@@ -118,7 +156,7 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
 
     private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
-        let urlString = APIManager.shared.baseURL + "groups/\(groupIds)/user/\(staffId)/profile/get?type=staff"
+        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupIds)/user/\(staffId)/profile/get?type=staff"
 
         // Print the API URL
         print("Fetching staff details from: \(urlString)")

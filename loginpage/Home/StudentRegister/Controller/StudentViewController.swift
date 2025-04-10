@@ -6,6 +6,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         navigationController?.popViewController(animated: true)
     }
     
+    
     @IBAction func AddButton(_ sender: Any) {
         let actionSheet = UIAlertController(title: "Add Class", message: "Choose an option", preferredStyle: .actionSheet)
         
@@ -27,7 +28,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func fetchClassDataForRegularClass() {
-        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/get/class/list") else {
+        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupIds)/get/class/list") else {
             print("❌ Invalid URL")
             return
         }

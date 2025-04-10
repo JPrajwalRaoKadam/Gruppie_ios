@@ -53,7 +53,8 @@ class NonTeachingStaff: UITableViewCell {
         imageLabel.text = firstLetter
         imageLabel.textAlignment = .center
         imageLabel.textColor = .white
-        icon.backgroundColor = UIColor.gray
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 20) // Increased font size
+        icon.backgroundColor = UIColor.link
         
         // Ensure label's text is centered within the circle
         imageLabel.frame = icon.bounds

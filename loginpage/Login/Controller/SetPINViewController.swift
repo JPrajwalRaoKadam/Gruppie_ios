@@ -13,6 +13,8 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var skipOutlet: UIButton!
     @IBOutlet weak var nextOutlet: UIButton!
     
+    var schools: [School] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTextFields()
@@ -61,8 +63,23 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func skip(_ sender: UIButton) {
-//        callAPIAndNavigate()
-        self.navigateToGroupViewController()
+        //        callAPIAndNavigate()
+//        HomeAPIService.shared.callAPIAndNavigate { [weak self] in
+//            guard let self = self else { return }
+//            
+//            print("API call finished, reloading collection view...")
+//            
+//            // Ensure there's at least one school to pass
+//            if let selectedSchool = self.schools.first  {
+//                print("Received schools data: \(self.schools)")
+//                if HomeAPIService.shared.CurrentRole == "student" && HomeAPIService.shared.grpCount == 1 {
+//                    self.navigateToHomeVC(schoolData: selectedSchool)
+//                } else {
+                    self.navigateToGroupViewController()
+//                }
+//            }
+//            
+//        }
     }
 
     private func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
@@ -142,4 +159,65 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
             self.navigationController?.pushViewController(groupVC, animated: true)
         }
     }
+    
+//    func navigateToHomeVC(schoolData: School) {
+//        // Instantiate storyboard and HomeVC
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        if let homeVC = storyboard.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC {
+//            print("Successfully instantiated HomeVC")
+//            
+//            // Pass the school data
+//            homeVC.school = schoolData
+//            
+//            // Create a DispatchGroup to manage multiple API calls
+//            let dispatchGroup = DispatchGroup()
+//            var imageUrls: [String]?
+//            
+//            // Fetch Banner Image
+//            dispatchGroup.enter()
+//            HomeAPIService.shared.fetchBannerImage(groupId: schoolData.id) { urls in
+//                imageUrls = urls
+//                dispatchGroup.leave()
+//            }
+//            
+//            // Fetch User Profile
+//            dispatchGroup.enter()
+//            HomeAPIService.shared.fetchUserProfile(groupId: schoolData.id) { profile in
+//                homeVC.name = profile
+//                dispatchGroup.leave()
+//             }
+//          
+//            dispatchGroup.enter()
+//            HomeAPIService.shared.fetchHomeData(groupId: schoolData.id) { groupData in
+//                if let groupData = groupData {
+//                    // Pass the fetched group data to homeVC
+//                    DispatchQueue.main.async {
+//                        homeVC.groupDatas = groupData  // Store the fetched data in groupDatas
+//                       // homeVC.tableView.reloadData()  // Reload the table view to display the new data
+//                    }
+//
+//                    // Debugging output
+//                    for group in groupData {
+//                        print("Fetched Activity: \(group.activity)")
+//                        for icon in group.featureIcons {
+//                            print("Feature Type: \(icon.type), Image: \(icon.image)")
+//                        }
+//                    }
+//                }
+//                dispatchGroup.leave()
+//            }
+//
+//            
+//            dispatchGroup.notify(queue: .main) {
+//                if let imageUrls = imageUrls {
+//                    // Pass the image URLs to HomeVC
+//                    homeVC.imageUrls = imageUrls
+//                }
+//                print("All API calls have finished!")
+//                
+//                self.navigationController?.pushViewController(homeVC, animated: true)
+//            }
+//            
+//        }
+//    }
 }

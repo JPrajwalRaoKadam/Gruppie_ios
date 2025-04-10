@@ -177,6 +177,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchSubjectDataAndNavigate()
         case "Gallery":
             navigateToGalleryViewController()
+        case "Attendance":
+                    navigateToAttendanceViewController()
         case "Fees New":
             let storyboard = UIStoryboard(name: "Payment", bundle: nil)
             guard let payVC = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as? PaymentClassListingVC else {
@@ -189,6 +191,15 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("No navigation configured for type: \(featureIcon.type)")
         }
     }
+    
+    func navigateToAttendanceViewController() {
+            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+            if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
+                attendanceVC.groupId = school?.id ?? ""
+                print("groupId of attendance: \(attendanceVC.groupId)")
+                navigationController?.pushViewController(attendanceVC, animated: true)
+            }
+        }
     
     func navigateToFeedBackViewController() {
         let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)

@@ -27,44 +27,52 @@ class RegularTableViewCell: UITableViewCell {
         iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
         iconImageView.clipsToBounds = true
 
-        // Set default background color for imageView
-        iconImageView.backgroundColor = .systemGray // Set it to grey for fallback
-        imageLabel.isHidden = true // Hide text by default
+        // Set a system link color background for fallback
+        iconImageView.backgroundColor = UIColor.link
+
+        // Configure fallback text label
+        imageLabel.isHidden = true
+        imageLabel.textAlignment = .center // Center text
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
     }
 
     // MARK: - Gesture Recognizers
     private func setupGestureRecognizers() {
         let callTapGesture = UITapGestureRecognizer(target: self, action: #selector(callTapped))
         callImageView.addGestureRecognizer(callTapGesture)
+        callImageView.isUserInteractionEnabled = true // Enable interaction
 
         let whatsAppTapGesture = UITapGestureRecognizer(target: self, action: #selector(whatsAppTapped))
         whatsAppImageView.addGestureRecognizer(whatsAppTapGesture)
+        whatsAppImageView.isUserInteractionEnabled = true // Enable interaction
     }
 
     // MARK: - Configuration Method
     func configure(name: String, designation: Int, icon: UIImage?, phoneNumber: String) {
         nameLabel.text = name
-        designationLabel.text = "\(designation)"
+        designationLabel.text = "Students: \(designation)"
 
-        // If icon is available, display it
         if let image = icon {
             iconImageView.image = image
-            imageLabel.isHidden = true // Hide fallback text if image is available
+            imageLabel.isHidden = true
         } else {
-            // Remove any previous image and set a fallback background color
+            // Remove any previous image and set system link color background
             iconImageView.image = nil
-            iconImageView.backgroundColor = .systemGray // Grey background for fallback
-            imageLabel.text = String(name.prefix(1)).uppercased() // Display first letter of name
-            imageLabel.textColor = .white // White text color for fallback
+            iconImageView.backgroundColor = UIColor.link
+
+            // Display first letter of name as fallback
+            imageLabel.text = String(name.prefix(1)).uppercased()
+            imageLabel.textColor = .white
             imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
-            imageLabel.isHidden = false // Show fallback text
+            imageLabel.textAlignment = .center
+            imageLabel.isHidden = false
         }
     }
 
     // MARK: - Actions
     @objc private func callTapped() {
         print("Call button tapped")
-        // You can open dialer with a valid phone number
+        // Open dialer logic can be added here
     }
 
     @objc private func whatsAppTapped() {

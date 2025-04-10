@@ -150,23 +150,19 @@ struct StudentRegisterRequest: Codable {
 
 // MARK: - Basic Info Model
 struct BasicInfoModel {
-    let id: String?
-    let name: String
-    let designation: String?
-    let country: String
-    let phone: String
-    let alternativePhone: String?
-    let email: String?
-    let gender: String?
-    let satsNumber: String
-    let admissionNumber: String
-    let rollNo: String
-    let dob: String
-    let doj: String
-    let aadharNumber: String
-    let bloodGroup: String
-    let panNumber: String?
-    let address: String
+    var name: String
+    var designation: String
+    var country: String
+    var phoneNo: String
+    var alternativeNo: String
+    var email: String
+    var gender: String
+    var dob: String
+    var doj: String
+    var aadharNo: String
+    var bloodGroup: String
+    var panNo: String
+    var address: String
 }
 struct StaffDataResponse: Codable {
     let totalNumberOfPages: Int?

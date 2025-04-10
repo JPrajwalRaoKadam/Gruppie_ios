@@ -65,38 +65,38 @@ struct StaffDetailsResponse: Codable {
     let data: StaffDetailsData
 }
 
-// Complete StaffDetailsData struct
+// Updated StaffDetailsData with `staffId`
 struct StaffDetailsData: Codable {
-    let name: String
-    let phone: String
     let staffId: String
-    let doj: String
-    let classType: String?
-    let gender: String
-    let qualification: String
-    let dob: String
-    let address: String
-    let religion: String
-    let caste: String
-    let bloodGroup: String
-    let email: String
     let aadharNumber: String
+    let address: String
+    let bankAccountNumber: String
+    let bankIfscCode: String
+    let bloodGroup: String
+    let caste: String
+    let designation: String
+    let disability: String
+    let dob: String
+    let doj: String
+    let email: String
+//    let emergencyContactNumber: String
+//    let fatherName: String
+    let gender: String
+    let image: String
+//    let motherName: String
+    let name: String
+    let panNumber: String
+    let phone: String
+//    let profession: String
+    let qualification: String
+    let religion: String
     let staffCategory: String
-
-    // New fields for account info
-    let uanNumber: String?
-    let panNumber: String?
-    let bankAccountNumber: String?
-    let bankIfscCode: String?
+    let type: String
+    let uanNumber: String
+    let classType: String?
 }
 
-// Struct for organizing StaffDetailData into two sections
-struct StaffDetailData {
-    let basicInfo: StaffBasicInfoModel
-    let accountInfo: StaffAccountInfoModel
-}
-
-// Basic Information Model
+// Updated Basic Information Model
 struct StaffBasicInfoModel {
     let name: String
     let country: String
@@ -114,9 +114,13 @@ struct StaffBasicInfoModel {
     let emailId: String
     let aadharNo: String
     let type: String
+//    let emergencyContact: String // Added
+//    let fatherName: String // Added
+//    let motherName: String // Added
+//    let profession: String // Added
 }
 
-// Account Information Model
+// Updated Account Information Model
 struct StaffAccountInfoModel {
     let uanNumber: String?
     let panNumber: String?

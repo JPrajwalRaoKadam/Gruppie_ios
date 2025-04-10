@@ -53,6 +53,9 @@ struct School {
 struct FeatureIcon: Codable {
     let type: String
     let image: String
+    let role: String
+//    let details: [UserDetails]?
+//    let count: Int?
 }
 
 struct GroupData: Codable {
@@ -81,3 +84,8 @@ struct Holiday {
     let endDate: String
 }
 
+struct UserDetails: Codable {
+    let userId: String?
+    let teamId: String?
+    let studentName: String?
+}

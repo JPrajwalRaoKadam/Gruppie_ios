@@ -51,13 +51,13 @@ class Member_TableViewCell: UITableViewCell {
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         let context = UIGraphicsGetCurrentContext()
         
-        context?.setFillColor(UIColor.gray.cgColor)
+        context?.setFillColor(UIColor.link.cgColor)
         context?.fillEllipse(in: CGRect(origin: .zero, size: size))
         
         let textAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: 30),
-            .foregroundColor: UIColor.white
-        ]
+               .font: UIFont.boldSystemFont(ofSize: 30),
+               .foregroundColor: UIColor.white // White text color
+           ]
         
         let textSize = letter.size(withAttributes: textAttributes)
         let textRect = CGRect(

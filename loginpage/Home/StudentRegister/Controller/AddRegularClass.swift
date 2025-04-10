@@ -66,7 +66,7 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
             "noOfSection": updatedSections
         ]
 
-        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/add/classes") else { return }
+        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupId)/add/classes") else { return }
         
         print("🌍 API URL: \(url)")
         print("🔑 Token: \(token)")

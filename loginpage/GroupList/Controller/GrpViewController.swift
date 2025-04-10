@@ -353,10 +353,12 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
                         // Map featureIcons to FeatureIcon model
                         let featureIcons = featureIconsArray.compactMap { iconDict -> FeatureIcon? in
                             guard let type = iconDict["type"] as? String,
-                                  let image = iconDict["image"] as? String else {
+                                  let image = iconDict["image"] as? String,
+                                  let role = iconDict["role"] as? String else {
                                 return nil
                             }
-                            return FeatureIcon(type: type, image: image)
+                            print(".....rolee.......\(role)")
+                            return FeatureIcon(type: type, image: image, role: role)
                         }
 
                         return GroupData(activity: activity, featureIcons: featureIcons)

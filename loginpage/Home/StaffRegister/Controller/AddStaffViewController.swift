@@ -3,16 +3,43 @@ import UIKit
 class AddStaffViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     var token: String?
-    var groupId: String? = "62b4265f97d24b15e8123155" // Ensure this is correctly set
+    var groupId: String? = "" 
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var segmentController: UISegmentedControl!
-//    @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var addButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.layer.cornerRadius = 20
+            tableView.clipsToBounds = true
 
-        // Debugging: Check if token and groupId are received
+            // Shadow Effect for 2D Look
+            tableView.layer.shadowColor = UIColor.black.cgColor
+            tableView.layer.shadowOffset = CGSize(width: 0, height: 4)
+            tableView.layer.shadowOpacity = 0.3
+            tableView.layer.shadowRadius = 10
+            tableView.layer.masksToBounds = false
+
+            // Optional: Light Gray Border
+            tableView.layer.borderWidth = 1
+            tableView.layer.borderColor = UIColor.lightGray.cgColor
+
+            // Background Color for Visibility
+            tableView.backgroundColor = UIColor.white
+
+            // Add some padding around the tableView
+            tableView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        
+        addButton.layer.cornerRadius = 10  // Reduced curvature
+        addButton.clipsToBounds = true
+
+        // Optional: Shadow Effect for Depth
+        addButton.layer.shadowColor = UIColor.black.cgColor
+        addButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+        addButton.layer.shadowOpacity = 0.3
+        addButton.layer.shadowRadius = 5
+        addButton.layer.masksToBounds = false
         print("Token: \(TokenManager.shared.getToken() ?? "No Token")")
         print("Group ID: \(groupId ?? "No Group ID")")
 
@@ -93,7 +120,6 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/multiple/staff/register?type=\(type)"
         print("Making API call to: \(apiUrl)")
 
-        // Call the function to post the data to API
         postStaffData(to: apiUrl, requestBody: requestBody)
     }
 

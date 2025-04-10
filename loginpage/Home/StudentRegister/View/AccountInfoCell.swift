@@ -58,8 +58,8 @@ class AccountInfoCell: UITableViewCell {
             motherOccupation: motherOccupation.text ?? "",
             fatherAadharNo: fatherAadharNo.text ?? "",
             motherAadharNo: motherAadharNo.text ?? "",
-            fatherIncome: fatherIncome.text ?? "",
-            motherIncome: motherIncome.text ?? ""
+            fatherIncome: fatherIncome.text?.isEmpty == false ? fatherIncome.text ?? "0" : "0",
+            motherIncome: motherIncome.text?.isEmpty == false ? motherIncome.text ?? "0" : "0"
         )
     }
 }
