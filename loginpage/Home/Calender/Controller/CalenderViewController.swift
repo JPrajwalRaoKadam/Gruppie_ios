@@ -98,7 +98,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
 
     @IBAction func addHolidayAction(_ sender: UISegmentedControl) {
         let storyboard = UIStoryboard(name: "calender", bundle: nil)  
-           if let addHolidaysVC = storyboard.instantiateViewController(withIdentifier: "AddHolidaysViewController") as? AddHolidaysViewController {
+           if let addHolidaysVC = storyboard.instantiateViewController(withIdentifier: "AddHolidaysViewController") as? AddHolidaysCallenderViewController {
                addHolidaysVC.groupId = self.groupId // Pass the groupId
                self.navigationController?.pushViewController(addHolidaysVC, animated: true)
            }

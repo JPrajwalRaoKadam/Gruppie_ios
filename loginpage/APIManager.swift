@@ -15,3 +15,12 @@ class APIManager {
     
     private init() {} // Prevents others from creating another instance
 }
+
+class APIProdManager {
+    static let shared = APIProdManager()
+    
+    // Define the base URL here
+    let baseURL = "https://prod.gruppie.in/api/v1/"
+    
+    private init() {} // Prevents others from creating another instance
+}

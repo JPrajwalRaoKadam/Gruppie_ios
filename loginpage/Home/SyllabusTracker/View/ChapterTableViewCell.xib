@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="70" id="NjR-sB-QU2" userLabel="ChapterTableViewCell" customClass="ChapterTableViewCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="335" height="70"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="NjR-sB-QU2" id="4u1-dZ-Cai">
+                <rect key="frame" x="0.0" y="0.0" width="335" height="70"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="Chapter" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Rn2-rw-2r2">
+                        <rect key="frame" x="20" y="10" width="239" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="239" id="QPc-9a-5ta"/>
+                            <constraint firstAttribute="height" constant="21" id="R17-zq-6pz"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Prd-jO-Nun">
+                        <rect key="frame" x="282" y="19" width="33" height="32"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="33" id="7xE-T3-Xh4"/>
+                            <constraint firstAttribute="height" constant="32" id="ujg-Ka-IvR"/>
+                        </constraints>
+                        <state key="normal" title="Button"/>
+                        <buttonConfiguration key="configuration" style="plain" image="remove"/>
+                        <connections>
+                            <action selector="deleteButton:" destination="NjR-sB-QU2" eventType="touchUpInside" id="Aeg-oK-dZS"/>
+                        </connections>
+                    </button>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="topic" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="G5Q-gn-IRX">
+                        <rect key="frame" x="20" y="36" width="239" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="239" id="DgP-53-TLw"/>
+                            <constraint firstAttribute="height" constant="21" id="YNq-oL-BcF"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="Prd-jO-Nun" secondAttribute="trailing" constant="20" id="4xV-LH-VGm"/>
+                    <constraint firstAttribute="bottom" secondItem="G5Q-gn-IRX" secondAttribute="bottom" constant="10" id="C1n-a4-mPX"/>
+                    <constraint firstItem="Rn2-rw-2r2" firstAttribute="leading" secondItem="4u1-dZ-Cai" secondAttribute="leading" constant="20" id="IwC-78-ncb"/>
+                    <constraint firstItem="Prd-jO-Nun" firstAttribute="top" secondItem="4u1-dZ-Cai" secondAttribute="top" constant="19" id="L5v-wh-K4S"/>
+                    <constraint firstItem="G5Q-gn-IRX" firstAttribute="leading" secondItem="4u1-dZ-Cai" secondAttribute="leading" constant="20" id="RsN-ez-zFZ"/>
+                    <constraint firstItem="Rn2-rw-2r2" firstAttribute="top" secondItem="4u1-dZ-Cai" secondAttribute="top" constant="10" id="hRC-SN-4R7"/>
+                    <constraint firstItem="G5Q-gn-IRX" firstAttribute="top" secondItem="Rn2-rw-2r2" secondAttribute="bottom" constant="5" id="jP2-Qk-RBD"/>
+                    <constraint firstAttribute="bottom" secondItem="Prd-jO-Nun" secondAttribute="bottom" constant="19" id="yt8-i6-aGC"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="SMe-bd-gzZ"/>
+            <accessibility key="accessibilityConfiguration" identifier="SyllubasTrackerTableViewCell"/>
+            <connections>
+                <outlet property="chapter" destination="Rn2-rw-2r2" id="o20-yw-W6x"/>
+                <outlet property="topic" destination="G5Q-gn-IRX" id="ER6-q2-lOe"/>
+            </connections>
+            <point key="canvasLocation" x="139.69465648854961" y="9.8591549295774659"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="remove" width="32" height="32"/>
+    </resources>
+</document>
