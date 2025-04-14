@@ -13,7 +13,7 @@
 //    private init() {}
 //    
 //    var schools: [School] = []
-//    var CurrentRole: String?
+//    var currentRole: String?
 //    var grpCount: Int?
 //    
 //    func fetchHomeData(groupId: String, completion: @escaping ([GroupData]?) -> Void) {
@@ -72,10 +72,13 @@
 //                                  let count = iconDict["count"] as? Int else {
 //                                return nil
 //                            }
-//                            print("pooooppppppoooooopopopopo...........\(role)")
-//                            self.CurrentRole = role
-//                            self.grpCount = count
-//                            return FeatureIcon(type: type, image: image, role: role, details: details, count: count)
+//                            self.currentRole = role
+//                            print(".....rolee.......\(self.currentRole)")
+//                            return FeatureIcon(type: type, image: image, role: role)
+////                            print("pooooppppppoooooopopopopo...........\(role)")
+////                            self.CurrentRole = role
+////                            self.grpCount = count
+//////                            return FeatureIcon(type: type, image: image, role: role, details: details, count: count)
 //                        }
 //                        
 //                        return GroupData(activity: activity, featureIcons: featureIcons)

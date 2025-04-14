@@ -11,6 +11,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var groupDatas: [GroupData] = []
     var studentTeams: [StudentTeam] = []
     var featureIcon: FeatureIcon?
+    var currentRole: String?
     
     @IBOutlet weak var tableView: UITableView! // TableView outlet
     @IBOutlet weak var menu: UIImageView!
@@ -29,6 +30,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         self.navigationController?.isNavigationBarHidden = true
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.estimatedRowHeight = 300
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UINib(nibName: "BannerAndProfileTableViewCell", bundle: nil), forCellReuseIdentifier: "BannerAndProfileTableViewCell")
         tableView.register(UINib(nibName: "AllIconsTableViewCell", bundle: nil), forCellReuseIdentifier: "AllIconsTableViewCell")
         
@@ -96,13 +99,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     
     // MARK: - UITableView Data Source
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return 1 // Display 1 row in section 0
-        } else if section == 1 {
-            print("Group data items: \(groupDatas.count)")
-            return groupDatas.count // Display rows based on groupDatas count
-        }
-        return 0 // Default case for other sections (if any)
+        return section == 0 ? 1 : groupDatas.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -173,7 +170,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchStudentDataAndNavigate()
         case "Subject Register":
             fetchSubjectDataAndNavigate()
-        case "Hostel":
+        case "Marks Card":
             fetchSubjectDataAndNavigate()
         case "Gallery":
             navigateToGalleryViewController()
@@ -342,7 +339,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                         switch self.featureIcon?.type {
                         case "Subject Register":
                             self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
-                        case "Hostel":
+                        case "Marks Card":
                             self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
                         case "Syllabus Tracker":
                             self.navigateToSyllabusTracker(subjects: subjects, teamIds: teamIds)

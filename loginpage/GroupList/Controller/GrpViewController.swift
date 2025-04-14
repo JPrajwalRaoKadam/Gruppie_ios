@@ -6,6 +6,8 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     var images: [ImageData] = []
     var schools: [School] = [] // Received from SetPINViewController
     var groupDatas: [GroupData] = []
+    var currentRole: String?
+    
     @IBOutlet var teamCollectionView: UICollectionView!
     
     override func viewDidLoad() {
@@ -51,6 +53,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
         
         return cell
     }
+    
     private func configureCell(_ cell: GroupCollectionViewCell, with school: School) {
         // Configure the image icon
         if let imageUrl = getImageURL(from: school.image), !imageUrl.absoluteString.isEmpty {
@@ -357,7 +360,8 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
                                   let role = iconDict["role"] as? String else {
                                 return nil
                             }
-                            print(".....rolee.......\(role)")
+                            self.currentRole = role
+                            print(".....rolee.......\(self.currentRole)")
                             return FeatureIcon(type: type, image: image, role: role)
                         }
 
