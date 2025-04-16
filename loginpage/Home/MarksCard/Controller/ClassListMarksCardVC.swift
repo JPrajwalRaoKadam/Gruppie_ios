@@ -10,6 +10,7 @@ class ClassListMarksCardVC: UIViewController, UITableViewDelegate, UITableViewDa
     var groupId: String = "" // Group ID
     var teamIds: [String] = []
     var teamId: String?
+    var currentRole: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()

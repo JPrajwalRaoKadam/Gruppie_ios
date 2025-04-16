@@ -13,6 +13,12 @@ class APIManager {
     // Define the base URL here
     let baseURL = "https://api.gruppie.in/api/v1/"
     
+    let parentEndPoint = "my/kids"
+    
+    let teacherEndPoint = "my/class/teams"
+    
+    let adminEndPoint = "class/get"
+    
     private init() {} // Prevents others from creating another instance
 }
 

@@ -98,63 +98,81 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     // MARK: - UITableView Data Source
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return section == 0 ? 1 : groupDatas.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.section == 0 {
-            // Configure the first cell
-            let cell = tableView.dequeueReusableCell(withIdentifier: "BannerAndProfileTableViewCell", for: indexPath) as! BannerAndProfileTableViewCell
-            cell.imageUrls = imageUrls // Pass the imageUrls to the cell
-            cell.configureBannerImage(at: 0) // Load the first image
-            print("Image URLs in first cell: \(imageUrls)")
-            cell.Profile.text = name // Set the profile name
-            
-            if let name = name {
-                cell.Profile.isHidden = false
-                cell.heightConstraintofAdminLabel.constant = 61
-            } else {
-                cell.Profile.isHidden = true
-                cell.heightConstraintofAdminLabel.constant = 0
-            }
-            
-            return cell
-        } else if indexPath.section == 1 {
-            let allIconCell = tableView.dequeueReusableCell(withIdentifier: "AllIconsTableViewCell", for: indexPath) as! AllIconsTableViewCell
-            allIconCell.delegate = self // Set the delegate
-            allIconCell.configureActivityNames(indexPath: indexPath, activity: groupDatas)
-            self.indexPath = indexPath
-            return allIconCell
-        }
-        return UITableViewCell()
-    }
-    
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+            return 1 + groupDatas.count
+        }
+
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return 1
+        }
+
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            if indexPath.section == 0 {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "BannerAndProfileTableViewCell", for: indexPath) as! BannerAndProfileTableViewCell
+                cell.imageUrls = imageUrls
+                cell.configureBannerImage(at: 0)
+                cell.Profile.text = name
+                cell.Profile.isHidden = (name == nil)
+                cell.heightConstraintofAdminLabel.constant = name != nil ? 61 : 0
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "AllIconsTableViewCell", for: indexPath) as! AllIconsTableViewCell
+                cell.delegate = self
+                cell.configure(with: groupDatas[indexPath.section - 1])
+                return cell
+            }
+        }
+
+        func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+            return section == 0 ? nil : groupDatas[section - 1].activity
+        }
+
+        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+            return UITableView.automaticDimension
+        }
+
+        func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+            return 400
+        }
+
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        guard section > 0 else { return nil }
+
+        let headerView = UIView()
+        headerView.backgroundColor = .white // Match table background
+
+        let titleLabel = UILabel()
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = groupDatas[section - 1].activity
+        titleLabel.textColor = .black
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+
+        headerView.addSubview(titleLabel)
+
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
+            titleLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 4),
+            titleLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -4)
+        ])
+
+        return headerView
+    }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return section == 0 ? 0 : 40
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension
-    }
-    
-    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 400
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.section == 1 {
-            let selectedActivity = groupDatas[indexPath.row]
-            print("Selected activity: \(selectedActivity.activity)")
-            
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            guard indexPath.section > 0 else { return }
+            let selectedActivity = groupDatas[indexPath.section - 1]
+
             if selectedActivity.activity == "Other Activities" {
                 navigateToCalendarViewController()
             } else {
                 print("No navigation configured for type: \(selectedActivity.activity)")
             }
         }
-    }
-    
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon
         switch featureIcon.type {
@@ -253,8 +271,21 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 print("❌ Token or Group ID is missing")
                 return
             }
+        // Choose endpoint based on currentRole
+           let endpoint: String
+           switch currentRole?.lowercased() {
+           case "parent":
+               endpoint = APIManager.shared.parentEndPoint
+           case "teacher":
+               endpoint = APIManager.shared.teacherEndPoint
+           case "admin":
+               endpoint = APIManager.shared.adminEndPoint
+           default:
+               print("❌ Invalid or missing role")
+               return
+           }
 
-            let subjectURL = APIManager.shared.baseURL + "/groups/\(groupId)/class/get"
+           let subjectURL = APIManager.shared.baseURL + "/groups/\(groupId)/" + endpoint
             print("📜 Request URL: \(subjectURL)")
 
             guard let url = URL(string: subjectURL) else {
@@ -548,6 +579,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         MarksCardVC.token = TokenManager.shared.getToken() ?? ""
         MarksCardVC.groupId = school?.id ?? ""
         MarksCardVC.teamIds = teamIds
+        MarksCardVC.currentRole = self.currentRole
         
         print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
         print("✅ Passing Group ID to SubjectViewController: \(MarksCardVC.groupId)") // Fix: Use subjectRegisterVC.groupId

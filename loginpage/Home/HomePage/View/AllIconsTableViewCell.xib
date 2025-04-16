@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -20,34 +21,14 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OTT-P9-YDg">
                         <rect key="frame" x="0.0" y="0.0" width="739" height="328"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VBJ-yL-kfh">
-                                <rect key="frame" x="0.0" y="0.0" width="739" height="53"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="MMP-uv-fqb">
-                                        <rect key="frame" x="15" y="18" width="37.5" height="17"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="17" id="xng-Ku-sj9"/>
-                                        </constraints>
-                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="14"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="53" id="Acl-Yx-6Wl"/>
-                                    <constraint firstItem="MMP-uv-fqb" firstAttribute="centerY" secondItem="VBJ-yL-kfh" secondAttribute="centerY" id="mLE-hq-HPc"/>
-                                    <constraint firstItem="MMP-uv-fqb" firstAttribute="leading" secondItem="VBJ-yL-kfh" secondAttribute="leading" constant="15" id="nDB-A3-hBl"/>
-                                </constraints>
-                            </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xdk-Sj-k4T">
-                                <rect key="frame" x="0.0" y="53" width="739" height="275"/>
+                                <rect key="frame" x="0.0" y="0.0" width="739" height="328"/>
                                 <subviews>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="8Li-cV-t8N">
-                                        <rect key="frame" x="0.0" y="0.0" width="739" height="275"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="739" height="328"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="275" id="02i-WZ-BNI"/>
+                                            <constraint firstAttribute="height" constant="328" id="Hba-F8-4D5"/>
                                         </constraints>
                                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="HjR-Tk-AV8">
                                             <size key="itemSize" width="128" height="128"/>
@@ -59,24 +40,21 @@
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstItem="8Li-cV-t8N" firstAttribute="top" secondItem="xdk-Sj-k4T" secondAttribute="top" id="2ks-hE-5JW"/>
-                                    <constraint firstItem="8Li-cV-t8N" firstAttribute="leading" secondItem="xdk-Sj-k4T" secondAttribute="leading" id="WEc-E3-xpl"/>
-                                    <constraint firstAttribute="height" constant="275" id="X2p-6X-QsL"/>
-                                    <constraint firstAttribute="trailing" secondItem="8Li-cV-t8N" secondAttribute="trailing" id="fRy-J1-DFB"/>
-                                    <constraint firstAttribute="bottom" secondItem="8Li-cV-t8N" secondAttribute="bottom" id="q8S-iG-GeP"/>
+                                    <constraint firstAttribute="bottom" secondItem="8Li-cV-t8N" secondAttribute="bottom" id="G8h-Oi-9Jx"/>
+                                    <constraint firstAttribute="height" constant="328" id="QuZ-SG-js9"/>
+                                    <constraint firstAttribute="trailing" secondItem="8Li-cV-t8N" secondAttribute="trailing" id="XRb-13-3Si"/>
+                                    <constraint firstItem="8Li-cV-t8N" firstAttribute="top" secondItem="xdk-Sj-k4T" secondAttribute="top" id="mxk-6Y-3p1"/>
+                                    <constraint firstItem="8Li-cV-t8N" firstAttribute="leading" secondItem="xdk-Sj-k4T" secondAttribute="leading" id="w8k-0t-N7U"/>
                                 </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="xdk-Sj-k4T" firstAttribute="leading" secondItem="OTT-P9-YDg" secondAttribute="leading" id="3tG-B5-nqv"/>
+                            <constraint firstItem="xdk-Sj-k4T" firstAttribute="leading" secondItem="OTT-P9-YDg" secondAttribute="leading" id="5Bg-bs-WdK"/>
                             <constraint firstAttribute="height" relation="lessThanOrEqual" constant="328" id="7KQ-01-kUt"/>
-                            <constraint firstItem="VBJ-yL-kfh" firstAttribute="leading" secondItem="OTT-P9-YDg" secondAttribute="leading" id="8oJ-3Q-Uzk"/>
-                            <constraint firstAttribute="trailing" secondItem="xdk-Sj-k4T" secondAttribute="trailing" id="Ueg-uO-ghx"/>
-                            <constraint firstItem="xdk-Sj-k4T" firstAttribute="top" secondItem="VBJ-yL-kfh" secondAttribute="bottom" id="cc1-WB-eQM"/>
-                            <constraint firstItem="VBJ-yL-kfh" firstAttribute="top" secondItem="OTT-P9-YDg" secondAttribute="top" id="f2v-IU-Upk"/>
-                            <constraint firstAttribute="trailing" secondItem="VBJ-yL-kfh" secondAttribute="trailing" id="j6I-tn-Exv"/>
-                            <constraint firstAttribute="bottom" secondItem="xdk-Sj-k4T" secondAttribute="bottom" id="rvm-mi-Al9"/>
+                            <constraint firstAttribute="bottom" secondItem="xdk-Sj-k4T" secondAttribute="bottom" id="Ayr-fB-cE1"/>
+                            <constraint firstAttribute="trailing" secondItem="xdk-Sj-k4T" secondAttribute="trailing" id="TIk-YX-5yg"/>
+                            <constraint firstItem="xdk-Sj-k4T" firstAttribute="top" secondItem="OTT-P9-YDg" secondAttribute="top" id="vUK-CZ-q3t"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -89,7 +67,6 @@
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="YC9-km-M5N"/>
             <connections>
-                <outlet property="ActivityLabel" destination="MMP-uv-fqb" id="m4j-a6-Ndf"/>
                 <outlet property="collectionViewHeightConstraint" destination="7KQ-01-kUt" id="IsQ-yJ-6O6"/>
                 <outlet property="iconCollectionView" destination="8Li-cV-t8N" id="W1O-LR-fA9"/>
             </connections>

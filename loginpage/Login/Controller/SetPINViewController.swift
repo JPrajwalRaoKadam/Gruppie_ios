@@ -501,6 +501,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
             groupVC.currentRole = currentRole
             groupVC.groupDatas = self.groupDatas
             groupVC.images = self.images
+            groupVC.currentRole = self.currentRole
             self.navigationController?.pushViewController(groupVC, animated: true)
         }
     }

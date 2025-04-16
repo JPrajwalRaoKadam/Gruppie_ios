@@ -137,7 +137,8 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
                 if let groupData = groupData {
                     // Pass the fetched group data to homeVC
                     DispatchQueue.main.async {
-                        homeVC.groupDatas = groupData  // Store the fetched data in groupDatas
+                        homeVC.groupDatas = groupData // Store the fetched data in groupDatas
+                        homeVC.currentRole = self.currentRole
                        // homeVC.tableView.reloadData()  // Reload the table view to display the new data
                     }
 
