@@ -20,6 +20,8 @@ class DetailTableViewCell: UITableViewCell {
         super.layoutSubviews()
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
+        imageLabel.layer.cornerRadius = iconImageView.frame.width / 2
+        imageLabel.clipsToBounds = true
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -69,16 +71,18 @@ class DetailTableViewCell: UITableViewCell {
             iconImageView.backgroundColor = UIColor.systemBlue
             
             // Display first letter of name as fallback
-            imageLabel.text = String(name.prefix(1)).uppercased()
+            let firstLetter = String(name.prefix(1)).uppercased()
+            print("Fallback Text: \(firstLetter)")  // Debugging the fallback text
+
+            imageLabel.text = firstLetter
             imageLabel.isHidden = false
             imageLabel.textColor = .white
             imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
             imageLabel.textAlignment = .center
             
-            // Ensure label stays in the center
+            // Ensure label stays in the center of iconImageView
             imageLabel.frame = iconImageView.bounds
-            imageLabel.layer.cornerRadius = iconImageView.frame.width / 2
-            imageLabel.clipsToBounds = true
+            imageLabel.center = iconImageView.center
         }
     }
 

@@ -1,36 +1,37 @@
 import Foundation
 
 struct SubjectResponse: Decodable {
-    let data: [SubjectData]
+    let data: [SubjectData]  // This is the array of subjects inside "data"
+    let teamId: String?
+    let groupId: String?// Added to store the teamId
 }
 
-// Model for individual class data
 struct SubjectData: Decodable {
-    let totalNoOfStaffAssigned: Int?
+    let totalNoOfStaffAssigned: Int
     let teamId: String
-    let teacherName: String
+    let teacherName: String?
     let subjectRequired: Bool
     let subjectId: Bool
-    let studentAssignedStatus: String?
-    let staffAssignedStatus: String?
-    let sortBy: String
-    let role: String
+    let studentAssignedStatus: String
+    let staffAssignedStatus: String
+    let sortBy: String?
+    let role: String?
     let phone: String
-    let numberOfTimeAttendance: Int
+    let numberOfTimeAttendance: StringOrInt // Updated to handle both types
     let name: String
     let members: Int
-    let jitsiToken: Bool
+    let jitsiToken: Bool?
     let image: String?
-    let gruppieClassName: String
+    let gruppieClassName: String?
     let enableAttendance: Bool
-    let ebookId: Bool
+    let ebookId: Bool?
     let downloadedCount: Int
-    let departmentUserId: String
-    let departmentHeadName: String
-    let department: String
-    let classTypeId: String
-    let classTeacherId: String
-    let classSort: String?
+    let departmentUserId: String?
+    let departmentHeadName: String?
+    let department: String?
+    let classTypeId: String?
+    let classTeacherId: String?
+    let classSort: CodableClassSort?
     let category: String?
     let admissionTeam: Bool
     let adminName: String
