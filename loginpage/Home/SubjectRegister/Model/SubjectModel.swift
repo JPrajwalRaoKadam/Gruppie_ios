@@ -7,31 +7,31 @@ struct SubjectResponse: Decodable {
 }
 
 struct SubjectData: Decodable {
-    let totalNoOfStaffAssigned: Int
+    let totalNoOfStaffAssigned: Int?
     let teamId: String
-    let teacherName: String?
+    let teacherName: String
     let subjectRequired: Bool
     let subjectId: Bool
-    let studentAssignedStatus: String
-    let staffAssignedStatus: String
-    let sortBy: String?
-    let role: String?
+    let studentAssignedStatus: String?
+    let staffAssignedStatus: String?
+    let sortBy: String
+    let role: String
     let phone: String
-    let numberOfTimeAttendance: StringOrInt // Updated to handle both types
+    let numberOfTimeAttendance: Int // Updated to handle both types
     let name: String
     let members: Int
-    let jitsiToken: Bool?
+    let jitsiToken: Bool
     let image: String?
-    let gruppieClassName: String?
+    let gruppieClassName: String
     let enableAttendance: Bool
-    let ebookId: Bool?
+    let ebookId: Bool
     let downloadedCount: Int
-    let departmentUserId: String?
-    let departmentHeadName: String?
-    let department: String?
-    let classTypeId: String?
-    let classTeacherId: String?
-    let classSort: CodableClassSort?
+    let departmentUserId: String
+    let departmentHeadName: String
+    let department: String
+    let classTypeId: String
+    let classTeacherId: String
+    let classSort: String?
     let category: String?
     let admissionTeam: Bool
     let adminName: String
