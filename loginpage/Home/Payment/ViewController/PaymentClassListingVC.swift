@@ -23,16 +23,17 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     let totalFee: Double? = nil
     var studentData: [StudentDataa]? = nil
     var teamData: [TeamData]? = nil
-    
+    var currentRole: String?
+    var subjects: [SubjectData] = []
+        
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         classTableView.delegate = self
         classTableView.dataSource = self
-        
-        // Register your custom cell
+
         classTableView.register(UINib(nibName: "ClassesTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassesTableViewCell")
-        
+
         let token = TokenManager.shared.getToken() ?? ""
         
         fetchFeeReport(withToken: token) { [weak self] result in
@@ -40,22 +41,25 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             switch result {
             case .success(let feeReport):
                 print("Fee Report fetched successfully!")
-                print("Total Fee: \(feeReport.totalFee)")
                 self.feeReport = feeReport
-                // Save the team data from the API response to your teamDataList
                 self.studentData = feeReport.studentData
                 self.teamData = feeReport.teamData
-                // Reload the table view on the main thread
+
                 DispatchQueue.main.async {
                     self.classTableView.reloadData()
                     self.updateUI()
+                    
+                    // ✅ If user is parent, push next VC and hide current
+                    if self.currentRole?.lowercased() == "parent" {
+                        self.navigateToStudentListingForParent()
+                    }
                 }
             case .failure(let error):
                 print("Error fetching fee report: \(error.localizedDescription)")
             }
         }
-
     }
+
     
     func updateUI() {
         demandAmount.text = "\(feeReport?.totalFee ?? 0)"
@@ -86,17 +90,54 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-        let teamData = teamData?[indexPath.row]
-           if let studentListingVC = storyboard.instantiateViewController(withIdentifier: "StudentListingVC") as? StudentListingVC {
-               studentListingVC.groupId = self.groupId
-               studentListingVC.teamId = teamData?.classId
-               DispatchQueue.main.async {
-                   studentListingVC.className.text = teamData?.className
-               }
-               navigationController?.pushViewController(studentListingVC, animated: true)
-           }
+        navigateToStudentListingForParent()
     }
+    
+    private func navigateToStudentListingForParent() {
+        guard let firstSubject = subjects.first else { return }
+
+        // Extract only the text inside parentheses
+        let trimmedName: String
+        if let range = firstSubject.name.range(of: #"(?<=\().*?(?=\))"#, options: .regularExpression) {
+            trimmedName = String(firstSubject.name[range])
+        } else {
+            trimmedName = firstSubject.name
+        }
+
+        print("✅ Extracted (trimmed) subject name: \(trimmedName)\n")
+
+        print("📋 All teamData class names:")
+        teamData?.forEach { team in
+            print("→ \(team.className)")
+        }
+
+        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
+        if let studentListingVC = storyboard.instantiateViewController(withIdentifier: "StudentListingVC") as? StudentListingVC {
+
+            studentListingVC.groupId = self.groupId
+            studentListingVC.subjects = self.subjects
+            studentListingVC.currentRole = self.currentRole
+
+            // Match className with extracted text
+            if let team = teamData?.first(where: { $0.className == trimmedName }) {
+                print("✅ Found matching team: \(team.className)")
+                studentListingVC.teamId = team.classId
+
+                // 👇 Force view load before setting label
+                _ = studentListingVC.view
+                studentListingVC.className.text = team.className
+            } else {
+                print("❌ No matching team found for: \(trimmedName)")
+            }
+
+            // Replace current VC
+            var viewControllers = self.navigationController?.viewControllers ?? []
+            viewControllers.removeLast()
+            viewControllers.append(studentListingVC)
+            self.navigationController?.setViewControllers(viewControllers, animated: false)
+        }
+    }
+
     
     // MARK: - API Call
     func fetchFeeReport(withToken token: String, completion: @escaping (Result<PaymentResponse, Error>) -> Void) {

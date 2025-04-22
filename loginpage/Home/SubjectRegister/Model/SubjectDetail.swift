@@ -139,12 +139,13 @@ struct Staffs: Codable {
     let motherName: String?
     let aadharNumber: String?
     let subjectName: String?  // ✅ Add subjectName
+    let StudentName: String?  // ✅ Add subjectName
 
     enum CodingKeys: String, CodingKey {
         case subjectPriority, permanent, accountant, staffId, designation, type, phone, name, userId
         case payRollApprover, admissionApprover, examiner
         case bankIfscCode, bankAddress, bankName, category, motherName, aadharNumber
-        case subjectName  // ✅ Add this line
+        case subjectName , StudentName// ✅ Add this line
     }
 
     init(from decoder: Decoder) throws {
@@ -169,7 +170,7 @@ struct Staffs: Codable {
         category = try container.decodeIfPresent(String.self, forKey: .category)
         motherName = try container.decodeIfPresent(String.self, forKey: .motherName)
         aadharNumber = try container.decodeIfPresent(String.self, forKey: .aadharNumber)
-
+        StudentName = try container.decodeIfPresent(String.self, forKey: .StudentName)  // ✅ Fix the issue
         subjectName = try container.decodeIfPresent(String.self, forKey: .subjectName)  // ✅ Fix the issue
     }
 
@@ -182,4 +183,19 @@ struct Staffs: Codable {
         }
         return nil
     }
+}
+struct StudentSubjectResponse: Codable {
+    let data: [StudentSubjectData]
+}
+
+struct StudentSubjectData: Codable {
+    let subjectName: String
+    let subjectId: String
+    let studentsList: [StudentSubjectStudent]
+}
+
+struct StudentSubjectStudent: Codable {
+    let userId: String?
+    let studentName: String
+    let rollNumber: String
 }

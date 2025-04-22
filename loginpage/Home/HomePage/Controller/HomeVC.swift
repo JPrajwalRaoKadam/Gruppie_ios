@@ -12,6 +12,9 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var studentTeams: [StudentTeam] = []
     var featureIcon: FeatureIcon?
     var currentRole: String?
+    var teachingStaff: [Staff] = []
+    var subjects: [SubjectData] = [] // Store fetched subjects
+    var teamIds: [String] = []
     
     @IBOutlet weak var tableView: UITableView! // TableView outlet
     @IBOutlet weak var menu: UIImageView!
@@ -196,18 +199,61 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                     navigateToAttendanceViewController()
         case "Syllabus Tracker":
                     fetchSubjectDataAndNavigate()
+        case "Time Table":
+                    fetchSubjectDataAndNavigate()
         case "Fees New":
-            let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-            guard let payVC = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as? PaymentClassListingVC else {
-                print("ViewController with identifier 'PaymentClassListingVC' not found.")
-                return
-            }
-            payVC.groupId = school?.id ?? ""
-            self.navigationController?.pushViewController(payVC, animated: true)
+//            switch currentRole?.lowercased() {
+//            case "parent":
+//                fetchSubjectDataAndNavigate()
+//            case "admin":
+                fetchSubjectDataAndNavigate()
+//                let storyboard = UIStoryboard(name: "Payment", bundle: nil)
+//                let vc = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as! PaymentClassListingVC
+//                vc.groupId = school?.id ?? ""
+//                vc.currentRole = self.currentRole
+//                vc.subjects = self.subjects
+//                self.navigationController?.pushViewController(vc, animated: true)
+//            case "teacher":
+//                print("❌ Invalid role")
+//                return
+//            default:
+//                print("❌ Invalid or missing role")
+//                return
+//            }
         default:
             print("No navigation configured for type: \(featureIcon.type)")
         }
     }
+    
+    func navigateToFeesNew(subjects: [SubjectData]) {
+        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as! PaymentClassListingVC
+        vc.groupId = school?.id ?? ""
+        vc.subjects = subjects
+        vc.currentRole = self.currentRole
+        vc.subjects = subjects
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func navigateToTimeTable(staffDetails: [Staff]) {
+            let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
+            guard let timetableViewController = storyboard.instantiateViewController(withIdentifier: "TimetableViewController") as? TimetableViewController else {
+                print("❌ Failed to instantiate SubjectViewController")
+                return
+            }
+            
+            timetableViewController.subjects = self.subjects
+            timetableViewController.token = TokenManager.shared.getToken() ?? ""
+            timetableViewController.groupId = school?.id ?? ""
+            timetableViewController.teamIds = self.teamIds
+            timetableViewController.staffDetails = staffDetails
+            
+            print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
+            print("✅ Passing Group ID to SubjectViewController: \(timetableViewController.groupId)") // Fix: Use subjectRegisterVC.groupId
+            
+            self.navigationController?.pushViewController(timetableViewController, animated: true)
+        }
     
     func navigateToSyllabusTracker(subjects: [SubjectData], teamIds: [String]) {
             let storyboard = UIStoryboard(name: "SyllabusTracker", bundle: nil)
@@ -374,6 +420,12 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
                         case "Syllabus Tracker":
                             self.navigateToSyllabusTracker(subjects: subjects, teamIds: teamIds)
+                        case "Time Table":
+                            self.subjects = subjects
+                            self.teamIds = teamIds
+                            self.fetchStaffDataAndNavigate()
+                        case "Fees New":
+                                self.navigateToFeesNew(subjects: subjects)
                         default:
                             print("No navigation configured for type: \(self.featureIcon?.type)")
                             
@@ -683,25 +735,31 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     private func fetchStaffDataAndNavigate() {
-        guard let token = TokenManager.shared.getToken(), !token.isEmpty, let groupId = school?.id, !groupId.isEmpty else {
-            print("Token or Group ID is missing")
-            return
+            guard let token = TokenManager.shared.getToken(), !token.isEmpty, let groupId = school?.id, !groupId.isEmpty else {
+                print("Token or Group ID is missing")
+                return
+            }
+            
+            let teachingURL = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
+            let dispatchGroup = DispatchGroup()
+            var teachingStaff: [Staff] = []
+            
+            dispatchGroup.enter()
+            fetchStaffData(from: teachingURL, token: token) { staff in
+                teachingStaff = staff
+                dispatchGroup.leave()
+            }
+            dispatchGroup.notify(queue: .main) {
+                switch self.featureIcon?.type {
+                case "Staff Register":
+                    self.navigateToStaffRegister(teachingStaff: teachingStaff)
+                case "Time Table":
+                    self.navigateToTimeTable(staffDetails: teachingStaff)
+                default:
+                    print("No navigation configured for type: \(self.featureIcon?.type)")
+                }
+            }
         }
-        
-        let teachingURL = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
-        let dispatchGroup = DispatchGroup()
-        var teachingStaff: [Staff] = []
-        
-        dispatchGroup.enter()
-        fetchStaffData(from: teachingURL, token: token) { staff in
-            teachingStaff = staff
-            dispatchGroup.leave()
-        }
-        
-        dispatchGroup.notify(queue: .main) {
-            self.navigateToStaffRegister(teachingStaff: teachingStaff)
-        }
-    }
     
     private func fetchStaffData(from urlString: String, token: String, completion: @escaping ([Staff]) -> Void) {
         guard let url = URL(string: urlString) else {

@@ -22,11 +22,16 @@ class DetailFeedTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
 
-    // Configure the cell with FeedClassItem data
     func configure(with classData: FeedClassItem) {
         name.text = classData.name
         imageLabel.isHidden = false // Ensure it's visible by default
         imageLabel.text = String(classData.name.prefix(1)).uppercased() // First letter of name
+
+        // ✅ Set background to system link color and text to white
+        imageLabel.backgroundColor = .link
+        imageLabel.textColor = .white
+        imageLabel.clipsToBounds = true
+        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2 // Optional: make it circular
 
         if let imageUrlString = classData.image, !imageUrlString.isEmpty, let imageUrl = URL(string: imageUrlString) {
             DispatchQueue.global().async {

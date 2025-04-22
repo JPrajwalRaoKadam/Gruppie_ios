@@ -12,7 +12,7 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var NoOfQuestins: UITextField!
     @IBOutlet weak var enterTitle: UITextField!
     
-    var questions: [String] = [] // Stores questions based on input
+    var questions: [String] = []
     var groupId: String?
     var token: String?
     var feedbackData: [FeedBackItem] = []
@@ -23,16 +23,13 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Hide OptionsView initially
         OptionsView.isHidden = true
         
-        // Apply rounded corners
         OptionsButton.layer.cornerRadius = 8
         SaveButton.layer.cornerRadius = 8
         OptionsButton.clipsToBounds = true
         SaveButton.clipsToBounds = true
 
-        // Register TableView Cell
         TableView.delegate = self
         TableView.dataSource = self
         TableView.register(UINib(nibName: "AddFeedBackTableViewCell", bundle: nil), forCellReuseIdentifier: "AddFeedBackCell")
@@ -48,12 +45,10 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        // Apply shadow effect
         addShadow(to: OptionsButton)
         addShadow(to: SaveButton)
     }
     
-    // MARK: - Setup Date Pickers
     func setupDatePickers() {
         startDatePicker.datePickerMode = .date
         startDatePicker.preferredDatePickerStyle = .wheels
@@ -75,7 +70,6 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         EndDate.inputAccessoryView = toolbar
     }
     
-    // MARK: - Setup TextFields (Restrict Input to Numbers)
     func setupTextFields() {
         NoOfQuestins.delegate = self
         NoOfOptons.delegate = self
@@ -83,14 +77,12 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         NoOfOptons.keyboardType = .numberPad
     }
     
-    // MARK: - UITextFieldDelegate (Restrict Input to Numbers Only)
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let allowedCharacters = CharacterSet.decimalDigits
         let characterSet = CharacterSet(charactersIn: string)
         return allowedCharacters.isSuperset(of: characterSet)
     }
     
-    // MARK: - Handle Date Selection
     @objc func dateChanged(_ sender: UIDatePicker) {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -102,7 +94,6 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
-    // MARK: - Done Button Action for Date Picker
     @objc func donePickingDate() {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -116,19 +107,17 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         self.view.endEditing(true)
     }
     
-    // MARK: - Show/Hide Options View
     @IBAction func optionsButtonTapped(_ sender: UIButton) {
         if areAllFieldsFilled() {
             updateQuestionsArray()
             OptionsView.isHidden.toggle()
-            OptionsButton.isHidden = true // Hide the button
+            OptionsButton.isHidden = true
             TableView.reloadData()
         } else {
             showAlert(message: "Please fill in all the fields before proceeding.")
         }
     }
     
-    // MARK: - Update Questions Array Based on User Input
     func updateQuestionsArray() {
         if let numberOfQuestions = Int(NoOfQuestins.text ?? "0"), numberOfQuestions > 0 {
             questions = (1...numberOfQuestions).map { "Question \($0)" }
@@ -138,20 +127,17 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         TableView.reloadData()
     }
 
-    // MARK: - Check if all text fields are filled
     func areAllFieldsFilled() -> Bool {
         let textFields = [enterTitle, NoOfQuestins, NoOfOptons, StartDate, EndDate]
         return textFields.allSatisfy { $0?.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false }
     }
 
-    // MARK: - Show Alert
     func showAlert(message: String) {
         let alert = UIAlertController(title: "Incomplete Data", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
 
-    // MARK: - Add Shadow Effect
     func addShadow(to button: UIButton) {
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOpacity = 0.2
@@ -161,11 +147,10 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
 extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Int(NoOfOptons.text ?? "0") ?? 0 // Use noOfOptions instead of noOfQuestions
+        return Int(NoOfOptons.text ?? "0") ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -180,8 +165,6 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
             print("Missing required fields")
             return
         }
-        
-        // Collect questions and marks from TableView cells
         var questionsArray: [FeedbackQuestion] = []
         for i in 0..<questions.count {
             if let cell = TableView.cellForRow(at: IndexPath(row: i, section: 0)) as? AddFeedBackTableViewCell,
@@ -199,28 +182,25 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
             return
         }
 
-        // Prepare request body
         let feedbackData = FeedBackRequest(
             groupId: groupId,
             isActive: true,
             lastDate: endDate,
             noOfOptions: noOfOptions,
             noOfQuestions: noOfQuestions,
-            options: options, // ✅ Now accessible
+            options: options,
             questionsArray: questionsArray,
             startDate: startDate,
             title: title,
             updatedAt: ""
         )
 
-        // Convert to JSON
         guard let jsonData = try? JSONEncoder().encode(feedbackData) else {
             print("Failed to encode JSON")
             return
         }
 
-        // API URL
-        let url = URL(string: "https://demo.gruppie.in/api/v1/groups/\(groupId)/feedback/title/create")!
+        let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupId)/feedback/title/create")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -230,15 +210,12 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
         }
         request.httpBody = jsonData
 
-        // Perform API request
-        // Perform API request
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print("Error: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
 
-            // Check for success (200 or 201)
             if let httpResponse = response as? HTTPURLResponse, (httpResponse.statusCode == 200 || httpResponse.statusCode == 201) {
                 print("Feedback successfully saved!")
                 

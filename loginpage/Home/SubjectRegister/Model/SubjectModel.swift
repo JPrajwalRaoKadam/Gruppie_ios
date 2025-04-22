@@ -1,11 +1,10 @@
 import Foundation
 
 struct SubjectResponse: Decodable {
-    let data: [SubjectData]  // This is the array of subjects inside "data"
-    let teamId: String?
-    let groupId: String?// Added to store the teamId
+    let data: [SubjectData]
 }
 
+// Model for individual class data
 struct SubjectData: Decodable {
     let totalNoOfStaffAssigned: Int?
     let teamId: String
@@ -17,7 +16,7 @@ struct SubjectData: Decodable {
     let sortBy: String
     let role: String
     let phone: String
-    let numberOfTimeAttendance: Int // Updated to handle both types
+    let numberOfTimeAttendance: Int
     let name: String
     let members: Int
     let jitsiToken: Bool
@@ -36,7 +35,6 @@ struct SubjectData: Decodable {
     let admissionTeam: Bool
     let adminName: String
 }
-
 enum StringOrInt: Decodable {
     case string(String)
     case int(Int)

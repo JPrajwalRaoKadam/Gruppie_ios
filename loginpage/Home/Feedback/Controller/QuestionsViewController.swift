@@ -145,7 +145,17 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         print("Group ID: \(groupId ?? "No Group ID")")
         print("Total Questions (tQuest): \(tQuest)")
         print("Current Question Index: \(currentQuestionIndex)")
-        
+
+        // ✅ Print all feedback items
+        print("All Feedback Items:")
+        for (index, item) in allFeedbackItems.enumerated() {
+            print("Item \(index + 1):")
+            print(" - Title: \(item.title ?? "No Title")")
+            print(" - Question: \(item.question ?? "No Question")")
+            print(" - No of Questions: \(item.noOfQuestions ?? "N/A")")
+            print(" - Options: \(item.options?.map { $0.option } ?? [])")
+        }
+
         if let feedback = feedbackItem {
             do {
                 let jsonData = try JSONEncoder().encode(feedback)
@@ -159,10 +169,10 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             print("Feedback Item: No Feedback Item")
         }
     }
-    
+
     // MARK: - TableView DataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return feedbackItem?.options.count ?? 0
+        return feedbackItem?.options?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

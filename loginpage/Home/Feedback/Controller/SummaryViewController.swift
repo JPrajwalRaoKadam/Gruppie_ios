@@ -72,7 +72,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        let apiURL = "https://demo.gruppie.in/api/v1/groups/\(groupId)/feedback/\(feedbackId)/questions/add"
+        let apiURL = "https://api.gruppie.in/api/v1/groups/\(groupId)/feedback/\(feedbackId)/questions/add"
         
         // Prepare the request body
         var questionsArray: [[String: Any]] = []

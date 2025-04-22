@@ -33,7 +33,7 @@ class FeedBackViewController: UIViewController {
             return
         }
         
-        let urlString = "https://demo.gruppie.in/api/v1/groups/\(groupId)/feedback/title/get"
+        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/feedback/title/get"
         guard let url = URL(string: urlString) else { return }
 
         var request = URLRequest(url: url)
@@ -65,7 +65,8 @@ class FeedBackViewController: UIViewController {
                 
                 // Store API response in feedbackData
                 self.feedbackData = feedbackResponse.data
-                
+                print("Stored feedbackData:", self.feedbackData)
+
                 DispatchQueue.main.async {
                     self.tableView.reloadData() // Refresh table view
                 }
@@ -88,12 +89,15 @@ extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FeedBackCell", for: indexPath) as! FeedBackTableViewCell
         let feedback = feedbackData[indexPath.row]
         
-        cell.name.text = feedback.title // Show title instead of question
-        
-        // Print options for debugging
-        print("Options for '\(feedback.title)':")
-        for option in feedback.options {
-            print(" - \(option.option) (Marks: \(option.marks))")
+        cell.name.text = feedback.title ?? "No Title"
+
+        if let options = feedback.options {
+            print("Options for '\(feedback.title ?? "No Title")':")
+            for option in options {
+                print(" - \(option.option) (Marks: \(option.marks))")
+            }
+        } else {
+            print("No options available for '\(feedback.title ?? "No Title")'.")
         }
         
         return cell

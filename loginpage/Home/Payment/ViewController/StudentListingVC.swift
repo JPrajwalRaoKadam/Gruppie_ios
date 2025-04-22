@@ -17,10 +17,15 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     @IBOutlet weak var balenceAmount: UILabel!
     @IBOutlet weak var overdueAmount: UILabel!
     @IBOutlet weak var fineAmount: UILabel!
+    @IBOutlet weak var overAllAmountView: UIView!
+    
     
     var groupId: String?
     var teamId: String?
     var studentFees: [StudentFinancialData] = []
+    var filteredStudentFees: [StudentFinancialData] = []
+    var currentRole: String?
+    var subjects: [SubjectData] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +38,25 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
                 print("Fetched Data: \(data)")
                 DispatchQueue.main.async {
                     self.studentFees = data
+
+                 if self.currentRole?.lowercased() == "parent" {
+                        self.filteredStudentFees = self.subjects.compactMap { subject in
+                            let trimmedName = subject.name.components(separatedBy: " (").first ?? subject.name
+                            print("🔍 Looking for exact match for: \(trimmedName)")
+                            
+                            // Look for exact name match in student data
+                            if let matchingStudent = data.first(where: { $0.name == trimmedName }) {
+                                print("✅ Found match: \(matchingStudent.name)")
+                                return matchingStudent
+                            } else {
+                                print("❌ No match found for: \(trimmedName)")
+                                return nil
+                            }
+                        }
+
+                        print("🎯 Filtered students: \(self.filteredStudentFees.map { $0.name })")
+                    }
+
                     self.studentTableView.reloadData()
                     self.updateUI()
                 }
@@ -42,7 +66,11 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         }
     }
 
+
     func updateUI() {
+        
+        let studentFees = currentRole?.lowercased() == "parent" ? filteredStudentFees : studentFees
+        
         let totalFee = studentFees.reduce(0) { $0 + $1.totalFee }
         let totalConcession = studentFees.reduce(0) { $0 + $1.totalConcessionAmount }
         let totalAmountPaid = studentFees.reduce(0) { $0 + $1.totalAmountPaid }
@@ -63,30 +91,62 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return studentFees.count
+        if currentRole?.lowercased() == "parent" {
+            return filteredStudentFees.count
+        } else {
+            return studentFees.count
+        }
     }
+
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ClassesTableViewCell", for: indexPath) as! ClassesTableViewCell
-        let student = studentFees[indexPath.row]
         
-        cell.configure(with: student)
-        cell.nameLabel.text = student.name
+        if currentRole?.lowercased() == "parent" {
+            let subject = filteredStudentFees[indexPath.row]
+            cell.nameLabel.text = subject.name // Customize display for subject
+            // Optionally configure more fields if needed
+        } else {
+            let student = studentFees[indexPath.row]
+            cell.configure(with: student)
+            cell.nameLabel.text = student.name
+        }
         
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-        let studentFees = studentFees[indexPath.row]
-           if let makeFeePaymentVC = storyboard.instantiateViewController(withIdentifier: "MakeFeePaymentVC") as? MakeFeePaymentVC {
-               makeFeePaymentVC.groupId = self.groupId
-               makeFeePaymentVC.teamId = self.teamId
-               makeFeePaymentVC.userId = studentFees.userId
-               makeFeePaymentVC.intallments = studentFees.installments
-               navigationController?.pushViewController(makeFeePaymentVC, animated: true)
-           }
+        
+        if let makeFeePaymentVC = storyboard.instantiateViewController(withIdentifier: "MakeFeePaymentVC") as? MakeFeePaymentVC {
+            makeFeePaymentVC.groupId = self.groupId
+            makeFeePaymentVC.teamId = self.teamId
+            
+            if currentRole?.lowercased() == "parent" {
+                let subject = subjects[indexPath.row]
+                let trimmedName = subject.name.components(separatedBy: " (").first ?? subject.name
+
+                print("Trimmed subject name: \(trimmedName)")
+                            print("Student names in studentFees:")
+                            for student in studentFees {
+                                print("-------- \(student.name)")
+                            }
+                
+                if let student = studentFees.first(where: { $0.name == trimmedName }) {
+                    makeFeePaymentVC.userId = student.userId
+                    makeFeePaymentVC.intallments = student.installments
+                }
+                
+            } else {
+                let student = studentFees[indexPath.row]
+                makeFeePaymentVC.userId = student.userId
+                makeFeePaymentVC.intallments = student.installments
+            }
+
+            navigationController?.pushViewController(makeFeePaymentVC, animated: true)
+        }
     }
+
     
     func fetchStudentFeeList(token: String, groupId: String, teamId: String, completion: @escaping (Result<[StudentFinancialData], Error>) -> Void) {
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/fee/list"

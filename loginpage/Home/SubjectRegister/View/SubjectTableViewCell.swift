@@ -59,7 +59,7 @@ class SubjectTableViewCell: UITableViewCell {
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         let context = UIGraphicsGetCurrentContext()
         
-        context?.setFillColor(UIColor.gray.cgColor)
+        context?.setFillColor(UIColor.link.cgColor)
         context?.fillEllipse(in: CGRect(origin: .zero, size: size))
         
         let textAttributes: [NSAttributedString.Key: Any] = [

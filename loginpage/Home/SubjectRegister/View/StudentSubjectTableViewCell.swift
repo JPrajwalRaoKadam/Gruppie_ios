@@ -2,7 +2,7 @@ import UIKit
 
 class StudentSubjectTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var SubjectName: UILabel!
+    @IBOutlet weak var StudentName: UILabel!
     @IBOutlet weak var checkBoxButton: UIButton!
 
     var checkBoxTappedAction: (() -> Void)?  // ✅ Closure for action
@@ -19,11 +19,9 @@ class StudentSubjectTableViewCell: UITableViewCell {
     }
 
     // ✅ Configure function to bind data
-    func configure(with subject: Staffs, isSelected: Bool) {
-        self.subject = subject
+    func configure(with student: Student, isSelected: Bool) {
         self.isSelectedState = isSelected
-        SubjectName.text = subject.subjectName ?? "N/A"
-        
+        StudentName.text = student.name
         updateButtonAppearance()
     }
 
@@ -39,9 +37,9 @@ class StudentSubjectTableViewCell: UITableViewCell {
         updateButtonAppearance()  // ✅ Update UI
 
         if isSelectedState {
-            print("✅ Selected subject: \(subject?.subjectName ?? "N/A")")
+            print("✅ Selected subject: \(StudentName.text ?? "")")
         } else {
-            print("❌ Deselected subject: \(subject?.subjectName ?? "N/A")")
+            print("❌ Deselected subject: \(StudentName.text ?? "")")
         }
 
         checkBoxTappedAction?()  // ✅ Notify controller

@@ -29,18 +29,16 @@ class AllSubjectViewController: UIViewController, AllSubjectDetailTableViewCellD
            TableView.reloadData()
        }
 
-    // Function to filter subjects based on priority
     func subjectsForSection(_ section: Int) -> [SubjectDetail] {
         switch section {
-        case 0: return subjectDetails.filter { $0.subjectPriority == 1 } // Language-1
-        case 1: return subjectDetails.filter { $0.subjectPriority == 2 } // Language-2
-        case 2: return subjectDetails.filter { $0.subjectPriority == 3 } // Language-3
-        case 3: return subjectDetails.filter { $0.subjectPriority == 0 } // Other subjects
-        default: return [] // Optional subjects (Handle separately if needed)
+        case 0: return subjectDetails.filter { $0.subjectPriority == 1 }
+        case 1: return subjectDetails.filter { $0.subjectPriority == 2 }
+        case 2: return subjectDetails.filter { $0.subjectPriority == 3 }
+        case 3: return subjectDetails.filter { $0.subjectPriority == 0 }
+        default: return []
         }
     }
     
-    // Function to add new subject based on section
     func addNewSubject(to section: Int) {
 //        let newSubject = SubjectDetail(subjectName: "New Subject", subjectPriority: section + 1)
 //        subjectDetails.append(newSubject)
@@ -164,7 +162,7 @@ extension AllSubjectViewController {
                     staffSubjectVC.teamId = self.teamId
                     staffSubjectVC.selectedSubject = subjectDetail
                     staffSubjectVC.subjectPriority = subjectDetail.subjectPriority
-                    staffSubjectVC.subjectId = subjectId // ✅ Pass extracted subjectId
+                    staffSubjectVC.subjectId = subjectId
 
                     print("✅ Navigating to StaffSubjectViewController with subjectId: \(subjectId) and \(self.staffList.count) staff members")
                     self.navigationController?.pushViewController(staffSubjectVC, animated: true)
@@ -177,7 +175,6 @@ extension AllSubjectViewController {
 
     }
 
-    // MARK: - API Call to Fetch Staff
     extension AllSubjectViewController {
         func fetchStaffData(from urlString: String, completion: @escaping ([Staff]) -> Void) {
             print("🌍 API URL: \(urlString)")
@@ -221,7 +218,6 @@ extension AllSubjectViewController {
             task.resume()
         }
     }
-// MARK: - AllSubjectTableViewCellDelegate
 extension AllSubjectViewController {
     
     func didTapAddButton(for subjectDetail: SubjectDetail, sectionIndex: Int) {
@@ -239,7 +235,6 @@ extension AllSubjectViewController {
                 let storyboard = UIStoryboard(name: "Subject", bundle: nil)
                 if let addSubjectVC = storyboard.instantiateViewController(withIdentifier: "AddSubject") as? AddSubject {
                     
-                    // Pass required data
                     addSubjectVC.token = self.token
                     addSubjectVC.groupId = self.groupId
                     addSubjectVC.teamId = self.teamId
@@ -257,7 +252,6 @@ extension AllSubjectViewController {
     }
 }
 
-// MARK: - API Call to Fetch Subjects
 extension AllSubjectViewController {
     func fetchSubjectData(from urlString: String, completion: @escaping ([SubjectDetail]) -> Void) {
         guard let url = URL(string: urlString) else {
@@ -291,14 +285,13 @@ extension AllSubjectViewController {
                 return
             }
             
-            // Print Raw JSON Response for Debugging
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("📜 Raw API Response: \(jsonString)")
             }
 
             do {
                 let decodedResponse = try JSONDecoder().decode(SubjectRegisterResponse.self, from: data)
-                let subjects = decodedResponse.data // Ensure this matches actual response
+                let subjects = decodedResponse.data
                 
                 print("✅ API Response: \(subjects)")
                 completion(subjects)
@@ -321,7 +314,6 @@ extension AllSubjectViewController {
             let storyboard = UIStoryboard(name: "Subject", bundle: nil)
             if let studentSubjectVC = storyboard.instantiateViewController(withIdentifier: "StudentSubjectViewController") as? StudentSubjectViewController {
                 
-                // ✅ Pass required data
                 studentSubjectVC.token = self.token
                 studentSubjectVC.groupId = self.groupId
                 studentSubjectVC.teamId = self.teamId
