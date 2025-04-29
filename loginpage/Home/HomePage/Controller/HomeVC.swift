@@ -15,6 +15,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var teachingStaff: [Staff] = []
     var subjects: [SubjectData] = [] // Store fetched subjects
     var teamIds: [String] = []
+    var userIds: [String] = []
     
     @IBOutlet weak var tableView: UITableView! // TableView outlet
     @IBOutlet weak var menu: UIImageView!
@@ -202,28 +203,28 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         case "Time Table":
                     fetchSubjectDataAndNavigate()
         case "Fees New":
-//            switch currentRole?.lowercased() {
-//            case "parent":
-//                fetchSubjectDataAndNavigate()
-//            case "admin":
                 fetchSubjectDataAndNavigate()
-//                let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-//                let vc = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as! PaymentClassListingVC
-//                vc.groupId = school?.id ?? ""
-//                vc.currentRole = self.currentRole
-//                vc.subjects = self.subjects
-//                self.navigationController?.pushViewController(vc, animated: true)
-//            case "teacher":
-//                print("❌ Invalid role")
-//                return
-//            default:
-//                print("❌ Invalid or missing role")
-//                return
-//            }
+        case "Home Work":
+                    fetchSubjectDataAndNavigate()
         default:
             print("No navigation configured for type: \(featureIcon.type)")
         }
     }
+    
+    func navigateToNotes_Videos(subjects: [SubjectData], teamIds: [String]) {
+                let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
+            if let Notes_VideosVC = storyboard.instantiateViewController(withIdentifier: "Notes_VideosVC") as? Notes_VideosVC {
+                Notes_VideosVC.groupId = school?.id ?? ""
+                Notes_VideosVC.subjects = subjects
+                Notes_VideosVC.currentRole = self.currentRole
+                Notes_VideosVC.token = TokenManager.shared.getToken() ?? ""
+                Notes_VideosVC.teamId = teamIds[indexPath?.row ?? 0]
+                    print("groupId of Notes_Videos: \(Notes_VideosVC.groupId)")
+                    navigationController?.pushViewController(Notes_VideosVC, animated: true)
+                } else {
+                    print("Failed to instantiate SyllabusTrackerVC")
+                }
+            }
     
     func navigateToFeesNew(subjects: [SubjectData]) {
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
@@ -237,23 +238,24 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     func navigateToTimeTable(staffDetails: [Staff]) {
-            let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
-            guard let timetableViewController = storyboard.instantiateViewController(withIdentifier: "TimetableViewController") as? TimetableViewController else {
-                print("❌ Failed to instantiate SubjectViewController")
-                return
-            }
-            
-            timetableViewController.subjects = self.subjects
-            timetableViewController.token = TokenManager.shared.getToken() ?? ""
-            timetableViewController.groupId = school?.id ?? ""
-            timetableViewController.teamIds = self.teamIds
-            timetableViewController.staffDetails = staffDetails
-            
-            print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
-            print("✅ Passing Group ID to SubjectViewController: \(timetableViewController.groupId)") // Fix: Use subjectRegisterVC.groupId
-            
-            self.navigationController?.pushViewController(timetableViewController, animated: true)
+        let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
+        guard let timetableViewController = storyboard.instantiateViewController(withIdentifier: "TimetableViewController") as? TimetableViewController else {
+            print("❌ Failed to instantiate SubjectViewController")
+            return
         }
+        
+        timetableViewController.subjects = self.subjects
+        timetableViewController.token = TokenManager.shared.getToken() ?? ""
+        timetableViewController.groupId = school?.id ?? ""
+        timetableViewController.teamIds = self.teamIds
+        timetableViewController.staffDetails = staffDetails
+        timetableViewController.currentRole = self.currentRole
+        
+        print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
+        print("✅ Passing Group ID to SubjectViewController: \(timetableViewController.groupId)") // Fix: Use subjectRegisterVC.groupId
+        
+        self.navigationController?.pushViewController(timetableViewController, animated: true)
+    }
     
     func navigateToSyllabusTracker(subjects: [SubjectData], teamIds: [String]) {
             let storyboard = UIStoryboard(name: "SyllabusTracker", bundle: nil)
@@ -386,6 +388,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             phone: item["phone"] as? String ?? "",
                             numberOfTimeAttendance: item["numberOfTimeAttendance"] as? Int ?? 0,
                             name: item["name"] as? String ?? "",
+                            userId: item["userId"] as? String ?? "",
                             members: item["members"] as? Int ?? 0,
                             jitsiToken: item["jitsiToken"] as? Bool ?? false,
                             image: item["image"] as? String,
@@ -406,6 +409,9 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 
                         subjects.append(subject)
                         teamIds.append(subject.teamId)
+                        self.teamIds.append(subject.teamId)
+                        self.userIds.append(subject.userId ?? "")
+
                     }
 
                     print("✅ Successfully parsed \(subjects.count) subjects.")
@@ -425,7 +431,9 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.teamIds = teamIds
                             self.fetchStaffDataAndNavigate()
                         case "Fees New":
-                                self.navigateToFeesNew(subjects: subjects)
+                            self.navigateToFeesNew(subjects: subjects)
+                        case "Home Work":
+                            self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
                         default:
                             print("No navigation configured for type: \(self.featureIcon?.type)")
                             
@@ -437,116 +445,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 }
             }.resume()
         }
-    
-//    private func fetchSubjectDataAndNavigate() {
-//            // Ensure token and group ID are available
-//            guard let token = TokenManager.shared.getToken(), !token.isEmpty,
-//                  let groupId = school?.id, !groupId.isEmpty else {
-//                print("❌ Token or Group ID is missing")
-//                return
-//            }
-//
-//            let subjectURL = APIManager.shared.baseURL + "/groups/\(groupId)/class/get"
-//            print("📜 Request URL: \(subjectURL)")
-//
-//            guard let url = URL(string: subjectURL) else {
-//                print("❌ Invalid URL: \(subjectURL)")
-//                return
-//            }
-//
-//            var request = URLRequest(url: url)
-//            request.httpMethod = "GET"
-//            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//
-//            URLSession.shared.dataTask(with: request) { data, response, error in
-//                if let error = error {
-//                    print("❌ Error fetching subject data: \(error.localizedDescription)")
-//                    return
-//                }
-//
-//                guard let data = data else {
-//                    print("❌ No data received.")
-//                    return
-//                }
-//
-//                // Print raw JSON response
-//                if let jsonString = String(data: data, encoding: .utf8) {
-//                    print("📜 Raw JSON Response: \(jsonString)")
-//                } else {
-//                    print("❌ Failed to convert data to String.")
-//                }
-//
-//                // Decode JSON response using JSONSerialization
-//                do {
-//                    guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-//                          let dataArray = json["data"] as? [[String: Any]] else {
-//                        print("❌ Invalid JSON structure.")
-//                        return
-//                    }
-//
-//                    var subjects: [SubjectData] = []
-//                    var teamIds: [String] = []
-//
-//                    for item in dataArray {
-//                        let subject = SubjectData(
-//                            totalNoOfStaffAssigned: item["totalNoOfStaffAssigned"] as? Int,
-//                            teamId: item["teamId"] as? String ?? "",
-//                            teacherName: item["teacherName"] as? String ?? "",
-//                            subjectRequired: item["subjectRequired"] as? Bool ?? false,
-//                            subjectId: item["subjectId"] as? Bool ?? false,
-//                            studentAssignedStatus: item["studentAssignedStatus"] as? String,
-//                            staffAssignedStatus: item["staffAssignedStatus"] as? String,
-//                            sortBy: item["sortBy"] as? String ?? "",
-//                            role: item["role"] as? String ?? "",
-//                            phone: item["phone"] as? String ?? "",
-//                            numberOfTimeAttendance: item["numberOfTimeAttendance"] as? Int ?? 0,
-//                            name: item["name"] as? String ?? "",
-//                            members: item["members"] as? Int ?? 0,
-//                            jitsiToken: item["jitsiToken"] as? Bool ?? false,
-//                            image: item["image"] as? String,
-//                            gruppieClassName: item["gruppieClassName"] as? String ?? "",
-//                            enableAttendance: item["enableAttendance"] as? Bool ?? false,
-//                            ebookId: item["ebookId"] as? Bool ?? false,
-//                            downloadedCount: item["downloadedCount"] as? Int ?? 0,
-//                            departmentUserId: item["departmentUserId"] as? String ?? "",
-//                            departmentHeadName: item["departmentHeadName"] as? String ?? "",
-//                            department: item["department"] as? String ?? "",
-//                            classTypeId: item["classTypeId"] as? String ?? "",
-//                            classTeacherId: item["classTeacherId"] as? String ?? "",
-//                            classSort: item["classSort"] as? String,
-//                            category: item["category"] as? String,
-//                            admissionTeam: item["admissionTeam"] as? Bool ?? false,
-//                            adminName: item["adminName"] as? String ?? ""
-//                        )
-//
-//                        subjects.append(subject)
-//                        teamIds.append(subject.teamId)
-//                    }
-//
-//                    print("✅ Successfully parsed \(subjects.count) subjects.")
-//                    
-//                    // Navigate to Subject Register after fetching
-//                    DispatchQueue.main.async {
-//                        print("🚀 Navigating to SubjectViewController with Team IDs: \(teamIds)")
-//                        switch self.featureIcon?.type {
-//                        case "Subject Register":
-//                            self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
-//                        case "Hostel":
-//                            self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
-//                        case "Syllabus Tracker": break
-//                            self.navigateToSyllabusTracker(subjects: subjects, teamIds: teamIds)
-//                        default:
-//                            print("No navigation configured for type: \(self.featureIcon?.type)")
-//                            
-//                        }
-//                    }
-//
-//                } catch {
-//                    print("❌ Error decoding subject data: \(error.localizedDescription)")
-//                }
-//            }.resume()
-//        }
-    
+
     private func fetchSubjectData(from urlString: String, token: String, completion: @escaping ([SubjectData], [String]) -> Void) {
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL: \(urlString)")

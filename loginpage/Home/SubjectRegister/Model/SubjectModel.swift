@@ -18,6 +18,7 @@ struct SubjectData: Decodable {
     let phone: String
     let numberOfTimeAttendance: Int
     let name: String
+    let userId: String?
     let members: Int
     let jitsiToken: Bool
     let image: String?

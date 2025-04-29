@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="68" id="VzZ-IW-7Ca" userLabel="SubjectNotes_videosTableViewCell" customClass="SubjectNotes_videosTableViewCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="281" height="70"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="VzZ-IW-7Ca" id="cTG-YV-EX7">
+                <rect key="frame" x="0.0" y="0.0" width="281" height="70"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="Subject" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PSa-N0-bKd">
+                        <rect key="frame" x="16" y="9" width="214" height="17"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="214" id="ZOv-Wa-zrX"/>
+                            <constraint firstAttribute="height" constant="17" id="euA-u0-3ZG"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="StaffName" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nak-YZ-2gS">
+                        <rect key="frame" x="16" y="34" width="214" height="17"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="17" id="Xxs-UR-7H0"/>
+                            <constraint firstAttribute="width" constant="214" id="uOY-r6-zld"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="bottom" secondItem="nak-YZ-2gS" secondAttribute="bottom" constant="17" id="ADy-5e-ESO"/>
+                    <constraint firstItem="nak-YZ-2gS" firstAttribute="top" secondItem="PSa-N0-bKd" secondAttribute="bottom" constant="8" id="AaB-Ep-CgP"/>
+                    <constraint firstAttribute="trailing" secondItem="PSa-N0-bKd" secondAttribute="trailing" constant="51" id="Dsf-5i-Uv8"/>
+                    <constraint firstItem="PSa-N0-bKd" firstAttribute="top" secondItem="cTG-YV-EX7" secondAttribute="top" constant="9" id="Hc7-Zb-9uH"/>
+                    <constraint firstItem="PSa-N0-bKd" firstAttribute="leading" secondItem="cTG-YV-EX7" secondAttribute="leading" constant="16" id="TRj-5f-qPw"/>
+                    <constraint firstItem="nak-YZ-2gS" firstAttribute="leading" secondItem="cTG-YV-EX7" secondAttribute="leading" constant="16" id="U7g-Ce-cc1"/>
+                    <constraint firstAttribute="trailing" secondItem="nak-YZ-2gS" secondAttribute="trailing" constant="51" id="e4i-gc-nD6"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="peg-0I-DCZ"/>
+            <accessibility key="accessibilityConfiguration" identifier="SyllubasTrackerTableViewCell"/>
+            <connections>
+                <outlet property="StaffName" destination="nak-YZ-2gS" id="jN3-KV-eiO"/>
+                <outlet property="SubjectLabel" destination="PSa-N0-bKd" id="dSA-gR-CPK"/>
+            </connections>
+            <point key="canvasLocation" x="101.5267175572519" y="-2.8169014084507045"/>
+        </tableViewCell>
+    </objects>
+</document>

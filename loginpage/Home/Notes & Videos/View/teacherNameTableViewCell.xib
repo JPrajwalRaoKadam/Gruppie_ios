@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="68" id="QkW-t7-8k2" userLabel="teacherNameTableViewCell" customClass="teacherNameTableViewCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="334" height="68"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="QkW-t7-8k2" id="1f1-L4-S9f">
+                <rect key="frame" x="0.0" y="0.0" width="334" height="68"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Optional" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="lQv-jZ-gVc">
+                        <rect key="frame" x="50" y="14" width="272" height="40"/>
+                        <constraints>
+                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="40" id="4lD-x1-k5W"/>
+                            <constraint firstAttribute="width" constant="272" id="5BV-9e-YiJ"/>
+                            <constraint firstAttribute="height" constant="40" id="8D8-P1-d3L"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hW1-8e-kgI">
+                        <rect key="frame" x="2" y="23" width="40" height="22"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="40" id="KRp-lJ-t54"/>
+                            <constraint firstAttribute="height" constant="22" id="Sqr-fh-Wbu"/>
+                        </constraints>
+                        <color key="tintColor" systemColor="labelColor"/>
+                        <state key="normal">
+                            <imageReference key="image" image="checkmark.square.fill" catalog="system" symbolScale="large"/>
+                        </state>
+                        <connections>
+                            <action selector="checkBoxTapped:" destination="QkW-t7-8k2" eventType="touchUpInside" id="qgQ-3E-cPl"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="lQv-jZ-gVc" firstAttribute="leading" secondItem="hW1-8e-kgI" secondAttribute="trailing" constant="8" id="3hr-3Z-dNT"/>
+                    <constraint firstAttribute="bottom" secondItem="hW1-8e-kgI" secondAttribute="bottom" constant="23" id="Cb4-aD-nkH"/>
+                    <constraint firstItem="hW1-8e-kgI" firstAttribute="top" secondItem="1f1-L4-S9f" secondAttribute="top" constant="23" id="XhA-pN-TkE"/>
+                    <constraint firstItem="hW1-8e-kgI" firstAttribute="leading" secondItem="1f1-L4-S9f" secondAttribute="leading" constant="2" id="bgr-9H-6tU"/>
+                    <constraint firstAttribute="bottom" secondItem="lQv-jZ-gVc" secondAttribute="bottom" constant="14" id="vjX-wa-wD3"/>
+                    <constraint firstItem="lQv-jZ-gVc" firstAttribute="top" secondItem="1f1-L4-S9f" secondAttribute="top" constant="14" id="vxu-sz-ghq"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="JhH-or-BYT"/>
+            <connections>
+                <outlet property="checkBoxStaff" destination="hW1-8e-kgI" id="K7S-pm-k2D"/>
+                <outlet property="staffNames" destination="lQv-jZ-gVc" id="LMa-B7-Arf"/>
+            </connections>
+            <point key="canvasLocation" x="140.45801526717557" y="-2.8169014084507045"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="checkmark.square.fill" catalog="system" width="128" height="114"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

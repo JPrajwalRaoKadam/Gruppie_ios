@@ -1,47 +1,48 @@
 import UIKit
 
 class TimetableViewController: UIViewController {
-    
+
     @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
-    var selectedClassName: String = ""
 
-    var subjects: [SubjectData] = [] // Store fetched subjects
-    var token: String = "" // Authentication token
-    var groupId: String = "" // Group ID
+    var selectedClassName: String = ""
+    var subjects: [SubjectData] = []
+    var token: String = ""
+    var groupId: String = ""
     var teamIds: [String] = []
     var classList: [ClassData] = []
-    
-    // ✅ Store Staff API Data
+    var currentRole: String?
     var staffDetails: [Staff] = []
-    
     let daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-    
+
     var isStaffSelected: Bool = false
-    var isDaySelected: Bool = false
-    var isSubjectAgain: Bool = false // For Fourth Index
+    var isFreeTeachersSelected: Bool = false
+    var isSubjectAgain: Bool = false
+    var isDayIselected: Bool = false
+
+    // Reference to embedded DaysViewController
+    var daysVC: DaysViewController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         tableView.delegate = self
         tableView.dataSource = self
-        
+
         tableView.register(UINib(nibName: "TimetableTableViewCell", bundle: nil), forCellReuseIdentifier: "TimetableTableViewCell")
-        
         tableView.estimatedRowHeight = 80
         tableView.rowHeight = UITableView.automaticDimension
-        
+
         segmentController.isUserInteractionEnabled = true
-        
+        handleSegments()
         segmentController.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
-        
+
         print("✅ Token:", token)
         print("✅ GroupId:", groupId)
-        print("✅ Subjects Array:", subjects)
-        print("✅ TeamIds Array:", teamIds)
-        print("✅ Staff Details Array:", staffDetails)
-        
+        print("✅ Subjects:", subjects)
+        print("✅ TeamIds:", teamIds)
+        print("✅ Staff Details:", staffDetails)
+
         tableView.reloadData()
     }
 
@@ -50,37 +51,77 @@ class TimetableViewController: UIViewController {
         tableView.reloadData()
     }
 
-    // ✅ Fixed Segment Control Handler
+    func handleSegments() {
+        if let role = currentRole?.lowercased() {
+            switch role {
+            case "admin":
+                hideSegment(at: 4)
+            case "parent":
+                hideSegment(at: 1)
+                hideSegment(at: 2)
+            case "teacher":
+                hideSegment(at: 1)
+            default:
+                break
+            }
+        }
+    }
+
+    func hideSegment(at index: Int) {
+        segmentController.setEnabled(false, forSegmentAt: index)
+        segmentController.setWidth(0.1, forSegmentAt: index)
+    }
+
     @objc func segmentChanged(_ sender: UISegmentedControl) {
         print("🔥 Segment Index:", sender.selectedSegmentIndex)
 
+        isStaffSelected = false
+        isFreeTeachersSelected = false
+        isSubjectAgain = false
+        isDayIselected = false
+
         switch sender.selectedSegmentIndex {
-        case 0:
-            isStaffSelected = false
-            isDaySelected = false
-            isSubjectAgain = false
-        case 1:
-            isStaffSelected = true
-            isDaySelected = false
-            isSubjectAgain = false
-        case 2:
-            isDaySelected = true
-            isStaffSelected = false
-            isSubjectAgain = false
-        case 3: // ✅ For Fourth Index (Same as First Index)
-            isSubjectAgain = true
-            isDaySelected = false
-            isStaffSelected = false
-        default:
-            break
+        case 0: break // Default
+        case 1: isStaffSelected = true
+        case 2: isFreeTeachersSelected = true
+        case 3: isSubjectAgain = true
+        case 4: isDayIselected = true
+        default: break
         }
-        
+
         print("✅ isStaffSelected:", isStaffSelected)
-        print("✅ isDaySelected:", isDaySelected)
+        print("✅ isFreeTeachersSelected:", isFreeTeachersSelected)
         print("✅ isSubjectAgain:", isSubjectAgain)
-        
-        // ✅ Force Reload UI
-        tableView.reloadData()
+        print("✅ isDayIselected:", isDayIselected)
+
+        if isDayIselected {
+            showDaysViewController()
+        } else {
+            hideDaysViewController()
+            tableView.reloadData()
+        }
+    }
+
+    func showDaysViewController() {
+        if daysVC == nil {
+            let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
+            if let vc = storyboard.instantiateViewController(withIdentifier: "DaysViewController") as? DaysViewController {
+                vc.currentRole = self.currentRole
+                vc.groupId = self.groupId
+                daysVC = vc
+                addChild(vc)
+                vc.view.frame = tableView.bounds
+                tableView.addSubview(vc.view)
+                vc.didMove(toParent: self)
+            }
+        }
+        daysVC?.view.isHidden = false
+    }
+
+    func hideDaysViewController() {
+        daysVC?.view.removeFromSuperview()
+        daysVC?.removeFromParent()
+        daysVC = nil
     }
 
     @IBAction func BackButton(_ sender: UIButton) {
@@ -88,27 +129,28 @@ class TimetableViewController: UIViewController {
     }
 }
 
-// ✅ TableView Delegate and DataSource Methods
 extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if isDaySelected {
-            return daysOfWeek.count // ✅ 7 Rows for Days
+        if isDayIselected {
+            return 0 // Handled by embedded DaysViewController
+        } else if isFreeTeachersSelected {
+            return daysOfWeek.count
         } else if isStaffSelected {
-            return staffDetails.count // ✅ Staff Data
+            return staffDetails.count
         } else if isSubjectAgain {
-            return subjects.count // ✅ Same as First Segment (Subjects)
+            return subjects.count
         } else {
-            return subjects.count // ✅ Subject Data
+            return subjects.count
         }
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TimetableTableViewCell", for: indexPath) as! TimetableTableViewCell
-        
-        if isDaySelected {
+
+        if isFreeTeachersSelected {
             let day = daysOfWeek[indexPath.row]
-            cell.configureCell(with: day, icon: nil) // ✅ Display Days
+            cell.configureCell(with: day, icon: nil)
         } else if isStaffSelected {
             let staff = staffDetails[indexPath.row]
             cell.configureCell(with: staff.name ?? "No Name", icon: nil)
@@ -119,51 +161,47 @@ extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
             let subject = subjects[indexPath.row]
             cell.configureCell(with: subject.gruppieClassName ?? "No Name", icon: nil)
         }
-        
+
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if segmentController.selectedSegmentIndex == 0 {
-            // ✅ First Segment: Navigate to AcademicViewController
+        switch segmentController.selectedSegmentIndex {
+        case 0:
             let selectedTeamId = teamIds[indexPath.row]
             let selectedClassName = subjects[indexPath.row].gruppieClassName ?? "No Class Name"
-            
             let vc = storyboard?.instantiateViewController(withIdentifier: "AcademicViewController") as! AcademicViewController
             vc.groupId = groupId
             vc.token = token
             vc.subjects = subjects
             vc.teamIds = [selectedTeamId]
             vc.classTitle = selectedClassName
-            
             navigationController?.pushViewController(vc, animated: true)
-            
-        } else if segmentController.selectedSegmentIndex == 1 {
-            // ✅ Second Segment: Navigate to TeacherTTViewController
-            let selectedTeamId = teamIds[indexPath.row]
-            let selectedStaff = staffDetails[indexPath.row] // ✅ Fetch staff details
-            let userId = selectedStaff.userId ?? "" // ✅ Extract userId safely
 
+        case 1:
+            let selectedTeamId = teamIds[indexPath.row]
+            let selectedStaff = staffDetails[indexPath.row]
+            let userId = selectedStaff.userId ?? ""
             let vc = storyboard?.instantiateViewController(withIdentifier: "TeacherTTViewController") as! TeacherTTViewController
             vc.groupId = groupId
             vc.token = token
             vc.subjects = subjects
             vc.teamIds = [selectedTeamId]
-            vc.userId = userId // ✅ Pass userId
-
+            vc.userId = userId
             navigationController?.pushViewController(vc, animated: true)
-        }
-        else if segmentController.selectedSegmentIndex == 2 { 
+
+        case 2:
             let selectedDay = indexPath.row + 1
-            
             let vc = storyboard?.instantiateViewController(withIdentifier: "PeriodViewController") as! PeriodViewController
             vc.groupId = groupId
             vc.token = token
             vc.teamIds = teamIds
             vc.subjects = subjects
-            vc.day = selectedDay // ✅ Pass Day while navigating
-            
+            vc.day = selectedDay
             navigationController?.pushViewController(vc, animated: true)
+
+        default:
+            break
         }
     }
 }
