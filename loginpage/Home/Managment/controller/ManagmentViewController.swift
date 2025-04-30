@@ -9,6 +9,8 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
     @IBOutlet weak var printButton: UIButton!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchView: UIView!
+    @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
+    
     var filteredMembers: [Member] = []
     var token: String?
     var groupIds = ""
@@ -17,6 +19,8 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
     var searchButtonTapped = false
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        heightConstraintOfSearchView.constant = 0
         print("groupId:\(groupIds)")
         if let token = token {
             print("Received token in management: \(token)")
@@ -35,6 +39,9 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
     }
+    
+    
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
            return filteredMembers.count
            return members.count
@@ -201,24 +208,26 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
             self.navigationController?.popViewController(animated: true)
     }
     @objc func searchButtonTappedAction() {
-           searchView.isHidden = !searchView.isHidden
-           if !searchView.isHidden {
-               searchTextField = UITextField(frame: CGRect(x: 10, y: 10, width: searchView.frame.width - 20, height: 40))
-               searchTextField?.placeholder = "Search..."
-               searchTextField?.delegate = self
-               searchTextField?.borderStyle = .roundedRect
-               searchTextField?.backgroundColor = .white
-               searchTextField?.layer.cornerRadius = 5
-               searchTextField?.layer.borderWidth = 1
-               searchTextField?.layer.borderColor = UIColor.gray.cgColor
-               if let searchTextField = searchTextField {
-                   searchView.addSubview(searchTextField)
-               }
-           } else {
-               searchTextField?.removeFromSuperview()
-               searchTextField = nil
-           }
-       }
+        let shouldShow = searchView.isHidden
+        searchView.isHidden = !shouldShow
+        heightConstraintOfSearchView.constant = shouldShow ? 47 : 0
+        if shouldShow {
+            searchTextField = UITextField(frame: CGRect(x: 10, y: 10, width: searchView.frame.width - 20, height: 40))
+            searchTextField?.placeholder = "Search..."
+            searchTextField?.delegate = self
+            searchTextField?.borderStyle = .roundedRect
+            searchTextField?.backgroundColor = .white
+            searchTextField?.layer.cornerRadius = 5
+            searchTextField?.layer.borderWidth = 1
+            searchTextField?.layer.borderColor = UIColor.gray.cgColor
+            if let searchTextField = searchTextField {
+                searchView.addSubview(searchTextField)
+            }
+        } else {
+            searchTextField?.removeFromSuperview()
+            searchTextField = nil
+        }
+    }
         func filterMembers(searchText: String) {
         print("Search text entered: '\(searchText)'")
         let lowercasedSearchText = searchText.lowercased().trimmingCharacters(in: .whitespaces)

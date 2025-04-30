@@ -198,11 +198,11 @@
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                                 <subviews>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="bNh-hT-I6M">
-                                        <rect key="frame" x="0.0" y="157" width="414" height="739"/>
+                                        <rect key="frame" x="0.0" y="145" width="414" height="751"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     </tableView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iDG-ie-ioL" userLabel="ManegementView">
-                                        <rect key="frame" x="0.0" y="41" width="414" height="116"/>
+                                        <rect key="frame" x="0.0" y="41" width="414" height="60"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Management Register" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ksI-p5-CO2">
                                                 <rect key="frame" x="55" y="21" width="179" height="30"/>
@@ -231,13 +231,6 @@
                                                 <color key="tintColor" systemColor="labelColor"/>
                                                 <state key="normal" title="Button" image="printer" catalog="system"/>
                                             </button>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aNi-8b-WXH">
-                                                <rect key="frame" x="0.0" y="69" width="414" height="47"/>
-                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="height" constant="47" id="0Fv-S2-xA8"/>
-                                                </constraints>
-                                            </view>
                                             <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6px-DG-NaX">
                                                 <rect key="frame" x="326" y="21" width="30" height="30"/>
                                                 <constraints>
@@ -256,24 +249,31 @@
                                             <constraint firstItem="0rT-Us-31W" firstAttribute="leading" secondItem="iDG-ie-ioL" secondAttribute="leading" constant="15" id="RuW-YM-Ia6"/>
                                             <constraint firstItem="Zzl-MG-Iif" firstAttribute="leading" secondItem="6px-DG-NaX" secondAttribute="trailing" constant="8" symbolic="YES" id="Tpe-kf-9ch"/>
                                             <constraint firstItem="0rT-Us-31W" firstAttribute="top" secondItem="iDG-ie-ioL" secondAttribute="top" constant="21" id="VCq-bu-lfa"/>
-                                            <constraint firstAttribute="trailing" secondItem="aNi-8b-WXH" secondAttribute="trailing" id="Wv3-dX-EZE"/>
-                                            <constraint firstItem="aNi-8b-WXH" firstAttribute="leading" secondItem="iDG-ie-ioL" secondAttribute="leading" id="aMH-Fl-sTR"/>
                                             <constraint firstAttribute="trailing" secondItem="Zzl-MG-Iif" secondAttribute="trailing" constant="20" symbolic="YES" id="cdH-Ge-hCk"/>
-                                            <constraint firstAttribute="bottom" secondItem="aNi-8b-WXH" secondAttribute="bottom" id="sFl-Hc-HZl"/>
                                             <constraint firstItem="6px-DG-NaX" firstAttribute="top" secondItem="iDG-ie-ioL" secondAttribute="top" constant="21" id="uKd-dO-345"/>
+                                            <constraint firstAttribute="height" constant="60" id="ybE-ha-1p1"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wpf-Pg-C86">
+                                        <rect key="frame" x="0.0" y="99" width="414" height="47"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="47" id="sVy-pd-bXx"/>
                                         </constraints>
                                     </view>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstItem="bNh-hT-I6M" firstAttribute="top" secondItem="iDG-ie-ioL" secondAttribute="bottom" id="9CW-Vj-YVs"/>
+                                    <constraint firstAttribute="trailing" secondItem="wpf-Pg-C86" secondAttribute="trailing" id="4rJ-ci-TC5"/>
+                                    <constraint firstItem="wpf-Pg-C86" firstAttribute="leading" secondItem="Gtz-RJ-G9e" secondAttribute="leading" id="8bu-wW-DVy"/>
                                     <constraint firstAttribute="trailing" secondItem="iDG-ie-ioL" secondAttribute="trailing" id="RcB-YF-VwW"/>
+                                    <constraint firstItem="wpf-Pg-C86" firstAttribute="top" secondItem="iDG-ie-ioL" secondAttribute="bottom" constant="-2" id="WGy-ye-Y99"/>
                                     <constraint firstAttribute="bottom" secondItem="bNh-hT-I6M" secondAttribute="bottom" id="Z0e-nj-5Pg"/>
                                     <constraint firstAttribute="trailing" secondItem="bNh-hT-I6M" secondAttribute="trailing" id="Zds-HP-Oez"/>
                                     <constraint firstItem="bNh-hT-I6M" firstAttribute="leading" secondItem="Gtz-RJ-G9e" secondAttribute="leading" id="etw-vA-rsk"/>
                                     <constraint firstItem="iDG-ie-ioL" firstAttribute="leading" secondItem="Gtz-RJ-G9e" secondAttribute="leading" id="gy8-Lk-R2X"/>
+                                    <constraint firstItem="bNh-hT-I6M" firstAttribute="top" secondItem="wpf-Pg-C86" secondAttribute="bottom" constant="-1" id="jaW-Wh-bQ9"/>
                                     <constraint firstItem="iDG-ie-ioL" firstAttribute="top" secondItem="Gtz-RJ-G9e" secondAttribute="top" constant="41" id="pVf-B7-3sO"/>
-                                    <constraint firstAttribute="top" secondItem="iDG-ie-ioL" secondAttribute="bottom" constant="-157" id="xHf-tH-5Er"/>
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="mgi-YX-Ppm">
@@ -302,9 +302,10 @@
                     <navigationItem key="navigationItem" id="9j0-mb-TF4"/>
                     <connections>
                         <outlet property="backButton" destination="0rT-Us-31W" id="rfp-Un-HFS"/>
+                        <outlet property="heightConstraintOfSearchView" destination="sVy-pd-bXx" id="PTF-8d-0DN"/>
                         <outlet property="printButton" destination="Zzl-MG-Iif" id="fwu-id-1L2"/>
                         <outlet property="searchButton" destination="6px-DG-NaX" id="EWf-oC-viG"/>
-                        <outlet property="searchView" destination="aNi-8b-WXH" id="Kyd-WW-bfd"/>
+                        <outlet property="searchView" destination="wpf-Pg-C86" id="8Zf-WJ-9ve"/>
                         <outlet property="tableView" destination="bNh-hT-I6M" id="srG-Ag-n6f"/>
                     </connections>
                 </viewController>
@@ -547,10 +548,10 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray4Color">
-            <color red="0.81960784310000001" green="0.81960784310000001" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.81960784313725488" green="0.81960784313725488" blue="0.83921568627450982" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGray6Color">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
