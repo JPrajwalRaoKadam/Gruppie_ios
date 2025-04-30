@@ -671,8 +671,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         managementVC.groupIds = school?.id ?? ""
         managementVC.members = members
         
-        managementVC.modalPresentationStyle = .fullScreen
-        present(managementVC, animated: true, completion: nil)
+        navigationController?.pushViewController(managementVC, animated: true)
+
     }
     
     private func fetchStaffDataAndNavigate() {
