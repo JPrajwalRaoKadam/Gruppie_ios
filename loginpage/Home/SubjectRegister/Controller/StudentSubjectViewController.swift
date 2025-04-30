@@ -157,7 +157,7 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
             return
         }
 
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/students/add?subjectPriority=\(subjectPriority)"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/students/add?subjectPriority=\(subjectPriority)"
         print("🌐 API POST URL: \(urlString)")
 
         guard let url = URL(string: urlString) else {

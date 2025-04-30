@@ -32,7 +32,7 @@ class PeriodDetailViewController: UIViewController {
     }
 
     func fetchPeriodDetails() {
-        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupId)/free/staff/get?day=\(day)&period=\(periodData?.period ?? "")") else { return }
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/free/staff/get?day=\(day)&period=\(periodData?.period ?? "")") else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"

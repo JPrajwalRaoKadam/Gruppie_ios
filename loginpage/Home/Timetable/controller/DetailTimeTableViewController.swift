@@ -101,7 +101,7 @@ class DetailTimeTableViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     func deleteTimeTable() {
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/year/timetable/remove?day=\(selectedDay)"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/year/timetable/remove?day=\(selectedDay)"
         
         guard let url = URL(string: apiUrl) else {
             print("❌ Invalid URL")
@@ -186,7 +186,7 @@ extension DetailTimeTableViewController {
         let subjectId = subjectIds[selectedSubjectIndex]
         let staffId = staffIds[selectedStaffIndex]
 
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/staff/\(staffId)/year/timetable/add"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/staff/\(staffId)/year/timetable/add"
         
         let requestBody: [String: Any] = [
             "day": "\(selectedDay)",
@@ -447,7 +447,7 @@ extension DetailTimeTableViewController: UIPickerViewDelegate, UIPickerViewDataS
 
 extension DetailTimeTableViewController {
     func fetchDetailTimeTable() {
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/year/timetable/get?day=\(selectedDay)"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/year/timetable/get?day=\(selectedDay)"
         
         guard let url = URL(string: apiUrl) else { return }
         
@@ -509,7 +509,7 @@ extension DetailTimeTableViewController {
     }
     
     func addTimeTable() {
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/year/timetable/add"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/year/timetable/add"
         print("🟡 API URL addTimeTable: \(apiUrl)")
         
         guard let url = URL(string: apiUrl) else { return }

@@ -40,7 +40,7 @@
     //            return
     //        }
     //
-    //        let apiUrl = "https://api.gruppie.in/api/v1/admin/groups/\(groupId)/users/\(staffId)/allow/post"
+    //        let apiUrl = APIManager.shared.baseURL + "admin/groups/\(groupId)/users/\(staffId)/allow/post"
     //
     //        var request = URLRequest(url: URL(string: apiUrl)!)
     //        request.httpMethod = "PUT"
@@ -119,7 +119,7 @@
     //            return
     //        }
     //
-    //        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupId)/staff/\(staffId)/delete?type=staff"
+    //        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/staff/\(staffId)/delete?type=staff"
     //
     //        // Create URL request
     //        var request = URLRequest(url: URL(string: apiUrl)!)
@@ -256,7 +256,7 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
             return
         }
 
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/staff/\(staffId)/delete?type=staff"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/staff/\(staffId)/delete?type=staff"
         guard let url = URL(string: urlString) else {
             print("Error: Invalid URL")
             return
@@ -333,7 +333,7 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
             return
         }
 
-        let apiUrl = "https://api.gruppie.in/api/v1/admin/groups/\(groupId)/users/\(staffId)/allow/post"
+        let apiUrl = APIManager.shared.baseURL + "admin/groups/\(groupId)/users/\(staffId)/allow/post"
 
         var request = URLRequest(url: URL(string: apiUrl)!)
         request.httpMethod = "PUT"
@@ -429,7 +429,7 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
             "uanNumber": staffAccountInfo?.uanNumber ?? ""
         ]
 
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/staff/\(staffDetails.staffId)/edit"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/staff/\(staffDetails.staffId)/edit"
         guard let url = URL(string: urlString) else {
             print("Error: Invalid URL with groupId: \(groupId)")
             return

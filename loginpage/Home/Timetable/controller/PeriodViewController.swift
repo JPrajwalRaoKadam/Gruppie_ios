@@ -33,7 +33,7 @@ class PeriodViewController: UIViewController {
     
     // MARK: - API Call
     func fetchPeriodData() {
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/day/period/max/get?day=\(day)"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/day/period/max/get?day=\(day)"
         guard let url = URL(string: urlString) else { return }
         
         var request = URLRequest(url: url)

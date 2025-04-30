@@ -203,7 +203,7 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
          }
 
          // Step 3: Construct the URL
-         let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/subject/staff/get"
+         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/staff/get"
          guard let url = URL(string: urlString) else {
              print("❌ Invalid URL")
              return
@@ -262,7 +262,7 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
             return
         }
 
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/attendance/take/new?date=\(currentDate)"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/attendance/take/new?date=\(currentDate)"
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")
             return

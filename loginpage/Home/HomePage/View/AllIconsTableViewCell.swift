@@ -14,7 +14,7 @@ class AllIconsTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
 
     weak var delegate: AllIconsTableViewCellDelegate?
-    private var featureIcons: [FeatureIcon] = []
+    var featureIcons: [FeatureIcon] = []
 
     override func awakeFromNib() {
         super.awakeFromNib()

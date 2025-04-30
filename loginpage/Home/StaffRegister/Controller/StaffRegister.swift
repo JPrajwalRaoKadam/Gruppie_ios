@@ -143,7 +143,7 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
 
     private func fetchNonTeachingStaffData() {
-        let nonTeachingURL = "https://api.gruppie.in/api/v1/groups/\(groupIds)/staff/get?type=nonteaching"
+        let nonTeachingURL = APIManager.shared.baseURL + "groups/\(groupIds)/staff/get?type=nonteaching"
 
         print("Fetching non-teaching staff from: \(nonTeachingURL)")
 
@@ -156,7 +156,7 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
 
     private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupIds)/user/\(staffId)/profile/get?type=staff"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupIds)/user/\(staffId)/profile/get?type=staff"
 
         // Print the API URL
         print("Fetching staff details from: \(urlString)")

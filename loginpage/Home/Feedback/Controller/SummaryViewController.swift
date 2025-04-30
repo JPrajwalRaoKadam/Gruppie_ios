@@ -93,7 +93,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return
             }
 
-            let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/feedback/\(feedbackId)/staff/\(staffId)/answer?userId=\(userId)"
+            let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/feedback/\(feedbackId)/staff/\(staffId)/answer?userId=\(userId)"
 
             print("API URL: \(urlString)")
 
@@ -173,7 +173,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        let apiURL = "https://api.gruppie.in/api/v1/groups/\(groupId)/feedback/\(feedbackId)/questions/add"
+        let apiURL = APIManager.shared.baseURL + "\(groupId)/feedback/\(feedbackId)/questions/add"
         
         // Prepare the request body
         var questionsArray: [[String: Any]] = []

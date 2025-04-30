@@ -49,7 +49,7 @@ class AddSubNotes_VideosVC: UIViewController {
             return
         }
         
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/subject/staff/add"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/staff/add"
         guard let url = URL(string: urlString) else { return }
 
         var request = URLRequest(url: url)
@@ -124,7 +124,7 @@ class AddSubNotes_VideosVC: UIViewController {
             return
         }
 
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/staff/get?type=teaching"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
         guard let url = URL(string: urlString) else { return }
 
         var request = URLRequest(url: url)

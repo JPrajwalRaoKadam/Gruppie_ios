@@ -55,7 +55,7 @@ class AcademicViewController: UIViewController {
     
     func fetchTimeTableAPI() {
         self.selectedTeamId = teamIds.first ?? "" // Store selectedTeamId globally
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(selectedTeamId)/year/timetable/get"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(selectedTeamId)/year/timetable/get"
         
         guard let url = URL(string: apiUrl) else { return }
         

@@ -61,7 +61,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     private func navigateToAddStaffViewController() {
         print("Fetching staff data before navigation...")
 
-        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupIds)/staff/get?type=teaching") else {
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/staff/get?type=teaching") else {
             print("Invalid URL")
             return
         }

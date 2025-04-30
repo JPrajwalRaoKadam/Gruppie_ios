@@ -60,8 +60,8 @@ class DailySyllabusTrackerVC: UIViewController, UITableViewDelegate, UITableView
 
         let currentDate = getCurrentDate()
         
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/plan/get?date=\(currentDate)"
-//        let urlString = "https://api.gruppie.in/api/v1/groups/62b32f1197d24b31c4fa7a1a/team/62b32f1397d24b31c41bbc2d/plan/get?date=20-03-2025"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/plan/get?date=\(currentDate)"
+//        let urlString = APIManager.shared.baseURL + "groups/62b32f1197d24b31c4fa7a1a/team/62b32f1397d24b31c41bbc2d/plan/get?date=20-03-2025"
         print("Fetching syllabus data from: \(urlString)")
 
         guard let url = URL(string: urlString) else {

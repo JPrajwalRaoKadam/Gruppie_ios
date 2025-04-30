@@ -28,7 +28,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func fetchClassDataForRegularClass() {
-        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupIds)/get/class/list") else {
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/get/class/list") else {
             print("❌ Invalid URL")
             return
         }

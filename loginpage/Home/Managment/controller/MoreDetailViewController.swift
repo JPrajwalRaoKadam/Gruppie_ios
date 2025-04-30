@@ -64,7 +64,7 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
             print("❌ User ID is nil or empty")
             return
         }
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupIds)/user/\(userId)/management/delete?type=management"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupIds)/user/\(userId)/management/delete?type=management"
         guard let url = URL(string: apiUrl) else {
             print("❌ Invalid API URL")
             return
@@ -201,7 +201,7 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
             print("❌ User ID is nil or empty")
             return
         }
-        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupIds)/user/\(userId)/management/edit") else {
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/user/\(userId)/management/edit") else {
             print("❌ Invalid API URL")
             return
         }

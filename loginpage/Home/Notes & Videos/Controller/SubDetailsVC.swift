@@ -40,7 +40,7 @@ class SubDetailsVC: UIViewController {
             return
         }
 
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/posts/get"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/posts/get"
         guard let url = URL(string: urlString) else { return }
 
         var request = URLRequest(url: url)

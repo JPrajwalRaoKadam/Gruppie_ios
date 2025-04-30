@@ -16,6 +16,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var subjects: [SubjectData] = [] // Store fetched subjects
     var teamIds: [String] = []
     var userIds: [String] = []
+    var featureIcons: [FeatureIcon] = []
     
     @IBOutlet weak var tableView: UITableView! // TableView outlet
     @IBOutlet weak var menu: UIImageView!
@@ -47,6 +48,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         
         for activity in self.groupDatas {
             print("Received Activity: \(activity.activity)")
+            self.featureIcons = activity.featureIcons
             for featureIcon in activity.featureIcons {
                 print("Received Feature Icon Type: \(featureIcon.type), Image: \(featureIcon.image)")
             }
@@ -146,13 +148,17 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             return section == 0 ? nil : groupDatas[section - 1].activity
         }
 
-        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if self.featureIcons.count <= 4 {
+            return 100
+        } else if self.featureIcons.count > 4 && self.featureIcons.count <= 8 {
+            return 200
+        } else if self.featureIcons.count > 8 && self.featureIcons.count <= 12 {
+            return 300
+        } else {
             return UITableView.automaticDimension
         }
-
-        func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 400
-        }
+    }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard section > 0 else { return nil }

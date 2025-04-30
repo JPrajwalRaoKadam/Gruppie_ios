@@ -68,7 +68,7 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
 
     // MARK: - API Call to Assign Staff to Class
     func assignStaffToClass(userId: String, completion: @escaping (Bool) -> Void) {
-        let urlString = "https://api.gruppie.in/api/v1/groups/62b4265f97d24b15e8123155/team/62b4265f97d24b15e8123158/assign/class/teacher"
+        let urlString = APIManager.shared.baseURL + "groups/62b4265f97d24b15e8123155/team/62b4265f97d24b15e8123158/assign/class/teacher"
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
             completion(false)

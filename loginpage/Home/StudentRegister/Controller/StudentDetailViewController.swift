@@ -48,7 +48,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func deleteStudent() {
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/student/\(userId)/delete"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/\(userId)/delete"
         print("API URL: \(urlString)") // ✅ Print API URL
 
         guard let url = URL(string: urlString) else {
@@ -269,7 +269,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func updateStudentProfile(with updatedData: [String: Any]) {
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/student/edit/profile?user_id=\(userId)"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/edit/profile?user_id=\(userId)"
         print("API URL: \(urlString)")
         
         guard let url = URL(string: urlString) else {

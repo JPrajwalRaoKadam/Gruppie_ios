@@ -49,7 +49,7 @@ class AddCombineClass: UIViewController {
         print("Group ID: \(groupIds)")  // Log the groupId being used
 
         // Prepare API URL and Request Body
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupIds)/class/add/extra"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupIds)/class/add/extra"
         let base64Image = "aHR0cHM6Ly9ncnVwcGllbWVkaWEuc2pwMS5kaWdpdGFsb2NlYW5zcGFjZXMuY29tL2ltYWdlcy9nYzJfMTczOTc3Njc0ODM3NC5qcGc="
         let requestBody: [String: Any] = [
             "image": base64Image,

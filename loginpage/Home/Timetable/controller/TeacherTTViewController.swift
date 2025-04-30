@@ -56,7 +56,7 @@ class TeacherTTViewController: UIViewController {
 
     func fetchTimeTableAPI() {
         let selectedTeamId = teamIds.first ?? ""
-        let apiUrl = "https://api.gruppie.in/api/v1/groups/\(groupId)/staff/timetable/get?userId=\(userId)"
+        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/staff/timetable/get?userId=\(userId)"
 
         guard let url = URL(string: apiUrl) else { return }
 

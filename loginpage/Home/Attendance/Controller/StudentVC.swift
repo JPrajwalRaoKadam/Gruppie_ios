@@ -78,7 +78,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             return
         }
         
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/attendance/get/new?date=\(date)"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/attendance/get/new?date=\(date)"
         
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")
