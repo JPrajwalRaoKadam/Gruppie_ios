@@ -8,6 +8,11 @@ class FeedBackViewController: UIViewController {
     var groupId: String?
     var token: String?
     var feedbackData: [FeedBackItem] = [] // Store API response
+    var currentRole: String?
+    var feedbackId: String?
+    var userId: String = ""
+    var teamId: String = ""
+    var feedbackQuestions: [[QuestionData]] = []
 
     @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var tableView: UITableView!
@@ -22,8 +27,17 @@ class FeedBackViewController: UIViewController {
         print("Received Token: \(token ?? "No Token")")
 
         tableView.register(UINib(nibName: "FeedBackTableViewCell", bundle: nil), forCellReuseIdentifier: "FeedBackCell")
+        fetchFeedbackData()
+        print("-------- FeedBackViewController Initialized --------")
+        print("Group ID: \(groupId ?? "nil")")
+        print("Token: \(token ?? "nil")")
+        print("Current Role: \(currentRole ?? "nil")")
+        print("User ID: \(userId)")
+        print("Team ID: \(teamId)")
+        print("feedback ID: \(self.feedbackId)")
+        print("----------------------------------------------------")
 
-        fetchFeedbackData() // Fetch API data
+// Fetch API data
     }
 
     // MARK: - API Call
@@ -66,6 +80,11 @@ class FeedBackViewController: UIViewController {
                 // Store API response in feedbackData
                 self.feedbackData = feedbackResponse.data
                 print("Stored feedbackData:", self.feedbackData)
+
+                
+                // Extract questionArray from each feedback item and store in feedbackQuestions
+                self.feedbackQuestions = feedbackResponse.data.map { $0.questionsArray ?? [] }
+                print("Extracted feedbackQuestions:", self.feedbackQuestions)
 
                 DispatchQueue.main.async {
                     self.tableView.reloadData() // Refresh table view
@@ -115,22 +134,57 @@ extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
                 navigationController?.pushViewController(addFeedbackVC, animated: true)
             }
         }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedFeedback = feedbackData[indexPath.row] // Get selected feedback item
-        
-        let storyboard = UIStoryboard(name: "FeedBack", bundle: nil) // Ensure correct storyboard name
-        if let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailFeedViewController") as? DetailFeedViewController {
-            
-            // Pass data to DetailFeedViewController
-            detailVC.groupId = groupId
-            detailVC.token = token
-            detailVC.feedbackItem = selectedFeedback
-            let totalNoQues = feedbackData[indexPath.row].noOfQuestions
-            detailVC.feedbackId = selectedFeedback.feedbackId // Pass feedbackId
-            detailVC.totalNoOfQustions = totalNoQues
-            
-            navigationController?.pushViewController(detailVC, animated: true)
-        }
+        let selectedFeedback = self.feedbackData[indexPath.row]
+        let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
+
+        // Assign feedbackId from selectedFeedback (optional)
+        self.feedbackId = selectedFeedback.feedbackId
+
+        switch currentRole?.lowercased() {
+        case "parent":
+            if let vc = storyboard.instantiateViewController(withIdentifier: "listOfStaffVC") as? listOfStaffVC {
+                vc.groupId = groupId ?? ""
+                vc.token = token ?? ""
+                vc.feedbackId = selectedFeedback.feedbackId ?? ""
+                vc.feedbackData = selectedFeedback
+                vc.teamId = teamId
+                vc.userId = userId
+                vc.currentRole = currentRole
+                vc.feedbackQuestions = feedbackQuestions
+                print("Navigating to listOfStaffVC with:")
+                print("feedbackData\(feedbackData)")
+                print(" - Group ID: \(vc.groupId)")
+                print(" - Token: \(vc.token)")
+                print(" - Feedback ID: \(vc.feedbackId)")
+                print(" - Team ID: \(vc.teamId)")
+                print(" - User ID: \(vc.userId)")
+                print(" - Current Role: \(vc.currentRole)")
+
+                navigationController?.pushViewController(vc, animated: true)
+            }
+
+        case "admin":
+            if let vc = storyboard.instantiateViewController(withIdentifier: "DetailFeedViewController") as? DetailFeedViewController {
+                vc.groupId = groupId
+                vc.token = token
+                vc.feedbackItem = selectedFeedback
+                vc.feedbackId = selectedFeedback.feedbackId
+                vc.totalNoOfQustions = selectedFeedback.noOfQuestions
+                vc.role = currentRole
+
+                print("feedbackId passed to DetailFeedViewController: \(selectedFeedback.feedbackId ?? "nil")")
+
+                navigationController?.pushViewController(vc, animated: true)
+            }
+
+        default:
+            print("Unhandled role: \(currentRole ?? "nil")")
+    
+         }
     }
 
+
 }
+     

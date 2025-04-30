@@ -1,51 +1,66 @@
 import Foundation
 
+// MARK: - Feedback Response
 struct FeedBackResponse: Codable {
     let data: [FeedBackItem]
 }
 
+// MARK: - Feedback Item
 struct FeedBackItem: Codable {
     let feedbackId: String?
     let title: String?
     let startDate: String?
     let lastDate: String?
     let isActive: Bool?
-    let options: [FeedbackOption]?
+    var options: [FeedbackOption]?
     var question: String?
     let noOfQuestions: String?
     let noOfOptions: String?
     let groupId: String?
     let updatedAt: String?
     let insertedAt: String?
-
     let feedbackTo: String?
     let feedbackBy: String?
     let name: String?
     let createdAt: String?
 
+    let questionsArray: [QuestionData]?   // ✅ Updated to new structure
+
     enum CodingKeys: String, CodingKey {
         case feedbackId, title, startDate, lastDate, isActive, options, question
         case noOfQuestions, noOfOptions, groupId, updatedAt, insertedAt
-        case feedbackTo, feedbackBy, name, createdAt
+        case feedbackTo, feedbackBy, name, createdAt, questionsArray
     }
 }
 
+// MARK: - Feedback Option
 struct FeedbackOption: Codable {
-    let optionNo: String
-    let option: String
-    let marks: String
-    let answer: Bool
+    var optionNo: String
+    var option: String
+    var marks: String
+    var answer: Bool
 
     enum CodingKeys: String, CodingKey {
         case optionNo, option, marks, answer
     }
 }
 
-struct FeedbackQuestion: Codable {
-    let question: String
+// MARK: - Feedback Question (Updated)
+struct QuestionData: Codable {
+    var questionNo: Int?
+    var question: String
+    var marks: Int?
+    var options: [FeedbackOption]
+}
+// MARK: - Feedback Option for Questions
+struct OptionData: Codable {
+    let optionNo: String
+    let option: String
     let marks: String
+    let answer: Bool
 }
 
+// MARK: - Feedback Request
 struct FeedBackRequest: Codable {
     let groupId: String
     let isActive: Bool
@@ -53,16 +68,18 @@ struct FeedBackRequest: Codable {
     let noOfOptions: String?
     let noOfQuestions: String?
     let options: [FeedbackOption]?
-    let questionsArray: [FeedbackQuestion]?
+    let questionsArray: [QuestionData]?
     let startDate: String?
     let title: String?
     let updatedAt: String
 }
 
+// MARK: - Feed Class List
 struct FeedClass: Codable {
     let data: [FeedClassItem]
 }
 
+// MARK: - Feed Class Item
 struct FeedClassItem: Codable {
     let teamId: String
     let teacherName: String?
@@ -90,7 +107,6 @@ struct FeedClassItem: Codable {
     let category: String?
     let admissionTeam: Bool
     let adminName: String
-
     let feedbackTo: String?
     let feedbackBy: String?
     let createdAt: String?
@@ -115,7 +131,7 @@ struct FeedClassItem: Codable {
         role = try container.decode(String.self, forKey: .role)
         phone = try container.decode(String.self, forKey: .phone)
 
-        // Convert numberOfTimeAttendance to string safely
+        // Handle numberOfTimeAttendance safely
         if let numberString = try? container.decode(String.self, forKey: .numberOfTimeAttendance) {
             numberOfTimeAttendance = numberString
         } else if let numberInt = try? container.decode(Int.self, forKey: .numberOfTimeAttendance) {
@@ -143,7 +159,6 @@ struct FeedClassItem: Codable {
         category = try container.decodeIfPresent(String.self, forKey: .category)
         admissionTeam = try container.decode(Bool.self, forKey: .admissionTeam)
         adminName = try container.decode(String.self, forKey: .adminName)
-
         feedbackTo = try container.decodeIfPresent(String.self, forKey: .feedbackTo)
         feedbackBy = try container.decodeIfPresent(String.self, forKey: .feedbackBy)
         createdAt = try container.decodeIfPresent(String.self, forKey: .createdAt)

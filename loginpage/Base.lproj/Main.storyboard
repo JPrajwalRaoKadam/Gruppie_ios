@@ -777,15 +777,34 @@
                                                 <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DhS-hh-xmU">
+                                                <rect key="frame" x="302" y="12" width="74" height="26"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="26" id="TUh-bI-vtY"/>
+                                                    <constraint firstAttribute="width" constant="74" id="ivB-fJ-FTe"/>
+                                                </constraints>
+                                                <color key="tintColor" red="0.91976243260000001" green="0.078205545289999998" blue="0.062517977870000005" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="plain" title="Logout">
+                                                    <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="15"/>
+                                                </buttonConfiguration>
+                                                <connections>
+                                                    <action selector="logoutTapped:" destination="exd-1a-ouP" eventType="touchUpInside" id="q3n-au-Krq"/>
+                                                    <action selector="logoutTapped:" destination="ogc-rg-TfB" eventType="touchUpInside" id="qZi-nZ-DOO"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstItem="NQZ-Vd-pNh" firstAttribute="top" secondItem="00d-qk-Rtp" secondAttribute="top" constant="16" id="1vv-K7-4DQ"/>
+                                            <constraint firstAttribute="trailing" secondItem="DhS-hh-xmU" secondAttribute="trailing" constant="14" id="21l-4m-PQz"/>
                                             <constraint firstItem="NJ1-WB-KiW" firstAttribute="top" secondItem="00d-qk-Rtp" secondAttribute="top" constant="9" id="4ZE-AK-iJK"/>
                                             <constraint firstItem="NJ1-WB-KiW" firstAttribute="leading" secondItem="00d-qk-Rtp" secondAttribute="leading" constant="8" id="HFZ-zB-1Ev"/>
                                             <constraint firstItem="NQZ-Vd-pNh" firstAttribute="leading" secondItem="NJ1-WB-KiW" secondAttribute="trailing" constant="-4" id="VQe-u0-cIa"/>
                                             <constraint firstAttribute="height" constant="50" id="lrK-mb-a0f"/>
+                                            <constraint firstItem="DhS-hh-xmU" firstAttribute="top" secondItem="00d-qk-Rtp" secondAttribute="top" constant="12" id="sZg-XQ-WtK"/>
                                             <constraint firstAttribute="bottom" secondItem="NQZ-Vd-pNh" secondAttribute="bottom" constant="16" id="sx8-yz-LFn"/>
+                                            <constraint firstAttribute="bottom" secondItem="DhS-hh-xmU" secondAttribute="bottom" constant="12" id="uSh-ZT-nDF"/>
                                         </constraints>
                                     </view>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="fGZ-OE-TGH">
@@ -839,7 +858,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray5Color">
-            <color red="0.8980392157" green="0.8980392157" blue="0.91764705879999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

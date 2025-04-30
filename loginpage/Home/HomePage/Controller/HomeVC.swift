@@ -88,6 +88,21 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         self.navigationController?.pushViewController(feedVC, animated: true)
     }
     
+    @IBAction func logoutTapped(_ sender: UIButton) {
+//            UserDefaults.standard.removeObject(forKey: "loggedInPhone")
+//            let loginVC = storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+//        navigationController?.setViewControllers([loginVC], animated: true)
+        
+        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+            UserDefaults.standard.removeObject(forKey: "loggedInPhone")
+
+            // Return to login screen
+            if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate {
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+                sceneDelegate.window?.rootViewController = UINavigationController(rootViewController: loginVC)
+            }
+        }
     
     func getHomedata(indexpath: IndexPath) {
             if let homeVC = self.navigationController?.viewControllers.first(where: { $0 is HomeVC }) {
@@ -186,8 +201,19 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             navigateToMangementViewController()
         case "Staff Register":
             fetchStaffDataAndNavigate()
-        case "Feed Back": // New case for Feedback navigation
-            navigateToFeedBackViewController()
+        case "Feed Back":
+            switch currentRole?.lowercased() {
+            case "parent":
+                fetchSubjectDataAndNavigate()
+            case "admin":
+                navigateToFeedBackViewController()
+            case "teacher":
+                print("❌ Invalid role")
+                return
+            default:
+                print("❌ Invalid or missing role")
+                return
+            }
         case "Student Register":
             fetchStudentDataAndNavigate()
         case "Subject Register":
@@ -197,15 +223,15 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         case "Gallery":
             navigateToGalleryViewController()
         case "Attendance":
-                    navigateToAttendanceViewController()
+            navigateToAttendanceViewController()
         case "Syllabus Tracker":
-                    fetchSubjectDataAndNavigate()
+            fetchSubjectDataAndNavigate()
         case "Time Table":
-                    fetchSubjectDataAndNavigate()
+            fetchSubjectDataAndNavigate()
         case "Fees New":
-                fetchSubjectDataAndNavigate()
+            fetchSubjectDataAndNavigate()
         case "Home Work":
-                    fetchSubjectDataAndNavigate()
+            fetchSubjectDataAndNavigate()
         default:
             print("No navigation configured for type: \(featureIcon.type)")
         }
@@ -285,7 +311,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         if let feedbackVC = storyboard.instantiateViewController(withIdentifier: "FeedBackViewController") as? FeedBackViewController {
             feedbackVC.groupId = school?.id ?? ""
             feedbackVC.token = TokenManager.shared.getToken() ?? ""
-            
+            feedbackVC.currentRole = self.currentRole
             print("Navigating to FeedBackViewController with:")
             print("Group ID: \(feedbackVC.groupId)")
             print("Token: \(feedbackVC.token)")
@@ -432,6 +458,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.fetchStaffDataAndNavigate()
                         case "Fees New":
                             self.navigateToFeesNew(subjects: subjects)
+                        case "Feed Back":
+                            self.navigateToListOfStudentsVC(subjects: subjects)
                         case "Home Work":
                             self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
                         default:
@@ -446,6 +474,20 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }.resume()
         }
 
+    func navigateToListOfStudentsVC(subjects: [SubjectData]) {
+        let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
+        if let vc = storyboard.instantiateViewController(withIdentifier: "listOfStudentsVC") as? listOfStudentsVC {
+            vc.teamIds = self.teamIds
+            vc.teamId = self.teamIds.first // ✅ Or whichever one you're selecting
+            vc.groupId = school?.id ?? ""
+            vc.token = TokenManager.shared.getToken() ?? ""
+            vc.subjects = subjects
+            vc.userIds = self.userIds  // ✅ Pass the userIds here
+            vc.currentRole = self.currentRole
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
     private func fetchSubjectData(from urlString: String, token: String, completion: @escaping ([SubjectData], [String]) -> Void) {
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL: \(urlString)")

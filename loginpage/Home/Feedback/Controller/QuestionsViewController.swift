@@ -3,7 +3,7 @@ import UIKit
 class QuestionsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextViewDelegate {
     
     @IBOutlet weak var mainView: UIView!
-    @IBOutlet weak var tableVew: UITableView!
+    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var titleName: UILabel!
     @IBOutlet weak var QuestionNo: UILabel!
     @IBOutlet weak var nextButton: UIButton!
@@ -13,14 +13,22 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     
     var token: String?
     var groupId: String?
-    var feedbackId: String?
-    var allFeedbackItems: [FeedBackItem] = [] // List of all feedback items
+    var allFeedbackItems: [FeedBackItem] = []
     var currentQuestionIndex = 0
     var totalQuestions: String?
     var savedFeedback: [(question: String, options: [FeedbackOption])] = []
-    var selectedOptions: [Int: Int] = [:] // Store selected option per question
+    var selectedOptions: [Int: Int] = [:]
     var tQuest = 0
-    
+    var userId: String?
+    var studentName: String?
+    var isSubmitted: Bool?
+    var feedbackId: String?
+    var feedbackData: FeedBackItem?
+    var role: String?
+    var feedbackQuestions: [[QuestionData]] = []
+    var teamId: String = ""
+    var staffId: String = ""
+
     var feedbackItem: FeedBackItem? {
         didSet {
             DispatchQueue.main.async {
@@ -32,40 +40,90 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableVew.register(UINib(nibName: "QuestionsTableViewCell", bundle: nil), forCellReuseIdentifier: "QuestionsTableViewCell")
-        tableVew.delegate = self
-        tableVew.dataSource = self
+        tableView.register(UINib(nibName: "QuestionsTableViewCell", bundle: nil), forCellReuseIdentifier: "QuestionsTableViewCell")
+        
+        print("userId: \(userId ?? "No userId")")
+        print("teamId: \(teamId ?? "No teamId")")
+        print("staffId: \(staffId ?? "No staffId")")
+        print("groupId: \(groupId ?? "No groupId")")
+        print("feedbackId: \(feedbackId ?? "No feedbackId")")
+        print("role: \(role ?? "No role")")
+
+        print("studentName: \(studentName ?? "No studentName")")
+        print("isSubmitted: \(isSubmitted ?? false)")
+        print("feedbackData: \(feedbackData)")
+//        print(" feedback questions aaaaaaaa: \(feedbackQuestions)")
+
+        tableView.delegate = self
+        tableView.dataSource = self
         textView.delegate = self
         
         setupUI()
         printDebugInfo()
         
-        // Ensure tQuest is correctly set to the number of feedback items
+        guard let role = role else { return }
+
+           if role == "admin" {
+               tQuest = allFeedbackItems.count
+               if !allFeedbackItems.isEmpty {
+                   feedbackItem = allFeedbackItems[currentQuestionIndex]
+               }
+           } else if role == "parent" || role == "teacher" {
+               setupParentFeedback()
+               tQuest = feedbackData?.questionsArray?.count ?? 0
+               updateUIForCurrentQuestion()
+           }
+           
+        
         tQuest = allFeedbackItems.count
         
         if !allFeedbackItems.isEmpty {
             feedbackItem = allFeedbackItems[currentQuestionIndex]
         }
     }
-    
-    // MARK: - UI Updates
-    func updateUIForCurrentQuestion() {
-        guard let feedbackItem = feedbackItem else { return }
+    func setupParentFeedback() {
+        guard let feedbackData = feedbackData else {
+            print("No feedback data for parent")
+            return
+        }
+
+        titleName.text = feedbackData.title ?? "No Title"
+        QuestionNo.text = "Feedback Summary"
+        nextButton.isHidden = false
+        backward.isHidden = false
+        forward.isHidden = false
+        textView.isEditable = false
         
-        titleName.text = feedbackItem.title ?? "No Title"
-        QuestionNo.text = "Question \(currentQuestionIndex + 1) of \(tQuest)"
-        nextButton.setTitle(currentQuestionIndex + 1 == tQuest ? "Finish" : "Next", for: .normal)
-        
-        if currentQuestionIndex < savedFeedback.count {
-            textView.text = savedFeedback[currentQuestionIndex].question
+        if let question = feedbackData.questionsArray?.first?.question {
+            textView.text = question
+            print("Binding textView with question: \(question)")
+            
         } else {
-            textView.text = feedbackItem.question ?? "Enter Question"
+            textView.text = "No question available"
+            print("No question found, setting default: No question available")
         }
         
-        tableVew.reloadData()
+        feedbackItem = feedbackData
+        tableView.reloadData()
     }
     
-    // MARK: - UI Customization
+    func updateUIForCurrentQuestion() {
+        guard let questions = feedbackData?.questionsArray, currentQuestionIndex < questions.count else {
+            textView.text = "No more questions"
+            return
+        }
+
+        let currentQuestion = questions[currentQuestionIndex]
+        textView.text = currentQuestion.question ?? "Enter Question"
+        
+        titleName.text = feedbackData?.title ?? "No Title"
+        QuestionNo.text = "Question \(currentQuestionIndex + 1) of \(questions.count)"
+        nextButton.setTitle(currentQuestionIndex + 1 == questions.count ? "Finish" : "Next", for: .normal)
+        
+        tableView.reloadData()
+    }
+
+
     func setupUI() {
         textView.layer.cornerRadius = 8
         textView.layer.borderWidth = 1
@@ -79,9 +137,11 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         
         nextButton.layer.cornerRadius = 10
         nextButton.layer.masksToBounds = true
+        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
     }
     
-    // MARK: - UITextViewDelegate
     func textViewDidEndEditing(_ textView: UITextView) {
         let updatedQuestion = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
         
@@ -96,36 +156,30 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         }
     }
     
-    // MARK: - Next Button Action
     @IBAction func nextButtonTapped(_ sender: UIButton) {
         guard let currentFeedback = feedbackItem else { return }
         
         let questionText = textView.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        
         if !questionText.isEmpty {
             if currentQuestionIndex < savedFeedback.count {
-                // Update the existing question
                 savedFeedback[currentQuestionIndex].question = questionText
             } else {
-                // Append new question and options
                 let currentOptions = feedbackItem?.options ?? []
                 savedFeedback.append((question: questionText, options: currentOptions))
             }
         }
         
-        // Check if we reached the required number of questions
         if let totalQuestions = Int(currentFeedback.noOfQuestions ?? ""), savedFeedback.count >= totalQuestions {
             navigateToSummary()
             return
         }
         
-        // Move to the next question and clear textView for new input
         currentQuestionIndex += 1
         textView.text = ""
+        
         updateUIForCurrentQuestion()
     }
     
-    // MARK: - Navigate to SummaryViewController
     func navigateToSummary() {
         let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
         if let summaryVC = storyboard.instantiateViewController(withIdentifier: "SummaryViewController") as? SummaryViewController {
@@ -135,18 +189,23 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             summaryVC.allFeedbackItems = allFeedbackItems
             summaryVC.feedbackItem = feedbackItem
             summaryVC.feedbackId = feedbackId
+            summaryVC.staffId = staffId
+            summaryVC.teamId = teamId
+            summaryVC.userId = userId
+            summaryVC.role = role
+            summaryVC.selectedOptions = self.selectedOptions
+
+
             navigationController?.pushViewController(summaryVC, animated: true)
         }
     }
     
-    // MARK: - Debug Info
     func printDebugInfo() {
         print("Token: \(token ?? "No Token")")
         print("Group ID: \(groupId ?? "No Group ID")")
         print("Total Questions (tQuest): \(tQuest)")
         print("Current Question Index: \(currentQuestionIndex)")
 
-        // ✅ Print all feedback items
         print("All Feedback Items:")
         for (index, item) in allFeedbackItems.enumerated() {
             print("Item \(index + 1):")
@@ -170,7 +229,6 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         }
     }
 
-    // MARK: - TableView DataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return feedbackItem?.options?.count ?? 0
     }
@@ -182,7 +240,6 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             let option = optionsList[indexPath.row]
             cell.options.text = option.option
             
-            // Restore previous selection
             if let selectedIndex = selectedOptions[currentQuestionIndex], selectedIndex == indexPath.row {
                 cell.accessoryType = .checkmark
             } else {
@@ -193,21 +250,17 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         return cell
     }
     
-    // MARK: - TableView Delegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let optionsList = feedbackItem?.options, indexPath.row < optionsList.count {
             let selectedOption = optionsList[indexPath.row]
             print("Selected Option: \(selectedOption.option)")
             
-            // Save selected option for this question
             selectedOptions[currentQuestionIndex] = indexPath.row
             
-            // Refresh table to update checkmarks
             tableView.reloadData()
         }
     }
     
-    // MARK: - Back Button
     @IBAction func BackButton(_ sender: UIButton) {
         if currentQuestionIndex > 0 {
             currentQuestionIndex -= 1
@@ -216,36 +269,28 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             navigationController?.popViewController(animated: true)
         }
     }
-    // MARK: - Back Button Action
     @IBAction func BackwardButton(_ sender: UIButton) {
         if currentQuestionIndex > 0 {
-            // Move backward to the previous question
             currentQuestionIndex -= 1
             
-            // Ensure the index is valid before accessing the array
             if currentQuestionIndex < allFeedbackItems.count {
                 feedbackItem = allFeedbackItems[currentQuestionIndex]
             }
             
-            // Check if there's saved feedback for this question and load it into the textView
             if currentQuestionIndex < savedFeedback.count {
                 textView.text = savedFeedback[currentQuestionIndex].question
             } else {
                 textView.text = feedbackItem?.question ?? "Enter Question"
             }
             
-            // Update the UI with the current question details
             updateUIForCurrentQuestion()
         } else {
-            // No more previous questions, pop the view controller
             navigationController?.popViewController(animated: true)
         }
     }
-    // MARK: - Forward Button Action
     @IBAction func ForwardButton(_ sender: UIButton) {
         let questionText = textView.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-        // ✅ Save the current question if it's not empty
         if !questionText.isEmpty {
             if currentQuestionIndex < savedFeedback.count {
                 savedFeedback[currentQuestionIndex].question = questionText
@@ -255,7 +300,6 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             }
         }
 
-        // ✅ Move only within the savedFeedback array
         if currentQuestionIndex < savedFeedback.count - 1 {
             currentQuestionIndex += 1
             textView.text = savedFeedback[currentQuestionIndex].question

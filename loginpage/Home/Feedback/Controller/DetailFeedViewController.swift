@@ -12,6 +12,7 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
     var totalNoOfQustions: String?
     var classDataList: [FeedClassItem] = [] // Updated type
     var feedbackId: String?
+    var role: String? // <-- Add this line
 
     private let feedbackQuestionLabel: UILabel = {
            let label = UILabel()
@@ -80,7 +81,7 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
             questionsVC.feedbackItem = feedbackItem
             questionsVC.totalQuestions = totalNoOfQustions
             questionsVC.feedbackId = feedbackId // Pass feedbackId
-
+            questionsVC.role = role
             navigationController?.pushViewController(questionsVC, animated: true)
         }
     }

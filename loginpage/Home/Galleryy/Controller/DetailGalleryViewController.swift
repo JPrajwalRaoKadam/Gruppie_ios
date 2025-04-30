@@ -10,6 +10,8 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     @IBOutlet weak var albumName: UILabel!
     @IBOutlet weak var addButton: UIButton!
     
+    
+    var currentRole: String = ""
     var groupId: String = ""
     var token: String = ""
     var albumId: String = ""
@@ -21,7 +23,17 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("DetailGalleryViewController Loaded with Group ID: \(groupId), Token: \(token), and Album ID: \(albumId)")
+        print("DetailGalleryViewController Loaded with Group ID: \(groupId), Token: \(token), and Album ID: \(albumId), currentRole : \(currentRole)")
+        
+        // Show/hide buttons based on currentRole
+        if currentRole == "parent" || currentRole == "teacher" {
+            deleteButton.isHidden = true
+            addButton.isHidden = true
+        } else if currentRole == "admin" {
+            deleteButton.isHidden = false
+            addButton.isHidden = false
+        }
+
         print("Number of images in album: \(mediaItemsStrings.count)")
         
         let nib = UINib(nibName: "CollectionViewCell", bundle: nil)

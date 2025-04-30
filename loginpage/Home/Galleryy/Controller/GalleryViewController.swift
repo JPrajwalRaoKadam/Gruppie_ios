@@ -13,7 +13,7 @@ class GalleryViewController: UIViewController {
     
     @IBOutlet weak var addDescription: UITextField!
     
-    
+    var currentRole: String = ""
     var groupId: String = ""
     var token: String = ""
     
@@ -21,7 +21,15 @@ class GalleryViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("Gallery Loaded with Group ID: \(groupId) and Token: \(token)")
+        print("Gallery Loaded with Group ID: \(groupId) and Token: \(token).....\(currentRole)")
+        
+        
+        if currentRole.lowercased() == "parent" || currentRole.lowercased() == "teacher" {
+            addButton.isHidden = true
+        } else if currentRole.lowercased() == "admin" {
+            addButton.isHidden = false
+        }
+
 
         tableView.delegate = self
         tableView.dataSource = self
@@ -251,7 +259,7 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
             detailVC.albumId = selectedAlbum.albumId
             detailVC.albumNameString = selectedAlbum.albumName
             detailVC.mediaItemsStrings = selectedAlbum.fileName ?? []
-
+            detailVC.currentRole = currentRole
             print("Number of images in album: \(selectedAlbum.fileName?.count ?? 0)")
 
             navigationController?.pushViewController(detailVC, animated: true)

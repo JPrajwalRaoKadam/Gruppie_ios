@@ -13,21 +13,29 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     var allFeedbackItems: [FeedBackItem] = []
     var feedbackItem: FeedBackItem?
     var feedbackId: String?
+    var staffId: String = ""
+    var teamId: String = ""
+    var userId: String?
+    var role: String?
+    var selectedOptions: [Int: Int]?
 
     override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        setupTableView()
-        bindTitle()
-        setupButtons()
-        printDebugInfo()
-        
-        submitButton.addTarget(self, action: #selector(submitFeedback), for: .touchUpInside)
-        
-        editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+           super.viewDidLoad()
+           
+           setupTableView()
+           bindTitle()
+           setupButtons()
+           printDebugInfo()
+           if role == "admin" {
+               submitButton.addTarget(self, action: #selector(submitFeedback), for: .touchUpInside)
+           } else if role == "parent" || role == "teacher" {
+               submitButton.addTarget(self, action: #selector(submitFeedbackForparent), for: .touchUpInside)
+           }
+           
+           editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
 
-    }
-
+       }
+    
     func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
@@ -49,6 +57,10 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     func printDebugInfo() {
         print("Token: \(token ?? "No Token")")
         print("Group ID: \(groupId ?? "No Group ID")")
+        print("Team ID: \(teamId.isEmpty ? "No Team ID" : teamId)")
+        print("Staff ID: \(staffId.isEmpty ? "No Staff ID" : staffId)")
+        print("User ID: \(userId ?? "No User ID")")
+        print("Feedback ID: \(feedbackId ?? "No Feedback ID")")
         printSavedFeedback()
     }
 
@@ -66,6 +78,95 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     // MARK: - Submit Feedback API Call
     // MARK: - Submit Feedback API Call
     // MARK: - Submit Feedback API Call
+    
+    
+    @objc func submitFeedbackForparent() {
+            guard let token = token else {
+                print("Missing token")
+                return
+            }
+
+            guard let groupId = groupId,
+                  let feedbackId = feedbackId,
+                  let userId = userId else {
+                print("Missing required IDs")
+                return
+            }
+
+            let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/feedback/\(feedbackId)/staff/\(staffId)/answer?userId=\(userId)"
+
+            print("API URL: \(urlString)")
+
+            let body: [String: Any] = [
+                "isActive": false,
+                "noOfOptions": "5",
+                "noOfQuestions": "1",
+                "options": [],
+                "questionsArray": [
+                    [
+                        "question": "Welcome",
+                        "questionNo": 1,
+                        "options": [
+                            ["answer": true, "marks": "1", "option": "a", "optionNo": "1"],
+                            ["answer": false, "marks": "2", "option": "b", "optionNo": "2"],
+                            ["answer": false, "marks": "3", "option": "c", "optionNo": "3"],
+                            ["answer": false, "marks": "4", "option": "d", "optionNo": "4"],
+                            ["answer": false, "marks": "5", "option": "e", "optionNo": "5"]
+                        ]
+                    ]
+                ],
+                "title": "sbeg dg"
+            ]
+
+            guard let url = URL(string: urlString) else {
+                print("Invalid URL")
+                return
+            }
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
+                request.httpBody = jsonData
+            } catch {
+                print("Failed to serialize JSON:", error.localizedDescription)
+                return
+            }
+
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("API Error:", error.localizedDescription)
+                    return
+                }
+
+                if let response = response as? HTTPURLResponse {
+                    print("Status Code:", response.statusCode)
+
+                    if response.statusCode == 200 {
+                        // Successfully saved, show alert on main thread
+                        DispatchQueue.main.async {
+                            let alert = UIAlertController(title: "Saved", message: "Successfully saved feedback to the API!", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                            self.present(alert, animated: true, completion: nil)
+                        }
+                    } else {
+                        print("Failed to save feedback. Status Code: \(response.statusCode)")
+                    }
+                }
+
+                if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                    print("API Response:", responseString)
+                }
+            }
+
+            task.resume()
+        }
+
+    
+
     @objc func submitFeedback() {
         guard let groupId = groupId, let feedbackId = feedbackId else {
             print("Missing groupId or feedbackId")

@@ -16,6 +16,11 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     var groupId: String?
     var token: String?
     var feedbackData: [FeedBackItem] = []
+    var feedbackOptions: [FeedbackOption] = []
+     
+    var optionNo: String?
+   var option: String?
+   var Marks: String?
     
     let startDatePicker = UIDatePicker()
     let endDatePicker = UIDatePicker()
@@ -29,6 +34,16 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         SaveButton.layer.cornerRadius = 8
         OptionsButton.clipsToBounds = true
         SaveButton.clipsToBounds = true
+        
+        if let text = NoOfOptons.text, let count = Int(text) {
+            for i in 1...count {
+                let newOption = FeedbackOption(optionNo: "\(i)", option: "", marks: "", answer: false)
+                feedbackOptions.append(newOption)
+            }
+            TableView.reloadData()
+        } else {
+            print("Invalid number of options entered")
+        }
 
         TableView.delegate = self
         TableView.dataSource = self
@@ -78,10 +93,17 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let allowedCharacters = CharacterSet.decimalDigits
-        let characterSet = CharacterSet(charactersIn: string)
-        return allowedCharacters.isSuperset(of: characterSet)
+        // Restrict only NoOfQuestins and NoOfOptons to numbers
+        if textField == NoOfQuestins || textField == NoOfOptons {
+            let allowedCharacters = CharacterSet.decimalDigits
+            let characterSet = CharacterSet(charactersIn: string)
+            return allowedCharacters.isSuperset(of: characterSet)
+        }
+
+        // Allow text for other fields like Question and Marks
+        return true
     }
+
     
     @objc func dateChanged(_ sender: UIDatePicker) {
         let dateFormatter = DateFormatter()
@@ -109,13 +131,21 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func optionsButtonTapped(_ sender: UIButton) {
         if areAllFieldsFilled() {
-            updateQuestionsArray()
-            OptionsView.isHidden.toggle()
-            OptionsButton.isHidden = true
-            TableView.reloadData()
-        } else {
-            showAlert(message: "Please fill in all the fields before proceeding.")
-        }
+                updateQuestionsArray()
+                OptionsView.isHidden.toggle()
+                OptionsButton.isHidden = true
+                
+                // Update the feedbackOptions array
+                if let count = Int(NoOfOptons.text ?? "0"), count > 0 {
+                    feedbackOptions = (1...count).map { FeedbackOption(optionNo: "\($0)", option: "", marks: "", answer: false) }
+                } else {
+                    feedbackOptions.removeAll()
+                }
+                
+                TableView.reloadData()
+            } else {
+                showAlert(message: "Please fill in all the fields before proceeding.")
+            }
     }
     
     func updateQuestionsArray() {
@@ -145,43 +175,125 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         button.layer.shadowRadius = 3
         button.layer.masksToBounds = false
     }
+    
+    func updateOptionsArray() {
+        if let count = Int(NoOfOptons.text ?? "0"), count > 0 {
+            feedbackOptions = (0..<count).map {
+                FeedbackOption(optionNo: "\($0 + 1)", option: "", marks: "", answer: false)
+            }
+        } else {
+            feedbackOptions.removeAll()
+        }
+        TableView.reloadData()
+    }
+
 }
 
 extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Int(NoOfOptons.text ?? "0") ?? 0
+        return feedbackOptions.count // Use the count of feedbackOptions instead of NoOfOptons.text
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "AddFeedBackCell", for: indexPath) as! AddFeedBackTableViewCell
+//        cell.QuestionNo.text = "\(indexPath.row + 1)"
+//        self.option = cell.Question.text
+//        self.optionNo = cell.QuestionNo.text
+//        self.Marks = cell.Marks.text
+//
+//        return cell
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "AddFeedBackCell", for: indexPath) as! AddFeedBackTableViewCell
-        cell.QuestionNo.text = "\(indexPath.row + 1)"
+       
+//        cell.QuestionNo.text = "\(indexPath.row + 1)"
+//        self.option = cell.Question.text
+        
+        let option = feedbackOptions[indexPath.row]
+        
+        cell.Question.delegate = self
+        cell.Marks.delegate = self
+
+        cell.Question.tag = indexPath.row
+        cell.Marks.tag = indexPath.row
+
+        cell.QuestionNo.text = option.optionNo
+        cell.Question.text = option.option
+        cell.Marks.text = option.marks
+
+        // Tag text fields to know which row they belong to
+        cell.Question.tag = indexPath.row
+        cell.Marks.tag = indexPath.row
+
+        cell.Question.delegate = self
+        cell.Marks.delegate = self
+
         return cell
     }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        let index = textField.tag
+        guard index < feedbackOptions.count else { return }
+
+        if let cell = TableView.cellForRow(at: IndexPath(row: index, section: 0)) as? AddFeedBackTableViewCell {
+            let updatedOption = FeedbackOption(
+                optionNo: "\(index + 1)",
+                option: cell.Question.text ?? "",
+                marks: cell.Marks.text ?? "",
+                answer: false // Or keep a toggle/checkbox for answer if needed
+            )
+            feedbackOptions[index] = updatedOption
+        }
+    }
+
+    
     @IBAction func saveButtonTapped(_ sender: UIButton) {
-        guard let groupId = groupId, let title = enterTitle.text,
-              let startDate = StartDate.text, let endDate = EndDate.text,
-              let noOfQuestions = NoOfQuestins.text, let noOfOptions = NoOfOptons.text else {
-            print("Missing required fields")
+        guard let groupId = groupId, !groupId.isEmpty else {
+            print("Missing groupId")
             return
         }
-        var questionsArray: [FeedbackQuestion] = []
+        guard let title = enterTitle.text, !title.isEmpty else {
+            print("Missing title")
+            return
+        }
+        guard let startDate = StartDate.text, !startDate.isEmpty else {
+            print("Missing startDate")
+            return
+        }
+        guard let endDate = EndDate.text, !endDate.isEmpty else {
+            print("Missing endDate")
+            return
+        }
+        guard let noOfQuestions = NoOfQuestins.text, !noOfQuestions.isEmpty else {
+            print("Missing number of questions")
+            return
+        }
+        guard let noOfOptions = NoOfOptons.text, !noOfOptions.isEmpty else {
+            print("Missing number of options")
+            return
+        }
+
+        var questionsArray: [QuestionData] = []
         for i in 0..<questions.count {
             if let cell = TableView.cellForRow(at: IndexPath(row: i, section: 0)) as? AddFeedBackTableViewCell,
                let questionText = cell.Question.text, let marksText = cell.Marks.text {
-                let question = FeedbackQuestion(question: questionText, marks: marksText)
+                let marksInt = Int(marksText) ?? 0  // Convert marksText to Int?
+                let question = QuestionData(question: questionText, marks: marksInt, options: feedbackOptions)  // Pass feedbackOptions here
                 questionsArray.append(question)
             }
         }
 
+        // Ensure all options are captured in feedbackOptions
         var options: [FeedbackOption] = []
-        if let noOfOptionsInt = Int(noOfOptions) {
-            options = (1...noOfOptionsInt).map { FeedbackOption(optionNo: "\($0)", option: "Option \($0)", marks: "0", answer: false) }
-        } else {
-            print("Invalid number of options")
-            return
+        for i in 0..<feedbackOptions.count {
+            let option = feedbackOptions[i]
+            options.append(FeedbackOption(optionNo: option.optionNo,
+                                          option: option.option,
+                                          marks: option.marks,
+                                          answer: option.answer))
         }
 
+        // Send the API request with the proper data
         let feedbackData = FeedBackRequest(
             groupId: groupId,
             isActive: true,
@@ -234,6 +346,7 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
 
         task.resume()
     }
+
     @IBAction func BackButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
