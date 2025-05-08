@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource, StudentMarksDetailDelegate {
     
     @IBOutlet weak var examListTableView: UITableView!
     
@@ -109,11 +109,15 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             }
         }.resume()
     }
+    
+    func didUpdateMarks() {
+            fetchExamData(offlineTestExamId: offlineTestExamId ?? "")
+        }
 
     func navigateToMarksCard() {
         let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
         guard let studentMarksDetailVC = storyboard.instantiateViewController(withIdentifier: "StudentMarksDetailVC") as? StudentMarksDetailVC else {
-            print("❌ Failed to instantiate SubjectViewController")
+            print("❌ Failed to instantiate StudentMarksDetailVC")
             return
         }
         studentMarksDetailVC.examDataResponse = self.examDataResponse
@@ -122,6 +126,13 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         studentMarksDetailVC.groupId = self.groupId
         studentMarksDetailVC.teamId = self.teamId
         studentMarksDetailVC.offlineTestExamId = self.offlineTestExamId
+        
+        // Set the closure
+        studentMarksDetailVC.onMarksUpdated = { [weak self] in
+            self?.fetchExamData(offlineTestExamId: self?.offlineTestExamId ?? "")
+        }
+        
         self.navigationController?.pushViewController(studentMarksDetailVC, animated: true)
     }
 }
+

@@ -52,7 +52,6 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         print("studentName: \(studentName ?? "No studentName")")
         print("isSubmitted: \(isSubmitted ?? false)")
         print("feedbackData: \(feedbackData)")
-//        print(" feedback questions aaaaaaaa: \(feedbackQuestions)")
 
         tableView.delegate = self
         tableView.dataSource = self

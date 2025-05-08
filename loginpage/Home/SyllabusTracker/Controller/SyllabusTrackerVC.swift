@@ -11,6 +11,7 @@ class SyllabusTrackerVC: UIViewController {
     var groupId: String = "" // Group ID
     var teamId: String = "" 
     var className: String = ""
+    var currentrole: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,7 +81,7 @@ extension SyllabusTrackerVC: UITableViewDelegate, UITableViewDataSource {
 // MARK: - API Call for Subject Staff Details
 extension SyllabusTrackerVC {
     func fetchSubjectStaffDetails(for teamId: String) {
-        let urlString = APIProdManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/staff/get"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/staff/get"
         print("Fetching data from: \(urlString)")
 
         guard let url = URL(string: urlString) else {
@@ -160,6 +161,7 @@ extension SyllabusTrackerVC {
             subjectStaffVC.passedGroupId = groupId  // Pass groupId
             subjectStaffVC.passedTeamId = teamId    // Pass teamId
             subjectStaffVC.passedSubjectId = subjectId // Pass subjectId
+            subjectStaffVC.currentrole = self.currentrole
 
             self.navigationController?.pushViewController(subjectStaffVC, animated: true)
         }

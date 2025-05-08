@@ -32,6 +32,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
     var chapters: [ChapterData] = []
     var currentButton: UIButton?
     var originalPlan: ChapterPlanResponse?
+    var currentrole: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,6 +41,9 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
         Chaptertableview.delegate = self
         Chaptertableview.dataSource = self
         Chaptertableview.register(UINib(nibName: "ChapterTableViewCell", bundle: nil), forCellReuseIdentifier: "ChapterTableViewCell")
+        if currentrole?.lowercased() == "parent" {
+            submitButton.isHidden = true
+        }
         
         subjectName.text = passedSubjectName
         fetchChapters()
@@ -88,6 +92,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.navigationController?.popViewController(animated: true)
     }
     @IBAction func submitButton(_ sender: Any) {
+        dailogboxView.isHidden = true
         guard let originalPlan = originalPlan else {
             print("No original data to compare")
             return
@@ -129,7 +134,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return
             }
     
-        let urlString = APIProdManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/syllabus/get"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/syllabus/get"
             print("Fetching chapters from: \(urlString)")
     
             guard let url = URL(string: urlString) else {
@@ -205,7 +210,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        let urlString = APIProdManager.shared.baseURL +  "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/plan?chapterId=\(chapterId)"
+        let urlString = APIProdManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/plan?chapterId=\(chapterId)"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
@@ -251,7 +256,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        let urlString = APIProdManager.shared.baseURL +  "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/plan?planId=\(plan.planId)"
+        let urlString = "https://prod.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/plan?planId=\(plan.planId)"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
@@ -444,6 +449,9 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         
         let chapter = chapters[indexPath.row]
+        if currentrole?.lowercased() == "parent" {
+            cell.delete.isHidden = true
+        }
         cell.configure(with: chapter, groupId: groupId, teamId: teamId, subjectId: subjectId)
         cell.delegate = self
         return cell
@@ -459,7 +467,17 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedChapter = chapters[indexPath.row]
         let chapterId = selectedChapter.chapterId
-        
+        DispatchQueue.main.async {
+            self.dailogboxView.isHidden = false
+            self.chapter.text = "Chapter - \(selectedChapter.chapterName)"
+            
+            if !selectedChapter.topicsList.isEmpty {
+                let topics = selectedChapter.topicsList[0]
+                self.topic.text = "Topic Name - \(topics.topicName)"
+            } else {
+                self.topic.text = "No topics available"
+            }
+        }
         callChapterPlanAPI(chapterId: chapterId) { [weak self] plan in
             guard let self = self else { return }
             

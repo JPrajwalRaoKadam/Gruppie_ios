@@ -52,7 +52,7 @@ class listOfStaffVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     
     func fetchFeedbackStudentData() {
         // API URL
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/class/staffs/get?feedbackId=\(feedbackId ?? "")&userId=\(userId)"
+        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/class/staffs/get?feedbackId=\(feedbackId ?? "")&userId=\(userId)"
         
         print("🌐 Request URL: \(urlString)")
         

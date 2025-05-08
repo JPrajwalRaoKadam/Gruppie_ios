@@ -229,7 +229,11 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         case "Gallery":
             navigateToGalleryViewController()
         case "Attendance":
-            navigateToAttendanceViewController()
+            if currentRole == "admin" {
+                navigateToAttendanceViewController()
+            } else if currentRole == "teacher" {
+                fetchSubjectDataAndNavigate()
+            }
         case "Syllabus Tracker":
             fetchSubjectDataAndNavigate()
         case "Time Table":
@@ -304,13 +308,26 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         }
     
     func navigateToAttendanceViewController() {
-            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
-            if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
-                attendanceVC.groupId = school?.id ?? ""
-                print("groupId of attendance: \(attendanceVC.groupId)")
-                navigationController?.pushViewController(attendanceVC, animated: true)
+                let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+                if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
+                    attendanceVC.groupId = school?.id ?? ""
+                    attendanceVC.currentRole = self.currentRole ?? ""
+                    print("groupId of attendance: \(attendanceVC.groupId)")
+                    navigationController?.pushViewController(attendanceVC, animated: true)
+                }
             }
-        }
+    
+    func navigateToAttendanceViewControllerWithClass(subjects: [SubjectData], teamIds: [String]) {
+                let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+                if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
+                    attendanceVC.groupId = school?.id ?? ""
+                    attendanceVC.teamid = teamIds[indexPath?.row ?? 0]
+                    attendanceVC.subjects = subjects
+                    attendanceVC.currentRole = self.currentRole ?? ""
+                    print("groupId of attendance: \(attendanceVC.groupId)")
+                    navigationController?.pushViewController(attendanceVC, animated: true)
+                }
+            }
     
     func navigateToFeedBackViewController() {
         let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
@@ -468,6 +485,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.navigateToListOfStudentsVC(subjects: subjects)
                         case "Home Work":
                             self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
+                        case "Attendance":
+                            self.navigateToAttendanceViewControllerWithClass(subjects: subjects, teamIds: teamIds)
                         default:
                             print("No navigation configured for type: \(self.featureIcon?.type)")
                             
@@ -587,13 +606,14 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     func navigateToCalendarViewController() {
-        let storyboard = UIStoryboard(name: "calender", bundle: nil)
-        if let calendarVC = storyboard.instantiateViewController(withIdentifier: "CalenderViewController") as? CalenderViewController {
-            calendarVC.groupId = school?.id ?? ""
-            print("groupId : \(calendarVC.groupId)")
-            navigationController?.pushViewController(calendarVC, animated: true)
+            let storyboard = UIStoryboard(name: "calender", bundle: nil)
+            if let calendarVC = storyboard.instantiateViewController(withIdentifier: "CalenderViewController") as? CalenderViewController {
+                calendarVC.groupId = school?.id ?? ""
+                calendarVC.currentRole = self.currentRole ?? ""
+                print("groupId : \(calendarVC.groupId)")
+                navigationController?.pushViewController(calendarVC, animated: true)
+            }
         }
-    }
     
     func navigateToMangementViewController() {
         print("Home stack tapped, calling API...")

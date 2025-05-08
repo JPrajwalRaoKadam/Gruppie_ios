@@ -19,6 +19,9 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
     var currentDate : String?
     var attendanceData: [Attendance] = []
     var classDetails: [[String: Any]] = []
+    var subjects: [SubjectData] = []
+    var teamid: String?
+    var currentRole: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -187,68 +190,101 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return attendanceData.count
+        if currentRole == "teacher" {
+            return subjects.count
+        } else {
+            return attendanceData.count
+        }
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
-            fatalError("Cell could not be dequeued")
-        }
-        
-        let attendance = attendanceData[indexPath.row]
-        cell.classLabel.text = attendance.name
-        print("Class Name: \(attendance.name)")
-        
-        // Check if the image URL is missing, empty, or contains "image_url_or_path"
-        if let imageUrlString = attendance.image,
-           !imageUrlString.isEmpty,
-           imageUrlString != "image_url_or_path",
-           let imageUrl = URL(string: imageUrlString) {
-            
-            // Load image asynchronously
-            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-                if let data = data, let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        cell.img.image = image
-                        cell.fallbackLabel.isHidden = true // Hide fallback label when image is available
-                    }
-                } else {
-                    // Show fallback if the image fails to load
-                    DispatchQueue.main.async {
-                        cell.showFallbackImage(for: attendance.name)
-                        cell.fallbackLabel.isHidden = false
-                    }
-                }
-            }.resume()
+        if currentRole == "teacher" {
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
+                fatalError("Cell could not be dequeued")
+            }
+            let subject = subjects[indexPath.row] as! SubjectData
+            cell.textLabel?.text = subject.name // Replace with your custom logic
+                    return cell
         } else {
-            // Show fallback when image is missing or invalid
-            DispatchQueue.main.async {
-                cell.img.image = nil // Ensure no old image is displayed
-                cell.showFallbackImage(for: attendance.name)
-                cell.fallbackLabel.isHidden = false
-                cell.configure(with: attendance)
-
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
+                fatalError("Cell could not be dequeued")
+            }
+            
+            let attendance = attendanceData[indexPath.row]
+            cell.classLabel.text = attendance.name
+            print("Class Name: \(attendance.name)")
+            
+            // Check if the image URL is missing, empty, or contains "image_url_or_path"
+            if let imageUrlString = attendance.image,
+               !imageUrlString.isEmpty,
+               imageUrlString != "image_url_or_path",
+               let imageUrl = URL(string: imageUrlString) {
+                
+                // Load image asynchronously
+                URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+                    if let data = data, let image = UIImage(data: data) {
+                        DispatchQueue.main.async {
+                            cell.img.image = image
+                            cell.fallbackLabel.isHidden = true // Hide fallback label when image is available
+                        }
+                    } else {
+                        // Show fallback if the image fails to load
+                        DispatchQueue.main.async {
+                            cell.showFallbackImage(for: attendance.name)
+                            cell.fallbackLabel.isHidden = false
+                        }
+                    }
+                }.resume()
+            } else {
+                // Show fallback when image is missing or invalid
+                DispatchQueue.main.async {
+                    cell.img.image = nil // Ensure no old image is displayed
+                    cell.showFallbackImage(for: attendance.name)
+                    cell.fallbackLabel.isHidden = false
+                    cell.configure(with: attendance)
+                    
+                }
+            }
+            
+            return cell
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if currentRole == "teacher" {
+            // Navigate to subject-specific attendance view for teachers
+            let selectedSubject = subjects[indexPath.row]
+            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+            if let StudentVC = storyboard.instantiateViewController(withIdentifier: "StudentVC") as? StudentVC {
+                StudentVC.currentDate = currentDate
+                StudentVC.groupId = groupId
+                let subject = subjects[indexPath.row]
+                StudentVC.teamId = subject.teamId
+                StudentVC.className = subject.name
+//                StudentVC.attendanceData = self.attendanceData
+//                StudentVC.selectedClassnumberOfTimeAttendance = Int(selectedAttendance.numberOfTimeAttendance)
+                navigationController?.pushViewController(StudentVC, animated: true)
+            } else {
+                print("❌ Could not instantiate SubjectAttendanceVC")
+            }
+        } else {
+            // Navigate to student list for selected class
+            let selectedAttendance = attendanceData[indexPath.row]
+            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+            if let StudentVC = storyboard.instantiateViewController(withIdentifier: "StudentVC") as? StudentVC {
+                StudentVC.groupId = groupId
+                StudentVC.teamId = selectedAttendance.teamId
+                StudentVC.currentDate = currentDate
+                StudentVC.className = selectedAttendance.name
+                StudentVC.attendanceData = self.attendanceData
+                StudentVC.selectedClassnumberOfTimeAttendance = Int(selectedAttendance.numberOfTimeAttendance)
+                navigationController?.pushViewController(StudentVC, animated: true)
+            } else {
+                print("❌ Could not instantiate StudentVC")
             }
         }
-        
-        return cell
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedAttendance = attendanceData[indexPath.row]
-        let storyboard = UIStoryboard(name: "Attendance", bundle: nil) // Ensure the name is correct
-        if let StudentVC = storyboard.instantiateViewController(withIdentifier: "StudentVC") as? StudentVC {
-            StudentVC.groupId = groupId
-            StudentVC.teamId = selectedAttendance.teamId
-            StudentVC.currentDate = currentDate
-            StudentVC.className = selectedAttendance.name
-            StudentVC.attendanceData = self.attendanceData
-            StudentVC.selectedClassnumberOfTimeAttendance = Int(selectedAttendance.numberOfTimeAttendance)
 
-            navigationController?.pushViewController(StudentVC, animated: true)
-        } else {
-            print("❌ Could not instantiate StudentVC")
-        }
-
-    }
+    
     func showDatePickerPopup(for button: UIButton) {
         let backgroundView = UIView(frame: UIScreen.main.bounds)
         backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
@@ -341,5 +377,3 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
         }
     }
 }
-
-

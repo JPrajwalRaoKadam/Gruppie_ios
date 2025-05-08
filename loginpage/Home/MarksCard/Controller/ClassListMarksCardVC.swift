@@ -76,19 +76,19 @@ class ClassListMarksCardVC: UIViewController, UITableViewDelegate, UITableViewDa
             }
 
             do {
-                let decodedResponse = try JSONDecoder().decode(ExamDataResponse.self, from: data)
+                let decoder = JSONDecoder()
+                let decodedResponse = try decoder.decode(ExamDataResponse.self, from: data)
                 DispatchQueue.main.async {
                     self.examDataResponse = decodedResponse.data
                     self.navigateToExamVC()
                 }
             } catch {
-                print("Failed to decode JSON: \(error.localizedDescription)")
+                print("Failed to decode JSON: \(error)")
                 if let rawString = String(data: data, encoding: .utf8) {
                     print("Raw JSON Response: \(rawString)")
                 }
             }
         }
-
         task.resume()
     }
     

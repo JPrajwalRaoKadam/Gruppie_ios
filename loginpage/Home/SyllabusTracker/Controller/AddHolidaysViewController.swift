@@ -38,7 +38,7 @@ class AddHolidaysViewController: UIViewController, UITableViewDelegate, UITableV
             print("Token not found")
             return
         }
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/get/calendar/events?year=2025"
+        let urlString = APIManager.shared.baseURL +  "groups/\(groupId)/get/calendar/events?year=2025"
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
             return

@@ -13,6 +13,7 @@ protocol ChapterTableViewCellDelegate: AnyObject {
 class ChapterTableViewCell: UITableViewCell {
     
     @IBOutlet weak var topic: UILabel!
+    @IBOutlet weak var delete: UIButton!
     @IBOutlet weak var chapter: UILabel!
     
     weak var delegate: ChapterTableViewCellDelegate?
@@ -40,9 +41,30 @@ class ChapterTableViewCell: UITableViewCell {
         }
     }
 
+//    @IBAction func deleteButton(_ sender: Any) {
+//        deleteChapter()
+//    }
     @IBAction func deleteButton(_ sender: Any) {
-        deleteChapter()
+        showDeleteConfirmation()
     }
+
+    private func showDeleteConfirmation() {
+        guard let topVC = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.rootViewController?.topMostViewController() else {
+            return
+        }
+
+        let alert = UIAlertController(title: "Confirm Delete",
+                                      message: "Are you sure you want to delete this chapter?",
+                                      preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: { _ in
+            self.deleteChapter()
+        }))
+
+        topVC.present(alert, animated: true, completion: nil)
+    }
+
 
     private func deleteChapter() {
         guard let token = TokenManager.shared.getToken() else {
@@ -50,7 +72,7 @@ class ChapterTableViewCell: UITableViewCell {
             return
         }
 
-        let urlString = "\(APIProdManager.shared.baseURL)groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/chapter/\(chapterId)/syllabus/delete"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/chapter/\(chapterId)/syllabus/delete"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
@@ -77,5 +99,19 @@ class ChapterTableViewCell: UITableViewCell {
             }
         }
         task.resume()
+    }
+}
+extension UIViewController {
+    func topMostViewController() -> UIViewController {
+        if let presentedVC = self.presentedViewController {
+            return presentedVC.topMostViewController()
+        }
+        if let navVC = self as? UINavigationController {
+            return navVC.visibleViewController?.topMostViewController() ?? navVC
+        }
+        if let tabVC = self as? UITabBarController {
+            return tabVC.selectedViewController?.topMostViewController() ?? tabVC
+        }
+        return self
     }
 }

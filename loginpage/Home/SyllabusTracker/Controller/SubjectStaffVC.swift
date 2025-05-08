@@ -16,6 +16,8 @@ class SubjectStaffVC: UIViewController {
     var passedGroupId: String = ""  // New variable for groupId
     var passedTeamId: String = ""   // New variable for teamId
     var passedSubjectId: String = "" // New variable for subjectId
+    var currentrole: String?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -58,6 +60,7 @@ extension SubjectStaffVC: UITableViewDelegate, UITableViewDataSource {
               chapterVC.teamId = passedTeamId
               chapterVC.subjectId = selectedStaff.subjectId
               chapterVC.passedSubjectName = selectedStaff.subjectName
+              chapterVC.currentrole = self.currentrole
               self.navigationController?.pushViewController(chapterVC, animated: true)
           }
       }

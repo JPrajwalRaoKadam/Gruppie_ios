@@ -20,21 +20,20 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     var selectedOptions: [Int: Int]?
 
     override func viewDidLoad() {
-           super.viewDidLoad()
-           
-           setupTableView()
-           bindTitle()
-           setupButtons()
-           printDebugInfo()
-           if role == "admin" {
-               submitButton.addTarget(self, action: #selector(submitFeedback), for: .touchUpInside)
-           } else if role == "parent" || role == "teacher" {
-               submitButton.addTarget(self, action: #selector(submitFeedbackForparent), for: .touchUpInside)
-           }
-           
-           editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
-
-       }
+        super.viewDidLoad()
+        
+        setupTableView()
+        bindTitle()
+        setupButtons()
+        printDebugInfo()
+        if role == "admin" {
+            submitButton.addTarget(self, action: #selector(submitFeedback), for: .touchUpInside)
+        } else if role == "parent" || role == "teacher" {
+            submitButton.addTarget(self, action: #selector(submitFeedbackForparent), for: .touchUpInside)
+        }
+        
+        editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+    }
     
     func setupTableView() {
         tableView.delegate = self
@@ -75,107 +74,104 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
-    // MARK: - Submit Feedback API Call
-    // MARK: - Submit Feedback API Call
-    // MARK: - Submit Feedback API Call
-    
-    
+    // MARK: - Submit Feedback (Parent/Teacher)
     @objc func submitFeedbackForparent() {
-            guard let token = token else {
-                print("Missing token")
-                return
-            }
-
-            guard let groupId = groupId,
-                  let feedbackId = feedbackId,
-                  let userId = userId else {
-                print("Missing required IDs")
-                return
-            }
-
-            let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/feedback/\(feedbackId)/staff/\(staffId)/answer?userId=\(userId)"
-
-            print("API URL: \(urlString)")
-
-            let body: [String: Any] = [
-                "isActive": false,
-                "noOfOptions": "5",
-                "noOfQuestions": "1",
-                "options": [],
-                "questionsArray": [
-                    [
-                        "question": "Welcome",
-                        "questionNo": 1,
-                        "options": [
-                            ["answer": true, "marks": "1", "option": "a", "optionNo": "1"],
-                            ["answer": false, "marks": "2", "option": "b", "optionNo": "2"],
-                            ["answer": false, "marks": "3", "option": "c", "optionNo": "3"],
-                            ["answer": false, "marks": "4", "option": "d", "optionNo": "4"],
-                            ["answer": false, "marks": "5", "option": "e", "optionNo": "5"]
-                        ]
-                    ]
-                ],
-                "title": "sbeg dg"
-            ]
-
-            guard let url = URL(string: urlString) else {
-                print("Invalid URL")
-                return
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
-                request.httpBody = jsonData
-            } catch {
-                print("Failed to serialize JSON:", error.localizedDescription)
-                return
-            }
-
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    print("API Error:", error.localizedDescription)
-                    return
-                }
-
-                if let response = response as? HTTPURLResponse {
-                    print("Status Code:", response.statusCode)
-
-                    if response.statusCode == 200 {
-                        // Successfully saved, show alert on main thread
-                        DispatchQueue.main.async {
-                            let alert = UIAlertController(title: "Saved", message: "Successfully saved feedback to the API!", preferredStyle: .alert)
-                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                            self.present(alert, animated: true, completion: nil)
-                        }
-                    } else {
-                        print("Failed to save feedback. Status Code: \(response.statusCode)")
-                    }
-                }
-
-                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                    print("API Response:", responseString)
-                }
-            }
-
-            task.resume()
+        guard let token = token,
+              let groupId = groupId,
+              let feedbackId = feedbackId,
+              let userId = userId else {
+            print("Missing required identifiers")
+            return
         }
 
-    
+        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/feedback/\(feedbackId)/staff/\(staffId)/answer?userId=\(userId)"
+        print("API URL: \(urlString)")
 
+        var questionsArray: [[String: Any]] = []
+
+        for (index, feedback) in savedFeedback.enumerated() {
+            var optionsArray: [[String: Any]] = []
+            for (optionIndex, option) in feedback.options.enumerated() {
+                let optionDict: [String: Any] = [
+                    "optionNo": "\(optionIndex + 1)",
+                    "option": option.option,
+                    "marks": option.marks ?? "0",
+                    "answer": option.answer ?? false
+                ]
+                optionsArray.append(optionDict)
+            }
+
+            let questionDict: [String: Any] = [
+                "question": feedback.question,
+                "questionNo": index + 1,
+                "options": optionsArray
+            ]
+
+            questionsArray.append(questionDict)
+        }
+
+        let requestBody: [String: Any] = [
+            "isActive": false,
+            "noOfOptions": "5",
+            "noOfQuestions": "\(savedFeedback.count)",
+            "options": [],
+            "questionsArray": questionsArray,
+            "title": feedbackItem?.title ?? "Untitled"
+        ]
+
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+            request.httpBody = jsonData
+        } catch {
+            print("JSON Serialization Error:", error.localizedDescription)
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Request Error:", error.localizedDescription)
+                return
+            }
+
+            if let response = response as? HTTPURLResponse {
+                print("Status Code:", response.statusCode)
+
+                if response.statusCode == 200 {
+                    DispatchQueue.main.async {
+                        let alert = UIAlertController(title: "Saved", message: "Successfully saved feedback to the API!", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(alert, animated: true)
+                    }
+                } else {
+                    print("Failed to save feedback. Status Code: \(response.statusCode)")
+                }
+            }
+
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("API Response:", responseString)
+            }
+        }.resume()
+    }
+
+    // MARK: - Submit Feedback (Admin)
     @objc func submitFeedback() {
         guard let groupId = groupId, let feedbackId = feedbackId else {
             print("Missing groupId or feedbackId")
             return
         }
 
-        let apiURL = APIManager.shared.baseURL + "\(groupId)/feedback/\(feedbackId)/questions/add"
+        let apiURL = "https://api.gruppie.in/api/v1/groups/\(groupId)/feedback/\(feedbackId)/questions/add"
         
-        // Prepare the request body
         var questionsArray: [[String: Any]] = []
 
         for (index, feedback) in savedFeedback.enumerated() {
@@ -185,7 +181,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 let optionData: [String: Any] = [
                     "optionNo": "\(optionIndex + 1)",
                     "option": option.option,
-                    "marks": option.marks ?? "0",  // Assuming marks may be optional
+                    "marks": option.marks ?? "0",
                     "answer": option.answer ?? false
                 ]
                 optionsArray.append(optionData)
@@ -222,12 +218,10 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if let response = response as? HTTPURLResponse {
                     if response.statusCode == 200 {
                         print("Successfully saved feedback to the API!")
-                        
-                        // Show alert on main thread
                         DispatchQueue.main.async {
                             let alert = UIAlertController(title: "Saved", message: "Your feedback has been successfully saved.", preferredStyle: .alert)
-                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                            self.present(alert, animated: true, completion: nil)
+                            alert.addAction(UIAlertAction(title: "OK", style: .default))
+                            self.present(alert, animated: true)
                         }
                     } else {
                         print("Failed to save feedback. Status Code: \(response.statusCode)")
@@ -244,7 +238,8 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("Failed to encode JSON:", error.localizedDescription)
         }
     }
-    // MARK: - TableView DataSource Methods
+
+    // MARK: - TableView DataSource & Delegate
     func numberOfSections(in tableView: UITableView) -> Int {
         return savedFeedback.count
     }
@@ -255,14 +250,11 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "QuestionsTableViewCell", for: indexPath) as! QuestionsTableViewCell
-        
         let option = savedFeedback[indexPath.section].options[indexPath.row]
-        cell.options.text = "\(indexPath.row + 1). \(option.option)" // Adding numbering
-        
+        cell.options.text = "\(indexPath.row + 1). \(option.option)"
         return cell
     }
 
-    // MARK: - Custom Section Header
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView()
         headerView.backgroundColor = .white
@@ -270,7 +262,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
         let label = UILabel()
         label.frame = CGRect(x: 16, y: 5, width: tableView.frame.width - 32, height: 35)
         label.text = "\(section + 1). \(savedFeedback[section].question)"
-        label.font = UIFont.systemFont(ofSize: 20, weight: .bold) // Increased font size & weight
+        label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         label.textColor = .black
 
         headerView.addSubview(label)
@@ -278,15 +270,15 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 50 // Slightly increased height for better spacing
+        return 50
     }
-    
+
+    // MARK: - Navigation
     @IBAction func BackButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
+
     @objc func editButtonTapped() {
-        // Navigate back to the previous view controller
         navigationController?.popViewController(animated: true)
     }
-
 }

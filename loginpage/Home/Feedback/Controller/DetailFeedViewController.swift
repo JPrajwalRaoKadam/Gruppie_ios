@@ -109,7 +109,7 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
 
         guard let groupId = groupId, !groupId.isEmpty,
               let token = token, !token.isEmpty,
-              let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/class/get") else {
+              let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupId)/class/get") else {
             print("❌ Invalid URL or missing groupId/token")
             return
         }

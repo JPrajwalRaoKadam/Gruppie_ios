@@ -11,6 +11,7 @@ class AddHolidaysCallenderViewController: UIViewController, UITableViewDelegate,
     var groupId: String = ""
     var holidays: [Holiday] = []
     var holidayAddCount = 1
+    var currentRole: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,6 +22,10 @@ class AddHolidaysCallenderViewController: UIViewController, UITableViewDelegate,
         submit.clipsToBounds = true
         
         holiday.register(UINib(nibName: "AddNewHoliday", bundle: nil), forCellReuseIdentifier: "AddNewHoliday")
+        if currentRole != "admin" {
+            submit.isHidden = true
+            holidayAddCount = 0 // Prevent new row for adding holidays
+        }
         fetchHolidays()
     }
         

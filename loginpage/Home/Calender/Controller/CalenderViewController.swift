@@ -13,6 +13,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     var selectedEventId: String = ""
     var selectedDate: Date?
     var currentDate: Date?
+    var currentRole: String = ""
     
     @IBOutlet weak var segmentControl: UISegmentedControl!
     @IBOutlet weak var calendarTableView: UITableView!
@@ -20,40 +21,45 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     @IBOutlet weak var addHolidays: UIButton!
     @IBOutlet weak var calenderView: UIView!
     var calendar: FSCalendar!
-        override func viewDidLoad() {
-            super.viewDidLoad()
-            print("cal grpid: \(groupId)")
-            calendarTableView.delegate = self
-            calendarTableView.dataSource = self
-            //myView.isHidden = true
-           // transforentView.isHidden = true
-            calendarTableView.register(UINib(nibName:"CalendarTableViewCell" , bundle: nil), forCellReuseIdentifier: "CalendarTableViewCell")
-            self.navigationController?.isNavigationBarHidden = true
-            // Initialize the calendar
-            calendar = FSCalendar(frame: CGRect(x: 0, y: 100, width: self.view.frame.width, height: 300))
-           self.view.addSubview(calendar)
-            calendar.backgroundColor = .white
-            calendar.appearance.headerDateFormat = "MMMM yyyy"
-            calendar.appearance.weekdayTextColor = .black
-            calendar.appearance.selectionColor = .blue
-            calendar.scope = .month
-            calendar.scrollDirection = .horizontal
-            // Customize fonts
-            calendar.appearance.titleFont = UIFont.systemFont(ofSize: 18) // Day numbers
-            calendar.appearance.weekdayFont = UIFont.boldSystemFont(ofSize: 16) // Weekdays (e.g., Sun, Mon)
-            calendar.appearance.headerTitleFont = UIFont.boldSystemFont(ofSize: 20) // Month and year header
-            FSCalendar.appearance().placeholderType = .none
-            calendar.scope = .month
-            // Set the delegate
-            calendar.delegate = self
-            let currentDate = Date()
-            calendar.setCurrentPage(currentDate, animated: false)  // Set the current month as the initial view
-            segmentButtonAction(segmentControl)
-            let currentSelectedDate = formatDateToString(date: currentDate)
-//            let selectedDatt = formatDateToString(date: selectedDate!)
-            print("currentSelectedDate date: \(currentSelectedDate)")
-//            print("SelectedDate date: \(selectedDatt)")
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        print("cal grpid: \(groupId)")
+        if currentRole.lowercased() != "admin" {
+            addEvents.isHidden = true
+        } else {
+            addEvents.isHidden = false
         }
+        calendarTableView.delegate = self
+        calendarTableView.dataSource = self
+        //myView.isHidden = true
+        // transforentView.isHidden = true
+        calendarTableView.register(UINib(nibName:"CalendarTableViewCell" , bundle: nil), forCellReuseIdentifier: "CalendarTableViewCell")
+        self.navigationController?.isNavigationBarHidden = true
+        // Initialize the calendar
+        calendar = FSCalendar(frame: CGRect(x: 0, y: 100, width: self.view.frame.width, height: 300))
+        self.view.addSubview(calendar)
+        calendar.backgroundColor = .white
+        calendar.appearance.headerDateFormat = "MMMM yyyy"
+        calendar.appearance.weekdayTextColor = .black
+        calendar.appearance.selectionColor = .blue
+        calendar.scope = .month
+        calendar.scrollDirection = .horizontal
+        // Customize fonts
+        calendar.appearance.titleFont = UIFont.systemFont(ofSize: 18) // Day numbers
+        calendar.appearance.weekdayFont = UIFont.boldSystemFont(ofSize: 16) // Weekdays (e.g., Sun, Mon)
+        calendar.appearance.headerTitleFont = UIFont.boldSystemFont(ofSize: 20) // Month and year header
+        FSCalendar.appearance().placeholderType = .none
+        calendar.scope = .month
+        // Set the delegate
+        calendar.delegate = self
+        let currentDate = Date()
+        calendar.setCurrentPage(currentDate, animated: false)  // Set the current month as the initial view
+        segmentButtonAction(segmentControl)
+        let currentSelectedDate = formatDateToString(date: currentDate)
+        //            let selectedDatt = formatDateToString(date: selectedDate!)
+        print("currentSelectedDate date: \(currentSelectedDate)")
+        //            print("SelectedDate date: \(selectedDatt)")
+    }
     func formatDateToString(date: Date) -> String {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "dd-MM-yyyy" // Format to only show date
@@ -100,6 +106,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
         let storyboard = UIStoryboard(name: "calender", bundle: nil)  
            if let addHolidaysVC = storyboard.instantiateViewController(withIdentifier: "AddHolidaysViewController") as? AddHolidaysCallenderViewController {
                addHolidaysVC.groupId = self.groupId // Pass the groupId
+               addHolidaysVC.currentRole = currentRole
                self.navigationController?.pushViewController(addHolidaysVC, animated: true)
            }
     }
