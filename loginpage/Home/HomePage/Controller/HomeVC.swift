@@ -50,7 +50,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("Received Activity: \(activity.activity)")
             self.featureIcons = activity.featureIcons
             for featureIcon in activity.featureIcons {
-                print("Received Feature Icon Type: \(featureIcon.type), Image: \(featureIcon.image)")
+                print("Received Feature Icon Type: \(featureIcon.name), Image: \(featureIcon.image)")
             }
         }
         
@@ -148,17 +148,42 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             return section == 0 ? nil : groupDatas[section - 1].activity
         }
 
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        if self.featureIcons.count <= 4 {
+//            return 100
+//        } else if self.featureIcons.count > 4 && self.featureIcons.count <= 8 {
+//            return 200
+//        } else if self.featureIcons.count > 8 && self.featureIcons.count <= 12 {
+//            return 300
+//        } else {
+//            return UITableView.automaticDimension
+//        }
+//    }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if self.featureIcons.count <= 4 {
-            return 100
-        } else if self.featureIcons.count > 4 && self.featureIcons.count <= 8 {
-            return 200
-        } else if self.featureIcons.count > 8 && self.featureIcons.count <= 12 {
-            return 300
+        if indexPath.section == 0 {
+            return UITableView.automaticDimension // Or fixed height for Banner/Profile cell
         } else {
-            return UITableView.automaticDimension
+            let featureIcons = groupDatas[indexPath.section - 1].featureIcons // Get icons per section
+            let count = featureIcons.count
+            
+            // Customize height based on number of icons
+            if count <= 4 {
+                return 100
+            } else if count <= 8 {
+                return 200
+            } else {
+                return 300
+//            } else {
+//                // Calculate based on number of rows needed (assuming 4 per row, for example)
+//                let itemsPerRow = 4
+//                let rows = ceil(Double(count) / Double(itemsPerRow))
+//                let heightPerRow: CGFloat = 100 // Adjust as per design
+//                return CGFloat(rows) * heightPerRow
+            }
         }
     }
+
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard section > 0 else { return nil }
@@ -200,7 +225,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         }
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon
-        switch featureIcon.type {
+        switch featureIcon.name {
         case "Calendar":
             navigateToCalendarViewController()
         case "Management Register":
@@ -240,10 +265,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchSubjectDataAndNavigate()
         case "Fees New":
             fetchSubjectDataAndNavigate()
-        case "Home Work":
+        case "Notes & Videos":
             fetchSubjectDataAndNavigate()
         default:
-            print("No navigation configured for type: \(featureIcon.type)")
+            print("No navigation configured for type: \(featureIcon.name)")
         }
     }
     
@@ -468,7 +493,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                     // Navigate to Subject Register after fetching
                     DispatchQueue.main.async {
                         print("🚀 Navigating to SubjectViewController with Team IDs: \(teamIds)")
-                        switch self.featureIcon?.type {
+                        switch self.featureIcon?.name {
                         case "Subject Register":
                             self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
                         case "Marks Card":
@@ -483,12 +508,12 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.navigateToFeesNew(subjects: subjects)
                         case "Feed Back":
                             self.navigateToListOfStudentsVC(subjects: subjects)
-                        case "Home Work":
+                        case "Notes & Videos":
                             self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
                         case "Attendance":
                             self.navigateToAttendanceViewControllerWithClass(subjects: subjects, teamIds: teamIds)
                         default:
-                            print("No navigation configured for type: \(self.featureIcon?.type)")
+                            print("No navigation configured for type: \(self.featureIcon?.name)")
                             
                         }
                     }
@@ -717,13 +742,13 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 dispatchGroup.leave()
             }
             dispatchGroup.notify(queue: .main) {
-                switch self.featureIcon?.type {
+                switch self.featureIcon?.name {
                 case "Staff Register":
                     self.navigateToStaffRegister(teachingStaff: teachingStaff)
                 case "Time Table":
                     self.navigateToTimeTable(staffDetails: teachingStaff)
                 default:
-                    print("No navigation configured for type: \(self.featureIcon?.type)")
+                    print("No navigation configured for type: \(self.featureIcon?.name)")
                 }
             }
         }

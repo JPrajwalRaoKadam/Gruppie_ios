@@ -51,7 +51,7 @@ struct School {
     }
 }
 struct FeatureIcon: Codable {
-    let type: String
+    let name: String
     let image: String
     let role: String
 //    let details: [UserDetails]?

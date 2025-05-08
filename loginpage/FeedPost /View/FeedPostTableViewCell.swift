@@ -331,7 +331,7 @@ class FeedPostTableViewCell: UITableViewCell {
             downloadButton.isHidden = false
             playPauseButton.isHidden = true
         case "audio":
-            audioView.isHidden = false
+//            audioView.isHidden = false
             setupAudioPlayer()
             setupSlider()
             downloadButton.isHidden = true

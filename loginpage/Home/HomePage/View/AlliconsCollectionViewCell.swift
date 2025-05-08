@@ -15,7 +15,7 @@ class AlliconsCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with featureIcon: FeatureIcon) {
-        iconLabel.text = featureIcon.type.count > 10 ? String(featureIcon.type.prefix(10)) + "..." : featureIcon.type
+        iconLabel.text = featureIcon.name.count > 10 ? String(featureIcon.name.prefix(10)) + "..." : featureIcon.name
         if let imageUrl = URL(string: featureIcon.image) {
             iconImage.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder"))
         }

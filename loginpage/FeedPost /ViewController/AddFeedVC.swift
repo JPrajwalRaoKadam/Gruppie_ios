@@ -154,6 +154,7 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                         self.response?.data.insert(newPost, at: 0) // Adds at the top
                         
                         print("🆕 Updated Feed: \(self.response?.data.count ?? 0) posts")
+                        self.navigationController?.popViewController(animated: true)
 
                     case .failure(let error):
                         print("❌ Error Adding Post: \(error.localizedDescription)")

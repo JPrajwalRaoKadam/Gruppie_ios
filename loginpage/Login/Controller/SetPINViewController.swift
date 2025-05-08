@@ -194,7 +194,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
                     for group in groupData {
                         print("Fetched Activity: \(group.activity)")
                         for icon in group.featureIcons {
-                            print("Feature Type: \(icon.type), Image: \(icon.image)")
+                            print("Feature Type: \(icon.name), Image: \(icon.image)")
                         }
                     }
                 }
@@ -397,14 +397,14 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
                         
                         // Map featureIcons to FeatureIcon model
                         let featureIcons = featureIconsArray.compactMap { iconDict -> FeatureIcon? in
-                            guard let type = iconDict["type"] as? String,
+                            guard let name = iconDict["name"] as? String,
                                   let image = iconDict["image"] as? String,
                                   let role = iconDict["role"] as? String else {
                                 return nil
                             }
                             self.currentRole = role
                             print(".....rolee.......\(self.currentRole)")
-                            return FeatureIcon(type: type, image: image, role: role)
+                            return FeatureIcon(name: name, image: image, role: role)
                         }
                         
                         return GroupData(activity: activity, featureIcons: featureIcons)
@@ -414,7 +414,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
                     for group in groups {
                         print("Activity: \(group.activity)")
                         for icon in group.featureIcons {
-                            print("Type H: \(icon.type), Image H: \(icon.image)")
+                            print("Type H: \(icon.name), Image H: \(icon.image)")
                         }
                     }
                     
