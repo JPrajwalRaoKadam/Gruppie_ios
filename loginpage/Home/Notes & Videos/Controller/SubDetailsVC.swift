@@ -83,6 +83,7 @@ class SubDetailsVC: UIViewController {
         if let AddChapterVC = storyboard.instantiateViewController(withIdentifier: "AddChapterVC") as? AddChapterVC {
             AddChapterVC.groupId = groupId  // Pass groupId
             AddChapterVC.teamId  = teamId   // Pass teamId
+            AddChapterVC.subjectId = subjectId
             self.navigationController?.pushViewController(AddChapterVC, animated: true)
         }
     }

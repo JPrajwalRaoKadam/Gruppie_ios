@@ -256,7 +256,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        let urlString = "https://prod.gruppie.in/api/v1/groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/plan?planId=\(plan.planId)"
+        let urlString = APIProdManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/plan?planId=\(plan.planId)"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL")

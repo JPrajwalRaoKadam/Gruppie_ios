@@ -28,3 +28,34 @@ struct TopicNV: Codable {
 }
 
 
+struct SyllabusResponse: Codable {
+    let data: [Chapter]
+}
+
+struct Chapter: Codable {
+    let chapterName: String
+    let chapterId: String
+    let totalTopicsCount: Int
+    let topicsList: [TopicAdd]
+}
+
+struct TopicAdd: Codable {
+    let topicName: String
+    let topicId: String
+}
+
+
+// MARK: - Model Definitions
+struct SubjectPostRequest: Codable {
+    let chapterName: String
+    let fileName: [String]
+    let fileType: String
+    let thumbnailImage: [String]
+    let topicName: String
+    let video: String
+}
+
+struct SubjectPostResponse: Codable {
+    let success: Bool
+    let message: String?
+}

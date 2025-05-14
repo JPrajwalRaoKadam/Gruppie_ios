@@ -312,7 +312,7 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
             return
         }
 
-        let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupId)/feedback/title/create")!
+        let url = URL(string:  APIManager.shared.baseURL + "groups/\(groupId)/feedback/title/create")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

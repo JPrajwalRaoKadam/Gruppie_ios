@@ -51,7 +51,8 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
                     
                     // ✅ If user is parent, push next VC and hide current
                     if self.currentRole?.lowercased() == "parent" {
-                        self.navigateToStudentListingForParent()
+                        let indexPath = IndexPath(row: 0, section: 0)
+                        self.navigateToStudentListingForParent(at: indexPath)
                     }
                 }
             case .failure(let error):
@@ -90,26 +91,28 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        navigateToStudentListingForParent()
+        navigateToStudentListingForParent(at: indexPath)
     }
-    
-    private func navigateToStudentListingForParent() {
-        guard let firstSubject = subjects.first else { return }
 
-        // Extract only the text inside parentheses
+    
+    private func navigateToStudentListingForParent(at indexPath: IndexPath) {
+        guard let selectedTeam = teamData?[indexPath.row] else {
+            print("❌ Could not find team at index \(indexPath.row)")
+            return
+        }
+
+        // Extract subject name from firstSubject (optional – you can adjust this logic)
         let trimmedName: String
-        if let range = firstSubject.name.range(of: #"(?<=\().*?(?=\))"#, options: .regularExpression) {
+        if let firstSubject = subjects.first,
+           let range = firstSubject.name.range(of: #"(?<=\().*?(?=\))"#, options: .regularExpression) {
             trimmedName = String(firstSubject.name[range])
         } else {
-            trimmedName = firstSubject.name
+            trimmedName = selectedTeam.className ?? ""
         }
 
-        print("✅ Extracted (trimmed) subject name: \(trimmedName)\n")
-
+        print("✅ Selected Team: \(selectedTeam.className)")
         print("📋 All teamData class names:")
-        teamData?.forEach { team in
-            print("→ \(team.className)")
-        }
+        teamData?.forEach { print("→ \($0.className)") }
 
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
         if let studentListingVC = storyboard.instantiateViewController(withIdentifier: "StudentListingVC") as? StudentListingVC {
@@ -117,18 +120,11 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             studentListingVC.groupId = self.groupId
             studentListingVC.subjects = self.subjects
             studentListingVC.currentRole = self.currentRole
+            studentListingVC.teamId = selectedTeam.classId
 
-            // Match className with extracted text
-            if let team = teamData?.first(where: { $0.className == trimmedName }) {
-                print("✅ Found matching team: \(team.className)")
-                studentListingVC.teamId = team.classId
-
-                // 👇 Force view load before setting label
-                _ = studentListingVC.view
-                studentListingVC.className.text = team.className
-            } else {
-                print("❌ No matching team found for: \(trimmedName)")
-            }
+            // 👇 Force view load before setting label
+            _ = studentListingVC.view
+            studentListingVC.className.text = selectedTeam.className
 
             // Replace current VC
             var viewControllers = self.navigationController?.viewControllers ?? []

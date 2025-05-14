@@ -223,6 +223,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 print("No navigation configured for type: \(selectedActivity.activity)")
             }
         }
+    
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon
         switch featureIcon.name {
@@ -263,7 +264,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchSubjectDataAndNavigate()
         case "Time Table":
             fetchSubjectDataAndNavigate()
-        case "Fees New":
+        case "Fee Payment New":
             fetchSubjectDataAndNavigate()
         case "Notes & Videos":
             fetchSubjectDataAndNavigate()
@@ -504,7 +505,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.subjects = subjects
                             self.teamIds = teamIds
                             self.fetchStaffDataAndNavigate()
-                        case "Fees New":
+                        case "Fee Payment New":
                             self.navigateToFeesNew(subjects: subjects)
                         case "Feed Back":
                             self.navigateToListOfStudentsVC(subjects: subjects)
