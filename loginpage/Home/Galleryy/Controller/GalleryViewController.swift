@@ -17,7 +17,7 @@ class GalleryViewController: UIViewController {
     var groupId: String = ""
     var token: String = ""
     
-    var albums: [AlbumData] = [] // Store API response
+    var albums: [AlbumData] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,18 +30,22 @@ class GalleryViewController: UIViewController {
             addButton.isHidden = false
         }
 
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
+        tapGesture.cancelsTouchesInView = false // Allow table view and button interactions
+        view.addGestureRecognizer(tapGesture)
+
 
         tableView.delegate = self
         tableView.dataSource = self
 
         
-        CreateAlbum.layer.cornerRadius = 10 // Adjust the radius as needed
+        CreateAlbum.layer.cornerRadius = 10
             CreateAlbum.layer.masksToBounds = true
         
         view1.isHidden = true
         view2.isHidden = true
         
-        view2.layer.cornerRadius = 10 // Adjust the radius as needed
+        view2.layer.cornerRadius = 10
         view2.layer.masksToBounds = true
 
         view2.layer.shadowColor = UIColor.black.cgColor
@@ -50,56 +54,56 @@ class GalleryViewController: UIViewController {
         view2.layer.shadowRadius = 4
         view2.layer.masksToBounds = false
 
-        // Register the custom cell
         tableView.register(UINib(nibName: "GalleryTableViewCell", bundle: nil), forCellReuseIdentifier: "GalleryCell")
 
-        // ✅ Add long-press gesture recognizer
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         tableView.addGestureRecognizer(longPressGesture)
 
-        // Fetch the gallery data
         fetchGalleryData()
         setupDatePicker()
 
     }
+    @objc func handleOutsideTap(_ sender: UITapGestureRecognizer) {
+        let location = sender.location(in: self.view)
+
+        if !view2.isHidden && !view2.frame.contains(location) {
+            view2.isHidden = true
+            view1.isHidden = true
+            self.view.endEditing(true)
+        }
+    }
+
     func setupDatePicker() {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .wheels
         datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
         
-        // Create a toolbar
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
         
-        // Add a Done button to dismiss the picker
         let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(dismissDatePicker))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         toolbar.setItems([space, doneButton], animated: false)
         
-        // Assign date picker & toolbar to the textField
         date.inputView = datePicker
         date.inputAccessoryView = toolbar
     }
 
-    // Function to handle date change
     @objc func dateChanged(_ sender: UIDatePicker) {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy" // Customize the date format
+        formatter.dateFormat = "dd/MM/yyyy"
         date.text = formatter.string(from: sender.date)
     }
 
-    // Function to dismiss the DatePicker
-    // Function to dismiss the DatePicker
     @objc func dismissDatePicker() {
         if let datePicker = date.inputView as? UIDatePicker {
             let formatter = DateFormatter()
-            formatter.dateFormat = "dd/MM/yyyy" // Customize the date format
-            date.text = formatter.string(from: datePicker.date) // Set selected date to textField
+            formatter.dateFormat = "dd/MM/yyyy"
+            date.text = formatter.string(from: datePicker.date)
         }
         view.endEditing(true)
     }
-    // MARK: - Fetch API Data
     func fetchGalleryData() {
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/gallery/get?page=1"
         guard let url = URL(string: urlString) else {
@@ -109,7 +113,7 @@ class GalleryViewController: UIViewController {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // If auth is required
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             guard let self = self else { return }
@@ -126,11 +130,11 @@ class GalleryViewController: UIViewController {
 
             do {
                 let decodedResponse = try JSONDecoder().decode(AlbumResponse.self, from: data)
-                self.albums = decodedResponse.data // Store the response
+                self.albums = decodedResponse.data
                 print("API Response GalleryVC: \(decodedResponse)")
 
                 DispatchQueue.main.async {
-                    self.tableView.reloadData() // Reload table view with new data
+                    self.tableView.reloadData()
                 }
             } catch {
                 print("Error decoding JSON: \(error.localizedDescription)")
@@ -140,7 +144,6 @@ class GalleryViewController: UIViewController {
         task.resume()
     }
 
-    // MARK: - Long Press Gesture Handler
     @objc func handleLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
         if gestureRecognizer.state == .began {
             let touchPoint = gestureRecognizer.location(in: tableView)
@@ -151,7 +154,6 @@ class GalleryViewController: UIViewController {
         }
     }
 
-    // MARK: - Show Delete Confirmation Alert
     func showDeleteConfirmation(album: AlbumData, indexPath: IndexPath) {
         let alert = UIAlertController(title: "Delete Album", message: "Are you sure you want to delete this album?", preferredStyle: .alert)
 
@@ -165,7 +167,6 @@ class GalleryViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
 
-    // MARK: - API Call to Delete Album
     func deleteAlbum(album: AlbumData, indexPath: IndexPath) {
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/album/\(album.albumId)/delete"
         
@@ -208,7 +209,6 @@ class GalleryViewController: UIViewController {
     }
 }
 
-// MARK: - UITableView Delegate & DataSource
 extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -228,7 +228,6 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
         print("Album count:\(albumCount.fileName?.count)")
         
 
-        // Load the first image if available
         if let imageUrlString = album.fileName?.first, let imageUrl = URL(string: imageUrlString) {
             DispatchQueue.global().async {
                 if let imageData = try? Data(contentsOf: imageUrl) {
@@ -238,7 +237,7 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
                 }
             }
         } else {
-            cell.ImageUrl.image = UIImage(named: "placeholder") // Fallback image
+            cell.ImageUrl.image = UIImage(named: "placeholder")
         }
 
         return cell
@@ -248,7 +247,6 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
         return 100
     }
     
-    // Navigate to DetailGalleryViewController on cell tap
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedAlbum = albums[indexPath.row] // Get the selected album
         let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
@@ -271,7 +269,7 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     @IBAction func addButtonTapped(_ sender: UIButton) {
-        let shouldShow = view1.isHidden // Toggle visibility
+        let shouldShow = view1.isHidden 
         view1.isHidden = !shouldShow
         view2.isHidden = !shouldShow
     }
@@ -289,7 +287,6 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
             return
         }
 
-        // Create the request body
         let requestBody: [String: Any] = [
             "albumName": albumName,
             "date": albumDate,
@@ -301,7 +298,6 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
             return
         }
 
-        // Create the request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -325,21 +321,19 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource {
                 print("✅ Album created successfully")
 
                 DispatchQueue.main.async {
-                    self.AlbumName.text = ""  // Clear Album Name field
-                    self.date.text = ""        // Clear Date field
-                    self.addDescription.text = "" // Clear Description field
+                    self.AlbumName.text = ""
+                    self.date.text = ""
+                    self.addDescription.text = ""
                     
                     self.view1.isHidden = true
                     self.view2.isHidden = true
-                    self.fetchGalleryData() // Reload gallery data
+                    self.fetchGalleryData()
                 }
             }
 else {
                 print("❌ Failed to create album. Status code: \(httpResponse.statusCode)")
             }
         }
-
         task.resume()
     }
-
 }

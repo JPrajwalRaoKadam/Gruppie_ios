@@ -4,7 +4,8 @@ class CollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var SelectButton: UIButton!
-    
+//    @IBOutlet weak var playIcon: UIImageView!
+
     var isSelectedCell: Bool = false {
         didSet {
             updateSelectionAppearance()
@@ -27,7 +28,7 @@ class CollectionViewCell: UICollectionViewCell {
     }
 
     @objc func selectButtonTapped() {
-        isSelectedCell.toggle() // Toggle selection state
+        isSelectedCell.toggle() 
     }
 
     func updateSelectionAppearance() {
