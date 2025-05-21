@@ -11,7 +11,7 @@ class APIManager {
     static let shared = APIManager()
     
     // Define the base URL here
-    let baseURL = "https://api.gruppie.in/api/v1/"
+    let baseURL = "https://gcc.gruppie.in/api/v1/"
     
     let parentEndPoint = "my/kids"
     
