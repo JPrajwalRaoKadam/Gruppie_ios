@@ -71,22 +71,13 @@
                                     <action selector="checkButtonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="g0b-Qq-cVb"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="249" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H6p-q8-obN">
-                                <rect key="frame" x="58" y="53" width="18" height="18"/>
-                                <color key="backgroundColor" systemColor="systemGray3Color"/>
+                            <stackView opaque="NO" contentMode="left" semanticContentAttribute="forceLeftToRight" distribution="fillEqually" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="YHq-x8-Pmb">
+                                <rect key="frame" x="58" y="54" width="25" height="17"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="18" id="u0f-Xt-1Es"/>
-                                    <constraint firstAttribute="width" constant="18" id="zQy-mK-YKi"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="20" id="QhD-nX-g7P"/>
+                                    <constraint firstAttribute="height" constant="16" id="ZWQ-VX-t2K"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="12"/>
-                                <color key="tintColor" systemColor="labelColor"/>
-                                <state key="normal">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </state>
-                                <connections>
-                                    <action selector="attenStatusTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="JEo-Qq-2CG"/>
-                                </connections>
-                            </button>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <accessibility key="accessibilityConfiguration" identifier="AttendanceTableViewCell"/>
@@ -98,13 +89,13 @@
                             <constraint firstItem="5UV-jF-gZL" firstAttribute="leading" secondItem="qNR-R2-JPu" secondAttribute="leading" constant="8" id="MOJ-rS-ha0"/>
                             <constraint firstItem="TZs-Rs-KFL" firstAttribute="top" secondItem="qNR-R2-JPu" secondAttribute="top" constant="9" id="OiO-od-WKJ"/>
                             <constraint firstItem="O0W-HD-PbP" firstAttribute="leading" secondItem="qNR-R2-JPu" secondAttribute="leading" constant="8" id="dQu-Xq-gMm"/>
+                            <constraint firstAttribute="bottom" secondItem="YHq-x8-Pmb" secondAttribute="bottom" id="duf-OI-q27"/>
                             <constraint firstItem="HNP-9g-Qb4" firstAttribute="leading" secondItem="O0W-HD-PbP" secondAttribute="trailing" constant="12" id="gc9-pC-M0B"/>
-                            <constraint firstItem="H6p-q8-obN" firstAttribute="top" secondItem="qNR-R2-JPu" secondAttribute="top" constant="53" id="hUk-j8-Ifg"/>
                             <constraint firstItem="TZs-Rs-KFL" firstAttribute="leading" secondItem="O0W-HD-PbP" secondAttribute="trailing" constant="12" id="hzp-cn-E41"/>
                             <constraint firstAttribute="trailing" secondItem="nfK-it-KAy" secondAttribute="trailing" constant="8" id="jm7-vQ-5wy"/>
+                            <constraint firstItem="YHq-x8-Pmb" firstAttribute="leading" secondItem="HNP-9g-Qb4" secondAttribute="leading" id="wOx-PY-syc"/>
                             <constraint firstAttribute="height" constant="76" id="xiZ-HK-63N"/>
                             <constraint firstItem="5UV-jF-gZL" firstAttribute="top" secondItem="qNR-R2-JPu" secondAttribute="top" constant="19" id="yo7-xW-oKR"/>
-                            <constraint firstItem="H6p-q8-obN" firstAttribute="leading" secondItem="TZs-Rs-KFL" secondAttribute="trailing" constant="-168" id="zOs-Gt-ZIY"/>
                             <constraint firstAttribute="bottom" secondItem="O0W-HD-PbP" secondAttribute="bottom" constant="19" id="ze4-dY-Zji"/>
                         </constraints>
                     </view>
@@ -118,7 +109,7 @@
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
-                <outlet property="attenStatus" destination="H6p-q8-obN" id="9kH-hN-feB"/>
+                <outlet property="attenStatusStackView" destination="YHq-x8-Pmb" id="CdI-QX-dDX"/>
                 <outlet property="checkButton" destination="nfK-it-KAy" id="Aag-MB-ncP"/>
                 <outlet property="fallback" destination="5UV-jF-gZL" id="Fjl-hK-a5N"/>
                 <outlet property="images" destination="O0W-HD-PbP" id="oTe-Bt-n6M"/>
@@ -130,14 +121,8 @@
     </objects>
     <resources>
         <image name="square" catalog="system" width="128" height="114"/>
-        <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="systemGray3Color">
-            <color red="0.7803921568627451" green="0.7803921568627451" blue="0.80000000000000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

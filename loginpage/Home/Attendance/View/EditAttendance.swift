@@ -1,10 +1,7 @@
 import UIKit
 
-// MARK: - Delegate Protocol
 protocol EditAttendanceDelegate: AnyObject {
-    /// Called when user taps Delete
     func didTapDeleteAttendance(attendanceId: String)
-    /// Called when user taps Save/Edit
     func didTapEditAttendance(status: String, attendanceId: String, userId: String)
 }
 
@@ -12,12 +9,10 @@ protocol EditAttendanceDelegate: AnyObject {
 class EditAttendance: UIView {
     // MARK: - Outlets
     @IBOutlet weak var attendanceStatus: UITextField!
-    @IBOutlet weak var date: UITextField!
-    @IBOutlet weak var teacherName: UITextField!
-    @IBOutlet weak var subject: UITextField!
-    @IBOutlet weak var periodNumber: UITextField!
     @IBOutlet weak var studentNameLabel: UILabel!
-    @IBOutlet weak var studentName: UILabel!
+    @IBOutlet weak var editButtonOutlet: UIButton!
+    
+  //  @IBOutlet weak var studentName: UILabel!
 
     // MARK: - Delegate & Data
     weak var delegate: EditAttendanceDelegate?
@@ -29,33 +24,32 @@ class EditAttendance: UIView {
         return Bundle.main.loadNibNamed("EditAttendance", owner: nil, options: nil)?.first as? EditAttendance
     }
 
+
     override func awakeFromNib() {
         super.awakeFromNib()
         layer.cornerRadius = 12
         layer.masksToBounds = true
         setupDropdownTap() // Dismiss dropdown on outside tap
+        editButtonOutlet.layer.cornerRadius =  10
+        editButtonOutlet.layer.masksToBounds = true
+        editButtonOutlet.clipsToBounds = true
     }
-
-    // MARK: - Public Configuration
-    /// Configure the view with existing attendance data
     func configure(studentName: String,
                    attendanceId: String,
                    userId: String,
-                   status: String,
-                   date: String,
-                   teacher: String,
-                   subject: String,
-                   period: String) {
+                   status: String) {
         studentNameLabel.text = studentName
         self.attendanceId = attendanceId
         self.userId = userId
         attendanceStatus.text = status
-        self.date.text = date
-        teacherName.text = teacher
-        self.subject.text = subject
-        periodNumber.text = period
-    }
 
+        // 👇 Hide edit button if status is "holiday"
+        if status.lowercased() == "holiday" {
+            editButtonOutlet.isHidden = true
+        } else {
+            editButtonOutlet.isHidden = false
+        }
+    }
     // MARK: - Button Actions
     @IBAction func deleteButton(_ sender: Any) {
         guard let id = attendanceId else { return }
@@ -70,17 +64,17 @@ class EditAttendance: UIView {
             print("❌ Missing data for edit")
             return
         }
-        delegate?.didTapEditAttendance(status: statusText,
-                                       attendanceId: id,
-                                       userId: uid)
-        removeFromSuperview()
+        print("📤 Sending edited status: \(statusText)")
+        delegate?.didTapEditAttendance(status: statusText,attendanceId: id, userId: uid)
+        DispatchQueue.main.async {
+               self.removeFromSuperview()
+           }
     }
 
     // MARK: - Dropdown for Status
     @IBAction func dropdown(_ sender: UIButton) {
         toggleDropdown()
     }
-    
 
     // MARK: - Private Dropdown
     private let dropdownTag = 9999
@@ -91,37 +85,7 @@ class EditAttendance: UIView {
         }
         showDropdown()
     }
-
-//    private func showDropdown() {
-//        guard let parent = attendanceStatus.superview else { return }
-//        // Calculate frame next to textField
-//        let tfFrame = attendanceStatus.convert(attendanceStatus.bounds, to: self)
-//        let menu = UIView(frame: CGRect(x: tfFrame.minX,
-//                                        y: tfFrame.maxY + 5,
-//                                        width: attendanceStatus.frame.width,
-//                                        height: 120))
-//        menu.backgroundColor = .white
-//        menu.tag = dropdownTag
-//        menu.layer.cornerRadius = 8
-//        menu.layer.shadowColor = UIColor.black.cgColor
-//        menu.layer.shadowOpacity = 0.2
-//
-//        let options = ["present", "absent"]
-//        for (i, opt) in options.enumerated() {
-//            let btn = UIButton(frame: CGRect(x: 0,
-//                                             y: CGFloat(i) * 30,
-//                                             width: menu.frame.width,
-//                                             height: 30))
-//            btn.setTitle(opt.capitalized, for: .normal)
-//            btn.setTitleColor(.darkText, for: .normal)
-//            btn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-//            btn.tag = i
-//            btn.addTarget(self, action: #selector(statusSelected(_:)), for: .touchUpInside)
-//            menu.addSubview(btn)
-//        }
-//
-//        addSubview(menu)
-//    }
+    
     private func showDropdown() {
         let options = ["present", "absent"]
         let optionHeight: CGFloat = 30
@@ -158,12 +122,17 @@ class EditAttendance: UIView {
 
         addSubview(menu)
     }
-
-
+    
     @objc private func statusSelected(_ sender: UIButton) {
         let options = ["present", "absent"]
         let chosen = options[sender.tag]
         attendanceStatus.text = chosen
+        attendanceStatus.resignFirstResponder()
+        attendanceStatus.setNeedsDisplay()
+
+        print("✅ Selected status: \(chosen)")
+
+        // Only remove dropdown — not the entire view!
         if let menu = viewWithTag(dropdownTag) {
             removeDropdown(menu)
         }

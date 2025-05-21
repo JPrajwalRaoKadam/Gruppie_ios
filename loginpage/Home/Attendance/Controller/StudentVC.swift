@@ -1,7 +1,6 @@
 import UIKit
 
 class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, StudentCellDelegate, EditAttendanceDelegate {
-
     @IBOutlet weak var name: UILabel!
     @IBOutlet weak var studentTBL: UITableView!
     @IBOutlet weak var currDate: UIButton!
@@ -21,12 +20,12 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
       var uncheckedStudentsIds: [String] = []
       var attendenceId: String?
       var selectedStud: StudentAtten?
-      
       var studAtten: StudentAttendance?
       var selectedAttendanceId: String?
       var selectedUserId: String?
+      private var dimmingView: UIView?
+       private var popupView: EditAttendance?
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -147,100 +146,85 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         }
     }
 
-    
     func didTapEditAttendance(status: String, attendanceId: String, userId: String) {
         // Call your API from the ViewController here
-        editAttendance(status: status, attendanceId: attendanceId, userId: userId)
+        
+        editAttendance(attendance: status, attendanceId: attendanceId, userId: userId)
         print("Edit requested with status: \(status), id: \(attendanceId), user: \(userId)")
+        dismissPopup()
     }
-    func editAttendance(status: String, attendanceId: String, userId: String) {
-        let url = URL(string: "https://yourapi.com/update-attendance")!  // replace with your actual URL
+
+    func editAttendance(attendance: String, attendanceId: String, userId: String) {
+        guard let groupId = self.groupId,
+              let teamId = self.teamId else {
+                  print("❌ Missing groupId, teamId")
+                  return
+              }
+
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/attendance/edit"
+        print("edit atten api::::::\(urlString)")
+        
+        guard let url = URL(string: urlString) else {
+            print("❌ Invalid URL")
+            return
+        }
+        
+        guard let token = TokenManager.shared.getToken() else {
+            print("❌ Token not found")
+            return
+        }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
         let body: [String: Any] = [
-            "attendance": status,
+            "attendance": attendance,
             "attendanceId": attendanceId,
             "userId": userId
         ]
 
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted])
+            
+            // 🔍 Print the body as a JSON string
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("📤 Final JSON Body:\n\(jsonString)")
+            }
+            
+            request.httpBody = jsonData
+        } catch {
+            print("❌ Failed to encode body: \(error.localizedDescription)")
+            return
+        }
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ API Error: \(error)")
+                print("❌ Request failed: \(error.localizedDescription)")
                 return
             }
 
-            if let data = data, let responseStr = String(data: data, encoding: .utf8) {
-                print("✅ Response: \(responseStr)")
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ No valid HTTP response")
+                return
             }
-        }
 
-        task.resume()
+            if httpResponse.statusCode == 200 {
+                print("✅ Attendance updated successfully")
+            } else {
+                print("⚠️ Failed with status code: \(httpResponse.statusCode)")
+                if let data = data,
+                   let responseBody = String(data: data, encoding: .utf8) {
+                    print("📩 Response: \(responseBody)")
+                }
+                DispatchQueue.main.async {
+                    self.fetchStudentData() // Or reload UI
+                }
+            }
+        }.resume()
     }
-
-//    func editAttendance(attendance: String, attendanceId: String, userId: String) {
-//        let groupId = "yourGroupId" // You should pass this dynamically or inject
-//        let teamId = "yourTeamId"   // You should pass this dynamically or inject
-//
-//        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/attendance/edit"
-//        
-//        guard let url = URL(string: urlString) else {
-//            print("❌ Invalid URL")
-//            return
-//        }
-//        
-//        guard let token = TokenManager.shared.getToken() else {
-//            print("❌ Token not found")
-//            return
-//        }
-//
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "PUT"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//        
-//        let body: [String: Any] = [
-//            "attendance": attendance,
-//            "attendanceId": attendanceId,
-//            "userId": userId
-//        ]
-//
-//        do {
-//            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
-//        } catch {
-//            print("❌ Failed to encode body: \(error.localizedDescription)")
-//            return
-//        }
-//
-//        URLSession.shared.dataTask(with: request) { data, response, error in
-//            if let error = error {
-//                print("❌ Request failed: \(error.localizedDescription)")
-//                return
-//            }
-//
-//            guard let httpResponse = response as? HTTPURLResponse else {
-//                print("❌ No valid HTTP response")
-//                return
-//            }
-//
-//            if httpResponse.statusCode == 200 {
-//                print("✅ Attendance updated successfully")
-//            } else {
-//                print("⚠️ Failed with status code: \(httpResponse.statusCode)")
-//                if let data = data,
-//                   let responseBody = String(data: data, encoding: .utf8) {
-//                    print("📩 Response: \(responseBody)")
-//                }
-//                DispatchQueue.main.async {
-//                    self.fetchStudentData() // Or reload UI
-//                }
-//            }
-//        }.resume()
-//    }
 
 
     func deleteAttendance(attendanceId: String) {
@@ -417,6 +401,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
 
         task.resume()
     }
+    
     func didTapAttendanceStatus(for student: StudentAtten, at indexPath: IndexPath) {
         self.selectedStud = student
 
@@ -434,156 +419,138 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         showEditAttendancePopup(for: student)
     }
 
-    
-//    func didTapAttendanceStatus(for student: StudentAtten, at indexPath: IndexPath){
-//        if let selectedStudent = selectedStud {
-//            showEditAttendancePopup(for: selectedStudent)
-//        } else {
-//            print("selectedStud is nil. Cannot show attendance popup.")
-//        }
-//
-//    }
     func didTapDeleteAttendance(attendanceId: String) {
         deleteAttendance(attendanceId: attendanceId)
     }
- func showEditAttendancePopup(for student: StudentAtten) {
-       
-        
-     let selectedAttendance = self.studAtten
-        
-        if let popupView = EditAttendance.loadFromNib() {
-//             Populate the popup with last attendance details for the selected cell
-            popupView.attendanceStatus.text = selectedAttendance?.attendance ?? ""
-            popupView.studentName.text = student.studentName
-            popupView.teacherName.text = selectedAttendance?.teacherName ?? ""
-            popupView.subject.text = selectedAttendance?.subjectName ?? ""
-            popupView.periodNumber.text = "\(selectedAttendance?.periodNumber ?? 0)"
-            popupView.date.text = selectedAttendance?.date ?? ""
-            
-            // Set delegate and pass attendanceId
-            popupView.delegate = self
-            popupView.attendanceId = selectedAttendance?.attendanceId
+    
+// func showEditAttendancePopup(for student: StudentAtten) {
+//     let selectedAttendance = self.studAtten
+//        
+//        if let popupView = EditAttendance.loadFromNib() {
+//            popupView.configure(
+//                     studentName: student.studentName,
+//                     attendanceId: selectedAttendance?.attendanceId ?? "",
+//                     userId: student.userId ?? "",
+//                     status: selectedAttendance?.attendance ?? ""
+//                 )
+////            if attendance.attendance?.lowercased() == "holiday" {
+////                   editButton.isHidden = true
+////               } else {
+////                   editButton.isHidden = false
+////               }
+////             Populate the popup with last attendance details for the selected cell
+//            popupView.attendanceStatus.text = selectedAttendance?.attendance ?? ""
+//            popupView.studentNameLabel.text = student.studentName
+//
+//            // Set delegate and pass attendanceId
+//            popupView.delegate = self
+//            popupView.attendanceId = selectedAttendance?.attendanceId
+//
+//            // Add it to current view
+//            popupView.translatesAutoresizingMaskIntoConstraints = false
+//            view.addSubview(popupView)
+//
+//            NSLayoutConstraint.activate([
+//                popupView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+//                popupView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+//                popupView.widthAnchor.constraint(equalToConstant: 293),
+//                popupView.heightAnchor.constraint(equalToConstant: 147
+//                                                 )
+//            ])
+//            // Dismiss on outside tap
+//                 let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
+//                 tapGesture.cancelsTouchesInView = false
+//                 view.addGestureRecognizer(tapGesture)
+//            
+//            // Optional: Add a dimmed background
+//            view.bringSubviewToFront(popupView)
+//        }
+//    }
+    func showEditAttendancePopup(for student: StudentAtten) {
+        // 1️⃣ Create and add the dimming view
+        let dimView = UIView(frame: view.bounds)
+        dimView.backgroundColor = UIColor(white: 0, alpha: 0.5)
+        dimView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        dimView.tag = 999  // for easy removal
+        view.addSubview(dimView)
+        self.dimmingView = dimView
 
-            // Add it to current view
-            popupView.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview(popupView)
+        // 2️⃣ Load and configure your popup
+        guard let popup = EditAttendance.loadFromNib() else { return }
+        popup.delegate = self
+        popup.configure(
+            studentName: student.studentName,
+            attendanceId: studAtten?.attendanceId ?? "",
+            userId: student.userId ?? "",
+            status: studAtten?.attendance ?? ""
+        )
+        popup.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(popup)
+        self.popupView = popup
 
-            NSLayoutConstraint.activate([
-                popupView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                popupView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                popupView.widthAnchor.constraint(equalToConstant: 293),
-                popupView.heightAnchor.constraint(equalToConstant: 345)
-            ])
-            
-            // Optional: Add a dimmed background
-            view.bringSubviewToFront(popupView)
-        }
+        // 3️⃣ Center it with Auto Layout
+        NSLayoutConstraint.activate([
+            popup.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            popup.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            popup.widthAnchor.constraint(equalToConstant: 293),
+            popup.heightAnchor.constraint(equalToConstant: 147)
+        ])
+
+        // 4️⃣ Add tap‐to‐dismiss (outside the popup)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissPopup))
+        dimView.addGestureRecognizer(tap)
+
+        // Bring popup above the dimming view
+        view.bringSubviewToFront(popup)
     }
 
+    @objc private func dismissPopup() {
+        // Remove popup and dimming view
+        popupView?.removeFromSuperview()
+        dimmingView?.removeFromSuperview()
+        popupView = nil
+        dimmingView = nil
+    }
 
+    @objc private func handleOutsideTap(_ sender: UITapGestureRecognizer) {
+        for subview in view.subviews {
+            if let popup = subview as? EditAttendance {
+                let location = sender.location(in: popup)
+                if !popup.bounds.contains(location) {
+                    popup.removeFromSuperview()
+                }
+            }
+        }
+    }
 
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return students.count
     }
-//     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        guard let cell = tableView.dequeueReusableCell(withIdentifier: "StudentVCTableViewCell", for: indexPath) as? StudentVCTableViewCell else {
-//            return UITableViewCell()
-//        }
-//
-//        let student = students[indexPath.row]
-//        cell.delegate = self
-//         
-//
-//        // Set student details
-//        cell.studentName.text = student.studentName
-//        cell.studentID = student.userId
-//        cell.students = students
-//        self.studentID = student.userId
-//        cell.rollNo.text = "Roll No: \(student.rollNumber)"
-//
-//        // Load student image or show fallback
-//        if let imageUrlString = student.studentImage,
-//           !imageUrlString.isEmpty,
-//           let imageUrl = URL(string: imageUrlString) {
-//
-//            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-//                if let data = data, let image = UIImage(data: data) {
-//                    DispatchQueue.main.async {
-//                        cell.images.image = image
-//                        cell.fallback.isHidden = true
-//                    }
-//                } else {
-//                    DispatchQueue.main.async {
-//                        cell.showFallbackImage(for: student.studentName)
-//                        cell.fallback.isHidden = false
-//                    }
-//                }
-//            }.resume()
-//        } else {
-//            cell.showFallbackImage(for: student.studentName)
-//            cell.fallback.isHidden = false
-//        }
-//
-//        // ✅ Configure Attendance Status Button (attenStatus) or hide it
-//        if let lastAttendance = student.lastDaysAttendance.first {
-//            cell.setAttendanceVisibility(isHidden: false)
-//            cell.configureAttendanceStatus(attendance: lastAttendance.attendance!)
-//        } else {
-//            cell.setAttendanceVisibility(isHidden: true)
-//        }
-//
-//        // Pass the numberOfTimeAttendance to the cell
-//        if indexPath.row < attendanceData.count {
-//            let attendance = attendanceData[indexPath.row]
-//            if let numberOfTimes = Int(attendance.numberOfTimeAttendance) {
-//                cell.configureAttendanceButtons(numberOfTimes: numberOfTimes)
-//            }
-//        }
-//         
-//         cell.attenStatus.addTarget(
-//             self,
-//             action: #selector(editButtonTapped(_:)),
-//             for: .touchUpInside
-//           )
-//
-//        return cell
-//    }
-    func tableView(_ tableView: UITableView,
-                   cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
-                withIdentifier: "StudentVCTableViewCell",
-                for: indexPath
-              ) as? StudentVCTableViewCell
-        else {
+            withIdentifier: "StudentVCTableViewCell",
+            for: indexPath
+        ) as? StudentVCTableViewCell else {
             return UITableViewCell()
         }
 
         let student = students[indexPath.row]
 
-        // MARK: – Pass context into the cell
-        cell.indexPath     = indexPath
-        cell.delegate      = self
-        cell.students      = students
-        cell.studentID     = student.userId
-        cell.rollNo.text   = "Roll No: \(student.rollNumber)"
-        cell.attendanceId  = nil  // clear first
+        cell.configure(
+            with: student,
+            allStudents: students,
+            at: indexPath,
+            delegate: self
+        )
 
-        // If there's at least one attendance record, assign all of them
-        if !student.lastDaysAttendance.isEmpty {
-            // You can store the whole array and let the delegate choose later:
-            cell.lastDaysAttendance = student.lastDaysAttendance
-            
-        }
-
-        // MARK: – Image loading / fallback
+        // ✅ Load image
         if let urlString = student.studentImage,
            let url = URL(string: urlString), !urlString.isEmpty {
             URLSession.shared.dataTask(with: url) { data, _, _ in
                 if let data = data, let img = UIImage(data: data) {
                     DispatchQueue.main.async {
-                        cell.images.image    = img
+                        cell.images.image = img
                         cell.fallback.isHidden = true
                     }
                 } else {
@@ -598,34 +565,84 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             cell.fallback.isHidden = false
         }
 
-        // MARK: – Attendance Status Button
-        if let last = student.lastDaysAttendance.last {
-            // show the button but don’t pick one here
-            cell.setAttendanceVisibility(isHidden: false)
-            cell.configureAttendanceStatus(attendance: last.attendance ?? "")
-            // store the ID on the button tap
-            cell.attendanceId = last.attendanceId
+        // ✅ Show dynamic attendance buttons
+        if student.lastDaysAttendance.isEmpty {
+            cell.attenStatusStackView.isHidden = true
         } else {
-            cell.setAttendanceVisibility(isHidden: true)
+            cell.attenStatusStackView.isHidden = false
+            cell.configureAttendanceButtons(lastDaysAttendance: student.lastDaysAttendance)
         }
-
-        // MARK: – Checkbox buttons
-        if indexPath.row < attendanceData.count {
-            if let times = Int(attendanceData[indexPath.row].numberOfTimeAttendance) {
-                cell.configureAttendanceButtons(numberOfTimes: times)
-            }
-        }
-        
-        cell.attenStatus.addTarget(
-                   self,
-                   action: #selector(editButtonTapped(_:)),
-                   for: .touchUpInside
-                 )
-      
-              return cell
 
         return cell
     }
+
+
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        guard let cell = tableView.dequeueReusableCell(
+//            withIdentifier: "StudentVCTableViewCell",
+//            for: indexPath
+//        ) as? StudentVCTableViewCell else {
+//            return UITableViewCell()
+//        }
+//
+//        let student = students[indexPath.row]
+//
+//        // ✅ Call your configure method
+//        cell.configure(
+//            with: student,
+//            allStudents: students,
+//            at: indexPath,
+//            delegate: self
+//        )
+//
+//        // ✅ Load image (you can keep this part separately if needed)
+//        if let urlString = student.studentImage,
+//           let url = URL(string: urlString), !urlString.isEmpty {
+//            URLSession.shared.dataTask(with: url) { data, _, _ in
+//                if let data = data, let img = UIImage(data: data) {
+//                    DispatchQueue.main.async {
+//                        cell.images.image = img
+//                        cell.fallback.isHidden = true
+//                    }
+//                } else {
+//                    DispatchQueue.main.async {
+//                        cell.showFallbackImage(for: student.studentName)
+//                        cell.fallback.isHidden = false
+//                    }
+//                }
+//            }.resume()
+//        } else {
+//            cell.showFallbackImage(for: student.studentName)
+//            cell.fallback.isHidden = false
+//        }
+//
+//        // ✅ Show attendance button if data is available
+//        if let last = student.lastDaysAttendance.last {
+//            cell.setAttendanceVisibility(isHidden: false)
+//            cell.configureAttendanceStatus(attendance: last.attendance ?? "")
+//            cell.attendanceId = last.attendanceId
+//            cell.attenStatus.tag = indexPath.row
+//
+//        } else {
+//            cell.setAttendanceVisibility(isHidden: true)
+//        }
+//
+//        // ✅ Show checkbox buttons
+//        if indexPath.row < attendanceData.count {
+//            if let times = Int(attendanceData[indexPath.row].numberOfTimeAttendance) {
+//                cell.configureAttendanceButtons(numberOfTimes: times)
+//            }
+//        }
+//
+//        // ✅ Add target
+//        cell.attenStatus.addTarget(
+//            self,
+//            action: #selector(editButtonTapped(_:)),
+//            for: .touchUpInside
+//        )
+//
+//        return cell
+//    }
 
     @objc private func editButtonTapped(_ sender: UIButton) {
       let row = sender.tag
@@ -665,13 +682,8 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             self.attendenceId = nil
             print("⚠️ No attendanceId available for this student.")
         }
-
-        // 💡 Now show popup safely
-//        showEditAttendancePopup(for: selectedStudent)
     }
 
-
-    
     func didUpdateUncheckedStudents(_ studentName: String, students: [StudentAtten], isChecked: Bool) {
         // 🔍 Find the matching student object
         guard let student = students.first(where: { $0.studentName == studentName }) else {
