@@ -8,14 +8,12 @@ class AccountInfoTableViewCell: UITableViewCell {
     @IBOutlet weak var branch: UITextField!
     @IBOutlet weak var address: UITextField!
 
-    // Populate text fields with account info data
     func populate(with member: Member, isEditingEnabled: Bool) {
-        // Use relevant member properties if you have them in your Member model
-        bankAccount.text = member.staffId  // Assuming a placeholder for the bankAccount, you may change it
+        bankAccount.text = member.staffId
         selectAccountType.text = member.profession
-        bankIfsc.text = member.aadharNumber  // Replace this with the actual data
-        bankName.text = member.name  // Example mapping
-        branch.text = member.religion  // Example mapping
+        bankIfsc.text = member.aadharNumber
+        bankName.text = member.name
+        branch.text = member.religion
         address.text = member.address
 
         let fields: [UITextField] = [
@@ -24,7 +22,6 @@ class AccountInfoTableViewCell: UITableViewCell {
         fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
     }
 
-    // Collect updated account info data
     func collectUpdatedData() -> [String: String] {
         return [
             "bankAccount": bankAccount.text ?? "",

@@ -6,7 +6,6 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
     }
     @IBOutlet weak var backButton: UIButton!
     @IBOutlet weak var searchButton: UIButton!
-    @IBOutlet weak var printButton: UIButton!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!

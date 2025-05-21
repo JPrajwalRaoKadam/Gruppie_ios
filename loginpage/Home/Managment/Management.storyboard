@@ -4,7 +4,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
-        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -250,7 +249,10 @@
                                                     <constraint firstAttribute="height" constant="30" id="JgW-Wr-hJ2"/>
                                                 </constraints>
                                                 <color key="tintColor" systemColor="labelColor"/>
-                                                <state key="normal" title="Button" image="printer" catalog="system"/>
+                                                <state key="normal" title="Button" image="icon_plus"/>
+                                                <connections>
+                                                    <action selector="addUser:" destination="39L-wm-NNd" eventType="touchUpInside" id="ZI6-a7-EHZ"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6px-DG-NaX">
                                                 <rect key="frame" x="326" y="21" width="30" height="30"/>
@@ -297,26 +299,11 @@
                                     <constraint firstItem="iDG-ie-ioL" firstAttribute="top" secondItem="Gtz-RJ-G9e" secondAttribute="top" constant="41" id="pVf-B7-3sO"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="mgi-YX-Ppm">
-                                <rect key="frame" x="317" y="754" width="66" height="61"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
-                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <state key="normal">
-                                    <imageReference key="image" image="person.crop.circle.fill.badge.plus" catalog="system" symbolScale="large"/>
-                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large" weight="bold"/>
-                                </state>
-                                <connections>
-                                    <action selector="addUser:" destination="39L-wm-NNd" eventType="touchUpInside" id="S9g-4D-cnN"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="AiQ-OK-xbJ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="mgi-YX-Ppm" firstAttribute="top" secondItem="bNh-hT-I6M" secondAttribute="bottom" constant="-142" id="H3X-GI-TS4"/>
                             <constraint firstItem="Gtz-RJ-G9e" firstAttribute="trailing" secondItem="AiQ-OK-xbJ" secondAttribute="trailing" id="NNG-pa-1Uj"/>
-                            <constraint firstItem="mgi-YX-Ppm" firstAttribute="leading" secondItem="bNh-hT-I6M" secondAttribute="trailing" constant="-97" id="biC-Ll-AGd"/>
                             <constraint firstAttribute="bottom" secondItem="Gtz-RJ-G9e" secondAttribute="bottom" id="hWK-Q6-6IC"/>
                             <constraint firstItem="Gtz-RJ-G9e" firstAttribute="top" secondItem="Wrr-e5-daH" secondAttribute="top" id="jXG-fJ-yXf"/>
                             <constraint firstItem="Gtz-RJ-G9e" firstAttribute="leading" secondItem="AiQ-OK-xbJ" secondAttribute="leading" id="mTh-b5-3zO"/>
@@ -326,7 +313,6 @@
                     <connections>
                         <outlet property="backButton" destination="0rT-Us-31W" id="rfp-Un-HFS"/>
                         <outlet property="heightConstraintOfSearchView" destination="sVy-pd-bXx" id="PTF-8d-0DN"/>
-                        <outlet property="printButton" destination="Zzl-MG-Iif" id="fwu-id-1L2"/>
                         <outlet property="searchButton" destination="6px-DG-NaX" id="EWf-oC-viG"/>
                         <outlet property="searchView" destination="wpf-Pg-C86" id="8Zf-WJ-9ve"/>
                         <outlet property="tableView" destination="bNh-hT-I6M" id="srG-Ag-n6f"/>
@@ -559,9 +545,8 @@
         <image name="arrow.backward" catalog="system" width="128" height="95"/>
         <image name="arrow.left" catalog="system" width="128" height="95"/>
         <image name="iconPhone" width="20" height="20"/>
+        <image name="icon_plus" width="25" height="25"/>
         <image name="magnifyingglass" catalog="system" width="128" height="117"/>
-        <image name="person.crop.circle.fill.badge.plus" catalog="system" width="128" height="114"/>
-        <image name="printer" catalog="system" width="128" height="111"/>
         <image name="trash.fill" catalog="system" width="117" height="128"/>
         <image name="user1" width="64" height="64"/>
         <systemColor name="labelColor">

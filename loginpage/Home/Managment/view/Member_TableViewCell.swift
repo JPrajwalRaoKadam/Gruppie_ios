@@ -56,7 +56,7 @@ class Member_TableViewCell: UITableViewCell {
         
         let textAttributes: [NSAttributedString.Key: Any] = [
                .font: UIFont.boldSystemFont(ofSize: 30),
-               .foregroundColor: UIColor.white // White text color
+               .foregroundColor: UIColor.white 
            ]
         
         let textSize = letter.size(withAttributes: textAttributes)

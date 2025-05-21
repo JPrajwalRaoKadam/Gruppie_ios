@@ -15,7 +15,6 @@ class BasicInfoTableViewCell: UITableViewCell {
     @IBOutlet weak var panNo: UITextField!
     @IBOutlet weak var address: UITextField!
 
-    // Populate text fields with member data
     func populate(with member: Member, isEditingEnabled: Bool) {
         name.text = member.name
         designation.text = member.designation
@@ -39,7 +38,6 @@ class BasicInfoTableViewCell: UITableViewCell {
         fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
     }
 
-    // Collect updated data from text fields
     func collectUpdatedData() -> [String: Any] {
         return [
             "name": name.text ?? "",
@@ -54,7 +52,7 @@ class BasicInfoTableViewCell: UITableViewCell {
             "bloodGroup": bloodGroup.text ?? "",
             "panNumber": panNo.text ?? "",
             "address": address.text ?? "",
-            "gender": gender.text ?? "" // Ensure this is here
+            "gender": gender.text ?? "" 
         ]
     }
 }

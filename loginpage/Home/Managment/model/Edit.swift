@@ -1,4 +1,3 @@
-// UserProfile.swift
 import Foundation
 
 struct UserProfile {

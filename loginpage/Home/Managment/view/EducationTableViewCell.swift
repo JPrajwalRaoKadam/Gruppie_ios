@@ -6,7 +6,6 @@ class EducationTableViewCell: UITableViewCell {
     @IBOutlet weak var achievementLabel: UITextField!
     @IBOutlet weak var address: UITextField!
 
-    // Populate text fields with education data
     func populate(with member: Member, isEditingEnabled: Bool) {
         education.text = member.education
         profession.text = member.profession
@@ -17,7 +16,6 @@ class EducationTableViewCell: UITableViewCell {
         fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
     }
 
-    // Collect updated education data
     func collectUpdatedData() -> [String: String] {
         return [
             "education": education.text ?? "",

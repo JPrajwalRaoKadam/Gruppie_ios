@@ -1,6 +1,5 @@
 import Foundation
 
-// Member model to store the details of a member
 struct Member: Decodable {
     let userId: String
     var name: String
@@ -29,33 +28,28 @@ struct Member: Decodable {
     var achievement: String?
 }
 
-// API response containing a list of members
 struct MemberResponse: Decodable {
     let status: String?
     let data: [Member]
 }
 
-// API response for detailed member information
 struct MemberDetailsResponse: Decodable {
     let status: String?
     let data: MemberDetails
 }
 
-// MemberDetails contains detailed information about a member
 struct MemberDetails: Decodable {
     let userId: String
     let details: MemberDetailsData
     let profileImageURL: String?
 }
 
-// MemberDetailsData holds additional details of a member
 struct MemberDetailsData: Decodable {
     let name: String
     let phone: String
     let designation: String
 }
 
-// API response for general responses
 struct APIResponse: Decodable {
     let status: String?
     let data: [Member]
