@@ -14,6 +14,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        overrideUserInterfaceStyle = .light // Enforce Light mode per screen if needed
+        view.backgroundColor = .white
         self.navigationController?.isNavigationBarHidden = true
         butttonStyles()
         phoneNumberTextField.delegate = self
