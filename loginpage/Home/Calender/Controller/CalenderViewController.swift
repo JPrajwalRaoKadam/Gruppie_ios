@@ -149,7 +149,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     }
 
     @IBAction func addHolidayAction(_ sender: UISegmentedControl) {
-        let storyboard = UIStoryboard(name: "calender", bundle: nil)
+        let storyboard = UIStoryboard(name: "calender", bundle: nil)  
            if let addHolidaysVC = storyboard.instantiateViewController(withIdentifier: "AddHolidaysViewController") as? AddHolidaysCallenderViewController {
                addHolidaysVC.groupId = self.groupId // Pass the groupId
                addHolidaysVC.currentRole = currentRole
@@ -423,7 +423,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
        
        task.resume()
    }
-
+    
    // Function to convert date format from "YYYY-MM-DD" to "DD-MM-YYYY"
 func formatDate(_ dateString: String) -> String {
    let inputFormatter = DateFormatter()
@@ -630,3 +630,4 @@ func formatDate(_ dateString: String) -> String {
         }
     }
 }
+

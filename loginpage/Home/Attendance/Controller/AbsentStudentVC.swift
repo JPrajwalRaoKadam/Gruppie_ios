@@ -26,10 +26,14 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
     var currDate: String?
     var currentDate: String?
     
+    @IBOutlet weak var DoneButton: UIButton!
     @IBOutlet weak var abtableview: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        DoneButton.layer.cornerRadius =  10
+        DoneButton.layer.masksToBounds = true
+        DoneButton.clipsToBounds = true
         abtableview.dataSource = self
         abtableview.delegate = self
         abtableview.register(UINib(nibName: "AbsentStudentTableViewCell", bundle: nil), forCellReuseIdentifier: "AbsentStudentTableViewCell")
