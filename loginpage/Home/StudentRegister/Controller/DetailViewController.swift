@@ -53,7 +53,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             addStaffVC.token = self.token
             addStaffVC.groupId = self.groupIds
             addStaffVC.userId = self.userId
-            addStaffVC.staffList = staffList // Pass fetched staff data
+            addStaffVC.staffList = staffList
             self.navigationController?.pushViewController(addStaffVC, animated: true)
         }
     }
@@ -89,7 +89,6 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
                 let decodedResponse = try JSONDecoder().decode(StaffDataResponse.self, from: data)
 
                 if let staffList = decodedResponse.data, !staffList.isEmpty {
-                    // Fetch and store userId from the first staff member
                     if let firstUser = staffList.first {
                         self.userId = firstUser.userId ?? ""
                         print("Fetched User ID: \(self.userId)")

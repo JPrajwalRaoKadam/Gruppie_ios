@@ -2,6 +2,66 @@ import UIKit
 
 class StudentViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     
+    @IBOutlet weak var StudentList: UITableView!
+    @IBOutlet weak var SegmentController: UISegmentedControl!
+    @IBOutlet weak var searchButton: UIButton!
+    @IBOutlet weak var searchView: UIView!
+    @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
+    
+    var studentTeams: [StudentTeam] = []
+    var filteredStudentTeams: [StudentTeam] = []
+    var combinedStudentTeams: [CombinedStudentTeam] = []
+    var token: String = ""
+    var groupIds: String = ""
+    var teamId: String = ""
+    var searchTextField: UITextField?
+    var searchButtonTapped = false
+    var isSearching = false
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        let regularNib = UINib(nibName: "RegularTableViewCell", bundle: nil)
+        let combineNib = UINib(nibName: "CombineTableViewCell", bundle: nil)
+        heightConstraintOfSearchView.constant = 0
+        
+        StudentList.register(regularNib, forCellReuseIdentifier: "RegularTableViewCell")
+        StudentList.register(combineNib, forCellReuseIdentifier: "CombineTableViewCell")
+        
+        StudentList.delegate = self
+        StudentList.dataSource = self
+        
+        searchView.isHidden = true
+        searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
+        filteredStudentTeams = studentTeams
+        
+        SegmentController.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+        
+        segmentChanged()
+    }
+    
+    @objc func searchButtonTappedAction() {
+        let shouldShow = searchView.isHidden
+        searchView.isHidden = !shouldShow
+        heightConstraintOfSearchView.constant = shouldShow ? 47 : 0
+        if shouldShow {
+            searchTextField = UITextField(frame: CGRect(x: 10, y: 10, width: searchView.frame.width - 20, height: 40))
+            searchTextField?.placeholder = "Search..."
+            searchTextField?.delegate = self
+            searchTextField?.borderStyle = .roundedRect
+            searchTextField?.backgroundColor = .white
+            searchTextField?.layer.cornerRadius = 5
+            searchTextField?.layer.borderWidth = 1
+            searchTextField?.layer.borderColor = UIColor.gray.cgColor
+            if let searchTextField = searchTextField {
+                searchView.addSubview(searchTextField)
+            }
+        } else {
+            searchTextField?.removeFromSuperview()
+            searchTextField = nil
+        }
+    }
+    
     @IBAction func backButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
@@ -62,7 +122,6 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 let decoder = JSONDecoder()
                 let response = try decoder.decode(ClassListResponse.self, from: data)
 
-                // Extract classTypeId and className from the first available ClassType
                 guard let firstClassData = response.data.first?.classes.first else {
                     print("❌ No class data found")
                     return
@@ -70,8 +129,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
 
                 let classData = response.data.first?.classes ?? []
                 let classTypeId = firstClassData.classTypeId
-                let className = firstClassData.classList.first?.className ?? "Unknown" // You can modify this based on your requirement
-
+                let className = firstClassData.classList.first?.className ?? "Unknown"
                 DispatchQueue.main.async {
                     self.navigateToAddRegularClass(
                         withClassData: classData,
@@ -93,7 +151,6 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        // Pass data to the view controller
         addRegularClassVC.classData = classData
         addRegularClassVC.classTypeId = classTypeId
         addRegularClassVC.className = className
@@ -105,56 +162,20 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
     func addCombinedClass() {
         print("✅ Adding Combined class")
         
-        // Instantiate AddCombineClass from storyboard
         let storyboard = UIStoryboard(name: "Student", bundle: nil)
         guard let addCombineClassVC = storyboard.instantiateViewController(withIdentifier: "AddCombineClass") as? AddCombineClass else {
             print("❌ Failed to instantiate AddCombineClass from Student.storyboard")
             return
         }
 
-        // Pass data to the AddCombineClass view controller
         addCombineClassVC.token = self.token
         addCombineClassVC.groupIds = self.groupIds
         
-        // Optionally, pass any other data needed for AddCombineClass
         addCombineClassVC.studentTeams = self.studentTeams
         addCombineClassVC.filteredStudentTeams = self.filteredStudentTeams
         addCombineClassVC.combinedStudentTeams = self.combinedStudentTeams
         
-        // Navigate to AddCombineClass view controller
         self.navigationController?.pushViewController(addCombineClassVC, animated: true)
-    }
-    var studentTeams: [StudentTeam] = []
-    var filteredStudentTeams: [StudentTeam] = []
-    var combinedStudentTeams: [CombinedStudentTeam] = []
-    var token: String = ""
-    var groupIds: String = ""
-    var teamId: String = ""
-    
-    @IBOutlet weak var StudentList: UITableView!
-    @IBOutlet weak var SearchClass: UITextField!
-    @IBOutlet weak var SegmentController: UISegmentedControl!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        let regularNib = UINib(nibName: "RegularTableViewCell", bundle: nil)
-        let combineNib = UINib(nibName: "CombineTableViewCell", bundle: nil)
-        
-        StudentList.register(regularNib, forCellReuseIdentifier: "RegularTableViewCell")
-        StudentList.register(combineNib, forCellReuseIdentifier: "CombineTableViewCell")
-        
-        StudentList.delegate = self
-        StudentList.dataSource = self
-        
-        SearchClass.delegate = self
-        SearchClass.addTarget(self, action: #selector(searchStudents), for: .editingChanged)
-        
-        filteredStudentTeams = studentTeams
-        
-        SegmentController.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-        
-        segmentChanged()
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -194,21 +215,6 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
             return cell
         }
     }
-
-    @objc func searchStudents() {
-        guard let searchText = SearchClass.text, !searchText.isEmpty else {
-            filteredStudentTeams = studentTeams
-            StudentList.reloadData()
-            return
-        }
-        
-        if SegmentController.selectedSegmentIndex == 0 {
-            filteredStudentTeams = studentTeams.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-        
-        StudentList.reloadData()
-    }
-
     @objc func segmentChanged() {
         let selectedIndex = SegmentController.selectedSegmentIndex
         print("Segment changed to index: \(selectedIndex)")
@@ -286,7 +292,6 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return
             }
 
-            // Print raw API response
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("API Response to detailView: \(jsonString)")
             }
@@ -320,4 +325,29 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         task.resume()
     }
+    
+    func filterMembers(textField: String) {
+        let searchText = textField.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if searchText.isEmpty {
+            filteredStudentTeams = studentTeams
+            StudentList.reloadData()
+            return
+        }
+        
+        if SegmentController.selectedSegmentIndex == 0 {
+            filteredStudentTeams = studentTeams.filter {
+                $0.name.lowercased().contains(searchText.lowercased())
+            }
+        }
+        
+        StudentList.reloadData()
+    }
+
+    
+func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
+    filterMembers(textField: searchText)
+    return true
+}
 }

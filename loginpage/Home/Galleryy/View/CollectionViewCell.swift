@@ -4,14 +4,34 @@ class CollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var SelectButton: UIButton!
-//    @IBOutlet weak var playIcon: UIImageView!
+
+    // Add this play icon image view (programmatically)
+    let playIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.image = UIImage(systemName: "play.circle.fill") // system or custom icon
+        imageView.tintColor = .white
+        imageView.contentMode = .scaleAspectFit
+        imageView.isHidden = true // hidden by default
+        return imageView
+    }()
 
     var isSelectedCell: Bool = false {
         didSet {
             updateSelectionAppearance()
         }
     }
-    
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupPlayIcon()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupPlayIcon()
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -28,7 +48,7 @@ class CollectionViewCell: UICollectionViewCell {
     }
 
     @objc func selectButtonTapped() {
-        isSelectedCell.toggle() 
+        isSelectedCell.toggle()
     }
 
     func updateSelectionAppearance() {
@@ -39,5 +59,16 @@ class CollectionViewCell: UICollectionViewCell {
             SelectButton.setImage(UIImage(systemName: "checkmark.circle"), for: .normal)
             SelectButton.tintColor = UIColor.white
         }
+    }
+
+    private func setupPlayIcon() {
+        contentView.addSubview(playIcon)
+
+        NSLayoutConstraint.activate([
+            playIcon.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            playIcon.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            playIcon.widthAnchor.constraint(equalToConstant: 30),
+            playIcon.heightAnchor.constraint(equalToConstant: 30)
+        ])
     }
 }

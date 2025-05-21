@@ -3,7 +3,7 @@ import UIKit
 class StudentDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var TableView: UITableView!
-    @IBOutlet weak var EditButton: UIButton! // Connect this in Interface Builder
+    @IBOutlet weak var EditButton: UIButton!
 
 
     @IBAction func whatsappButtonTapped(_ sender: UIButton) {
@@ -49,7 +49,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
 
     func deleteStudent() {
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/student/\(userId)/delete"
-        print("API URL: \(urlString)") // ✅ Print API URL
+        print("API URL: \(urlString)")
 
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
@@ -68,7 +68,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
             }
 
             if let httpResponse = response as? HTTPURLResponse {
-                print("Response Status Code: \(httpResponse.statusCode)") // ✅ Print status code
+                print("Response Status Code: \(httpResponse.statusCode)")
             }
 
             guard let data = data else {
@@ -77,10 +77,9 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
             }
 
             if let responseString = String(data: data, encoding: .utf8) {
-                print("API Response: \(responseString)") // ✅ Print API response
+                print("API Response: \(responseString)")
             }
 
-            // ✅ Check if deletion was successful
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 DispatchQueue.main.async {
                     print("✅ Student deleted successfully")
@@ -100,30 +99,28 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     @IBOutlet weak var name: UILabel!
     var student: StudentData?
         var isEditingEnabled = false
-        var token: String = "" // Add this line
-        var groupId: String = "" // If needed
-        var teamId: String = "" // If needed
-        var userId: String = "" // If needed
+        var token: String = ""
+        var groupId: String = ""
+        var teamId: String = ""
+        var userId: String = ""
         var studentDbId: String = ""
 
 
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Apply rounded corners to EditButton
-        EditButton.layer.cornerRadius = 10 // Adjust the radius as needed
+        EditButton.layer.cornerRadius = 10
             EditButton.clipsToBounds = true
 
         print("StudentDetailViewController Loaded")
          if let student = student {
-            print("Student Data: \(student)") // ✅ Print student data
+            print("Student Data: \(student)")
             name.text = student.name
             designation.text = student.rollNumber ?? ""
         } else {
             print("Error: Student data is nil")
         }
 
-        // Register TableView Cells
         TableView.register(UINib(nibName: "BasicInfoCell", bundle: nil), forCellReuseIdentifier: "BasicInfoCell")
         TableView.register(UINib(nibName: "EducationInfoCell", bundle: nil), forCellReuseIdentifier: "EducationInfoCell")
         TableView.register(UINib(nibName: "AccountInfoCell", bundle: nil), forCellReuseIdentifier: "AccountInfoCell")
@@ -133,16 +130,12 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         TableView.reloadData()
     }
 
- 
-
-    // MARK: - TableView DataSource Methods
-    
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 3  // Three sections: Basic, Education, Account
+        return 3
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1 // Each section contains a single row
+        return 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -152,17 +145,17 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         }
 
         switch indexPath.section {
-        case 0: // Basic Info
+        case 0:
             let cell = tableView.dequeueReusableCell(withIdentifier: "BasicInfoCell", for: indexPath) as! BasicInfoCell
             cell.populate(with: student, isEditingEnabled: isEditingEnabled)
             return cell
             
-        case 1: // Education Info
+        case 1:
             let cell = tableView.dequeueReusableCell(withIdentifier: "EducationInfoCell", for: indexPath) as! EducationInfoCell
             cell.populate(with: student.educationInfo, isEditingEnabled: isEditingEnabled)
             return cell
             
-        case 2: // Account Info
+        case 2:
             let cell = tableView.dequeueReusableCell(withIdentifier: "AccountInfoCell", for: indexPath) as! AccountInfoCell
             cell.populate(with: student.accountInfo, isEditingEnabled: isEditingEnabled)
             return cell
@@ -172,15 +165,13 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }
 
-    // MARK: - TableView Delegate Methods
-
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 40))
-        headerView.backgroundColor = UIColor.white // Background color for header
+        headerView.backgroundColor = UIColor.white
 
         let titleLabel = UILabel(frame: CGRect(x: 16, y: 5, width: tableView.frame.width - 32, height: 30))
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 18) // Bold font
-        titleLabel.textColor = UIColor.black // Black color
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        titleLabel.textColor = UIColor.black
 
         switch section {
         case 0:
@@ -198,11 +189,10 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 40 // Adjust height as needed
+        return 40
     }
     @IBAction func EditButton(_ sender: Any) {
             if isEditingEnabled {
-                // Collect updated data from text fields
                 let updatedStudentData = collectUpdatedData()
                 updateStudentProfile(with: updatedStudentData)
             } else {
@@ -281,8 +271,8 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let token = TokenManager.shared.getToken() ?? "" // Fetching the token
-        print("🔑 Token Used: Bearer \(token)") // ✅ Debugging the token
+        let token = TokenManager.shared.getToken() ?? ""
+        print("🔑 Token Used: Bearer \(token)")
         
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
@@ -290,7 +280,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
             let jsonData = try JSONSerialization.data(withJSONObject: updatedData, options: .prettyPrinted)
             
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("🚀 Request Body Sent: \(jsonString)") // ✅ Debugging Request Data
+                print("🚀 Request Body Sent: \(jsonString)")
             }
             
             request.httpBody = jsonData
@@ -324,9 +314,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
                 }
             }
         }
-
         task.resume()
     }
-
 }
 

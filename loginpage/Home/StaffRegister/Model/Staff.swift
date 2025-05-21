@@ -1,17 +1,15 @@
 import Foundation
 
-// Staff response model to decode the list of staff members
 struct StaffResponse: Decodable {
     let totalNumberOfPages: Int
     let data: [Staff]
 }
 
-// Staff model
 struct Staff: Decodable {
-    var userId: String // Changed to non-optional
+    var userId: String
     let name: String
     let designation: String?
-    let imageURL: String?  // Base64 encoded URL, will need decoding if used for image
+    let imageURL: String?
     let bloodGroup: String?
     let panNumber: String?
     let caste: String?
@@ -24,7 +22,6 @@ struct Staff: Decodable {
     let email: String?
     let bankAccountNumber: String?
 
-    // Custom decoding for userId as non-optional
     enum CodingKeys: String, CodingKey {
         case name, designation, imageURL = "image", bloodGroup = "bloodGroup", panNumber = "panNumber", caste, doj, dob, address, phone, gender, religion, email, bankAccountNumber = "bankAccountNumber", userId
     }
@@ -32,14 +29,12 @@ struct Staff: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // Decode userId as non-optional, throws an error if missing
         if let decodedUserId = try? container.decode(String.self, forKey: .userId) {
             self.userId = decodedUserId
         } else {
             throw DecodingError.dataCorruptedError(forKey: .userId, in: container, debugDescription: "userId is required but missing.")
         }
         
-        // Decode other properties
         self.name = try container.decode(String.self, forKey: .name)
         self.designation = try container.decodeIfPresent(String.self, forKey: .designation)
         self.imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
@@ -57,15 +52,12 @@ struct Staff: Decodable {
     }
 }
 
-/// StaffDetailsResponse model to handle the decoded API response
 
-// API Response Model
 struct StaffDetailsResponse: Codable {
     let status: String?
     let data: StaffDetailsData
 }
 
-// Updated StaffDetailsData with `staffId`
 struct StaffDetailsData: Codable {
     let staffId: String
     let aadharNumber: String
@@ -96,7 +88,6 @@ struct StaffDetailsData: Codable {
     let classType: String?
 }
 
-// Updated Basic Information Model
 struct StaffBasicInfoModel {
     let name: String
     let country: String
@@ -120,7 +111,6 @@ struct StaffBasicInfoModel {
 //    let profession: String // Added
 }
 
-// Updated Account Information Model
 struct StaffAccountInfoModel {
     let uanNumber: String?
     let panNumber: String?

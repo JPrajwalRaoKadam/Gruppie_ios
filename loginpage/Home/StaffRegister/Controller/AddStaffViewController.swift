@@ -14,27 +14,22 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.layer.cornerRadius = 20
             tableView.clipsToBounds = true
 
-            // Shadow Effect for 2D Look
             tableView.layer.shadowColor = UIColor.black.cgColor
             tableView.layer.shadowOffset = CGSize(width: 0, height: 4)
             tableView.layer.shadowOpacity = 0.3
             tableView.layer.shadowRadius = 10
             tableView.layer.masksToBounds = false
 
-            // Optional: Light Gray Border
             tableView.layer.borderWidth = 1
             tableView.layer.borderColor = UIColor.lightGray.cgColor
 
-            // Background Color for Visibility
             tableView.backgroundColor = UIColor.white
 
-            // Add some padding around the tableView
             tableView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         
-        addButton.layer.cornerRadius = 10  // Reduced curvature
+        addButton.layer.cornerRadius = 10
         addButton.clipsToBounds = true
 
-        // Optional: Shadow Effect for Depth
         addButton.layer.shadowColor = UIColor.black.cgColor
         addButton.layer.shadowOffset = CGSize(width: 0, height: 4)
         addButton.layer.shadowOpacity = 0.3
@@ -48,20 +43,17 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
             return
         }
 
-        // Register custom cell
         tableView.register(UINib(nibName: "AddStaff", bundle: nil), forCellReuseIdentifier: "AddStaffCell")
 
         tableView.delegate = self
         tableView.dataSource = self
         
-        // UI Customization
         tableView.layer.cornerRadius = 20
         tableView.clipsToBounds = true
 //        addButton.layer.cornerRadius = 10
 //        addButton.clipsToBounds = true
     }
 
-    // MARK: - UITableView DataSource & Delegate
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
@@ -82,7 +74,6 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         return 200
     }
     
-    // MARK: - Actions
 
     @IBAction func BackButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
@@ -94,7 +85,6 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
             return
         }
 
-        // Fetch user inputs from text fields
         let name = cell.name.text ?? ""
         let country = cell.country.text ?? "IN"
         let phone = cell.phone.text ?? ""
@@ -110,7 +100,6 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         )
         let requestBody = StaffRequest(staffData: [staffData])
 
-        // Determine the API endpoint based on the selected segment index
         let type = segmentController.selectedSegmentIndex == 0 ? "teaching" : "nonteaching"
         guard let groupId = groupId else {
             print("Error: groupId is nil")
@@ -123,7 +112,6 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         postStaffData(to: apiUrl, requestBody: requestBody)
     }
 
-    // MARK: - API Call
 
     private func postStaffData(to url: String, requestBody: StaffRequest) {
         guard let requestUrl = URL(string: url) else {
@@ -135,21 +123,19 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Adding Authorization Token
         if let token = TokenManager.shared.getToken() {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
         do {
             let jsonData = try JSONEncoder().encode(requestBody)
-            print("Request Body: \(String(data: jsonData, encoding: .utf8) ?? "Error encoding")")  // Debugging request body
+            print("Request Body: \(String(data: jsonData, encoding: .utf8) ?? "Error encoding")")
             request.httpBody = jsonData
         } catch {
             print("Error: Failed to encode request body - \(error)")
             return
         }
 
-        // API Request
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Error: Network request failed - \(error)")
@@ -161,17 +147,15 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
                 return
             }
 
-            // Print HTTP Status Code for debugging
             if let response = response as? HTTPURLResponse {
-                print("HTTP Status Code: \(response.statusCode)") // Check status code
+                print("HTTP Status Code: \(response.statusCode)")
             }
 
             do {
                 let jsonResponse = try JSONSerialization.jsonObject(with: data, options: [])
                 DispatchQueue.main.async {
-                    print("API Response: \(jsonResponse)")  // Print response for debugging
+                    print("API Response: \(jsonResponse)")
 
-                    // Check if the response indicates success
                     if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                         self.showAlert(title: "Success", message: "Staff data has been saved successfully.")
                     } else {
@@ -185,7 +169,6 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         task.resume()
     }
 
-    // MARK: - Helper Function to Show Alert
     private func showAlert(title: String, message: String) {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)

@@ -26,6 +26,14 @@ struct StudentAtten: Codable {
         fatherName = try container.decodeIfPresent(String.self, forKey: .fatherName) ?? "Unknown"
         lastDaysAttendance = try container.decodeIfPresent([StudentAttendance].self, forKey: .lastDaysAttendance) ?? []
     }
+        /// Returns true if *any* recorded attendance for this student is "holiday"
+        var hasHolidayAttendance: Bool {
+            return lastDaysAttendance.contains {
+                $0.attendance?.lowercased() == "holiday"
+            }
+        }
+    
+
 }
 
 // MARK: - Attendance Model

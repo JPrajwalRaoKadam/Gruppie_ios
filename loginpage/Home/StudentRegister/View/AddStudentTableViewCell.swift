@@ -6,46 +6,25 @@ class AddStudentTableViewCell: UITableViewCell {
     @IBOutlet weak var country: UITextField!
     @IBOutlet weak var phone: UITextField!
     @IBOutlet weak var fatherName: UITextField!
-    @IBOutlet weak var newAdmissionButton: UIButton! // Outlet for button
+    @IBOutlet weak var newAdmissionButton: UIButton!
 
-    // Track the admission status
     var isNewAdmission: Bool = false
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateNewAdmissionButton() // Set the initial button state
+        updateNewAdmissionButton()
     }
 
-    // MARK: - Toggle Admission Status on Button Tap
     @IBAction func NewAdmission(_ sender: UIButton) {
-        isNewAdmission.toggle() // Toggle the state
-        updateNewAdmissionButton() // Update button UI
+        isNewAdmission.toggle()
+        updateNewAdmissionButton()
     }
 
-    // Update button appearance based on selection
     private func updateNewAdmissionButton() {
         if isNewAdmission {
-            newAdmissionButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .normal) // Show tick mark
+            newAdmissionButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .normal)
         } else {
-            newAdmissionButton.setImage(UIImage(systemName: "square"), for: .normal) // Empty box
+            newAdmissionButton.setImage(UIImage(systemName: "square"), for: .normal) 
         }
     }
-
-    // MARK: - Get Student Data from TextFields
-//    func getStudentData() -> StudentData? {
-//        guard let nameText = name.text, !nameText.isEmpty,
-//              let countryText = country.text, !countryText.isEmpty,
-//              let phoneText = phone.text, !phoneText.isEmpty,
-//              let fatherNameText = fatherName.text, !fatherNameText.isEmpty else {
-//            return nil // Return nil if any required field is missing
-//        }
-//
-//        // Create and return the student data object
-//        return StudentData(admissionType: isNewAdmission ? "New Admission" : "Old Admission",
-//                           cCode: 0,
-//                           countryCode: countryText,
-//                           fatherName: fatherNameText,
-//                           name: nameText,
-//                           phone: phoneText)
-//    }
 }

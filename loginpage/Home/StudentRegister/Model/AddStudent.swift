@@ -1,17 +1,14 @@
 import Foundation
 
-// MARK: - API Response Model
 struct StudentDataResponse: Codable {
     let data: [StudentData]
 }
 
-// MARK: - Fee Structure
 struct FeeId: Codable {
     let feeType: String?
     let feeAmount: Double?
 }
 
-// MARK: - Student Data Model
 struct StudentData: Codable {
     var userId: String?
     var userDownloadedApp: Bool?
@@ -23,9 +20,9 @@ struct StudentData: Codable {
     var searchName2: String?
     var name: String?
     var phone: String?
-    var alternativePhone: String?  // ✅ Added
+    var alternativePhone: String?
     var countryCode: String?
-    var country: String?  // ✅ Added
+    var country: String?
     var admissionType: String?
     var admissionNumber: String?
     var satsNo: String?
@@ -43,18 +40,17 @@ struct StudentData: Codable {
     var disability: String?
     var bloodGroup: String?
     var dob: String?
-    var dateOfBirth: String?  // ✅ Renamed from `dob`
+    var dateOfBirth: String?
     var doj: String?
-    var dateOfJoining: String?  // ✅ Renamed from `doj`
+    var dateOfJoining: String?
     var aadharNumber: String?
-    var panNumber: String?  // ✅ Added
+    var panNumber: String?
     var email: String?
     var address: String?
     var district: String?
     var taluk: String?
     var familyIncome: String?
     
-    // ✅ Parent Information
     var fatherName: String?
     var fatherPhone: String?
     var fatherNumber: String?
@@ -75,8 +71,7 @@ struct StudentData: Codable {
     var isMotherDownloaded: Bool?
     var isFatherDownloaded: Bool?
     
-    // ✅ Additional Data
-    var designation: String?  // ✅ Added
+    var designation: String?
     var numberOfKids: String?
     var feeIds: [FeeId]?
     var marksCard: [String]?
@@ -84,12 +79,10 @@ struct StudentData: Codable {
     var image: String?
     var isSelected: Bool?
     
-    // ✅ Educational & Account Info
     var educationInfo: EducationInfo?
     var accountInfo: AccountInfo?
 }
 
-// MARK: - Education Information
 struct EducationInfo: Codable {
     var className: String?
     var section: String?
@@ -101,7 +94,7 @@ struct EducationInfo: Codable {
     var caste: String?
     var category: String?
     var disability: String?
-    var dateOfBirth: String? // ✅ Renamed from `dob`
+    var dateOfBirth: String?
     var admissionNumber: String?
     var satsNumber: String?
     var aadharNumber: String?
@@ -112,13 +105,11 @@ struct EducationInfo: Codable {
     var achievement: String?
 }
 
-// MARK: - Account Information
 struct AccountInfo: Codable {
     var email: String?
     var phone: String?
     var admissionType: String?
 
-    // ✅ Parent Details
     var fatherName: String?
     var motherName: String?
     var fatherPhone: String?
@@ -134,7 +125,6 @@ struct AccountInfo: Codable {
     var fatherIncome: String?
     var motherIncome: String?
 
-    // ✅ Banking Information
     var bankAccount: String?
     var accountType: String?
     var bankIfsc: String?
@@ -143,12 +133,10 @@ struct AccountInfo: Codable {
     var address: String?
 }
 
-// MARK: - Student Register Request
 struct StudentRegisterRequest: Codable {
     var studentData: [StudentData]
 }
 
-// MARK: - Basic Info Model
 struct BasicInfoModel {
     var name: String
     var designation: String
@@ -170,7 +158,7 @@ struct StaffDataResponse: Codable {
 }
 
 struct StaffMember: Codable {
-    let permanent: StringOrBool // Changed to support both String and Bool
+    let permanent: StringOrBool
     let accountant: Bool?
     let qualification: String?
     let religion: String?
@@ -200,7 +188,7 @@ struct StaffMember: Codable {
     let aadharNumber: String?
     let officeAddress: String?
     let fatherName: String?
-    let className: String? // "class" is a reserved keyword, renamed to className
+    let className: String? 
     let caste: String?
     let gender: String?
     let emergencyContactNumber: String?

@@ -9,7 +9,7 @@ class AddRegularClassLabelCell: UITableViewCell {
     @IBOutlet weak var noOfSections: UILabel!
     @IBOutlet weak var incrementButton: UIButton!
 
-    weak var delegate: AddRegularClassLabelCellDelegate? // Use weak to avoid retain cycle
+    weak var delegate: AddRegularClassLabelCellDelegate?
     var classItem: ClassItem?
     var indexPath: IndexPath?
 

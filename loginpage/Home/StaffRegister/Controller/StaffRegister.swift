@@ -4,14 +4,19 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
 
     @IBOutlet weak var staffRegister: UITableView!
     @IBOutlet weak var segmentController: UISegmentedControl!
+    @IBOutlet weak var searchButton: UIButton!
+    @IBOutlet weak var searchView: UIView!
     
-    @IBOutlet weak var searchField: UITextField!
+    @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
     
     var filteredTeachingStaff: [Staff] = []
     var filteredNonTeachingStaff: [Staff] = []
     var isSearching = false
 
     var staffDetails: StaffDetailsData?
+    
+    var searchTextField: UITextField?
+    var searchButtonTapped = false
     
     var teachingStaffData: [Staff] = []
     var nonTeachingStaffData: [Staff] = []
@@ -25,9 +30,8 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         super.viewDidLoad()
         print("Received groupId: \(groupIds)")
         
-        searchField.delegate = self
-        searchField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
 
+        heightConstraintOfSearchView.constant = 0
 
         staffRegister.register(UINib(nibName: "TeachingStaff", bundle: nil), forCellReuseIdentifier: "TeachingStaffCell")
         staffRegister.register(UINib(nibName: "NonTeachingStaff", bundle: nil), forCellReuseIdentifier: "NonTeachingStaffCell")
@@ -37,32 +41,36 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
 
         staffRegister.estimatedRowHeight = 100
         staffRegister.rowHeight = UITableView.automaticDimension
+        
+        searchView.isHidden = true
 
         if segmentController.selectedSegmentIndex == 1 {
             fetchNonTeachingStaffData()
         }
+        searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
     }
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        guard let searchText = textField.text, !searchText.isEmpty else {
-            isSearching = false
-            staffRegister.reloadData()
-            return
-        }
-        
-        isSearching = true
-        if segmentController.selectedSegmentIndex == 0 {
-            filteredTeachingStaff = teachingStaffData.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+    
+    @objc func searchButtonTappedAction() {
+        let shouldShow = searchView.isHidden
+        searchView.isHidden = !shouldShow
+        heightConstraintOfSearchView.constant = shouldShow ? 47 : 0
+        if shouldShow {
+            searchTextField = UITextField(frame: CGRect(x: 10, y: 10, width: searchView.frame.width - 20, height: 40))
+            searchTextField?.placeholder = "Search..."
+            searchTextField?.delegate = self
+            searchTextField?.borderStyle = .roundedRect
+            searchTextField?.backgroundColor = .white
+            searchTextField?.layer.cornerRadius = 5
+            searchTextField?.layer.borderWidth = 1
+            searchTextField?.layer.borderColor = UIColor.gray.cgColor
+            if let searchTextField = searchTextField {
+                searchView.addSubview(searchTextField)
+            }
         } else {
-            filteredNonTeachingStaff = nonTeachingStaffData.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            searchTextField?.removeFromSuperview()
+            searchTextField = nil
         }
-        staffRegister.reloadData()
     }
-
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
-    }
-
 
     @IBAction func segmentControllerChanged(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 1 {
@@ -182,7 +190,6 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
                 return
             }
 
-            // Print the raw API response
             if let rawResponse = String(data: data, encoding: .utf8) {
                 print("Raw API Response: \(rawResponse)")
             }
@@ -236,4 +243,30 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
 
         navigationController?.pushViewController(addStaffVC, animated: true)
     }
+    
+    func filterMembers(textField: String) {
+        if textField.isEmpty {
+            isSearching = false
+            staffRegister.reloadData()
+            return
+        }
+
+        isSearching = true
+        let searchText = textField.lowercased()
+        
+        if segmentController.selectedSegmentIndex == 0 {
+            filteredTeachingStaff = teachingStaffData.filter { $0.name.lowercased().contains(searchText) }
+        } else {
+            filteredNonTeachingStaff = nonTeachingStaffData.filter { $0.name.lowercased().contains(searchText) }
+        }
+
+        staffRegister.reloadData()
+    }
+
+    
+func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
+    filterMembers(textField: searchText)
+    return true
+}
 }

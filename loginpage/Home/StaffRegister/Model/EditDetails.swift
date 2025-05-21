@@ -1,9 +1,4 @@
-//
-//  Edit.swift
-//  loginpage
-//
-//  Created by Apple on 31/01/25.
-//
+
 
 import Foundation
 
@@ -38,7 +33,6 @@ struct EditStaffResponse: Codable {
     let success: Bool?
     let message: String?
 
-    // Provide default values in case of an empty response
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.success = try container.decodeIfPresent(Bool.self, forKey: .success) ?? true

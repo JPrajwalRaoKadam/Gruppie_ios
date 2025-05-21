@@ -15,7 +15,7 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
         super.viewDidLoad()
         print("groupId: \(groupId), teamId: \(teamId), token: \(token)")
         
-        addButton.layer.cornerRadius = 10 // Adjust the value as needed
+        addButton.layer.cornerRadius = 10
             addButton.layer.masksToBounds = true
 
 
@@ -23,7 +23,6 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
         TableView.delegate = self
         TableView.dataSource = self
 
-        // Apply rounded corners, border, and shadow to the table view
         TableView.layer.cornerRadius = 15
         TableView.layer.masksToBounds = true
         TableView.layer.borderWidth = 1
@@ -65,7 +64,6 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
     }
 
     @IBAction func BackButton(_ sender: UIButton) {
-        // Navigate back to the previous view controller
         navigationController?.popViewController(animated: true)
     }
     
@@ -122,7 +120,6 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
                 
                 DispatchQueue.main.async {
                     if !responseModel.data.isEmpty {
-                        // Navigate back to previous screen (DetailViewController)
                         self.navigationController?.popViewController(animated: true)
                     }
                 }

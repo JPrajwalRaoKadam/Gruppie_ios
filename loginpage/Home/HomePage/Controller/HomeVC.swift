@@ -40,6 +40,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         tableView.register(UINib(nibName: "BannerAndProfileTableViewCell", bundle: nil), forCellReuseIdentifier: "BannerAndProfileTableViewCell")
         tableView.register(UINib(nibName: "AllIconsTableViewCell", bundle: nil), forCellReuseIdentifier: "AllIconsTableViewCell")
         
+        tableView.contentInset = .zero
+        tableView.sectionHeaderHeight = 0
+        tableView.tableHeaderView = nil
+        
         CustomTabManager.shared.delegate = self
         CustomTabManager.shared.hDelegate = self
         CustomTabManager.shared.mDelegate = self
@@ -147,22 +151,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
             return section == 0 ? nil : groupDatas[section - 1].activity
         }
-
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        if self.featureIcons.count <= 4 {
-//            return 100
-//        } else if self.featureIcons.count > 4 && self.featureIcons.count <= 8 {
-//            return 200
-//        } else if self.featureIcons.count > 8 && self.featureIcons.count <= 12 {
-//            return 300
-//        } else {
-//            return UITableView.automaticDimension
-//        }
-//    }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 0 {
-            return UITableView.automaticDimension // Or fixed height for Banner/Profile cell
+            return 150
         } else {
             let featureIcons = groupDatas[indexPath.section - 1].featureIcons // Get icons per section
             let count = featureIcons.count
@@ -186,7 +178,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        guard section > 0 else { return nil }
+        guard section > 0 else { return UIView() }
 
         let headerView = UIView()
         headerView.backgroundColor = .white // Match table background
@@ -202,8 +194,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-            titleLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 4),
-            titleLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -4)
+            titleLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 0),
+            titleLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -20)
         ])
 
         return headerView
@@ -211,6 +203,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return section == 0 ? 0 : 40
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 0
     }
     
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

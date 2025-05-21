@@ -7,7 +7,7 @@ class AddRegularClassCell: UITableViewCell, UITableViewDelegate, UITableViewData
     @IBOutlet weak var TableView: UITableView!
 
     var classData: [ClassItem] = []
-    weak var parentDelegate: AddRegularClassLabelCellDelegate? // Reference to parent delegate
+    weak var parentDelegate: AddRegularClassLabelCellDelegate?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -26,11 +26,10 @@ class AddRegularClassCell: UITableViewCell, UITableViewDelegate, UITableViewData
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        bringSubviewToFront(className)   // Ensure labels are visible
-        bringSubviewToFront(noOfSection) // Ensure labels are visible
+        bringSubviewToFront(className)
+        bringSubviewToFront(noOfSection)
     }
 
-    // MARK: - UITableView DataSource Methods
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return classData.count
@@ -43,13 +42,11 @@ class AddRegularClassCell: UITableViewCell, UITableViewDelegate, UITableViewData
 
         let classItem = classData[indexPath.row]
         cell.configure(with: classItem, indexPath: indexPath)
-        cell.delegate = parentDelegate // Assign parent delegate
+        cell.delegate = parentDelegate
         cell.className.text = classItem.className
         cell.noOfSections.text = "\(classItem.noOfSections)"
         return cell
     }
-
-    // MARK: - UITableView Delegate Methods
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50

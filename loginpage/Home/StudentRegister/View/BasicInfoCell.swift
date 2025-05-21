@@ -4,12 +4,12 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
 
     @IBOutlet weak var name: UITextField!
     @IBOutlet weak var gender: UITextField!
-    @IBOutlet weak var studentClass: UITextField! // Mapped to className
+    @IBOutlet weak var studentClass: UITextField!
     @IBOutlet weak var section: UITextField!
-    @IBOutlet weak var rollNo: UITextField! // Mapped to rollNumber
+    @IBOutlet weak var rollNo: UITextField!
     @IBOutlet weak var email: UITextField!
     @IBOutlet weak var phone: UITextField!
-    @IBOutlet weak var doj: UITextField! // Mapped to dateOfJoining
+    @IBOutlet weak var doj: UITextField!
 
     private let genderOptions = ["Male", "Female", "Other"]
     private var genderPicker = UIPickerView()
@@ -65,12 +65,12 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
     func populate(with student: StudentData, isEditingEnabled: Bool) {
         name.text = student.name
         gender.text = student.gender
-        studentClass.text = student.className // ✅ Correct mapping
+        studentClass.text = student.className
         section.text = student.section
-        rollNo.text = student.rollNumber // ✅ Correct mapping
+        rollNo.text = student.rollNumber
         email.text = student.email
         phone.text = student.phone
-        doj.text = student.dateOfJoining // ✅ Correct mapping
+        doj.text = student.dateOfJoining
 
         let fields: [UITextField] = [
             name, gender, studentClass, section, rollNo, email, phone, doj
@@ -82,12 +82,12 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
         return [
             "name": name.text ?? "",
             "gender": gender.text ?? "",
-            "className": studentClass.text ?? "", // ✅ Correct key
+            "className": studentClass.text ?? "",
             "section": section.text ?? "",
-            "rollNumber": rollNo.text ?? "", // ✅ Correct key
+            "rollNumber": rollNo.text ?? "",
             "email": email.text ?? "",
             "phone": phone.text ?? "",
-            "dateOfJoining": doj.text ?? "" // ✅ Correct key
+            "dateOfJoining": doj.text ?? ""
         ]
     }
 

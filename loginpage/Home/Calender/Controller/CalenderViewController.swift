@@ -102,26 +102,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
                  filterEventsForSelectedDate()
              }
       }
-//    @IBAction func segmentButtonAction(_ sender: UISegmentedControl) {
-//        selectedSegmentIndex = sender.selectedSegmentIndex
-//
-//        if selectedSegmentIndex == 0 {
-//            // Clear events and reload table view
-//            events.removeAll()
-//            calendarTableView.reloadData()
-//            print("Cleared events for segment 0")
-//        } else if selectedSegmentIndex == 1 {
-//                // Fetch events for the current month and year
-//                let currentPage = calendar.currentPage // Get the current visible month and year from the calendar
-//                let components = Calendar.current.dateComponents([.month, .year], from: currentPage)
-//
-//                guard let month = components.month, let year = components.year else {
-//                    print("Failed to extract month and year")
-//                    return
-//                }
-//            fetchEvents(for: month, year: year)
-//        }
-//    }
+//    @IBAction func segmentButtonAction(_ sender: UISegmentedControl)
     
     
     @IBAction func segmentButtonAction(_ sender: UISegmentedControl) {
@@ -168,7 +149,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     }
 
     @IBAction func addHolidayAction(_ sender: UISegmentedControl) {
-        let storyboard = UIStoryboard(name: "calender", bundle: nil)  
+        let storyboard = UIStoryboard(name: "calender", bundle: nil)
            if let addHolidaysVC = storyboard.instantiateViewController(withIdentifier: "AddHolidaysViewController") as? AddHolidaysCallenderViewController {
                addHolidaysVC.groupId = self.groupId // Pass the groupId
                addHolidaysVC.currentRole = currentRole
@@ -177,8 +158,18 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedEvent = events[indexPath.row]
+        // Pick from the correct array based on the segment
+        let selectedEvent: Event
+        if selectedSegmentIndex == 0 {
+            selectedEvent = filteredEvents[indexPath.row]
+        } else {
+            selectedEvent = events[indexPath.row]
+        }
+
+        // Store the ID
         self.selectedEventId = selectedEvent.eventid ?? ""
+
+        // Present your edit UI
         showEditEventView(with: selectedEvent)
     }
        
@@ -411,6 +402,15 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
                    DispatchQueue.main.async {
                        self.events.append(formattedEvent)
                        self.calendarTableView.reloadData()
+                       let currentPage = self.calendar.currentPage // Get the current visible month and year from the calendar
+                       let components = Calendar.current.dateComponents([.month, .year], from: currentPage)
+
+                       guard let month = components.month, let year = components.year else {
+                           print("Failed to extract month and year")
+                           return
+                       }
+                       
+                       self.fetchEvents(for: month, year: year)
                        if let viewController = UIApplication.shared.windows.first?.rootViewController {
                            self.showSuccessAlert(alertVC: viewController)
                        }
@@ -630,4 +630,3 @@ func formatDate(_ dateString: String) -> String {
         }
     }
 }
-

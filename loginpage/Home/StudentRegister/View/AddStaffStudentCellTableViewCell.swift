@@ -17,13 +17,11 @@ class AddStaffStudentCellTableViewCell: UITableViewCell {
         updateButtonAppearance()
     }
 
-    // **Method to update button appearance**
     private func updateButtonAppearance() {
         let imageName = isSelectedState ? "checkmark.circle.fill" : "circle"
         selectButton.setImage(UIImage(systemName: imageName), for: .normal)
     }
 
-    // **Method to configure the cell with data**
     func configure(with name: String, isSelected: Bool) {
         nameLabel.text = name
         self.isSelectedState = isSelected

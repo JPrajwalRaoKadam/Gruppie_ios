@@ -307,7 +307,6 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
     private func showAdminConfirmationAlert() {
         let alert = UIAlertController(title: "Confirm", message: "Do you want to make this staff an admin?", preferredStyle: .alert)
 
-        // "Yes" action to proceed with making the staff admin
         let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
             self.makeStaffAdmin()
         }

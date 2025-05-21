@@ -423,49 +423,6 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         deleteAttendance(attendanceId: attendanceId)
     }
     
-// func showEditAttendancePopup(for student: StudentAtten) {
-//     let selectedAttendance = self.studAtten
-//        
-//        if let popupView = EditAttendance.loadFromNib() {
-//            popupView.configure(
-//                     studentName: student.studentName,
-//                     attendanceId: selectedAttendance?.attendanceId ?? "",
-//                     userId: student.userId ?? "",
-//                     status: selectedAttendance?.attendance ?? ""
-//                 )
-////            if attendance.attendance?.lowercased() == "holiday" {
-////                   editButton.isHidden = true
-////               } else {
-////                   editButton.isHidden = false
-////               }
-////             Populate the popup with last attendance details for the selected cell
-//            popupView.attendanceStatus.text = selectedAttendance?.attendance ?? ""
-//            popupView.studentNameLabel.text = student.studentName
-//
-//            // Set delegate and pass attendanceId
-//            popupView.delegate = self
-//            popupView.attendanceId = selectedAttendance?.attendanceId
-//
-//            // Add it to current view
-//            popupView.translatesAutoresizingMaskIntoConstraints = false
-//            view.addSubview(popupView)
-//
-//            NSLayoutConstraint.activate([
-//                popupView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-//                popupView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-//                popupView.widthAnchor.constraint(equalToConstant: 293),
-//                popupView.heightAnchor.constraint(equalToConstant: 147
-//                                                 )
-//            ])
-//            // Dismiss on outside tap
-//                 let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
-//                 tapGesture.cancelsTouchesInView = false
-//                 view.addGestureRecognizer(tapGesture)
-//            
-//            // Optional: Add a dimmed background
-//            view.bringSubviewToFront(popupView)
-//        }
-//    }
     func showEditAttendancePopup(for student: StudentAtten) {
         // 1️⃣ Create and add the dimming view
         let dimView = UIView(frame: view.bounds)
@@ -572,77 +529,9 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             cell.attenStatusStackView.isHidden = false
             cell.configureAttendanceButtons(lastDaysAttendance: student.lastDaysAttendance)
         }
-
+        DoneButton.isHidden = student.hasHolidayAttendance
         return cell
     }
-
-
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        guard let cell = tableView.dequeueReusableCell(
-//            withIdentifier: "StudentVCTableViewCell",
-//            for: indexPath
-//        ) as? StudentVCTableViewCell else {
-//            return UITableViewCell()
-//        }
-//
-//        let student = students[indexPath.row]
-//
-//        // ✅ Call your configure method
-//        cell.configure(
-//            with: student,
-//            allStudents: students,
-//            at: indexPath,
-//            delegate: self
-//        )
-//
-//        // ✅ Load image (you can keep this part separately if needed)
-//        if let urlString = student.studentImage,
-//           let url = URL(string: urlString), !urlString.isEmpty {
-//            URLSession.shared.dataTask(with: url) { data, _, _ in
-//                if let data = data, let img = UIImage(data: data) {
-//                    DispatchQueue.main.async {
-//                        cell.images.image = img
-//                        cell.fallback.isHidden = true
-//                    }
-//                } else {
-//                    DispatchQueue.main.async {
-//                        cell.showFallbackImage(for: student.studentName)
-//                        cell.fallback.isHidden = false
-//                    }
-//                }
-//            }.resume()
-//        } else {
-//            cell.showFallbackImage(for: student.studentName)
-//            cell.fallback.isHidden = false
-//        }
-//
-//        // ✅ Show attendance button if data is available
-//        if let last = student.lastDaysAttendance.last {
-//            cell.setAttendanceVisibility(isHidden: false)
-//            cell.configureAttendanceStatus(attendance: last.attendance ?? "")
-//            cell.attendanceId = last.attendanceId
-//            cell.attenStatus.tag = indexPath.row
-//
-//        } else {
-//            cell.setAttendanceVisibility(isHidden: true)
-//        }
-//
-//        // ✅ Show checkbox buttons
-//        if indexPath.row < attendanceData.count {
-//            if let times = Int(attendanceData[indexPath.row].numberOfTimeAttendance) {
-//                cell.configureAttendanceButtons(numberOfTimes: times)
-//            }
-//        }
-//
-//        // ✅ Add target
-//        cell.attenStatus.addTarget(
-//            self,
-//            action: #selector(editButtonTapped(_:)),
-//            for: .touchUpInside
-//        )
-//
-//        return cell
-//    }
 
     @objc private func editButtonTapped(_ sender: UIButton) {
       let row = sender.tag
@@ -670,6 +559,8 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedStudent = students[indexPath.row]
+       // DoneButton.isHidden = selected.hasHolidayAttendance
+        DoneButton.isHidden = selectedStudent.hasHolidayAttendance
         self.selectedStud = selectedStudent
 
         // Safely get attendance data

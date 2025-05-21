@@ -36,13 +36,11 @@ class EducationInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewData
     }
 
     private func setupPickers() {
-        // Nationality Picker
         nationalityPicker.delegate = self
         nationalityPicker.dataSource = self
         nationality.inputView = nationalityPicker
         nationality.inputAccessoryView = createToolbar(selector: #selector(doneSelectingNationality))
 
-        // Disability Picker
         disabilityPicker.delegate = self
         disabilityPicker.dataSource = self
         disability.inputView = disabilityPicker
@@ -84,7 +82,6 @@ class EducationInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewData
         dob.resignFirstResponder()
     }
 
-    // MARK: - UIPickerView DataSource & Delegate
     func numberOfComponents(in pickerView: UIPickerView) -> Int { return 1 }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -95,7 +92,6 @@ class EducationInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewData
         return pickerView == nationalityPicker ? countries[row] : disabilityOptions[row]
     }
 
-    // ✅ Function to populate fields with student data
     func populate(with educationInfo: EducationInfo?, isEditingEnabled: Bool) {
         guard let educationInfo = educationInfo else { return }
 
@@ -118,7 +114,6 @@ class EducationInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewData
         fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
     }
 
-    // ✅ Function to collect updated data from fields
     func collectUpdatedData() -> EducationInfo {
         let nationalityText = nationality.text ?? ""
         let bloodGroupText = bloodGroup.text ?? ""

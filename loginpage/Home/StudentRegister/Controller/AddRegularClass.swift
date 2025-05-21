@@ -27,7 +27,6 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
         TableView.dataSource = self
     }
 
-    // MARK: - UITableViewDataSource methods
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return classData.count
@@ -38,7 +37,7 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1 // Each section contains one `AddRegularClassCell`
+        return 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -46,8 +45,7 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
             return UITableViewCell()
         }
 
-        // Pass the relevant class list to the nested table view inside AddRegularClassCell
-        cell.parentDelegate = self // Assign delegate
+        cell.parentDelegate = self
         cell.classData = classData[indexPath.section].classList
         cell.TableView.reloadData()
 
@@ -76,7 +74,7 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // ✅ Add token for authentication
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") 
         request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody, options: [])
 
         URLSession.shared.dataTask(with: request) { (data, response, error) in

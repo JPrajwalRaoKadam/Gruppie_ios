@@ -18,8 +18,12 @@ class DetailTableViewCell: UITableViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        
+        // Make icon circular
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
+        
+        // Make imageLabel circular and fill the image view
         imageLabel.layer.cornerRadius = iconImageView.frame.width / 2
         imageLabel.clipsToBounds = true
     }
@@ -30,19 +34,17 @@ class DetailTableViewCell: UITableViewCell {
 
     // MARK: - UI Configuration
     private func setupUI() {
-        // Make the iconImageView circular
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
         iconImageView.contentMode = .scaleAspectFill
-        
-        // Set a system link color background for fallback
         iconImageView.backgroundColor = UIColor.systemBlue
 
-        // Configure fallback text label
+        // Setup fallback label (must be subview of iconImageView in storyboard)
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
         imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
         imageLabel.textColor = .white
+        imageLabel.backgroundColor = .clear
     }
 
     // MARK: - Gesture Recognizers
@@ -66,34 +68,32 @@ class DetailTableViewCell: UITableViewCell {
             iconImageView.backgroundColor = .clear
             imageLabel.isHidden = true
         } else {
-            // Remove any previous image and set system blue background
             iconImageView.image = nil
             iconImageView.backgroundColor = UIColor.systemBlue
-            
-            // Display first letter of name as fallback
+
             let firstLetter = String(name.prefix(1)).uppercased()
-            print("Fallback Text: \(firstLetter)")  // Debugging the fallback text
+            print("Fallback Text: \(firstLetter)") // Debug print
 
             imageLabel.text = firstLetter
             imageLabel.isHidden = false
-            imageLabel.textColor = .white
-            imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
-            imageLabel.textAlignment = .center
-            
-            // Ensure label stays in the center of iconImageView
-            imageLabel.frame = iconImageView.bounds
-            imageLabel.center = iconImageView.center
+
+            // Ensure imageLabel fills iconImageView (if not using constraints in storyboard)
+            imageLabel.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                imageLabel.centerXAnchor.constraint(equalTo: iconImageView.centerXAnchor),
+                imageLabel.centerYAnchor.constraint(equalTo: iconImageView.centerYAnchor),
+                imageLabel.widthAnchor.constraint(equalTo: iconImageView.widthAnchor),
+                imageLabel.heightAnchor.constraint(equalTo: iconImageView.heightAnchor)
+            ])
         }
     }
 
     // MARK: - Actions
     @objc private func callTapped() {
         print("Call button tapped")
-        // Open dialer logic can be added here
     }
 
     @objc private func whatsAppTapped() {
         print("WhatsApp button tapped")
-        // Implement WhatsApp opening logic
     }
 }
