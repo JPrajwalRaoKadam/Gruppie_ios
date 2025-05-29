@@ -119,6 +119,4 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
         // Navigate back to the previous view controller
         navigationController?.popViewController(animated: true)
     }
-    
-
 }

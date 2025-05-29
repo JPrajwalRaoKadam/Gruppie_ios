@@ -12,7 +12,7 @@ protocol AddNewHolidayDelegate: AnyObject {
 }
 
 
-class AddNewHoliday: UITableViewCell {
+class AddNewHoliday: UITableViewCell, UITextFieldDelegate {
  
     @IBOutlet weak var addholidayStack: UIStackView!
     @IBOutlet weak var holidayTitle: UITextField!
@@ -20,27 +20,27 @@ class AddNewHoliday: UITableViewCell {
     @IBOutlet weak var holidaydate: UITextField!
     @IBOutlet weak var viewHeight: NSLayoutConstraint!
     @IBOutlet weak var addMoreHeightConstraint: NSLayoutConstraint!
-    weak var delegate: AddNewHolidayDelegate? // Delegate property
+    
+    weak var delegate: AddNewHolidayDelegate?
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        holidaydate.delegate = self
     }
-
-    @IBAction func newHolidayDate(_ sender: Any) {
-        delegate?.didTapDateField(textField: holidaydate)
-       
-    }
-    
     
     @IBAction func addMoreButtonAction(_ sender: Any) {
         delegate?.didTapAddMore()
     }
     
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        if textField == holidaydate {
+            delegate?.didTapDateField(textField: textField)
+            return false
+        }
+        return true
+    }
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
-    
 }

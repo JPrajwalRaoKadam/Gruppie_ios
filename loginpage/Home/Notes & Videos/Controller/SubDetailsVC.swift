@@ -13,15 +13,15 @@ class SubDetailsVC: UIViewController {
     @IBOutlet weak var subTableView: UITableView!
     @IBOutlet weak var plusButton: UIButton!
     
-    var subjectId : String = ""
-      var subjectName: String = ""
-      var groupId : String = ""
-      var teamId: String = ""
-      var className : String = ""
-      var topicsList: [TopicNV] = []
-      var currentRole: String?
+    var subjectId: String = ""
+    var subjectName: String = ""
+    var groupId: String = ""
+    var teamId: String = ""
+    var className: String = ""
+    var topicsList: [TopicNV] = []
+    var currentRole: String?
+    var shouldRefreshData = false
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         subTableView.delegate = self
@@ -30,10 +30,19 @@ class SubDetailsVC: UIViewController {
             plusButton.isHidden = true
         }
         classsubjName.text = "\(className)- (\(subjectName))"
-        print("adsbgid: \(groupId) adsbtid: \(teamId) subid: \(subjectId)" )
+        print("adsbgid: \(groupId) adsbtid: \(teamId) subid: \(subjectId)")
         subTableView.register(UINib(nibName: "SubDetailsTableViewCell", bundle: nil), forCellReuseIdentifier: "SubDetailsTableViewCell")
         fetchSubjectDetails()
     }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if shouldRefreshData {
+            fetchSubjectDetails()
+            shouldRefreshData = false
+        }
+    }
+
     func fetchSubjectDetails() {
         guard let token = TokenManager.shared.getToken() else {
             print("❌ Token not found")
@@ -68,28 +77,26 @@ class SubDetailsVC: UIViewController {
         }.resume()
     }
 
-   
     @IBAction func backButton(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
-    
+
     @IBAction func addButton(_ sender: Any) {
         print("add button tapped")
         navigateToAddChapter()
     }
-    
+
     func navigateToAddChapter() {
         let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
         if let AddChapterVC = storyboard.instantiateViewController(withIdentifier: "AddChapterVC") as? AddChapterVC {
-            AddChapterVC.groupId = groupId  // Pass groupId
-            AddChapterVC.teamId  = teamId   // Pass teamId
+            AddChapterVC.groupId = groupId
+            AddChapterVC.teamId = teamId
             AddChapterVC.subjectId = subjectId
             self.navigationController?.pushViewController(AddChapterVC, animated: true)
         }
     }
-    
-    
 }
+
 extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -105,7 +112,7 @@ extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
         cell.topicName.text = topic.topicName
         cell.createdBy.text = topic.createdByName
 
-        // Date formatting
+        // Format date
         let inputFormatter = ISO8601DateFormatter()
         if let date = inputFormatter.date(from: topic.insertedAt) {
             let formatter = DateFormatter()
@@ -115,42 +122,135 @@ extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
             cell.createdOn.text = "-"
         }
 
-        // Decode base64 fileName and log details
+        // Clear previous content
+        cell.datacontainer.subviews.forEach { $0.removeFromSuperview() }
+
+        // Load file preview
         if let encodedFile = topic.fileName.first,
-           let decodedURLString = decodeFileURL(from: encodedFile),
+           let decodedURLString = decodeBase64String(encodedFile),
            let fileURL = URL(string: decodedURLString) {
 
             print("✅ Decoded URL: \(decodedURLString)")
 
-            switch topic.fileType.lowercased() {
-            case "image":
-                print("🖼️ File is an image")
-            case "pdf":
-                print("📄 File is a PDF")
-            case "video":
-                print("🎥 File is a video")
-            default:
-                print("📁 Unknown file type")
+            let type = topic.fileType.lowercased()
+
+            if let encoded = topic.fileName.first,
+               let decoded = decodeBase64String(encoded),
+               let url = URL(string: decoded) {
+
+                switch type {
+                case "image":
+                    let imageView = UIImageView(frame: cell.datacontainer.bounds)
+                    imageView.contentMode = .scaleAspectFit
+                    imageView.clipsToBounds = true
+                    imageView.load(url: encoded)
+                    cell.datacontainer.addSubview(imageView)
+
+                case "video":
+                    let label = UILabel(frame: cell.datacontainer.bounds)
+                    label.text = "🎥 Video: \(url.lastPathComponent)"
+                    label.textAlignment = .center
+                    label.numberOfLines = 2
+                    label.textColor = .systemRed
+                    cell.datacontainer.addSubview(label)
+
+                case "audio":
+                    let label = UILabel(frame: cell.datacontainer.bounds)
+                    label.text = "🎵 Audio: \(url.lastPathComponent)"
+                    label.textAlignment = .center
+                    label.numberOfLines = 2
+                    label.textColor = .systemGreen
+                    cell.datacontainer.addSubview(label)
+
+                case "youtube":
+                    let label = UILabel(frame: cell.datacontainer.bounds)
+                    label.text = "▶️ YouTube: \(url.absoluteString)"
+                    label.textAlignment = .center
+                    label.numberOfLines = 2
+                    label.textColor = .systemOrange
+                    cell.datacontainer.addSubview(label)
+
+                case "pdf":
+                    let imageView = UIImageView(image: UIImage(named: "defaultpdf"))
+                    imageView.frame = cell.datacontainer.bounds
+                    imageView.contentMode = .scaleAspectFit
+                    cell.datacontainer.addSubview(imageView)
+
+                default:
+                    let imageView = UIImageView(image: UIImage(named: "defaultpdf"))
+                    imageView.frame = cell.datacontainer.bounds
+                    imageView.contentMode = .scaleAspectFit
+                    cell.datacontainer.addSubview(imageView)
+                }
+
+            } else {
+                // Fallback if decoding fails or URL is invalid
+                let label = UILabel(frame: cell.datacontainer.bounds)
+                label.text = "❌ Invalid or missing file"
+                label.textAlignment = .center
+                label.textColor = .systemGray
+                cell.datacontainer.addSubview(label)
             }
+
+
         }
 
         return cell
     }
 
-    func decodeFileURL(from base64String: String) -> String? {
-        let cleanedString = base64String
-            .replacingOccurrences(of: "\n", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard let decodedData = Data(base64Encoded: cleanedString),
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 605
+    }
+    
+    func decodeBase64String(_ base64String: String) -> String? {
+        guard let decodedData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),
               let decodedString = String(data: decodedData, encoding: .utf8) else {
-            print("❌ Failed to decode base64 string")
             return nil
         }
         return decodedString
     }
+    
+}
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 605
+extension UIImageView {
+    func load(url base64String: String) {
+        guard let decodedURLString = decodeBase64String(base64String),
+              let url = URL(string: decodedURLString) else {
+            DispatchQueue.main.async {
+                self.image = nil
+            }
+            return
+        }
+
+        let urlRequest = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+
+        URLSession.shared.dataTask(with: urlRequest) { data, _, error in
+            if let error = error {
+                print("❌ Failed to load image: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.image = nil
+                }
+                return
+            }
+
+            if let data = data, let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    self.image = image
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.image = nil
+                }
+            }
+        }.resume()
+    }
+
+    private func decodeBase64String(_ base64String: String) -> String? {
+        let cleaned = base64String.replacingOccurrences(of: "\n", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let decodedData = Data(base64Encoded: cleaned),
+              let decodedString = String(data: decodedData, encoding: .utf8) else {
+            return nil
+        }
+        return decodedString
     }
 }

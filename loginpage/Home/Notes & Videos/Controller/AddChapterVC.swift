@@ -54,6 +54,9 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
 
         ChapterName.delegate = self
         topicName.delegate = self
+        
+        contentCancel.isHidden = true
+        pdfNameLabel.isHidden = true
 
         addDropDownIcon(to: ChapterName, action: #selector(showChapterPicker))
         addDropDownIcon(to: topicName, action: #selector(showTopicPicker))
@@ -628,10 +631,13 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
                 switch result {
                 case .success(let response):
                     print("✅ Subject Post Added: \(response.message ?? "")")
-                    self.navigationController?.popViewController(animated: true)
                 case .failure(let error):
                     print("❌ Error Submitting Subject Post: \(error.localizedDescription)")
                 }
+                if let previousVC = self.navigationController?.viewControllers.dropLast().last as? SubDetailsVC {
+                            previousVC.shouldRefreshData = true
+                        }
+                        self.navigationController?.popViewController(animated: true)
             }
         }
     }

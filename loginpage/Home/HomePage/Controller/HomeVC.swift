@@ -791,6 +791,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("Failed to instantiate StaffRegister view controller")
             return
         }
+        staffRegisterVC.token = TokenManager.shared.getToken() ?? ""
         staffRegisterVC.groupIds = school?.id ?? ""
         staffRegisterVC.teachingStaffData = teachingStaff
         navigationController?.pushViewController(staffRegisterVC, animated: true)

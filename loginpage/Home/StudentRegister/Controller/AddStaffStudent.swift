@@ -33,7 +33,6 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
             }
         }
     }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -43,9 +42,8 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
 
         TableView.register(UINib(nibName: "AddStaffStudentCellTableViewCell", bundle: nil), forCellReuseIdentifier: "AddStaffStudentCell")
 
-        
         addButton.layer.cornerRadius = 10
-            addButton.layer.masksToBounds = true
+        addButton.layer.masksToBounds = true
 
         TableView.delegate = self
         TableView.dataSource = self
@@ -53,14 +51,18 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
         TableView.estimatedRowHeight = 100
         TableView.rowHeight = UITableView.automaticDimension
 
+        // TableView border and corner styling
         TableView.layer.cornerRadius = 15
         TableView.layer.masksToBounds = true
+        TableView.layer.borderWidth = 1.0
+        TableView.layer.borderColor = UIColor.lightGray.cgColor
 
         if let addButton = self.view.viewWithTag(1) as? UIButton {
             addButton.layer.cornerRadius = addButton.frame.height / 2
             addButton.clipsToBounds = true
         }
     }
+
 
     func assignStaffToClass(userId: String, completion: @escaping (Bool) -> Void) {
         let urlString = APIManager.shared.baseURL + "groups/62b4265f97d24b15e8123155/team/62b4265f97d24b15e8123158/assign/class/teacher"

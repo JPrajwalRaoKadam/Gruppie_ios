@@ -19,7 +19,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     var albumId: String = ""
     var albumNameString: String = ""
     var selectedIndices: Set<Int> = []
-
     var mediaItems: [UIImage] = []
     var mediaItemsStrings: [String] = []
 
@@ -58,7 +57,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     func generateThumbnail(url: URL) -> UIImage? {
         let asset = AVAsset(url: url)
         
-        // Check if asset is playable
         if !asset.isPlayable {
             print("❌ Asset is not playable: \(url.path)")
             return nil
@@ -76,6 +74,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             return nil
         }
     }
+    
     func loadLocalImage(from path: String) -> UIImage? {
         let fileURL = URL(fileURLWithPath: path)
         if FileManager.default.fileExists(atPath: fileURL.path),
@@ -88,25 +87,48 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
     func loadLocalVideoThumbnail(from path: String) -> UIImage? {
         let fileURL = URL(fileURLWithPath: path)
+
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            print("❌ File does not exist at path: \(path)")
+            return nil
+
+        }
+
+        do {
+            let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+            if let fileSize = attributes[.size] as? NSNumber, fileSize.intValue == 0 {
+                print("❌ File is empty (0 bytes): \(path)")
+                return nil
+            }
+        } catch {
+            print("❌ Error checking file size: \(error.localizedDescription)")
+            return nil
+        }
         let asset = AVAsset(url: fileURL)
         if !asset.isPlayable {
             print("❌ Video asset not playable: \(path)")
             return nil
         }
+
         return generateThumbnail(url: fileURL)
     }
     func loadVideos() {
         for path in mediaItemsStrings {
             if path.hasSuffix(".mp4") {
+                let videoURL = URL(fileURLWithPath: path)
+                
                 if let thumbnail = loadLocalVideoThumbnail(from: path) {
-                    processedMediaItems.append(.videoThumbnail(thumbnail, URL(fileURLWithPath: path)))
+                    processedMediaItems.append(.videoThumbnail(thumbnail, videoURL))
                 } else {
                     print("❌ Failed to load video thumbnail: \(path)")
                 }
+                
+                let asset = AVAsset(url: videoURL)
+                let playerItem = AVPlayerItem(asset: asset)
+                processedMediaItems.append(.video(videoURL, playerItem))
             }
         }
     }
-
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let item = processedMediaItems[indexPath.item]
@@ -114,29 +136,35 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         switch item {
         case .image(let image):
             showFullScreenImage(image: image)
+            
         case .videoThumbnail(_, let url):
             let playerVC = AVPlayerViewController()
             playerVC.player = AVPlayer(url: url)
             self.present(playerVC, animated: true) {
                 playerVC.player?.play()
             }
+            
+        case .video(let url, let playerItem):
+            let playerVC = AVPlayerViewController()
+            playerVC.player = AVPlayer(playerItem: playerItem)
+            self.present(playerVC, animated: true) {
+                playerVC.player?.play()
+            }
         }
     }
-
+    
     func showFullScreenImage(image: UIImage) {
         let backgroundView = UIView(frame: self.view.bounds)
         backgroundView.backgroundColor = UIColor.white
         backgroundView.alpha = 0
         backgroundView.tag = 999
 
-        // Fullscreen ImageView
         let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.tag = 1000
         backgroundView.addSubview(imageView)
 
-        // Button Container
         let buttonStack = UIStackView()
         buttonStack.axis = .horizontal
         buttonStack.alignment = .center
@@ -145,15 +173,12 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.addSubview(buttonStack)
 
-        // Download Button
         let downloadButton = createIconButton(systemName: "arrow.down.circle", action: #selector(downloadImageTapped))
         downloadButton.accessibilityLabel = "Download"
 
-        // Share Button
         let shareButton = createIconButton(systemName: "square.and.arrow.up", action: #selector(shareImageTapped))
         shareButton.accessibilityLabel = "Share"
 
-        // Rotate Button
         let rotateButton = createIconButton(systemName: "rotate.right", action: #selector(rotateImageTapped))
         rotateButton.accessibilityLabel = "Rotate"
 
@@ -173,18 +198,16 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             buttonStack.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 20)
         ])
 
-        // Save image reference
         backgroundView.accessibilityElements = [image]
 
-        // Tap anywhere to dismiss
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideFullScreenImage(_:)))
         backgroundView.addGestureRecognizer(tapGesture)
 
-        // Animate in
         UIView.animate(withDuration: 0.3) {
             backgroundView.alpha = 1
         }
     }
+
     func createIconButton(systemName: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 28, weight: .regular)
@@ -196,6 +219,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         button.heightAnchor.constraint(equalToConstant: 50).isActive = true
         return button
     }
+    
     @objc func downloadImageTapped() {
         if let backgroundView = self.view.viewWithTag(999),
            let imageView = backgroundView.viewWithTag(1000) as? UIImageView,
@@ -242,6 +266,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         let cellWidth = (collectionView.frame.width - totalSpacing) / numberOfColumns
         return CGSize(width: cellWidth, height: cellWidth * 1.2)
     }
+    
     func loadImages() {
         let dispatchGroup = DispatchGroup()
         var tempMediaItems: [MediaType] = []
@@ -273,7 +298,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
                 continue
             }
 
-            // 2. Check if string is base64 image string with prefix
             var base64ImageString = cleanedString
             if cleanedString.hasPrefix("data:image/jpeg;base64,") {
                 base64ImageString = String(cleanedString.dropFirst("data:image/jpeg;base64,".count))
@@ -286,7 +310,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
                 continue
             }
 
-            // 3. Check if string is a base64 encoded URL
             if let decodedData = Data(base64Encoded: cleanedString),
                let decodedURLString = String(data: decodedData, encoding: .utf8),
                decodedURLString.hasPrefix("http"),
@@ -311,7 +334,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
                 continue
             }
 
-            // 4. Try to load as direct URL string (non-base64)
             if cleanedString.hasPrefix("http"), let url = URL(string: cleanedString) {
                 dispatchGroup.enter()
                 URLSession.shared.dataTask(with: url) { data, response, error in
@@ -332,7 +354,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
                 continue
             }
 
-            // If none matched, print error
             print("❌ Unsupported media format or invalid string: \(cleanedString)")
         }
 
@@ -349,8 +370,8 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     enum MediaType {
         case image(UIImage)
         case videoThumbnail(UIImage, URL)
+        case video(URL, AVPlayerItem)
     }
-
 
 
     func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
@@ -459,7 +480,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         }
     }
 
-
     private func openMediaPicker() {
         var config = PHPickerConfiguration()
         config.selectionLimit = 0
@@ -555,7 +575,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         }.resume()
     }
 
-
     func convertImageToBase64(_ image: UIImage) -> String? {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else { return nil }
         return "data:image/jpeg;base64," + imageData.base64EncodedString()
@@ -584,7 +603,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         return processedMediaItems.count
     }
 
-
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as? CollectionViewCell else {
             return UICollectionViewCell()
@@ -595,9 +613,16 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         switch item {
         case .image(let image):
             cell.imageView.image = image
+
         case .videoThumbnail(let thumbnail, _):
             cell.imageView.image = thumbnail
-            // Optionally, overlay a play icon
+
+        case .video(let url, _):
+            if let thumbnail = loadLocalVideoThumbnail(from: url.path) {
+                cell.imageView.image = thumbnail
+            } else {
+                cell.imageView.image = UIImage(named: "video_placeholder") // fallback image
+            }
         }
 
         return cell
@@ -614,6 +639,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         
         CollectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
     }
+    
     @IBAction func deleteButtonTapped(_ sender: UIButton) {
         guard !selectedIndices.isEmpty else {
             print("⚠️ No images selected for deletion.")
@@ -652,7 +678,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             print("❌ Invalid URL")
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -686,10 +712,10 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
                 } catch {
                     print("❌ JSON Parsing failed: \(error.localizedDescription)")
                 }
-            } else {
+            }
+            else {
                 print("⚠️ Response data is empty.")
             }
-
             if httpResponse.statusCode == 200 {
                 DispatchQueue.main.async {
                     let indicesToDelete = self.selectedIndices.sorted(by: >)
@@ -711,9 +737,3 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     }
     
 }
-//
-//extension DetailGalleryViewController {
-//    enum MediaType {
-//        case photo
-//        case video
-//    }}
