@@ -39,7 +39,7 @@ struct Activity: Codable {
 
 struct DailySyllabus {
     let topicName: String
-    let chapterName: String
+    let subjectName: String
     let fromDate: String
     let toDate: String
     let actualStartDate: String

@@ -6,6 +6,7 @@ class CreateAccountViewController: UIViewController {
     var phoneNumber: String?
 
     @IBOutlet weak var NextOutlet: UIButton!
+    @IBOutlet weak var backOutlet: UIButton!
     @IBOutlet weak var phoneNumberTextField: UITextField!
     @IBOutlet weak var nameTextField: UITextField! // Variable for user name
 
@@ -28,10 +29,14 @@ class CreateAccountViewController: UIViewController {
     
     func butttonStyles(){
         NextOutlet.layer.cornerRadius = 10
+        backOutlet.layer.cornerRadius = 10
         nameTextField.layer.cornerRadius = 10
         nameTextField.clipsToBounds = true
         phoneNumberTextField.layer.cornerRadius = 10
         phoneNumberTextField.clipsToBounds = true
+    }
+    @IBAction func backButton(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
     }
     
     @IBAction func nextButtonPressed(_ sender: UIButton) {

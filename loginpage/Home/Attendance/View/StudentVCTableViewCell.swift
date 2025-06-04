@@ -133,7 +133,22 @@ protocol StudentCellDelegate: AnyObject {
             checkButton.setImage(UIImage(systemName: "square"), for: .normal)
             checkButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected)
             checkButton.isSelected = initiallySelected
+            checkButton.tintColor = .systemGreen
             checkButton.backgroundColor = .white
+        }
+//        private func setupCheckButton() {
+//            checkButton.setImage(UIImage(systemName: "square"), for: .normal) // Unchecked
+//            checkButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected) // Checked
+//            checkButton.tintColor = .systemGreen // This sets the checkmark color to green
+//            checkButton.addTarget(self, action: #selector(checkButtonTapped), for: .touchUpInside)
+//        }
+
+
+
+
+        @objc func checkButtonTapped() {
+            checkButton.isSelected.toggle()
+            contentView.backgroundColor = .white
         }
         
 //        func configureAttendanceStatus(attendance: String) {

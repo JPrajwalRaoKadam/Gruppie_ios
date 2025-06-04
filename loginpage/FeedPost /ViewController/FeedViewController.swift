@@ -35,17 +35,15 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         self.navigationController?.isNavigationBarHidden = true
         feedTableView.register(UINib(nibName: "FeedPostTableViewCell", bundle: nil), forCellReuseIdentifier: "FeedPostTableViewCell")
         // Setup Activity Indicator
-           activityIndicator = UIActivityIndicatorView(style: .large)
-           activityIndicator.center = view.center
-           activityIndicator.hidesWhenStopped = true
-           view.addSubview(activityIndicator)
-
-           // Setup Pull to Refresh
-           let refreshControl = UIRefreshControl()
-           refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-           feedTableView.refreshControl = refreshControl
+        activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        view.addSubview(activityIndicator)
         
-        setupBottomLeftButton()
+        // Setup Pull to Refresh
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        feedTableView.refreshControl = refreshControl
     }
     
     
@@ -92,26 +90,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
     }
     
-    
-    func setupBottomLeftButton() {
-        let downImage = UIImage(named: "edit")
-        bottomLeftButton.setImage(downImage, for: .normal)
-        
-        bottomLeftButton.tintColor = .black
-        bottomLeftButton.layer.cornerRadius = 25 // Circular button
-        bottomLeftButton.layer.masksToBounds = true
-        
-    }
-    
-    
     @IBAction func bottomLeftButtonAction(_ sender: Any) {
-        
-//        if bottomLeftButton.imageView?.image == UIImage(named: "icon_up") {
-//                let indexPath = IndexPath(row: 0, section: 0)  // Scroll to the top of the table
-//                feedTableView.scrollToRow(at: indexPath, at: .top, animated: true)
-//            } else if bottomLeftButton.imageView?.image == UIImage(named: "edit") {
-//                print("Button has 'edit' image")
-//            }
         
         let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
                 guard let addFeedVC = storyboard.instantiateViewController(withIdentifier: "AddFeedVC") as? AddFeedVC else {
@@ -124,75 +103,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         
                 self.navigationController?.pushViewController(addFeedVC, animated: true)
     }
-    
-    // Detecting Scroll Direction
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView == feedTableView else { return }
-        
-        let currentOffset = scrollView.contentOffset.y
-        
-        if currentOffset > lastContentOffset {
-            // Scrolling Down
-            print("Scrolling up")
-            updateButtonForScrollingUp()
-        } else if currentOffset < lastContentOffset {
-            // Scrolling Up
-            print("Scrolling down")
-            updateButtonForScrollingDown()
-        }
-        
-        if currentOffset <= 0 {
-            print("Scrolling down")
-            updateButtonForScrollingDown()
-        }
-        
-        lastContentOffset = currentOffset
-        
-        // Check if the user has scrolled to the bottom
-        let contentHeight = scrollView.contentSize.height
-        let scrollPosition = scrollView.contentOffset.y + scrollView.frame.size.height
-        
-        // Only trigger pagination when near the bottom (without interfering with pull-to-refresh)
-        if scrollPosition > contentHeight - 100 && !isLoading && feedTableView.refreshControl?.isRefreshing == false {
-            loadMorePosts()
-        }
-    }
-
-
-
-    
-    // Update button appearance when scrolling down
-    func updateButtonForScrollingDown() {
-        let downImage = UIImage(named: "edit")
-        bottomLeftButton.setImage(downImage, for: .normal)
-        
-        // Update action for scrolling down
-        bottomLeftButton.addTarget(self, action: #selector(scrollDownButtonTapped), for: .touchUpInside)
-    }
-    
-    // Update button appearance when scrolling up
-    func updateButtonForScrollingUp() {
-        let upImage = UIImage(named: "icon_up")
-        bottomLeftButton.setImage(upImage, for: .normal)
-        
-        // Update action for scrolling up
-        bottomLeftButton.addTarget(self, action: #selector(scrollUpButtonTapped), for: .touchUpInside)
-    }
-    
-    @objc func scrollDownButtonTapped() {
-        if bottomLeftButton.imageView?.image == UIImage(named: "edit")  {
-            print("Scrolling down button tapped!")
-            // Action for button when scrolling down
-        }
-    }
-    
-    @objc func scrollUpButtonTapped() {
-        if bottomLeftButton.imageView?.image == UIImage(named: "icon_up") {
-            print("Scrolling up button tapped!")
-            // Action for button when scrolling up
-        }
-        
-    }
+ 
     
     func loadMorePosts() {
         guard !isLoading else { return }

@@ -23,7 +23,8 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var pEndButton: UIButton!
     @IBOutlet weak var aStartButton: UIButton!
     @IBOutlet weak var aEndButton: UIButton!
-    @IBOutlet weak var submitButton: UIButton!
+    @IBOutlet weak var submitButton1: UIButton!
+    
     
     var groupId: String = ""
     var teamId: String = ""
@@ -32,7 +33,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
     var chapters: [ChapterData] = []
     var currentButton: UIButton?
     var originalPlan: ChapterPlanResponse?
-    var currentrole: String?
+    var currentRole: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,9 +41,10 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
         dailogboxView.isHidden = true
         Chaptertableview.delegate = self
         Chaptertableview.dataSource = self
+        print("role in syllubus tracker:\(currentRole)")
         Chaptertableview.register(UINib(nibName: "ChapterTableViewCell", bundle: nil), forCellReuseIdentifier: "ChapterTableViewCell")
-        if currentrole?.lowercased() == "parent" {
-            submitButton.isHidden = true
+        if currentRole?.lowercased() == "parent" {
+            submitButton1.isHidden = true
         }
         
         subjectName.text = passedSubjectName
@@ -52,11 +54,13 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     private func styleButtons() {
         let buttons = [pStartButton, pEndButton, aStartButton, aEndButton]
-        submitButton.layer.cornerRadius = 8
-        submitButton.layer.masksToBounds = true
+        submitButton1.layer.cornerRadius = 10
+        submitButton1.layer.masksToBounds = true
+        dailogboxView.layer.cornerRadius = 10
+        dailogboxView.layer.masksToBounds = true
         
         for button in buttons {
-            button?.layer.cornerRadius = 8      // Adjust the corner radius
+            button?.layer.cornerRadius = 10      // Adjust the corner radius
             button?.layer.masksToBounds = true   // Ensure the corners are clipped
             button?.layer.borderWidth = 1        // Add a border (optional)
             button?.layer.borderColor = UIColor.lightGray.cgColor
@@ -449,7 +453,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         
         let chapter = chapters[indexPath.row]
-        if currentrole?.lowercased() == "parent" {
+        if currentRole?.lowercased() == "parent" {
             cell.delete.isHidden = true
         }
         cell.configure(with: chapter, groupId: groupId, teamId: teamId, subjectId: subjectId)

@@ -19,8 +19,9 @@ class CustomTabBarViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        view.backgroundColor = .white // or any background color you want
+        view.layer.cornerRadius = 0   // Make sure it's square bottom
+        view.clipsToBounds = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -40,7 +41,7 @@ class CustomTabBarViewController: UIViewController {
         self.resetTabBar()
         self.images[selectedIndex].isHighlighted = true
         self.bottomLines[selectedIndex].isHidden = false
-        self.titleLabels[selectedIndex].textColor = .white
+        self.titleLabels[selectedIndex].textColor = .black
         self.tabBarController?.selectedIndex = self.selectedIndex == 0 ? 1 : (self.selectedIndex == 1 ? 0 : self.selectedIndex)
     }
 }

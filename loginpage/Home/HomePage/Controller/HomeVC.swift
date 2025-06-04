@@ -19,10 +19,6 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var featureIcons: [FeatureIcon] = []
     
     @IBOutlet weak var tableView: UITableView! // TableView outlet
-    @IBOutlet weak var menu: UIImageView!
-    @IBOutlet weak var home: UIStackView!
-    @IBOutlet weak var feed: UIStackView!
-    @IBOutlet weak var more: UIStackView!
     @IBOutlet weak var shortNameLabel: UILabel! // Label to display short name
     @IBOutlet weak var bottomTableViewConstraint: NSLayoutConstraint!
     
@@ -39,7 +35,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UINib(nibName: "BannerAndProfileTableViewCell", bundle: nil), forCellReuseIdentifier: "BannerAndProfileTableViewCell")
         tableView.register(UINib(nibName: "AllIconsTableViewCell", bundle: nil), forCellReuseIdentifier: "AllIconsTableViewCell")
-        
+        tableView.separatorStyle = .none
         tableView.contentInset = .zero
         tableView.sectionHeaderHeight = 0
         tableView.tableHeaderView = nil
@@ -94,22 +90,6 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         self.navigationController?.pushViewController(feedVC, animated: true)
     }
     
-    @IBAction func logoutTapped(_ sender: UIButton) {
-//            UserDefaults.standard.removeObject(forKey: "loggedInPhone")
-//            let loginVC = storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-//        navigationController?.setViewControllers([loginVC], animated: true)
-        
-        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
-            UserDefaults.standard.removeObject(forKey: "loggedInPhone")
-
-            // Return to login screen
-            if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate {
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-                sceneDelegate.window?.rootViewController = UINavigationController(rootViewController: loginVC)
-            }
-        }
-    
     func getHomedata(indexpath: IndexPath) {
             if let homeVC = self.navigationController?.viewControllers.first(where: { $0 is HomeVC }) {
                 self.navigationController?.popToViewController(homeVC, animated: true)
@@ -119,106 +99,84 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     func tapOnMore() {
+        let storyboard = UIStoryboard(name: "More", bundle: nil)
+        guard let moreVC = storyboard.instantiateViewController(withIdentifier: "MoreViewController") as? MoreViewController else {
+            print("ViewController with identifier 'MoreVC' not found.")
+            return
+        }
         
+        self.navigationController?.pushViewController(moreVC, animated: true)
     }
     
     // MARK: - UITableView Data Source
     func numberOfSections(in tableView: UITableView) -> Int {
-            return 1 + groupDatas.count
-        }
+        //            return 1 + groupDatas.count
+        return groupDatas.count
+    }
 
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
             return 1
         }
 
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            if indexPath.section == 0 {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "BannerAndProfileTableViewCell", for: indexPath) as! BannerAndProfileTableViewCell
-                cell.imageUrls = imageUrls
-                cell.configureBannerImage(at: 0)
-                cell.Profile.text = name
-                cell.Profile.isHidden = (name == nil)
-                cell.heightConstraintofAdminLabel.constant = name != nil ? 61 : 0
-                return cell
-            } else {
+//            if indexPath.section == 0 {
+//                let cell = tableView.dequeueReusableCell(withIdentifier: "BannerAndProfileTableViewCell", for: indexPath) as! BannerAndProfileTableViewCell
+//                cell.imageUrls = imageUrls
+//                cell.configureBannerImage(at: 0)
+//                cell.Profile.text = name
+//                cell.Profile.isHidden = (name == nil)
+//                cell.heightConstraintofAdminLabel.constant = name != nil ? 61 : 0
+//                return cell
+//            } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "AllIconsTableViewCell", for: indexPath) as! AllIconsTableViewCell
                 cell.delegate = self
-                cell.configure(with: groupDatas[indexPath.section - 1])
+                cell.configure(with: groupDatas[indexPath.section])
                 return cell
-            }
-        }
-
-        func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-            return section == 0 ? nil : groupDatas[section - 1].activity
+//            }
         }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == 0 {
-            return 150
-        } else {
-            let featureIcons = groupDatas[indexPath.section - 1].featureIcons // Get icons per section
+//        if indexPath.section == 0 {
+//            return 150
+//        } else {
+            let featureIcons = groupDatas[indexPath.section].featureIcons
             let count = featureIcons.count
-            
-            // Customize height based on number of icons
-            if count <= 4 {
-                return 100
-            } else if count <= 8 {
-                return 200
+            let itemsPerRow = 4 // 🔄 Moved outside
+
+            if count <= itemsPerRow {
+                return 125
+            } else if count <= itemsPerRow * 2 {
+                return 220
             } else {
-                return 300
-//            } else {
-//                // Calculate based on number of rows needed (assuming 4 per row, for example)
-//                let itemsPerRow = 4
-//                let rows = ceil(Double(count) / Double(itemsPerRow))
-//                let heightPerRow: CGFloat = 100 // Adjust as per design
-//                return CGFloat(rows) * heightPerRow
+                // For more than 8 items, calculate rows and return dynamic height
+                let rows = ceil(Double(count) / Double(itemsPerRow))
+                let baseRowHeight: CGFloat = 80
+                let verticalSpacing: CGFloat = 10
+
+                // Total = rows * rowHeight + (rows - 1) * spacing
+                return CGFloat(rows) * baseRowHeight + CGFloat(rows - 1) * verticalSpacing
             }
-        }
+//        }
     }
-
-
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        guard section > 0 else { return UIView() }
-
-        let headerView = UIView()
-        headerView.backgroundColor = .white // Match table background
-
-        let titleLabel = UILabel()
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = groupDatas[section - 1].activity
-        titleLabel.textColor = .black
-        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-
-        headerView.addSubview(titleLabel)
-
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-            titleLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 0),
-            titleLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -20)
-        ])
-
-        return headerView
-    }
-
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return section == 0 ? 0 : 40
+        return section == 0 ? 0 : 1 // Or 0 if you want no space at all
     }
-    
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 0
-    }
-    
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            guard indexPath.section > 0 else { return }
-            let selectedActivity = groupDatas[indexPath.section - 1]
 
-            if selectedActivity.activity == "Other Activities" {
-                navigateToCalendarViewController()
-            } else {
-                print("No navigation configured for type: \(selectedActivity.activity)")
-            }
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 0.01 // Must be non-zero to remove default footer space
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard indexPath.section > 0 else { return }
+        let selectedActivity = groupDatas[indexPath.section - 1]
+        
+        if selectedActivity.activity == "Other Activities" {
+            navigateToCalendarViewController()
+        } else {
+            print("No navigation configured for type: \(selectedActivity.activity)")
         }
+    }
     
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon

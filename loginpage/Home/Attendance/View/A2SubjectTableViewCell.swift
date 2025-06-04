@@ -46,6 +46,7 @@ class A2SubjectTableViewCell: UITableViewCell {
         checkButton.setImage(UIImage(systemName: "square"), for: .normal) // Unchecked
         checkButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected) // Checked
         checkButton.isSelected = initiallySelected
+        checkButton.tintColor = .systemGreen
         checkButton.backgroundColor = .white
     }
 

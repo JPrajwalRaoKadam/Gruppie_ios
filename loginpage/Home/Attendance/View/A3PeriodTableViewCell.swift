@@ -48,6 +48,7 @@ class A3PeriodTableViewCell: UITableViewCell {
         checkButton.setImage(UIImage(systemName: "square"), for: .normal)
         checkButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected)
         checkButton.isSelected = initiallySelected
+        checkButton.tintColor = .systemGreen
         checkButton.backgroundColor = .white
     }
 

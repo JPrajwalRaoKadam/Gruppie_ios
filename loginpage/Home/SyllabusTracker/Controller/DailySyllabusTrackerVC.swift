@@ -97,7 +97,7 @@ class DailySyllabusTrackerVC: UIViewController, UITableViewDelegate, UITableView
 
                     for item in dataArray {
                         let topic = item["topicName"] as? String ?? "N/A"
-                        let chapter = item["chapterName"] as? String ?? "N/A"
+                        let subjectName = item["subjectName"] as? String ?? "N/A"
                         let fromDate = item["fromDate"] as? String ?? "N/A"
                         let toDate = item["toDate"] as? String ?? "N/A"
                         let actualStart = item["actualStartDate"] as? String ?? "N/A"
@@ -105,7 +105,7 @@ class DailySyllabusTrackerVC: UIViewController, UITableViewDelegate, UITableView
 
                         let syllabus = DailySyllabus(
                             topicName: topic,
-                            chapterName: chapter,
+                            subjectName: subjectName,
                             fromDate: fromDate,
                             toDate: toDate,
                             actualStartDate: actualStart,

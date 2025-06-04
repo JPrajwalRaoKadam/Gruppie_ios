@@ -56,6 +56,8 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
             print("Failed to instantiate AttenSettingVC")
         }
     }
+    
+    
 
     func setCurrentDate() {
         let dateFormatter = DateFormatter()
@@ -190,21 +192,15 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if currentRole == "teacher" {
-            return subjects.count
-        } else {
+        if currentRole == "admin" {
             return attendanceData.count
+        } else {
+            return subjects.count
         }
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if currentRole == "teacher" {
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
-                fatalError("Cell could not be dequeued")
-            }
-            let subject = subjects[indexPath.row] as! SubjectData
-            cell.textLabel?.text = subject.name // Replace with your custom logic
-                    return cell
-        } else {
+        if currentRole == "admin" {
+            
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
                 fatalError("Cell could not be dequeued")
             }
@@ -246,11 +242,21 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
             }
             
             return cell
+        } else {
+            
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
+                fatalError("Cell could not be dequeued")
+            }
+            let subject = subjects[indexPath.row] as! SubjectData
+            cell.textLabel?.text = subject.name // Replace with your custom logic
+            cell.periodLabel.isHidden = false
+            cell.showFallbackImage(for: subject.name)
+            return cell
         }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if currentRole == "teacher" {
+        if currentRole == "teacher" || currentRole == "parent" {
             // Navigate to subject-specific attendance view for teachers
             let selectedSubject = subjects[indexPath.row]
             let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
@@ -266,7 +272,7 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
             } else {
                 print("❌ Could not instantiate SubjectAttendanceVC")
             }
-        } else {
+        } else if currentRole == "admin" {
             // Navigate to student list for selected class
             let selectedAttendance = attendanceData[indexPath.row]
             let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
@@ -281,6 +287,8 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
             } else {
                 print("❌ Could not instantiate StudentVC")
             }
+        } else {
+            
         }
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

@@ -27,7 +27,7 @@ class EditAttendance: UIView {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        layer.cornerRadius = 12
+        layer.cornerRadius = 10
         layer.masksToBounds = true
         setupDropdownTap() // Dismiss dropdown on outside tap
         editButtonOutlet.layer.cornerRadius =  10

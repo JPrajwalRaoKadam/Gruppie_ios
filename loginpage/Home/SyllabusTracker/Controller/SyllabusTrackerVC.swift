@@ -11,7 +11,7 @@ class SyllabusTrackerVC: UIViewController {
     var groupId: String = "" // Group ID
     var teamId: String = "" 
     var className: String = ""
-    var currentrole: String?
+    var currentRole: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,6 +19,7 @@ class SyllabusTrackerVC: UIViewController {
         print("grpid ST: \(groupId)")
         print("TEAMid TT: \(teamId)")
         print("sy class:\(className)")
+        print("role in syllubus trackervc:\(currentRole)")
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "SyllabusTrackerTableViewCell", bundle: nil), forCellReuseIdentifier: "SyllabusTrackerTableViewCell")
@@ -165,7 +166,7 @@ extension SyllabusTrackerVC {
             subjectStaffVC.passedGroupId = groupId  // Pass groupId
             subjectStaffVC.passedTeamId = teamId    // Pass teamId
             subjectStaffVC.passedSubjectId = subjectId // Pass subjectId
-            subjectStaffVC.currentrole = self.currentrole
+            subjectStaffVC.currentRole = self.currentRole
 
             self.navigationController?.pushViewController(subjectStaffVC, animated: true)
         }

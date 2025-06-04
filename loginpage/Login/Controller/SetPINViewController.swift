@@ -12,6 +12,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var cpinBox4: UITextField!
     @IBOutlet weak var skipOutlet: UIButton!
     @IBOutlet weak var nextOutlet: UIButton!
+    @IBOutlet weak var backButton1: UIButton!
     
     var images: [ImageData] = []
     var schools: [School] = [] // Received from SetPINViewController
@@ -31,7 +32,9 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     func butttonStyles(){
         skipOutlet.layer.cornerRadius = 10
         nextOutlet.layer.cornerRadius = 10
+        backButton1.layer.cornerRadius = 10
     }
+   
     
     private func setupTextFields() {
         let textFields = [spinBox1, spinBox2, spinBox3, spinBox4, cpinBox1, cpinBox2, cpinBox3, cpinBox4]
@@ -42,6 +45,9 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
             textField?.borderStyle = .roundedRect
             textField?.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         }
+    }
+    @IBAction func backButton(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
     }
     
     @objc func textFieldDidChange(_ textField: UITextField) {

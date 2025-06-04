@@ -16,7 +16,7 @@ class SubjectStaffVC: UIViewController {
     var passedGroupId: String = ""  // New variable for groupId
     var passedTeamId: String = ""   // New variable for teamId
     var passedSubjectId: String = "" // New variable for subjectId
-    var currentrole: String?
+    var currentRole: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +25,7 @@ class SubjectStaffVC: UIViewController {
         subTableView.dataSource = self
         subTableView.register(UINib(nibName: "SubjectStaffTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectStaffTableViewCell")
         className.text = passedClassName
+        print("role in syllubus tracker of subvc:\(currentRole)")
     }
     @IBAction func backButton(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
@@ -60,7 +61,7 @@ extension SubjectStaffVC: UITableViewDelegate, UITableViewDataSource {
               chapterVC.teamId = passedTeamId
               chapterVC.subjectId = selectedStaff.subjectId
               chapterVC.passedSubjectName = selectedStaff.subjectName
-              chapterVC.currentrole = self.currentrole
+              chapterVC.currentRole = self.currentRole
               self.navigationController?.pushViewController(chapterVC, animated: true)
           }
       }

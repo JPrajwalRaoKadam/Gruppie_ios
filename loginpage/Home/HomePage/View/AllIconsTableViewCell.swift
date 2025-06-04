@@ -9,19 +9,28 @@ protocol AllIconsTableViewCellDelegate: AnyObject {
 }
 class AllIconsTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var activityLabel: UILabel!
     @IBOutlet weak var iconCollectionView: UICollectionView!
     @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
-
+    @IBOutlet weak var activityHeader: UILabel!
+    @IBOutlet weak var cardView: UIView!
+    
     weak var delegate: AllIconsTableViewCellDelegate?
     var featureIcons: [FeatureIcon] = []
-
+    
     override func awakeFromNib() {
         super.awakeFromNib()
+        
         iconCollectionView.delegate = self
         iconCollectionView.dataSource = self
         iconCollectionView.register(UINib(nibName: "AlliconsCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "AlliconsCollectionViewCell")
+        
+        // Card View Styling
+        cardView.layer.cornerRadius = 20
+        cardView.layer.masksToBounds = false
+        cardView.layer.shadowOffset = CGSize(width: 0, height: 2)
+        cardView.layer.shadowRadius = 6
     }
+
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -29,7 +38,7 @@ class AllIconsTableViewCell: UITableViewCell {
     }
 
     func configure(with activity: GroupData) {
-//        activityLabel.text = activity.activity
+        activityHeader.text = activity.activity
         featureIcons = activity.featureIcons
         iconCollectionView.reloadData()
         DispatchQueue.main.async {

@@ -48,7 +48,7 @@ class DailySyllabusTrackerTableViewCell: UITableViewCell {
          let buttons = [pStart, pEnd, aStart, aEnd]
 
          for button in buttons {
-             button?.layer.cornerRadius = 8      // Adjust the corner radius
+             button?.layer.cornerRadius = 10      // Adjust the corner radius
              button?.layer.masksToBounds = true   // Ensure the corners are clipped
              button?.layer.borderWidth = 1        // Add a border (optional)
              button?.layer.borderColor = UIColor.lightGray.cgColor
@@ -57,20 +57,20 @@ class DailySyllabusTrackerTableViewCell: UITableViewCell {
 
     func configure(with syllabus: DailySyllabus) {
         topic.text = "Topic Name - \(syllabus.topicName)"
-        chapter.text = syllabus.chapterName
+        chapter.text = syllabus.subjectName
         pStart.setTitle(syllabus.fromDate, for: .normal)
         pEnd.setTitle(syllabus.toDate, for: .normal)
         
         if !syllabus.actualStartDate.isEmpty {
             aStart.setTitle(syllabus.actualStartDate, for: .normal)
         } else {
-            aStart.setTitle("N/A", for: .normal)
+            aStart.setTitle("", for: .normal)
         }
 
         if !syllabus.actualEndDate.isEmpty {
             aEnd.setTitle(syllabus.actualEndDate, for: .normal)
         } else {
-            aEnd.setTitle("N/A", for: .normal)
+            aEnd.setTitle("", for: .normal)
         }
     }
 }

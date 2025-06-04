@@ -58,15 +58,20 @@ class AttenSettingTableViewCell: UITableViewCell, UITextFieldDelegate {
          delegate?.didUpdateAttendance(teamId: teamId, newValue: newValue)
      }
 
+
     private func setupCheckButton() {
         checkButton.setImage(UIImage(systemName: "square"), for: .normal) // Unchecked
         checkButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected) // Checked
+        checkButton.tintColor = .systemGreen // This sets the checkmark color to green
         checkButton.addTarget(self, action: #selector(checkButtonTapped), for: .touchUpInside)
     }
 
+
+
+
     @objc func checkButtonTapped() {
         checkButton.isSelected.toggle()
-        contentView.backgroundColor = checkButton.isSelected ? UIColor.lightGray : UIColor.white
+        contentView.backgroundColor = .white
     }
 }
 
