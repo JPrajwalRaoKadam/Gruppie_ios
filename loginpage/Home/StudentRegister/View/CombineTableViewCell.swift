@@ -14,7 +14,7 @@ class CombineTableViewCell: UITableViewCell {
         // Make the iconImageView circular and setup fallback appearance
         iconImageView.layer.cornerRadius = iconImageView.frame.size.width / 2
         iconImageView.clipsToBounds = true
-        iconImageView.backgroundColor = .link // System link color for fallback
+        iconImageView.backgroundColor = .link 
 
         // Configure fallback text label
         imageLabel.isHidden = true
@@ -28,25 +28,23 @@ class CombineTableViewCell: UITableViewCell {
     }
 
     // Configure method with fallback for icon
-    func configure(name: String, designation: String, icon: UIImage?, phoneNumber: String) {
+    func configure(name: String, designation: Int, icon: UIImage?, phoneNumber: String) {
         nameLabel.text = name
-        designationLabel.text = designation
+        designationLabel.text = "Students: \(designation)"
         
         // If icon is available, display it
         if let image = icon {
             iconImageView.image = image
-            imageLabel.isHidden = true // Hide fallback text if image is available
+            imageLabel.isHidden = true
         } else {
-            // Remove any previous image and set a fallback background color
             iconImageView.image = nil
-            iconImageView.backgroundColor = .link // System link color for fallback
+            iconImageView.backgroundColor = .link
             
-            // Set the first letter of name as fallback text
-            imageLabel.text = String(name.prefix(1)).uppercased() // Display first letter of name
-            imageLabel.textColor = .white // White text color for fallback
+            imageLabel.text = String(name.prefix(1)).uppercased()
+            imageLabel.textColor = .white
             imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
-            imageLabel.textAlignment = .center // Ensure text is centered
-            imageLabel.isHidden = false // Show fallback text
+            imageLabel.textAlignment = .center
+            imageLabel.isHidden = false 
         }
     }
 }

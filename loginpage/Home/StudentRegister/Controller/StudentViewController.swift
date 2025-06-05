@@ -66,7 +66,6 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         navigationController?.popViewController(animated: true)
     }
     
-    
     @IBAction func AddButton(_ sender: Any) {
         let actionSheet = UIAlertController(title: "Add Class", message: "Choose an option", preferredStyle: .actionSheet)
         
@@ -144,6 +143,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         task.resume()
     }
+    
     func navigateToAddRegularClass(withClassData classData: [ClassType], classTypeId: String, className: String) {
         let storyboard = UIStoryboard(name: "Student", bundle: nil)
         guard let addRegularClassVC = storyboard.instantiateViewController(withIdentifier: "AddRegularClass") as? AddRegularClass else {
@@ -159,6 +159,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         self.navigationController?.pushViewController(addRegularClassVC, animated: true)
     }
+    
     func addCombinedClass() {
         print("✅ Adding Combined class")
         
@@ -197,7 +198,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
             let studentTeam = filteredStudentTeams[indexPath.row]
             let iconImage: UIImage? = UIImage(named: "default_profile")
             let phoneNumber = studentTeam.phone.isEmpty ? "N/A" : studentTeam.phone
-
+            
             cell.configure(name: studentTeam.name, designation: studentTeam.members, icon: iconImage, phoneNumber: phoneNumber)
             
             return cell
@@ -210,7 +211,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
             let iconImage: UIImage? = UIImage(named: "default_profile")
             let phoneNumber = combinedTeam.phone.isEmpty ? "N/A" : combinedTeam.phone
             
-            cell.configure(name: combinedTeam.name, designation: combinedTeam.teacherName ?? "Unknown", icon: iconImage, phoneNumber: phoneNumber)
+            cell.configure(name: combinedTeam.name, designation: combinedTeam.members, icon: iconImage, phoneNumber: phoneNumber)
             
             return cell
         }
@@ -228,6 +229,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func fetchCombinedStudentTeams() {
         guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/class/get?type=combined") else { return }
+        print("API URL: \(url.absoluteString)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -337,13 +339,13 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         if SegmentController.selectedSegmentIndex == 0 {
             filteredStudentTeams = studentTeams.filter {
+            
                 $0.name.lowercased().contains(searchText.lowercased())
             }
         }
         
         StudentList.reloadData()
     }
-
     
 func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
     let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)

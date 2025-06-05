@@ -1,193 +1,7 @@
-//import UIKit
-//
-//class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
-    //    @IBAction func Edit(_ sender: UIButton) {
-    ////        updateStaffDetails()
-    //    }
-    //
-    //    @IBAction func Admin(_ sender: UIButton) {
-    //        showAdminConfirmationAlert()
-    //    }
-    //
-    //    private func showAdminConfirmationAlert() {
-    //        let alert = UIAlertController(title: "Confirm", message: "Do you want to make this staff an admin?", preferredStyle: .alert)
-    //
-    //        // "Yes" action to proceed with making the staff admin
-    //        let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
-    //            self.makeStaffAdmin()
-    //        }
-    //
-    //        // "Cancel" action to dismiss the alert
-    //        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-    //
-    //        alert.addAction(yesAction)
-    //        alert.addAction(cancelAction)
-    //
-    //        // Present the alert
-    //        present(alert, animated: true, completion: nil)
-    //    }
-    //
-    //
-    //    private func makeStaffAdmin() {
-    //        guard let staffId = staffDetails?.staffId else {
-    //            print("Error: No staff ID found")
-    //            return
-    //        }
-    //
-    //        guard let groupId = groupId, !groupId.isEmpty else {
-    //            print("Error: groupId is missing")
-    //            return
-    //        }
-    //
-    //        let apiUrl = APIManager.shared.baseURL + "admin/groups/\(groupId)/users/\(staffId)/allow/post"
-    //
-    //        var request = URLRequest(url: URL(string: apiUrl)!)
-    //        request.httpMethod = "PUT"
-    //        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    //
-    //        guard let token = token, !token.isEmpty else {
-    //            print("Error: Missing authentication token")
-    //            return
-    //        }
-    //
-    //        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-    //
-    //        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    //            if let error = error {
-    //                print("Network error: \(error.localizedDescription)")
-    //                return
-    //            }
-    //
-    //            if let httpResponse = response as? HTTPURLResponse {
-    //                print("HTTP Status Code: \(httpResponse.statusCode)")
-    //
-    //                if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-    //                    print("Staff successfully made admin.")
-    //
-    //                    DispatchQueue.main.async {
-    //                        self.navigationController?.popViewController(animated: true)
-    //                    }
-    //
-    //                } else {
-    //                    print("Failed to make staff admin. Status code: \(httpResponse.statusCode)")
-    //                }
-    //            }
-    //
-    //            guard let data = data else {
-    //                print("No data received from server")
-    //                return
-    //            }
-    //
-    //            if let jsonResponse = String(data: data, encoding: .utf8) {
-    //                print("API Response: \(jsonResponse)")
-    //            }
-    //
-    //            do {
-    //                let responseObject = try JSONDecoder().decode(AdminStaffResponse.self, from: data)
-    //                print("Decoded Response: \(responseObject)")
-    //
-    //                if let success = responseObject.success, success {
-    //                    print("Staff successfully made admin.")
-    //
-    //                    DispatchQueue.main.async {
-    //                        self.navigationController?.popViewController(animated: true)
-    //                    }
-    //                } else {
-    //                    print("Failed to make staff admin: \(responseObject.message ?? "No message")")
-    //                }
-    //            } catch {
-    //                print("Failed to decode response: \(error.localizedDescription)")
-    //            }
-    //        }
-    //
-    //        task.resume()
-    //    }
-    //
-    //    @IBAction func DeleteButton(_ sender: UIButton) {
-    //        deleteStaff()
-    //    }
-    //
-    //    private func deleteStaff() {
-    //        guard let staffId = staffDetails?.staffId else {
-    //            print("Error: No staff ID found")
-    //            return
-    //        }
-    //
-    //        guard let groupId = groupId, !groupId.isEmpty else {
-    //            print("Error: groupId is missing")
-    //            return
-    //        }
-    //
-    //        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/staff/\(staffId)/delete?type=staff"
-    //
-    //        // Create URL request
-    //        var request = URLRequest(url: URL(string: apiUrl)!)
-    //        request.httpMethod = "DELETE"
-    //        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    //
-    //        // Ensure token is valid
-    //        guard let token = token, !token.isEmpty else {
-    //            print("Error: Missing authentication token")
-    //            return
-    //        }
-    //
-    //        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-    //
-    //        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    //            if let error = error {
-    //                print("Network error: \(error.localizedDescription)")
-    //                return
-    //            }
-    //
-    //            if let httpResponse = response as? HTTPURLResponse {
-    //                print("HTTP Status Code: \(httpResponse.statusCode)")
-    //
-    //                // Check if the response status code indicates success (2xx range)
-    //                if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-    //                    print("Staff successfully deleted from the API.")
-    //
-    //                    // Navigate back to the previous screen after deletion
-    //                    DispatchQueue.main.async {
-    //                        self.navigationController?.popViewController(animated: true)
-    //                    }
-    //                } else {
-    //                    print("Failed to delete staff from the API. Status code: \(httpResponse.statusCode)")
-    //                }
-    //            }
-    //
-    //            guard let data = data else {
-    //                print("No data received from server")
-    //                return
-    //            }
-    //
-    //            // Debug: Print raw API response
-    //            if let jsonResponse = String(data: data, encoding: .utf8) {
-    //                print("API Response: \(jsonResponse)")
-    //            }
-    //
-    //            // Decode JSON response (if applicable)
-    //            do {
-    //                let responseObject = try JSONDecoder().decode(DeleteStaffResponse.self, from: data)
-    //                print("Decoded Response: \(responseObject)")
-    //
-    //                if let success = responseObject.success, success {
-    //                    print("Staff deleted successfully.")
-    //                } else {
-    //                    print("Failed to delete staff: \(responseObject.message ?? "No message")")
-    //                }
-    //            } catch {
-    //                print("Failed to decode response: \(error.localizedDescription)")
-    //            }
-    //        }
-    //
-    //        task.resume()
-    //    }
 import UIKit
 
 class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-    
     @IBOutlet weak var staffDetailTableView: UITableView!
     @IBOutlet weak var editButton: UIButton!
     @IBOutlet weak var staffId: UILabel!
@@ -209,7 +23,7 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
         editButton.clipsToBounds = true
 
         print("staffDetails received: \(staffDetails)")
-
+        print ("token staffVc:\(token)")
         guard staffDetailTableView != nil else {
             print("Error: staffDetailTableView is nil")
             return
@@ -268,6 +82,8 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
         
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("❌ Error: token is nil when setting Authorization header")
         }
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
@@ -311,13 +127,11 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
             self.makeStaffAdmin()
         }
 
-        // "Cancel" action to dismiss the alert
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
 
         alert.addAction(yesAction)
         alert.addAction(cancelAction)
 
-        // Present the alert
         present(alert, animated: true, completion: nil)
     }
 
@@ -333,6 +147,8 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
         }
 
         let apiUrl = APIManager.shared.baseURL + "admin/groups/\(groupId)/users/\(staffId)/allow/post"
+        print("API URL make admin: \(apiUrl)")  // <--- This line prints the API URL to the console
+
 
         var request = URLRequest(url: URL(string: apiUrl)!)
         request.httpMethod = "PUT"

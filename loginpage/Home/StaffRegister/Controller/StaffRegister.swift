@@ -29,7 +29,7 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         print("Received groupId: \(groupIds)")
-        
+        print("token staff register:\(token)")
 
         heightConstraintOfSearchView.constant = 0
 
