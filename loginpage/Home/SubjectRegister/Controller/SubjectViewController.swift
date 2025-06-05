@@ -12,7 +12,7 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        enableKeyboardDismissOnTap()
         // Register the custom cell for the table view
         TableView.register(UINib(nibName: "SubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectTableViewCell")
         

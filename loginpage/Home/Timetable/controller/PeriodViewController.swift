@@ -23,7 +23,7 @@ class PeriodViewController: UIViewController {
         print("Group ID: \(groupId)")
         print("Day: \(day)")
         print("Token: \(token)")
-        
+        enableKeyboardDismissOnTap()
         fetchPeriodData()
     }
     

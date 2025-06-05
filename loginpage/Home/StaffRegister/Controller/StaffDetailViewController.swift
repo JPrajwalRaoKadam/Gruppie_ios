@@ -39,6 +39,7 @@ class StaffDetailViewController: UIViewController, UITableViewDelegate, UITableV
         staffDetailTableView.rowHeight = UITableView.automaticDimension
 
         fetchStaffDetails()
+        enableKeyboardDismissOnTap()
     }
 
     @IBAction func BackButton(_ sender: UIButton) {

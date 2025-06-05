@@ -37,6 +37,7 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
         }
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
+        enableKeyboardDismissOnTap()
     }
     
     

@@ -25,6 +25,7 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
         Notes_videosTV.dataSource = self
         Notes_videosTV.register(UINib(nibName: "classNameTableViewCell", bundle: nil), forCellReuseIdentifier: "classNameTableViewCell")
         //print("gid NV: \(groupId) tid NV: \(subjects.teamId)")
+        enableKeyboardDismissOnTap()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

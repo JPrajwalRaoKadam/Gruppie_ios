@@ -49,6 +49,7 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         print("curr date for api call\(currDate)")
         print("selected date for api call\(currentDate)")
         fetchSubjects()
+        enableKeyboardDismissOnTap()
       }
 
       func numberOfSections(in tableView: UITableView) -> Int {

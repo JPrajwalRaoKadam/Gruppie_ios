@@ -52,6 +52,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         albumName.text = albumNameString
         loadImages()
         loadVideos()
+        enableKeyboardDismissOnTap()
     }
     
     func generateThumbnail(url: URL) -> UIImage? {

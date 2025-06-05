@@ -23,6 +23,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         setupTextFields()
         butttonStyles()
+        enableKeyboardDismissOnTap()
         callAPIAndNavigate { [weak self] in
             print("API call finished, reloading collection view...")
         }

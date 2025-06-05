@@ -19,7 +19,7 @@ class AddSubject: UIViewController {
         print("Team ID: \(teamId ?? "N/A")")
         
         styleButton(Save)
-        
+        enableKeyboardDismissOnTap()
         TableView.delegate = self
         TableView.dataSource = self
         TableView.register(UINib(nibName: "AddSubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "AddSubjectTableViewCell")

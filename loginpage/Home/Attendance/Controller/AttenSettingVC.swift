@@ -27,6 +27,7 @@ class AttenSettingVC: UIViewController, UITableViewDataSource, UITableViewDelega
         // Fetch API data
         fetchAttendanceSettingData()
         //self.navigationItem.hidesBackButton = true
+        enableKeyboardDismissOnTap()
     }
     //new code 30 to 79
     func didUpdateAttendance(teamId: String, newValue: String) {

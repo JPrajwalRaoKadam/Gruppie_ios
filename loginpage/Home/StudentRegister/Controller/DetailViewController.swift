@@ -44,6 +44,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         filteredStudentDetails = studentDetails
 
         print("Student details count: \(studentDetails.count)")
+        enableKeyboardDismissOnTap()
     }
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden

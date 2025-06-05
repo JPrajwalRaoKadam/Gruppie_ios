@@ -61,6 +61,7 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
             addButton.layer.cornerRadius = addButton.frame.height / 2
             addButton.clipsToBounds = true
         }
+        enableKeyboardDismissOnTap()
     }
 
 

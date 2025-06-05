@@ -31,6 +31,7 @@ class AddCombineClass: UIViewController {
         MainView.backgroundColor = UIColor.white
 
         AddButton.addTarget(self, action: #selector(addClassTapped), for: .touchUpInside)
+        enableKeyboardDismissOnTap()
     }
 
     @objc func addClassTapped() {

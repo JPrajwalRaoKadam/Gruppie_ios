@@ -69,7 +69,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
             print("Failed to extract month and year")
             return
         }
-        
+        enableKeyboardDismissOnTap()
         fetchEvents(for: month, year: year)
     }
     

@@ -18,7 +18,7 @@ class AllSubjectViewController: UIViewController, AllSubjectDetailTableViewCellD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        enableKeyboardDismissOnTap()
         TableView.delegate = self
         TableView.dataSource = self
         TableView.register(UINib(nibName: "AllSubjectDetailTableViewCell", bundle: nil), forCellReuseIdentifier: "AllSubjectDetailTableViewCell")

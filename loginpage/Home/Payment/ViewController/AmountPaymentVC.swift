@@ -34,7 +34,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        enableKeyboardDismissOnTap()
         // Register the cell
         payableTableView.register(UINib(nibName: "PayablesTableViewCell", bundle: nil), forCellReuseIdentifier: "PayablesTableViewCell")
         

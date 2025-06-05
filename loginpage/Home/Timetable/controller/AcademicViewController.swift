@@ -33,7 +33,7 @@ class AcademicViewController: UIViewController {
         className.text = classTitle
         print("🎯 Class Title: \(classTitle)")
         
-        
+        enableKeyboardDismissOnTap()
         tableView.register(UINib(nibName: "AcademicTableViewCell", bundle: nil), forCellReuseIdentifier: "AcademicTableViewCell")
         
         expandCurrentDaySection()

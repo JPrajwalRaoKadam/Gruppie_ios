@@ -219,6 +219,7 @@ class SubjectNotes_VideosVC: UIViewController, AddSubNotesDelegate {
         }
         className.text = clsName
         print("111gid: \(groupId) tid: \(teamId)")
+        enableKeyboardDismissOnTap()
     }
     
     override func viewWillAppear(_ animated: Bool) {

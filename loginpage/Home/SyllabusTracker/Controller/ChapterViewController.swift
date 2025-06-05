@@ -50,7 +50,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
         subjectName.text = passedSubjectName
         fetchChapters()
         styleButtons()
-     
+        enableKeyboardDismissOnTap()
     }
     private func styleButtons() {
         let buttons = [pStartButton, pEndButton, aStartButton, aEndButton]

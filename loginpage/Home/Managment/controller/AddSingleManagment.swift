@@ -22,6 +22,7 @@ class AddSingleManagement: UIViewController, UITextFieldDelegate {
         name.addTarget(self, action: #selector(validateForm), for: .editingChanged)
         designation.addTarget(self, action: #selector(validateForm), for: .editingChanged)
         number.addTarget(self, action: #selector(validateForm), for: .editingChanged)
+        enableKeyboardDismissOnTap()
     }
     @objc func validateForm() {
         addUserButton.isEnabled = !(name.text?.isEmpty ?? true || designation.text?.isEmpty ?? true || number.text?.isEmpty ?? true)

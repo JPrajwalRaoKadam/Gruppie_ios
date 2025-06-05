@@ -26,6 +26,7 @@ class SubjectStaffVC: UIViewController {
         subTableView.register(UINib(nibName: "SubjectStaffTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectStaffTableViewCell")
         className.text = passedClassName
         print("role in syllubus tracker of subvc:\(currentRole)")
+        enableKeyboardDismissOnTap()
     }
     @IBAction func backButton(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)

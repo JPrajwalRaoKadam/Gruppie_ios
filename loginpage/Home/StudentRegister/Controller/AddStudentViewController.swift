@@ -32,6 +32,7 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
         TableView.layer.shadowOpacity = 0.3
         TableView.layer.shadowRadius = 4
         TableView.layer.masksToBounds = false
+        enableKeyboardDismissOnTap()
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

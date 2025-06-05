@@ -48,6 +48,7 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
         fetchClassData()
         
         setupFeedbackQuestionLabel()
+        enableKeyboardDismissOnTap()
 
     }
     

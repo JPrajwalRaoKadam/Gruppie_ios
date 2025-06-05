@@ -23,7 +23,7 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Stud
         super.viewDidLoad()
         examListTableView.delegate = self
         examListTableView.dataSource = self
-        
+        enableKeyboardDismissOnTap()
         examListTableView.register(UINib(nibName: "ClassNameMarksCardTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassNameMarksCardTableViewCell")
     
     }

@@ -38,7 +38,7 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
         TableView.layer.masksToBounds = true
         setCurrentDate()
         fetchAttendanceData()
-        
+        enableKeyboardDismissOnTap()
     }
     @IBAction func backButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)

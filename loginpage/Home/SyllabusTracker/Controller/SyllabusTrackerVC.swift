@@ -23,6 +23,7 @@ class SyllabusTrackerVC: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "SyllabusTrackerTableViewCell", bundle: nil), forCellReuseIdentifier: "SyllabusTrackerTableViewCell")
+        enableKeyboardDismissOnTap()
     }
     
 

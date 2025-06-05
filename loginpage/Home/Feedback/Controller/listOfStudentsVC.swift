@@ -30,6 +30,7 @@ class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         print("Team IDs: \(teamIds)")
         print("Subjects Count: \(subjects.count)")
         print("------------------------------------------------")
+        enableKeyboardDismissOnTap()
     }
     
     override func viewWillAppear(_ animated: Bool) {

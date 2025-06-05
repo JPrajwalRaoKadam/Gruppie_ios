@@ -19,7 +19,7 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        enableKeyboardDismissOnTap()
         if let priority = subjectPriority {
                 SubjectPriority.text = "\(priority)"  // Convert Int to String
             } else {

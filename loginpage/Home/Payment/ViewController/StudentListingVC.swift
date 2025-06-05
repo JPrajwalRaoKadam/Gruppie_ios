@@ -29,7 +29,7 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        enableKeyboardDismissOnTap()
         studentTableView.register(UINib(nibName: "ClassesTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassesTableViewCell")
         
         fetchStudentFeeList(token: TokenManager.shared.getToken() ?? "", groupId: groupId ?? "", teamId: teamId ?? "") { result in

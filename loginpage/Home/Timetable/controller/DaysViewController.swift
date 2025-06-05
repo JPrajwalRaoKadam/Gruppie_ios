@@ -26,7 +26,7 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         self.navigationItem.hidesBackButton = true
         
          print("grpid atten:\(currentDate) ")
-        
+        enableKeyboardDismissOnTap()
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UINib(nibName: "daysTableViewCell", bundle: nil), forCellReuseIdentifier: "daysTableViewCell")

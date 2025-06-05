@@ -21,7 +21,7 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        enableKeyboardDismissOnTap()
         print("✅ Received Data in StudentSubjectViewController:")
         print("📌 Token: \(token)")
         print("📌 Group ID: \(groupId)")

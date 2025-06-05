@@ -42,6 +42,7 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
             name.text = member.name
             designation.text = member.designation
         }
+        enableKeyboardDismissOnTap()
     }
     @IBAction func backButtonTapped(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)

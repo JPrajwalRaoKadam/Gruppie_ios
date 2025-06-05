@@ -22,3 +22,17 @@ class TokenManager {
         UserDefaults.standard.removeObject(forKey: tokenKey)
     }
 }
+
+import UIKit
+
+extension UIViewController {
+    func enableKeyboardDismissOnTap() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false // Allows buttons, cells etc. to work
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+}

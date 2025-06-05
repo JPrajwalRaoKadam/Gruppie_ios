@@ -44,6 +44,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         print("Received attendanceData no of numberOfTimeAttendance: \(selectedClassnumberOfTimeAttendance)")
         setCurrentDate()
         fetchStudentData()
+        enableKeyboardDismissOnTap()
     }
     let slideMenuView = UIView()
     let declareHolidayButton = UIButton(type: .system)

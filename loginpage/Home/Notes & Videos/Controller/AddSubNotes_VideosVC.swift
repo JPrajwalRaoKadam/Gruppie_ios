@@ -30,6 +30,7 @@ class AddSubNotes_VideosVC: UIViewController {
         print("adsbgid: \(groupId) adsbtid: \(teamId)")
         print("selected staffid: \(selectedStaffIds)")
         print("className staffid: \(className)")
+        enableKeyboardDismissOnTap()
     }
     
     @IBAction func backButton(_ sender: Any) {

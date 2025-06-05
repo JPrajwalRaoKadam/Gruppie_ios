@@ -19,6 +19,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
         print("Received schools data: \(schools)")
         teamCollectionView.register(UINib(nibName: "GroupCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "GroupCollectionViewCell")
         teamCollectionView.reloadData()
+        enableKeyboardDismissOnTap()
     }
     
     @IBAction func logoutTapped(_ sender: UIButton) {

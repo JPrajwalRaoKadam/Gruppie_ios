@@ -353,6 +353,7 @@ class StudentMarksDetailVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        enableKeyboardDismissOnTap()
         subjectsView.isHidden = true
         let nib = UINib(nibName: "ExamAndSubjectTitleTableViewCell", bundle: nil)
         subjectsTableView.register(nib, forCellReuseIdentifier: "ExamAndSubjectTitleTableViewCell")

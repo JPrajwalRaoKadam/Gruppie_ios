@@ -59,7 +59,7 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         
         setupUI()
         printDebugInfo()
-        
+        enableKeyboardDismissOnTap()
         guard let role = role else { return }
 
            if role == "admin" {

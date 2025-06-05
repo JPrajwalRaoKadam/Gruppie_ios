@@ -51,7 +51,7 @@ class DetailTimeTableViewController: UIViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-        
+        enableKeyboardDismissOnTap()
         AddButton.layer.cornerRadius = 10
         AddButton.layer.masksToBounds = true
         setupTableHeaderView()

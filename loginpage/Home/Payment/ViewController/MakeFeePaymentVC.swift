@@ -27,7 +27,7 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        enableKeyboardDismissOnTap()
         // Register table view cells
         paymentTableView.register(UINib(nibName: "AmoutTableViewCell", bundle: nil), forCellReuseIdentifier: "AmoutTableViewCell")
         paymentTableView.register(UINib(nibName: "InstallmentTableViewCell", bundle: nil), forCellReuseIdentifier: "InstallmentTableViewCell")

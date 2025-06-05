@@ -31,7 +31,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else if role == "parent" || role == "teacher" {
             submitButton.addTarget(self, action: #selector(submitFeedbackForparent), for: .touchUpInside)
         }
-        
+        enableKeyboardDismissOnTap()
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
     }
     

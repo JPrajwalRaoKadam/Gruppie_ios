@@ -18,7 +18,7 @@ class MoreViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         moreTableView.register(UINib(nibName: "MoreTableViewCell", bundle: nil), forCellReuseIdentifier: "MoreTableViewCell")
         CustomTabManager.addTabBar(self, isRemoveLast: false, selectIndex: 2, bottomConstraint: &self.moreTableViewBottomConstraint)
-        
+        enableKeyboardDismissOnTap()
     }
     
     @IBAction func backButtonAction(_ sender: Any) {

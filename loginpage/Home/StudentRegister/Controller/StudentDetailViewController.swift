@@ -128,6 +128,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         TableView.delegate = self
         TableView.dataSource = self
         TableView.reloadData()
+        enableKeyboardDismissOnTap()
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {

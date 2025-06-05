@@ -66,6 +66,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         } else {
             print("No profile data provided")
         }
+        enableKeyboardDismissOnTap()
     }
     
     override func viewWillAppear(_ animated: Bool) {

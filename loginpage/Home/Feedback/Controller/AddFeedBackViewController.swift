@@ -55,6 +55,7 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
 
         setupDatePickers()
         setupTextFields()
+        enableKeyboardDismissOnTap()
     }
     
     override func viewDidLayoutSubviews() {

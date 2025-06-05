@@ -46,6 +46,7 @@ class DailySyllabusTrackerVC: UIViewController, UITableViewDelegate, UITableView
         tableView.dataSource = self
         tableView.register(UINib(nibName: "DailySyllabusTrackerTableViewCell", bundle: nil), forCellReuseIdentifier: "DailySyllabusTrackerTableViewCell")
         fetchDailySyllabus()
+        enableKeyboardDismissOnTap()
     }
 
     @IBAction func backButton(_ sender: Any) {

@@ -18,12 +18,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         butttonStyles()
         phoneNumberTextField.delegate = self
         phoneNumberTextField.keyboardType = .numberPad
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-           view.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc func dismissKeyboard() {
-        view.endEditing(true)
+        enableKeyboardDismissOnTap()
     }
     
     func butttonStyles(){

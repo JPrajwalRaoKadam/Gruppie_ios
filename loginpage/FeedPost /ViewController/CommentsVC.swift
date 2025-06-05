@@ -30,6 +30,7 @@ class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
                 }
         commentTv.register(UINib(nibName: "CommentTableViewCell", bundle: nil), forCellReuseIdentifier: "CommentTableViewCell")
         fetchComments(groupId: grpID ?? "" , postId: postID ?? "")
+        enableKeyboardDismissOnTap()
     }
     
     override func viewWillAppear(_ animated: Bool) {

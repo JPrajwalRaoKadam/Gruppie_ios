@@ -43,6 +43,7 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
         // Enable dynamic row height
         addFeedTableView.estimatedRowHeight = 100
         addFeedTableView.rowHeight = UITableView.automaticDimension
+        enableKeyboardDismissOnTap()
     }
     
     @IBAction func backButtonAction(_ sender: Any) {

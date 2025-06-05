@@ -36,7 +36,7 @@ class FeedBackViewController: UIViewController {
         print("Team ID: \(teamId)")
         print("feedback ID: \(self.feedbackId)")
         print("----------------------------------------------------")
-
+        enableKeyboardDismissOnTap()
 // Fetch API data
     }
 

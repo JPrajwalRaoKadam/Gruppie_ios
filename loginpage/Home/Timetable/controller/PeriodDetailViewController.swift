@@ -25,6 +25,7 @@ class PeriodDetailViewController: UIViewController {
         tableView.dataSource = self
         tableView.register(UINib(nibName: "PeriodDetailTableViewCell", bundle: nil), forCellReuseIdentifier: "PeriodDetailTableViewCell")
         fetchPeriodDetails()
+        enableKeyboardDismissOnTap()
     }
 
     @IBAction func BackButton(_ sender: UIButton) {

@@ -15,6 +15,7 @@ class OTPViewController: UIViewController {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
         butttonStyles()
+        enableKeyboardDismissOnTap()
         if let number = phoneNumber {
             phoneNumberTextField.text = number
             print("Received phone number: \(number)")

@@ -38,6 +38,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         SegmentController.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         
         segmentChanged()
+        enableKeyboardDismissOnTap()
     }
     
     @objc func searchButtonTappedAction() {

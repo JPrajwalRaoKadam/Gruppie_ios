@@ -61,6 +61,7 @@ class GalleryViewController: UIViewController {
 
         fetchGalleryData()
         setupDatePicker()
+        enableKeyboardDismissOnTap()
 
     }
     @objc func handleOutsideTap(_ sender: UITapGestureRecognizer) {

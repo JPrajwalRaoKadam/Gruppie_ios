@@ -30,6 +30,7 @@ class AddHolidaysCallenderViewController: UIViewController, UITableViewDelegate,
             holidayAddCount = 0 // Prevent new row for adding holidays
         }
         fetchHolidays()
+        enableKeyboardDismissOnTap()
     }
         
     @IBAction func submit(_ sender: Any) {

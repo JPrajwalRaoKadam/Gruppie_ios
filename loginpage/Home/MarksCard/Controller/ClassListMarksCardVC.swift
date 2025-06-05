@@ -14,7 +14,7 @@ class ClassListMarksCardVC: UIViewController, UITableViewDelegate, UITableViewDa
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        enableKeyboardDismissOnTap()
         classListTableView.delegate = self
         classListTableView.dataSource = self
         

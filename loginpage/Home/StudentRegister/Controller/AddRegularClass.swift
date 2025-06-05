@@ -25,6 +25,7 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
 
         TableView.delegate = self
         TableView.dataSource = self
+        enableKeyboardDismissOnTap()
     }
 
     

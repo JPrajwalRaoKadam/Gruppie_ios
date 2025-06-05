@@ -19,12 +19,7 @@ class CreateAccountViewController: UIViewController {
             phoneNumberTextField.text = number // Set the phone number directly to the text field
             print("Received phone number: \(number)")
         }
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-            view.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc func dismissKeyboard() {
-        view.endEditing(true)
+        enableKeyboardDismissOnTap()
     }
     
     func butttonStyles(){

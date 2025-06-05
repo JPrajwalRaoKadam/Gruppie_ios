@@ -15,6 +15,7 @@ class CreatePasswordViewController: UIViewController {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
         butttonStyles()
+        enableKeyboardDismissOnTap()
         if let number = phoneNumber {
             print("Received phone number: \(number)")
         }

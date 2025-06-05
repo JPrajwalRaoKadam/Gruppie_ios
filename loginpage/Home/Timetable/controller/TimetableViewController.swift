@@ -25,7 +25,7 @@ class TimetableViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        enableKeyboardDismissOnTap()
         tableView.delegate = self
         tableView.dataSource = self
 

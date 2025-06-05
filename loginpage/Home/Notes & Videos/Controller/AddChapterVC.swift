@@ -62,6 +62,7 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
         addDropDownIcon(to: topicName, action: #selector(showTopicPicker))
 
         fetchSyllabusData()
+        enableKeyboardDismissOnTap()
     }
 
     // MARK: - DropDown Icon Setup

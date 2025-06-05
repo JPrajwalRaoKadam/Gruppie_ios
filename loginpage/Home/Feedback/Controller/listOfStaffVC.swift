@@ -37,6 +37,7 @@ class listOfStaffVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         print(" feedback questions: \(feedbackQuestions)")
         // Fetch data from the API
         fetchFeedbackStudentData()
+        enableKeyboardDismissOnTap()
     }
     
     override func viewWillAppear(_ animated: Bool) {

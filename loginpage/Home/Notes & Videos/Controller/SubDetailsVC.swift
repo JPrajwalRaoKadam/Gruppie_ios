@@ -33,6 +33,7 @@ class SubDetailsVC: UIViewController {
         print("adsbgid: \(groupId) adsbtid: \(teamId) subid: \(subjectId)")
         subTableView.register(UINib(nibName: "SubDetailsTableViewCell", bundle: nil), forCellReuseIdentifier: "SubDetailsTableViewCell")
         fetchSubjectDetails()
+        enableKeyboardDismissOnTap()
     }
 
     override func viewWillAppear(_ animated: Bool) {

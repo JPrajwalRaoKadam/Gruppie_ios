@@ -44,6 +44,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         feedTableView.refreshControl = refreshControl
+        enableKeyboardDismissOnTap()
     }
     
     

@@ -28,7 +28,7 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        enableKeyboardDismissOnTap()
         classTableView.delegate = self
         classTableView.dataSource = self
 
