@@ -42,6 +42,5 @@ class CustomTabBarViewController: UIViewController {
         self.images[selectedIndex].isHighlighted = true
         self.bottomLines[selectedIndex].isHidden = false
         self.titleLabels[selectedIndex].textColor = .black
-        self.tabBarController?.selectedIndex = self.selectedIndex == 0 ? 1 : (self.selectedIndex == 1 ? 0 : self.selectedIndex)
     }
 }

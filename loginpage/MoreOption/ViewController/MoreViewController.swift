@@ -17,7 +17,7 @@ class MoreViewController: UIViewController, UITableViewDelegate, UITableViewData
         super.viewDidLoad()
         
         moreTableView.register(UINib(nibName: "MoreTableViewCell", bundle: nil), forCellReuseIdentifier: "MoreTableViewCell")
-        CustomTabManager.addTabBar(self, isRemoveLast: false, selectIndex: 1, bottomConstraint: &self.moreTableViewBottomConstraint)
+        CustomTabManager.addTabBar(self, isRemoveLast: false, selectIndex: 2, bottomConstraint: &self.moreTableViewBottomConstraint)
         
     }
     

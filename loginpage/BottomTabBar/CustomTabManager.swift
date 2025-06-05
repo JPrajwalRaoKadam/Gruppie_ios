@@ -12,8 +12,7 @@ protocol FeedPageNavigationDelegate: AnyObject {
 }
 
 protocol HomePageNavigationDelegate: AnyObject {
-    func getHomedata(indexpath: IndexPath)
-    var indexPath: IndexPath? { get set }
+    func getHomedata()
 }
 
 protocol MoreNavigationDelegate: AnyObject {
@@ -78,25 +77,20 @@ class CustomTabManager: NSObject {
     }
     
     @objc func tapOnHome(_ sender: UIButton) {
-        if let indexPath = hDelegate?.indexPath {
-            hDelegate?.getHomedata(indexpath: indexPath)
-        }
         customTabbar.selectedIndex = 0
-        curVController.tabBarController?.selectedIndex = 0
         customTabbar.setSelectedTabBar()
+            hDelegate?.getHomedata()
     }
-    
+
     @objc func tapOnService(_ sender: UIButton) {
-        delegate?.tapforFeeds()
         customTabbar.selectedIndex = 1
-        curVController.tabBarController?.selectedIndex = 1
         customTabbar.setSelectedTabBar()
+        delegate?.tapforFeeds()
     }
-    
+
     @objc func tapOnMore(_ sender: UIButton) {
-        mDelegate?.tapOnMore()
         customTabbar.selectedIndex = 2
-        curVController.tabBarController?.selectedIndex = 2
         customTabbar.setSelectedTabBar()
+        mDelegate?.tapOnMore()
     }
 }

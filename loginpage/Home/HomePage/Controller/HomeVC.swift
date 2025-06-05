@@ -90,7 +90,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         self.navigationController?.pushViewController(feedVC, animated: true)
     }
     
-    func getHomedata(indexpath: IndexPath) {
+    func getHomedata() {
             if let homeVC = self.navigationController?.viewControllers.first(where: { $0 is HomeVC }) {
                 self.navigationController?.popToViewController(homeVC, animated: true)
             } else {
