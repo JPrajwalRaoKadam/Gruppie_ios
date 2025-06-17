@@ -16,7 +16,7 @@ class EducationTableViewCell: UITableViewCell {
         fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
     }
 
-    func collectUpdatedData() -> [String: String] {
+    func collectUpdatedData() -> [String: Any] {
         return [
             "education": education.text ?? "",
             "profession": profession.text ?? "",

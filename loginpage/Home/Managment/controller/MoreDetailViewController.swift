@@ -175,28 +175,43 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
         editButton.setTitle(isEditingEnabled ? "Save" : "Edit", for: .normal)
         moreDetailsTableView.reloadData()
     }
+    
     func saveUpdatedData() {
+        moreDetailsTableView.layoutIfNeeded()
+
+        // Scroll to the last section to ensure all cells are loaded
+        let lastSectionIndex = moreDetailsTableView.numberOfSections - 1
+        if moreDetailsTableView.numberOfRows(inSection: lastSectionIndex) > 0 {
+            let lastRowIndexPath = IndexPath(row: 0, section: lastSectionIndex)
+            moreDetailsTableView.scrollToRow(at: lastRowIndexPath, at: .bottom, animated: false)
+            moreDetailsTableView.layoutIfNeeded()
+        }
+
         guard let basicInfoCell = moreDetailsTableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? BasicInfoTableViewCell else {
             print("❌ Could not retrieve BasicInfoTableViewCell")
             return
         }
-        let basicData = basicInfoCell.collectUpdatedData()
         guard let educationCell = moreDetailsTableView.cellForRow(at: IndexPath(row: 0, section: 1)) as? EducationTableViewCell else {
             print("❌ Could not retrieve EducationTableViewCell")
             return
         }
-        let educationData = educationCell.collectUpdatedData()
         guard let accountCell = moreDetailsTableView.cellForRow(at: IndexPath(row: 0, section: 2)) as? AccountInfoTableViewCell else {
             print("❌ Could not retrieve AccountInfoTableViewCell")
             return
         }
+
+        let basicData = basicInfoCell.collectUpdatedData()
+        let educationData = educationCell.collectUpdatedData()
         let accountData = accountCell.collectUpdatedData()
+
         var requestBody: [String: Any] = basicData
         educationData.forEach { requestBody[$0.key] = $0.value }
         accountData.forEach { requestBody[$0.key] = $0.value }
+
         print("📦 Final Request Body to API:", requestBody)
         callEditAPI(requestBody)
     }
+
     func callEditAPI(_ requestBody: [String: Any]) {
         guard let userId = userId, !userId.isEmpty else {
             print("❌ User ID is nil or empty")

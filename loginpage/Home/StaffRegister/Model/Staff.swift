@@ -59,32 +59,32 @@ struct StaffDetailsResponse: Codable {
 }
 
 struct StaffDetailsData: Codable {
-    let staffId: String
-    let aadharNumber: String
-    let address: String
-    let bankAccountNumber: String
-    let bankIfscCode: String
-    let bloodGroup: String
-    let caste: String
-    let designation: String
-    let disability: String
-    let dob: String
-    let doj: String
-    let email: String
+    let staffId: String?
+    let aadharNumber: String?
+    let address: String?
+    let bankAccountNumber: String?
+    let bankIfscCode: String?
+    let bloodGroup: String?
+    let caste: String?
+    let designation: String?
+    let disability: String?
+    let dob: String?
+    let doj: String?
+    let email: String?
 //    let emergencyContactNumber: String
 //    let fatherName: String
-    let gender: String
-    let image: String
+    let gender: String?
+    let image: String?
 //    let motherName: String
-    let name: String
-    let panNumber: String
-    let phone: String
+    let name: String?
+    let panNumber: String?
+    let phone: String?
 //    let profession: String
-    let qualification: String
-    let religion: String
-    let staffCategory: String
-    let type: String
-    let uanNumber: String
+    let qualification: String?
+    let religion: String?
+    let staffCategory: String?
+    let type: String?
+    let uanNumber: String?
     let classType: String?
 }
 
