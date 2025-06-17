@@ -199,29 +199,30 @@ class FeedPostTableViewCell: UITableViewCell {
     }
     
     func configure(with post: Post) {
+        self.grpId = post.groupId
+        self.postId = post.id
         loadFile(for: post)
         adminLabel.text = post.createdBy
+        noticeLabel.text = post.title
+        firstDescriptionLabel.text = post.teamName
+        descriptionLabel.text = post.text
+        noOfViews.text = post.postViewedCount
+        noOfComments.text = "\(post.comments)"
+        noOfLikes.text = "\(post.likes)"
+        timingLabel.text = convertToFormattedDate(dateString: post.updatedAt)
+        grpId = post.groupId
+        postId = post.id
         // Set adminImageView to show the first letter of the admin's name
+        if post.isLiked {
+            likeButton.setImage(UIImage(systemName: "hand.thumbsup.fill"), for: .normal)
+        } else {
+            likeButton.setImage(UIImage(systemName: "hand.thumbsup"), for: .normal)
+        }
         if post.createdByImage == "" {
             updateImageViewWithFirstLetter(from: adminLabel, in: adminImageView)
         } else {
             loadImageForAdminImage(from: post.createdByImage ?? "") { image in
                 self.adminImageView.image = image
-            }
-            
-            noticeLabel.text = post.title
-            firstDescriptionLabel.text = post.teamName
-            descriptionLabel.text = post.text
-            noOfViews.text = post.postViewedCount
-            noOfComments.text = "\(post.comments)"
-            noOfLikes.text = "\(post.likes)"
-            timingLabel.text = convertToFormattedDate(dateString: post.updatedAt)
-            grpId = post.groupId
-            postId = post.id
-            if post.isLiked {
-                likeButton.setImage(UIImage(systemName: "hand.thumbsup.fill"), for: .normal)
-            } else {
-                likeButton.setImage(UIImage(systemName: "hand.thumbsup"), for: .normal)
             }
             // Load image, video, or PDF based on file type
         }

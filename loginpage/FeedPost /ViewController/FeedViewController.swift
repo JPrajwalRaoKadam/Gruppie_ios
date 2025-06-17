@@ -254,12 +254,14 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     func didTapLikeButton(cell: FeedPostTableViewCell) {
         guard let indexPath = feedTableView.indexPath(for: cell) else { return }
-        let postId = cell.postId
-        let grpId = cell.grpId
+        guard let groupId = cell.grpId, let postId = cell.postId else {
+            print("🚨 groupId or postId is nil")
+            return
+        }
         let unlikedImage = UIImage(systemName: "hand.thumbsup")
         let likedImage = UIImage(systemName: "hand.thumbsup.fill")
         
-        likePost(groupId: grpId!, postId: postId!) { [weak self] response in
+        likePost(groupId: groupId, postId: postId) { [weak self] response in
             guard let self = self else { return }
             
             // Find the post in the response and update its properties

@@ -1,6 +1,6 @@
 import UIKit
 
-class AddStaff: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSource {
+class AddStaff: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate {
 
     @IBOutlet weak var name: UITextField!
     @IBOutlet weak var country: UITextField!
@@ -13,25 +13,43 @@ class AddStaff: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSource {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        
-        // Set up the permanent field with the picker view
+
+        // Setup Picker
         permanent.inputView = permanentPicker
         permanentPicker.delegate = self
         permanentPicker.dataSource = self
-        
-        // Default value
         permanent.text = permanentOptions[0]
-        
-        // Add Done button to picker
+
+        // Done button for picker
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
         let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(donePicker))
         toolbar.setItems([doneButton], animated: false)
         permanent.inputAccessoryView = toolbar
+
+        // Phone field configuration
+        phone.delegate = self
+        phone.keyboardType = .numberPad
     }
 
-    // MARK: - UIPickerView Delegate and DataSource
+    // MARK: - Limit Phone TextField to 10 Digits
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if textField == phone {
+            let allowedCharacters = CharacterSet.decimalDigits
+            let characterSet = CharacterSet(charactersIn: string)
+            let isNumber = allowedCharacters.isSuperset(of: characterSet)
 
+            // New length after editing
+            let currentText = textField.text ?? ""
+            guard let stringRange = Range(range, in: currentText) else { return false }
+            let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+
+            return isNumber && updatedText.count <= 10
+        }
+        return true
+    }
+
+    // MARK: - UIPickerView Delegate & DataSource
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -52,8 +70,6 @@ class AddStaff: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSource {
         permanent.resignFirstResponder()
     }
 
-    // MARK: - Refresh Fields on Add More Button Tap
-
     @IBAction func AddMore(_ sender: UIButton) {
         resetFields()
     }
@@ -63,6 +79,6 @@ class AddStaff: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSource {
         country.text = ""
         phone.text = ""
         designation.text = ""
-        permanent.text = permanentOptions[0] // Reset to default
+        permanent.text = permanentOptions[0]
     }
 }

@@ -35,7 +35,12 @@ class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchComments(groupId: grpID!, postId: postID!)
+        guard let groupId = grpID, let postId = postID else {
+            print("❌ Missing grpID or postID")
+            return
+        }
+        fetchComments(groupId: groupId, postId: postId)
+
     }
     
     @IBAction func backButtonAction(_ sender: Any) {
@@ -51,8 +56,13 @@ class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             return
         }
         
+        guard let groupId = grpID, let postId = postID else {
+            print("❌ Missing group ID or post ID")
+            return
+        }
+        
         // Call the add comment API
-        addCommentToPost(groupId: grpID!, postId: postID!, commentText: commentText) { response, error in
+        addCommentToPost(groupId: groupId, postId: postId, commentText: commentText) { response, error in
             if let error = error {
                 print("Error adding comment: \(error.localizedDescription)")
             } else if let response = response, response.success {
