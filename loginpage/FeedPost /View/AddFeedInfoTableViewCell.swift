@@ -213,12 +213,40 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     }
     
     private func openCamera() {
-        // Code to open the camera
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            showAlert(title: "Camera Unavailable", message: "This device does not support camera access.")
+            return
+        }
+
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        self.presentImageCamera()
+                    } else {
+                        self.showAlert(title: "Camera Access Denied", message: "Please allow camera access in Settings.")
+                    }
+                }
+            }
+        case .authorized:
+            presentImageCamera()
+        case .denied, .restricted:
+            showAlert(title: "Camera Access Denied", message: "Please enable camera permissions in Settings.")
+        @unknown default:
+            showAlert(title: "Error", message: "Unknown camera permission status.")
+        }
+    }
+
+    private func presentImageCamera() {
         let imagePicker = UIImagePickerController()
         imagePicker.sourceType = .camera
-        imagePicker.delegate = self // Ensure your class conforms to UIImagePickerControllerDelegate
+        imagePicker.mediaTypes = [kUTTypeImage as String]
+        imagePicker.delegate = self
         parentViewController?.present(imagePicker, animated: true, completion: nil)
     }
+
     
     
     @IBAction func videoButtonActon(_ sender: UIButton) {
@@ -265,13 +293,46 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     }
     
     private func openVideoRecorder() {
-        // Code to open the camera for video recording
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            showAlert(title: "Camera Unavailable", message: "This device does not support camera access.")
+            return
+        }
+
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        self.presentVideoRecorder()
+                    } else {
+                        self.showAlert(title: "Camera Access Denied", message: "Please allow camera access in Settings.")
+                    }
+                }
+            }
+        case .authorized:
+            presentVideoRecorder()
+        case .denied, .restricted:
+            showAlert(title: "Camera Access Denied", message: "Please enable camera permissions in Settings.")
+        @unknown default:
+            showAlert(title: "Error", message: "Unknown camera permission status.")
+        }
+    }
+
+    private func presentVideoRecorder() {
         let imagePicker = UIImagePickerController()
         imagePicker.sourceType = .camera
-        imagePicker.mediaTypes = ["public.movie"] // Only allow video recording
-        imagePicker.delegate = self // Ensure your class conforms to UIImagePickerControllerDelegate
+        imagePicker.mediaTypes = ["public.movie"]
+        imagePicker.delegate = self
         parentViewController?.present(imagePicker, animated: true, completion: nil)
     }
+
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        parentViewController?.present(alert, animated: true)
+    }
+
     
     @IBAction func audioButtonAction(_ sender: Any) {
         // First Alert with two options
@@ -317,9 +378,7 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     }
     
     private func openAudioRecorder() {
-        // Code to open an audio recorder
-        print("Audio recorder functionality goes here.")
-        // Implement your audio recording functionality here
+        showAlert(title: "Coming Soon", message: "Audio recording is not implemented yet.")
     }
     
     private func openAudioLibrary() {
