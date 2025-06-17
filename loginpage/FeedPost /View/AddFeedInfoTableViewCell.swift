@@ -242,12 +242,11 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     private func presentImageCamera() {
         let imagePicker = UIImagePickerController()
         imagePicker.sourceType = .camera
-        imagePicker.mediaTypes = [kUTTypeImage as String]
+        imagePicker.mediaTypes = [UTType.image.identifier] // correct UTType
         imagePicker.delegate = self
+        imagePicker.allowsEditing = false
         parentViewController?.present(imagePicker, animated: true, completion: nil)
     }
-
-    
     
     @IBAction func videoButtonActon(_ sender: UIButton) {
         // First Alert with two options
@@ -320,11 +319,13 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     }
 
     private func presentVideoRecorder() {
-        let imagePicker = UIImagePickerController()
-        imagePicker.sourceType = .camera
-        imagePicker.mediaTypes = ["public.movie"]
-        imagePicker.delegate = self
-        parentViewController?.present(imagePicker, animated: true, completion: nil)
+        let videoPicker = UIImagePickerController()
+        videoPicker.sourceType = .camera
+        videoPicker.mediaTypes = [UTType.movie.identifier] // correct UTType
+        videoPicker.videoQuality = .typeMedium
+        videoPicker.delegate = self
+        videoPicker.allowsEditing = false
+        parentViewController?.present(videoPicker, animated: true, completion: nil)
     }
 
     private func showAlert(title: String, message: String) {
