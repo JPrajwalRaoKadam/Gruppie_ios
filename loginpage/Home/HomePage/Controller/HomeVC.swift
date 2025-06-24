@@ -281,6 +281,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 SyllabusTrackerVC.subjects = subjects
                 SyllabusTrackerVC.token = TokenManager.shared.getToken() ?? ""
                 SyllabusTrackerVC.teamId = teamIds[indexPath?.row ?? 0]
+                SyllabusTrackerVC.currentRole = self.currentRole
                 print("groupId of SyllabusTracker: \(SyllabusTrackerVC.groupId)")
                 navigationController?.pushViewController(SyllabusTrackerVC, animated: true)
             } else {
@@ -331,7 +332,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             if let galleryVC = storyboard.instantiateViewController(withIdentifier: "GalleryViewController") as? GalleryViewController {
                 galleryVC.groupId = school?.id ?? ""
                 galleryVC.token = TokenManager.shared.getToken() ?? ""
-
+                galleryVC.currentRole = self.currentRole ?? ""
                 print("Navigating to GalleryViewController with:")
                 print("Group ID: \(galleryVC.groupId)")
                 print("Token: \(galleryVC.token)")

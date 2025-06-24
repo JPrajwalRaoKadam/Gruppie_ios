@@ -59,11 +59,13 @@ struct StudentData: Codable {
     var fatherAadharNumber: String?
     var fatherOccupation: String?
     var fatherEducation: String?
-    
+    var fatherIncome: String?
+    var motherIncome: String?
     var motherName: String?
     var motherPhone: String?
     var motherNumber: String?
     var motherEmail: String?
+    var motherAadhar: String?                // ✅ Added
     var motherAadharNumber: String?
     var motherOccupation: String?
     var motherEducation: String?
@@ -78,9 +80,73 @@ struct StudentData: Codable {
     var rte: Bool?
     var image: String?
     var isSelected: Bool?
+
+   
+    var fatherQualification: String?
+    var motherQualification: String?
+   
+    var fatherAadharNo: String?
+    var motherAadharNo: String?
+   
+    var bankAccount: String?
+    var accountType: String?
+    var bankIfsc: String?
+    var bankName: String?
+    var branch: String?
+
     
     var educationInfo: EducationInfo?
     var accountInfo: AccountInfo?
+}
+
+// MARK: - Custom Encoding to Convert nil Strings to ""
+extension StudentData {
+    enum CodingKeys: String, CodingKey, CaseIterable {
+        case userId, userDownloadedApp, teamId, studentDbId, studentRegId, groupId,
+             searchName, searchName2, name, phone, alternativePhone, countryCode,
+             country, admissionType, admissionNumber, satsNo, satsNumber, rollNumber,
+             gruppieRollNumber, className, section, category, caste, subCaste,
+             religion, gender, nationality, disability, bloodGroup, dob, dateOfBirth,
+             doj, dateOfJoining, aadharNumber, panNumber, email, address, district,
+             taluk, familyIncome, fatherName, fatherPhone, fatherNumber, fatherEmail,
+             fatherAadhar, fatherAadharNumber, fatherOccupation, fatherEducation,
+             motherName, motherPhone, motherNumber, motherEmail, motherAadhar,        // ✅ Added key
+             motherAadharNumber, motherOccupation, motherEducation,
+             isMotherDownloaded, isFatherDownloaded,
+             designation, numberOfKids, feeIds, marksCard, rte, image, isSelected,
+             educationInfo, accountInfo
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        for key in CodingKeys.allCases {
+            switch key {
+            case .feeIds:
+                try container.encodeIfPresent(feeIds, forKey: .feeIds)
+            case .marksCard:
+                try container.encodeIfPresent(marksCard, forKey: .marksCard)
+            case .rte:
+                try container.encodeIfPresent(rte, forKey: .rte)
+            case .isMotherDownloaded:
+                try container.encodeIfPresent(isMotherDownloaded, forKey: .isMotherDownloaded)
+            case .isFatherDownloaded:
+                try container.encodeIfPresent(isFatherDownloaded, forKey: .isFatherDownloaded)
+            case .isSelected:
+                try container.encodeIfPresent(isSelected, forKey: .isSelected)
+            case .educationInfo:
+                try container.encodeIfPresent(educationInfo, forKey: .educationInfo)
+            case .accountInfo:
+                try container.encodeIfPresent(accountInfo, forKey: .accountInfo)
+            default:
+                let mirror = Mirror(reflecting: self)
+                if let child = mirror.children.first(where: { $0.label == key.stringValue }),
+                   let stringValue = child.value as? String? {
+                    try container.encode(stringValue ?? "", forKey: key)
+                }
+            }
+        }
+    }
 }
 
 struct EducationInfo: Codable {
@@ -152,6 +218,7 @@ struct BasicInfoModel {
     var panNo: String
     var address: String
 }
+
 struct StaffDataResponse: Codable {
     let totalNumberOfPages: Int?
     let data: [StaffMember]?
@@ -188,7 +255,7 @@ struct StaffMember: Codable {
     let aadharNumber: String?
     let officeAddress: String?
     let fatherName: String?
-    let className: String? 
+    let className: String?
     let caste: String?
     let gender: String?
     let emergencyContactNumber: String?
@@ -271,8 +338,48 @@ enum StringOrBool: Codable {
 func getPermanentValue(_ permanent: StringOrBool) -> String {
     switch permanent {
     case .string(let value):
-        return value // Already a string
+        return value
     case .bool(let value):
-        return value ? "Yes" : "No" // Convert boolean to string
+        return value ? "Yes" : "No"
     }
+}
+
+
+
+struct StudentProfileUpdate: Codable {
+    var aadharNumber: String
+    var address: String
+    var admissionNumber: String
+    var bloodGroup: String
+    var caste: String
+    var category: String
+    var `class`: String
+    var disability: String
+    var dob: String
+    var doj: String
+    var email: String
+    var familyIncome: String
+    var fatherAadharNumber: String
+    var fatherEducation: String
+    var fatherEmail: String
+    var fatherName: String
+    var fatherNumber: String
+    var fatherOccupation: String
+    var gender: String
+    var image: String
+    var isSelected: Bool
+    var motherAadharNumber: String
+    var motherEducation: String
+    var motherEmail: String
+    var motherName: String
+    var motherNumber: String
+    var motherOccupation: String
+    var name: String
+    var nationality: String
+    var numberOfKids: String
+    var phone: String
+    var religion: String
+    var rollNumber: String
+    var satsNo: String
+    var section: String
 }

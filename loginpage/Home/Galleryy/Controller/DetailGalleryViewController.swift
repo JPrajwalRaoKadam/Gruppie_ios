@@ -5,7 +5,7 @@ import PhotosUI
 import AVFoundation
 import AVKit
 
-class DetailGalleryViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, PHPickerViewControllerDelegate {
+class DetailGalleryViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, PHPickerViewControllerDelegate, CollectionViewCellDelegate {
 
     @IBOutlet weak var deleteButton: UIButton!
     @IBOutlet weak var CollectionView: UICollectionView!
@@ -18,9 +18,9 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     var token: String = ""
     var albumId: String = ""
     var albumNameString: String = ""
-    var selectedIndices: Set<Int> = []
-    var mediaItems: [UIImage] = []
-    var mediaItemsStrings: [String] = []
+    var selectedIndices: [Int] = []
+    var mediaItems: [UIImage] = [] // or your model type
+    var mediaItemsStrings: [String] = [] // filenames to send in API
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,7 +52,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         albumName.text = albumNameString
         loadImages()
         loadVideos()
-        enableKeyboardDismissOnTap()
     }
     
     func generateThumbnail(url: URL) -> UIImage? {
@@ -113,6 +112,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         return generateThumbnail(url: fileURL)
     }
+    
     func loadVideos() {
         for path in mediaItemsStrings {
             if path.hasSuffix(".mp4") {
@@ -611,35 +611,50 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         let item = processedMediaItems[indexPath.row]
 
+        // Configure the image based on media type
         switch item {
         case .image(let image):
             cell.imageView.image = image
-
         case .videoThumbnail(let thumbnail, _):
             cell.imageView.image = thumbnail
-
         case .video(let url, _):
             if let thumbnail = loadLocalVideoThumbnail(from: url.path) {
                 cell.imageView.image = thumbnail
             } else {
-                cell.imageView.image = UIImage(named: "video_placeholder") // fallback image
+                cell.imageView.image = UIImage(named: "video_placeholder")
             }
         }
 
+        cell.SelectButton.tag = indexPath.item
+        cell.isSelectedCell = selectedIndices.contains(indexPath.item)
+        cell.delegate = self
         return cell
     }
+    func didToggleSelection(on cell: CollectionViewCell) {
+        guard let indexPath = CollectionView.indexPath(for: cell) else { return }
+
+        if let index = selectedIndices.firstIndex(of: indexPath.row) {
+            selectedIndices.remove(at: index)
+        } else {
+            selectedIndices.append(indexPath.row)
+        }
+
+        cell.isSelectedCell = selectedIndices.contains(indexPath.row)
+    }
+
 
     @objc func selectButtonTapped(_ sender: UIButton) {
         let index = sender.tag
-        
+
         if selectedIndices.contains(index) {
-            selectedIndices.remove(index)
+            selectedIndices.removeAll(where: { $0 == index })
         } else {
-            selectedIndices.insert(index)
+            selectedIndices.append(index)
         }
-        
+
         CollectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
     }
+
     
     @IBAction func deleteButtonTapped(_ sender: UIButton) {
         guard !selectedIndices.isEmpty else {

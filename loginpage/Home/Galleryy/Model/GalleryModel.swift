@@ -1,4 +1,5 @@
 import Foundation
+import AVFoundation
 import UIKit
 
 struct AlbumResponse: Codable {
@@ -43,8 +44,10 @@ struct AlbumData: Codable {
 
 enum MediaType {
     case image(UIImage)
-    case videoThumbnail(UIImage, URL) // Thumbnail + video URL
+    case videoThumbnail(UIImage, URL)
+    case video(URL, AVPlayerItem)
 }
+
 
 struct MediaItem {
     let type: MediaType

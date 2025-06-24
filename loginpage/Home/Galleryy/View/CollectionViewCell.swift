@@ -1,11 +1,16 @@
 import UIKit
 
+protocol CollectionViewCellDelegate: AnyObject {
+    func didToggleSelection(on cell: CollectionViewCell)
+}
+
+
 class CollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var SelectButton: UIButton!
 
-    // Add this play icon image view (programmatically)
+    weak var delegate: CollectionViewCellDelegate?
     let playIcon: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -49,6 +54,7 @@ class CollectionViewCell: UICollectionViewCell {
 
     @objc func selectButtonTapped() {
         isSelectedCell.toggle()
+        delegate?.didToggleSelection(on: self)
     }
 
     func updateSelectionAppearance() {

@@ -1,5 +1,9 @@
 import UIKit
 
+protocol BasicInfoCellDelegate: AnyObject {
+    func didUpdateField(field: String, value: String)
+}
+
 class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSource {
 
     @IBOutlet weak var name: UITextField!
@@ -11,6 +15,8 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
     @IBOutlet weak var phone: UITextField!
     @IBOutlet weak var doj: UITextField!
 
+    weak var delegate: BasicInfoCellDelegate?
+
     private let genderOptions = ["Male", "Female", "Other"]
     private var genderPicker = UIPickerView()
     private var datePicker = UIDatePicker()
@@ -19,6 +25,10 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
         super.awakeFromNib()
         setupGenderPicker()
         setupDatePicker()
+        setupTextFieldObservers()
+        [name, gender, studentClass, section, rollNo, email, phone, doj].forEach {
+                   $0?.addTarget(self, action: #selector(textFieldChanged(_:)), for: .editingChanged)
+               }
     }
 
     private func setupGenderPicker() {
@@ -49,16 +59,42 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
         doj.inputAccessoryView = toolbar
     }
 
+    private func setupTextFieldObservers() {
+        [name, gender, studentClass, section, rollNo, email, phone, doj].forEach {
+            $0?.addTarget(self, action: #selector(textFieldChanged(_:)), for: .editingChanged)
+        }
+    }
+
+    @objc private func textFieldChanged(_ textField: UITextField) {
+        guard let text = textField.text else { return }
+
+        switch textField {
+        case name: delegate?.didUpdateField(field: "name", value: text)
+        case gender: delegate?.didUpdateField(field: "gender", value: text)
+        case studentClass: delegate?.didUpdateField(field: "className", value: text)
+        case section: delegate?.didUpdateField(field: "section", value: text)
+        case rollNo: delegate?.didUpdateField(field: "rollNumber", value: text)
+        case email: delegate?.didUpdateField(field: "email", value: text)
+        case phone: delegate?.didUpdateField(field: "phone", value: text)
+        case doj: delegate?.didUpdateField(field: "dateOfJoining", value: text)
+        default: break
+        }
+    }
+
     @objc private func doneSelectingGender() {
         let selectedRow = genderPicker.selectedRow(inComponent: 0)
-        gender.text = genderOptions[selectedRow]
+        let selectedGender = genderOptions[selectedRow]
+        gender.text = selectedGender
+        delegate?.didUpdateField(field: "gender", value: selectedGender)
         gender.resignFirstResponder()
     }
 
     @objc private func doneSelectingDate() {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        doj.text = formatter.string(from: datePicker.date)
+        let dateString = formatter.string(from: datePicker.date)
+        doj.text = dateString
+        delegate?.didUpdateField(field: "dateOfJoining", value: dateString)
         doj.resignFirstResponder()
     }
 
@@ -91,7 +127,6 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
         ]
     }
 
-    // MARK: - UIPickerView DataSource & Delegate
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -106,5 +141,6 @@ class BasicInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewDataSour
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         gender.text = genderOptions[row]
+        delegate?.didUpdateField(field: "gender", value: genderOptions[row])
     }
 }

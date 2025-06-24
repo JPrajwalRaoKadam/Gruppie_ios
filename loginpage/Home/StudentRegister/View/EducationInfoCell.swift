@@ -92,26 +92,23 @@ class EducationInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewData
         return pickerView == nationalityPicker ? countries[row] : disabilityOptions[row]
     }
 
-    func populate(with educationInfo: EducationInfo?, isEditingEnabled: Bool) {
-        guard let educationInfo = educationInfo else { return }
+    func populate(with education: StudentData, isEditingEnabled: Bool) {
+        nationality.text = education.nationality
+        bloodGroup.text = education.bloodGroup
+        religion.text = education.religion
+        caste.text = education.caste
+        category.text = education.category
+        disability.text = education.disability
+        dob.text = education.dateOfBirth
+        admissionNo.text = education.admissionNumber
+        satsNumber.text = education.satsNumber
+        address.text = education.address
+        aadharNo.text = education.aadharNumber
 
-        nationality.text = educationInfo.nationality
-        bloodGroup.text = educationInfo.bloodGroup
-        religion.text = educationInfo.religion
-        caste.text = educationInfo.caste
-        category.text = educationInfo.category
-        disability.text = educationInfo.disability
-        dob.text = educationInfo.dateOfBirth
-        admissionNo.text = educationInfo.admissionNumber
-        satsNumber.text = educationInfo.satsNumber
-        address.text = educationInfo.address
-        aadharNo.text = educationInfo.aadharNumber
-
-        let fields: [UITextField] = [
-            nationality, bloodGroup, religion, caste, category, disability, dob,
-            admissionNo, satsNumber, address, aadharNo
-        ]
-        fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
+        [nationality, bloodGroup, religion, caste, category, disability, dob, admissionNo, satsNumber, address, aadharNo].forEach {
+            $0?.isUserInteractionEnabled = isEditingEnabled
+            $0?.backgroundColor = isEditingEnabled ? .white : .clear
+        }
     }
 
     func collectUpdatedData() -> EducationInfo {

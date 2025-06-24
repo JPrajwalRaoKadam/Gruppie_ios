@@ -30,9 +30,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func submitButtonPressed(_ sender: Any) {
         // Reduce opacity when button is clicked
-        if let button = sender as? UIButton {
-            button.alpha = 0.5 // Set to 50% opacity
-        }
 
         guard let phoneNumber = phoneNumberTextField.text, phoneNumber.count == 10 else {
             showAlert(message: "Please enter a valid 10-digit phone number.")

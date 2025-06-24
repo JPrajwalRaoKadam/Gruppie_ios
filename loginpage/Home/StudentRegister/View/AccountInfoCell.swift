@@ -16,32 +16,27 @@ class AccountInfoCell: UITableViewCell {
     @IBOutlet weak var fatherIncome: UITextField!
     @IBOutlet weak var motherIncome: UITextField!
 
-    // ✅ Function to populate fields with account data
-    func populate(with accountInfo: AccountInfo?, isEditingEnabled: Bool) {
-        guard let accountInfo = accountInfo else { return }
-        
-        fatherName.text = accountInfo.fatherName
-        motherName.text = accountInfo.motherName
-        fatherPhone.text = accountInfo.fatherPhone
-        motherPhone.text = accountInfo.motherPhone
-        fatherEmail.text = accountInfo.fatherEmail
-        motherEmail.text = accountInfo.motherEmail
-        fatherQualification.text = accountInfo.fatherQualification
-        motherQualification.text = accountInfo.motherQualification
-        fatherOccupation.text = accountInfo.fatherOccupation
-        motherOccupation.text = accountInfo.motherOccupation
-        fatherAadharNo.text = accountInfo.fatherAadharNo
-        motherAadharNo.text = accountInfo.motherAadharNo
-        fatherIncome.text = accountInfo.fatherIncome
-        motherIncome.text = accountInfo.motherIncome
-        
-        let fields: [UITextField] = [
-            fatherName, motherName, fatherPhone, motherPhone, fatherEmail, motherEmail,
-            fatherQualification, motherQualification, fatherOccupation, motherOccupation,
-            fatherAadharNo, motherAadharNo, fatherIncome, motherIncome
-        ]
-        fields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
+    func populate(with account: StudentData, isEditingEnabled: Bool) {
+        fatherName.text = account.fatherName
+        motherName.text = account.motherName
+        fatherPhone.text = account.fatherPhone
+        motherPhone.text = account.motherPhone
+        fatherEmail.text = account.fatherEmail
+        motherEmail.text = account.motherEmail
+        fatherQualification.text = account.fatherEducation
+        motherQualification.text = account.motherEducation
+        fatherOccupation.text = account.fatherOccupation
+        motherOccupation.text = account.motherOccupation
+        fatherAadharNo.text = account.fatherAadharNumber
+        motherAadharNo.text = account.motherAadharNumber
+        fatherIncome.text = account.fatherIncome
+
+        [fatherName, motherName, fatherPhone, motherPhone, fatherEmail, motherEmail, fatherQualification, motherQualification, fatherOccupation, motherOccupation, fatherAadharNo, motherAadharNo, fatherIncome].forEach {
+            $0?.isUserInteractionEnabled = isEditingEnabled
+            $0?.backgroundColor = isEditingEnabled ? .white : .clear
+        }
     }
+
 
     // ✅ Function to collect updated data from fields
     func collectUpdatedData() -> AccountInfo {
@@ -63,3 +58,5 @@ class AccountInfoCell: UITableViewCell {
         )
     }
 }
+
+
