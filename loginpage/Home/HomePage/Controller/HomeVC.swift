@@ -148,7 +148,9 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 return 125
             } else if count <= itemsPerRow * 2 {
                 return 220
-            } else {
+            } else if count <= itemsPerRow * 3 {
+                return 315
+            }else {
                 // For more than 8 items, calculate rows and return dynamic height
                 let rows = ceil(Double(count) / Double(itemsPerRow))
                 let baseRowHeight: CGFloat = 80
