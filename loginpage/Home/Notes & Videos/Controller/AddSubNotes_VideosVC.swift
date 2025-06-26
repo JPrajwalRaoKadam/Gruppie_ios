@@ -7,8 +7,9 @@ class AddSubNotes_VideosVC: UIViewController {
     @IBOutlet weak var subject: UILabel!
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableview: UITableView!
-    
+    @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var enterSubject: UITextField!
+    
     var isCheckButtonSelected: Bool = false
     var selectedStaffIds: Set<String> = []
     var subjectId: String = ""
@@ -25,6 +26,7 @@ class AddSubNotes_VideosVC: UIViewController {
         tableview.delegate = self
         tableview.dataSource = self
         tableview.register(UINib(nibName: "teacherNameTableViewCell", bundle: nil), forCellReuseIdentifier: "teacherNameTableViewCell")
+        addButton.layer.cornerRadius = 10
         setupCheckButton(initiallySelected: false)
         fetchTeachingStaff(groupId: groupId)
         print("adsbgid: \(groupId) adsbtid: \(teamId)")

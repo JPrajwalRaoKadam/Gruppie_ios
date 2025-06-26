@@ -5,10 +5,10 @@ class AcademicViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var className: UILabel!
     
-    var timeTableData: [DaySchedule] = [] // Store API response
+    var timeTableData: [DaySchedule] = []
     var token: String = TokenManager.shared.getToken() ?? ""
-    var subjects: [SubjectData] = [] // Store fetched subjects
-    var groupId: String = "" // Group ID
+    var subjects: [SubjectData] = []
+    var groupId: String = ""
     var teamIds: [String] = []
     var classTitle: String = ""
     var subjectIds: [String] = []
@@ -33,7 +33,7 @@ class AcademicViewController: UIViewController {
         className.text = classTitle
         print("🎯 Class Title: \(classTitle)")
         
-        enableKeyboardDismissOnTap()
+        
         tableView.register(UINib(nibName: "AcademicTableViewCell", bundle: nil), forCellReuseIdentifier: "AcademicTableViewCell")
         
         expandCurrentDaySection()
@@ -44,7 +44,6 @@ class AcademicViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    // ✅ Expand Current Day Section Automatically
     func expandCurrentDaySection() {
         let currentDay = Calendar.current.component(.weekday, from: Date())
         let currentIndex = (currentDay == 1) ? 6 : currentDay - 2
@@ -54,7 +53,7 @@ class AcademicViewController: UIViewController {
 
     
     func fetchTimeTableAPI() {
-        self.selectedTeamId = teamIds.first ?? "" // Store selectedTeamId globally
+        self.selectedTeamId = teamIds.first ?? ""
         let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/team/\(selectedTeamId)/year/timetable/get"
         
         guard let url = URL(string: apiUrl) else { return }
@@ -82,7 +81,6 @@ class AcademicViewController: UIViewController {
                 let decodedResponse = try decoder.decode(AcademicScheduleResponse.self, from: data)
                 self.timeTableData = decodedResponse.data
                 
-                // ✅ Extract Periods, Subjects, Teachers, Subject IDs, and Staff IDs
                 self.allPeriods.removeAll()
                 self.subjectNames.removeAll()
                 self.teacherNames.removeAll()
@@ -123,7 +121,6 @@ class AcademicViewController: UIViewController {
             }
         }.resume()
     }}
-// MARK: - UITableViewDelegate, UITableViewDataSource
 extension AcademicViewController: UITableViewDelegate, UITableViewDataSource {
 
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -135,20 +132,17 @@ extension AcademicViewController: UITableViewDelegate, UITableViewDataSource {
             return 0
         }
 
-        // ✅ Return Header Row + Timetable Sessions
         return 1 + timeTableData[section].sessions.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        // ✅ First Row will be the Table Header
         if indexPath.row == 0 {
             let cell = UITableViewCell()
             cell.contentView.addSubview(createTableHeaderView())
             return cell
         }
 
-        // ✅ Timetable Cells
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "AcademicTableViewCell", for: indexPath) as? AcademicTableViewCell else {
             return UITableViewCell()
         }
@@ -164,17 +158,14 @@ extension AcademicViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 
-    // ✅ Fixed Height for Section Header
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 50
     }
 
-    // ✅ Custom Section Header View
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView()
         headerView.backgroundColor = .white
 
-        // Weekday Title
         let titleLabel = UILabel()
         titleLabel.text = weekdays[section]
         titleLabel.textColor = .black
@@ -182,15 +173,13 @@ extension AcademicViewController: UITableViewDelegate, UITableViewDataSource {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(titleLabel)
 
-        // ℹ️ Info Button
         let infoButton = UIButton(type: .infoLight)
         infoButton.tintColor = .gray
         infoButton.translatesAutoresizingMaskIntoConstraints = false
         infoButton.addTarget(self, action: #selector(infoButtonTapped(_:)), for: .touchUpInside)
-        infoButton.tag = section // Pass the section index
+        infoButton.tag = section
         headerView.addSubview(infoButton)
 
-        // Bottom Divider Line
         let bottomLine = UIView()
         bottomLine.backgroundColor = .gray
         bottomLine.translatesAutoresizingMaskIntoConstraints = false
@@ -209,31 +198,28 @@ extension AcademicViewController: UITableViewDelegate, UITableViewDataSource {
             bottomLine.heightAnchor.constraint(equalToConstant: 1)
         ])
 
-        // ✅ Add Tap Gesture to Handle Section Expand/Collapse
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(headerTapped(_:)))
         headerView.addGestureRecognizer(tapGesture)
         headerView.tag = section
 
         return headerView
     }
-    // ✅ Handle ℹ️ Info Button Tap
     @objc func infoButtonTapped(_ sender: UIButton) {
         let sectionIndex = sender.tag
-        let teamId = selectedTeamId // Use the selectedTeamId from fetchTimeTableAPI()
-        let selectedDay = sectionIndex + 1 // Convert section index to day (Monday = 1, Tuesday = 2, etc.)
+        let teamId = selectedTeamId
+        let selectedDay = sectionIndex + 1
 
         let vc = storyboard?.instantiateViewController(withIdentifier: "DetailTimeTableViewController") as! DetailTimeTableViewController
 
-        // ✅ Pass Data While Navigating
         vc.token = token
         vc.groupId = groupId
-        vc.teamId = selectedTeamId // Use selectedTeamId instead of teamIds.first
-        vc.selectedDay = selectedDay // Pass the selected day
-        vc.allPeriods = allPeriods // Pass periods array
-        vc.subjectNames = subjectNames // Pass subject names array
-        vc.teacherNames = teacherNames // Pass teacher names array
-        vc.subjectIds = subjectIds // Pass subject IDs
-        vc.staffIds = staffIds // Pass staff IDs
+        vc.teamId = selectedTeamId
+        vc.selectedDay = selectedDay
+        vc.allPeriods = allPeriods
+        vc.subjectNames = subjectNames
+        vc.teacherNames = teacherNames
+        vc.subjectIds = subjectIds
+        vc.staffIds = staffIds
 
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -241,9 +227,9 @@ extension AcademicViewController: UITableViewDelegate, UITableViewDataSource {
         guard let section = sender.view?.tag else { return }
 
         if expandedSections.contains(section) {
-            expandedSections.remove(section) // Collapse Section
+            expandedSections.remove(section)
         } else {
-            expandedSections.insert(section) // Expand Section
+            expandedSections.insert(section)
         }
 
         tableView.reloadData()
@@ -270,12 +256,12 @@ extension AcademicViewController {
             label.textColor = .darkGray
 
             switch i {
-            case 0: // Period - move slightly right
+            case 0:
                 label.frame.origin.x += 25
                 label.textAlignment = .left
-            case 1: // Subject/Teacher - keep centered
+            case 1:
                 label.textAlignment = .center
-            case 2: // Time - move slightly left
+            case 2: 
                 label.frame.origin.x -= 25
                 label.textAlignment = .right
             default:

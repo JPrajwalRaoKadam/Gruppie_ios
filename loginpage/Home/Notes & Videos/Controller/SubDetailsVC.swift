@@ -26,10 +26,13 @@ class SubDetailsVC: UIViewController {
         super.viewDidLoad()
         subTableView.delegate = self
         subTableView.dataSource = self
-        if let role = currentRole?.lowercased(), role == "parent" || role == "teacher" {
+//        if let role = currentRole?.lowercased(), role == "parent" || role == "teacher" {
+//            plusButton.isHidden = true
+//        }
+        if let role = currentRole?.lowercased(), role == "parent"{
             plusButton.isHidden = true
         }
-        classsubjName.text = "\(className)- (\(subjectName))"
+        classsubjName.text = "\(subjectName)- (\(className))"
         print("adsbgid: \(groupId) adsbtid: \(teamId) subid: \(subjectId)")
         subTableView.register(UINib(nibName: "SubDetailsTableViewCell", bundle: nil), forCellReuseIdentifier: "SubDetailsTableViewCell")
         fetchSubjectDetails()

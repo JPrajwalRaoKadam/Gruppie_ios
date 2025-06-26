@@ -36,9 +36,15 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
         TableView.delegate = self
         // TableView.layer.cornerRadius = 15
         TableView.layer.masksToBounds = true
+        
+        if currentRole == "teacher" {
+              setting.isHidden = true
+          }
+        
         setCurrentDate()
         fetchAttendanceData()
         enableKeyboardDismissOnTap()
+        
     }
     @IBAction func backButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)

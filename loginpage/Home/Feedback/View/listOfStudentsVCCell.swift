@@ -1,9 +1,4 @@
-//
-//  listOfStudentsVCCell.swift
-//  loginpage
-//
-//  Created by apple on 22/04/25.
-//
+
 
 import UIKit
 

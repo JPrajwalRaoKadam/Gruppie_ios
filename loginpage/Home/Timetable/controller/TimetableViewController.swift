@@ -20,12 +20,11 @@ class TimetableViewController: UIViewController {
     var isSubjectAgain: Bool = false
     var isDayIselected: Bool = false
 
-    // Reference to embedded DaysViewController
     var daysVC: DaysViewController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        enableKeyboardDismissOnTap()
+
         tableView.delegate = self
         tableView.dataSource = self
 
@@ -133,7 +132,7 @@ extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if isDayIselected {
-            return 0 // Handled by embedded DaysViewController
+            return 0
         } else if isFreeTeachersSelected {
             return daysOfWeek.count
         } else if isStaffSelected {

@@ -214,7 +214,7 @@ class SubjectNotes_VideosVC: UIViewController, AddSubNotesDelegate {
         subTableView.delegate = self
         subTableView.dataSource = self
         subTableView.register(UINib(nibName: "SubjectNotes_videosTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectNotes_videosTableViewCell")
-        if let role = currentRole?.lowercased(), role == "parent" || role == "teacher" {
+        if let role = currentRole?.lowercased(), role == "parent"{
             plusButton.isHidden = true
         }
         className.text = clsName

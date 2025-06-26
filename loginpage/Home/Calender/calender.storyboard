@@ -21,12 +21,6 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fQ8-e6-nhX" userLabel="View1">
                                 <rect key="frame" x="0.0" y="118" width="428" height="48"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Calender" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Vla-49-bBN">
-                                        <rect key="frame" x="69.666666666666686" y="11" width="93.333333333333314" height="26"/>
-                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
-                                        <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a6Y-Cs-JaH">
                                         <rect key="frame" x="8.0000000000000036" y="9" width="49.333333333333343" height="31"/>
                                         <constraints>
@@ -68,24 +62,32 @@
                                             <action selector="addEventAction:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="529-CX-E86"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Calender" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Vla-49-bBN">
+                                        <rect key="frame" x="72.333333333333343" y="1" width="93.333333333333343" height="46"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="46" id="tDO-3X-eLX"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
+                                        <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstItem="YJx-Qp-Iec" firstAttribute="top" secondItem="fQ8-e6-nhX" secondAttribute="top" constant="5" id="0eT-DX-PKm"/>
                                     <constraint firstAttribute="bottom" secondItem="a6Y-Cs-JaH" secondAttribute="bottom" constant="8" id="548-hm-0MR"/>
-                                    <constraint firstItem="Vla-49-bBN" firstAttribute="centerY" secondItem="fQ8-e6-nhX" secondAttribute="centerY" id="6by-IB-g4Z"/>
+                                    <constraint firstItem="Vla-49-bBN" firstAttribute="leading" secondItem="a6Y-Cs-JaH" secondAttribute="trailing" constant="15" id="6Th-FK-jaV"/>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="48" id="8Lk-S4-V0E"/>
                                     <constraint firstItem="t1V-ag-4fN" firstAttribute="centerY" secondItem="fQ8-e6-nhX" secondAttribute="centerY" id="Dqg-Hg-goa"/>
-                                    <constraint firstItem="t1V-ag-4fN" firstAttribute="centerY" secondItem="Vla-49-bBN" secondAttribute="centerY" id="FeY-ta-AIj"/>
                                     <constraint firstItem="a6Y-Cs-JaH" firstAttribute="leading" secondItem="fQ8-e6-nhX" secondAttribute="leading" constant="8" id="JIZ-4o-c5T"/>
-                                    <constraint firstItem="Vla-49-bBN" firstAttribute="top" secondItem="fQ8-e6-nhX" secondAttribute="top" constant="11" id="KYG-yb-Z4P"/>
                                     <constraint firstItem="a6Y-Cs-JaH" firstAttribute="top" secondItem="fQ8-e6-nhX" secondAttribute="top" constant="9" id="PjM-Zk-PHg"/>
+                                    <constraint firstAttribute="bottom" secondItem="Vla-49-bBN" secondAttribute="bottom" constant="1" id="R5h-cZ-jeU"/>
                                     <constraint firstAttribute="trailing" secondItem="t1V-ag-4fN" secondAttribute="trailing" constant="33" id="RXb-yg-Gve"/>
                                     <constraint firstItem="t1V-ag-4fN" firstAttribute="baseline" secondItem="a6Y-Cs-JaH" secondAttribute="baseline" id="VdC-nR-ehh"/>
                                     <constraint firstItem="t1V-ag-4fN" firstAttribute="bottom" secondItem="fQ8-e6-nhX" secondAttribute="bottomMargin" id="YB6-Ru-IgX"/>
                                     <constraint firstItem="t1V-ag-4fN" firstAttribute="baseline" secondItem="YJx-Qp-Iec" secondAttribute="firstBaseline" id="YJg-iC-brC"/>
                                     <constraint firstItem="t1V-ag-4fN" firstAttribute="leading" secondItem="YJx-Qp-Iec" secondAttribute="trailing" constant="0.66666666666662877" id="dfu-gy-M05"/>
-                                    <constraint firstItem="Vla-49-bBN" firstAttribute="leading" secondItem="fQ8-e6-nhX" secondAttribute="leading" constant="69.666666666666686" id="gRn-cj-see"/>
+                                    <constraint firstItem="Vla-49-bBN" firstAttribute="top" secondItem="fQ8-e6-nhX" secondAttribute="top" constant="1" id="fZx-B3-bvB"/>
                                     <constraint firstAttribute="bottom" secondItem="YJx-Qp-Iec" secondAttribute="bottom" constant="4" id="wE1-ZK-GLQ"/>
                                 </constraints>
                             </view>
@@ -142,6 +144,7 @@
                         <outlet property="addHolidays" destination="t1V-ag-4fN" id="kUS-Xl-ETo"/>
                         <outlet property="calendarTableView" destination="GRK-Qe-NAx" id="2Ku-Qw-K1p"/>
                         <outlet property="calenderView" destination="QGH-kQ-ail" id="u7m-cu-Vpa"/>
+                        <outlet property="calviewHeight" destination="I1w-NN-V2h" id="dZo-sg-Lw1"/>
                         <outlet property="segmentControl" destination="1gk-Ru-yQf" id="VKz-Mn-DLb"/>
                     </connections>
                 </viewController>
@@ -214,15 +217,15 @@
                                 </constraints>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Usi-lh-QcL">
-                                <rect key="frame" x="259" y="820" width="138" height="44"/>
+                                <rect key="frame" x="234" y="820" width="150" height="48"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="WhY-fD-kLf"/>
+                                    <constraint firstAttribute="height" constant="48" id="WhY-fD-kLf"/>
                                 </constraints>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Submit">
-                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="12"/>
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="17"/>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="submit:" destination="hlO-pV-oc6" eventType="touchUpInside" id="8dz-u0-kez"/>
@@ -235,11 +238,11 @@
                         <constraints>
                             <constraint firstItem="8hT-xp-gDM" firstAttribute="top" secondItem="6dR-qL-yn3" secondAttribute="top" id="45q-y7-qbC"/>
                             <constraint firstItem="8hT-xp-gDM" firstAttribute="leading" secondItem="6dR-qL-yn3" secondAttribute="leading" id="DBI-uc-wdY"/>
-                            <constraint firstItem="Usi-lh-QcL" firstAttribute="leading" secondItem="6dR-qL-yn3" secondAttribute="leading" constant="259" id="EPA-iY-5gu"/>
+                            <constraint firstItem="Usi-lh-QcL" firstAttribute="leading" secondItem="6dR-qL-yn3" secondAttribute="leading" constant="234" id="EPA-iY-5gu"/>
                             <constraint firstItem="krn-Mg-L3v" firstAttribute="top" secondItem="8hT-xp-gDM" secondAttribute="bottom" id="HE7-rT-I8T"/>
                             <constraint firstItem="ofo-y1-AcM" firstAttribute="leading" secondItem="krn-Mg-L3v" secondAttribute="leading" id="I4Z-8Y-PyM"/>
-                            <constraint firstItem="6dR-qL-yn3" firstAttribute="trailing" secondItem="Usi-lh-QcL" secondAttribute="trailing" constant="33" id="MUf-q4-u1d"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="Usi-lh-QcL" secondAttribute="bottom" id="ZUz-55-irh"/>
+                            <constraint firstItem="6dR-qL-yn3" firstAttribute="trailing" secondItem="Usi-lh-QcL" secondAttribute="trailing" constant="46" id="MUf-q4-u1d"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="Usi-lh-QcL" secondAttribute="bottom" constant="-4" id="ZUz-55-irh"/>
                             <constraint firstItem="ofo-y1-AcM" firstAttribute="top" secondItem="krn-Mg-L3v" secondAttribute="bottom" constant="-1" id="jYJ-M5-ywF"/>
                             <constraint firstItem="ofo-y1-AcM" firstAttribute="trailing" secondItem="krn-Mg-L3v" secondAttribute="trailing" id="mrV-8r-ogk"/>
                             <constraint firstItem="krn-Mg-L3v" firstAttribute="trailing" secondItem="6dR-qL-yn3" secondAttribute="trailing" id="rAr-qY-33m"/>

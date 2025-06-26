@@ -20,12 +20,10 @@ class PeriodDetailViewController: UIViewController {
         print("Day: \(day)")
         print("Selected Period: \(periodData?.period ?? "N/A")")
 
-        // Register the cell
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "PeriodDetailTableViewCell", bundle: nil), forCellReuseIdentifier: "PeriodDetailTableViewCell")
         fetchPeriodDetails()
-        enableKeyboardDismissOnTap()
     }
 
     @IBAction func BackButton(_ sender: UIButton) {
@@ -55,7 +53,6 @@ class PeriodDetailViewController: UIViewController {
                 let periodResponse = try decoder.decode(PeriodResponse.self, from: data)
                 self.periodDataList = periodResponse.data
                 
-                // Group the data by teacher name (name field)
                 self.groupedPeriodData = Dictionary(grouping: periodResponse.data, by: { $0.name ?? "Unknown" })
 
                 DispatchQueue.main.async {
@@ -68,7 +65,6 @@ class PeriodDetailViewController: UIViewController {
     }
 }
 
-// MARK: - UITableView Delegate & DataSource
 extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -78,7 +74,7 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let teacherName = Array(groupedPeriodData.keys)[section]
         let subjectCount = groupedPeriodData[teacherName]?.flatMap { $0.subjectsHandled ?? [] }.count ?? 0
-        return subjectCount + 1 // Adding 1 for "Class Name | Subject" header row
+        return subjectCount + 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -87,11 +83,9 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
 
         let subjects = periods.flatMap { $0.subjectsHandled ?? [] }
 
-        // First row should be the "Class Name | Subject" header
         if indexPath.row == 0 {
             let headerCell = UITableViewCell(style: .default, reuseIdentifier: "HeaderCell")
 
-            // Create labels
             let classLabel = UILabel()
             classLabel.text = "      Class Name"
             classLabel.font = UIFont.boldSystemFont(ofSize: 16)
@@ -100,16 +94,14 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
             let subjectLabel = UILabel()
             subjectLabel.text = "Subject"
             subjectLabel.font = UIFont.boldSystemFont(ofSize: 16)
-            subjectLabel.textAlignment = .left  // Change from `.right` to `.left`
+            subjectLabel.textAlignment = .left
 
-            // Create horizontal stack view
             let stackView = UIStackView(arrangedSubviews: [classLabel, subjectLabel])
             stackView.axis = .horizontal
             stackView.distribution = .fill
-            stackView.spacing = 150  // Increase spacing for better alignment
-            stackView.alignment = .leading  // Align elements to the left
+            stackView.spacing = 150
+            stackView.alignment = .leading
 
-            // Add stack view to the cell
             headerCell.contentView.addSubview(stackView)
             stackView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -119,17 +111,14 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
                 stackView.topAnchor.constraint(equalTo: headerCell.contentView.topAnchor, constant: 8),
                 stackView.bottomAnchor.constraint(equalTo: headerCell.contentView.bottomAnchor, constant: -8),
                 
-                // Ensure Class Name takes a fixed width to push Subject left
                 classLabel.widthAnchor.constraint(equalToConstant: 120)
             ])
 
-            // Change background color
             headerCell.backgroundColor = UIColor.systemGray5
 
             return headerCell
         }
 
-        // Adjust row index to fetch correct subject data
         let subjectIndex = indexPath.row - 1
         guard subjectIndex < subjects.count else { return UITableViewCell() }
 
@@ -174,7 +163,7 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.row == 0 {
-            return 40 // Match section header height
+            return 40 
         }
         return UITableView.automaticDimension
     }

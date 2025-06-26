@@ -1,13 +1,10 @@
 import UIKit
 
-// MARK: - Feedback Models
-
-// MARK: - FeedBackViewController
 class FeedBackViewController: UIViewController {
 
     var groupId: String?
     var token: String?
-    var feedbackData: [FeedBackItem] = [] // Store API response
+    var feedbackData: [FeedBackItem] = []
     var currentRole: String?
     var feedbackId: String?
     var userId: String = ""
@@ -36,11 +33,9 @@ class FeedBackViewController: UIViewController {
         print("Team ID: \(teamId)")
         print("feedback ID: \(self.feedbackId)")
         print("----------------------------------------------------")
-        enableKeyboardDismissOnTap()
-// Fetch API data
+
     }
 
-    // MARK: - API Call
     func fetchFeedbackData() {
         guard let groupId = groupId else {
             print("Group ID is missing")
@@ -65,7 +60,6 @@ class FeedBackViewController: UIViewController {
                 return
             }
 
-            // Print raw JSON response for debugging
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("Raw API Response JSON: \(jsonString)")
             }
@@ -74,20 +68,17 @@ class FeedBackViewController: UIViewController {
                 let decoder = JSONDecoder()
                 let feedbackResponse = try decoder.decode(FeedBackResponse.self, from: data)
 
-                // Print structured response
                 print("Decoded API Response:", feedbackResponse)
                 
-                // Store API response in feedbackData
                 self.feedbackData = feedbackResponse.data
                 print("Stored feedbackData:", self.feedbackData)
 
                 
-                // Extract questionArray from each feedback item and store in feedbackQuestions
                 self.feedbackQuestions = feedbackResponse.data.map { $0.questionsArray ?? [] }
                 print("Extracted feedbackQuestions:", self.feedbackQuestions)
 
                 DispatchQueue.main.async {
-                    self.tableView.reloadData() // Refresh table view
+                    self.tableView.reloadData()
                 }
             } catch {
                 print("Error decoding JSON:", error.localizedDescription)
@@ -97,11 +88,10 @@ class FeedBackViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
 extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return feedbackData.count // Use actual data count
+        return feedbackData.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -125,11 +115,11 @@ extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
         navigationController?.popViewController(animated: true)
     }
     @IBAction func addButtonTapped(_ sender: UIButton) {
-            let storyboard = UIStoryboard(name: "FeedBack", bundle: nil) // Change "Main" if using a different storyboard
+            let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
             if let addFeedbackVC = storyboard.instantiateViewController(withIdentifier: "AddFeedBackViewController") as? AddFeedBackViewController {
                 addFeedbackVC.groupId = groupId
                 addFeedbackVC.token = token
-                addFeedbackVC.feedbackData = feedbackData // Passing feedback data
+                addFeedbackVC.feedbackData = feedbackData
 
                 navigationController?.pushViewController(addFeedbackVC, animated: true)
             }
@@ -139,7 +129,6 @@ extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
         let selectedFeedback = self.feedbackData[indexPath.row]
         let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
 
-        // Assign feedbackId from selectedFeedback (optional)
         self.feedbackId = selectedFeedback.feedbackId
 
         switch currentRole?.lowercased() {
@@ -184,7 +173,5 @@ extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
     
          }
     }
-
-
 }
      

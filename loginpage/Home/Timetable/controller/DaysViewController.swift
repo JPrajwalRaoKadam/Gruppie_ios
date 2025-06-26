@@ -1,16 +1,8 @@
-//
-//  DaysViewController.swift
-//  loginpage
-//
-//  Created by apple on 23/04/25.
-//
-
 import Foundation
 import UIKit
 
 class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
    
-
     @IBOutlet weak var curDate: UIButton!
     @IBOutlet weak var tableView: UITableView!
     
@@ -18,27 +10,23 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var currentDate : String?
     var currentRole: String?
     var groupId: String = ""
-        
     var timetableData: TimeTableResponse?
 
-    
     override func viewDidLoad() {
         self.navigationItem.hidesBackButton = true
         
          print("grpid atten:\(currentDate) ")
-        enableKeyboardDismissOnTap()
+        
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UINib(nibName: "daysTableViewCell", bundle: nil), forCellReuseIdentifier: "daysTableViewCell")
         setCurrentDate()
         fetchData()
-
     }
-    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchData() // Optionally refresh data when view appears
+        fetchData()
     }
     
     func fetchData() {
@@ -72,9 +60,8 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 curDate.setTitle(currentDate, for: .normal)
                 
                 print("Selected Date: \(currentDate ?? "")")
-                fetchData() // 🔁 Call API for the new date
+                fetchData()
             }
-        
     }
     
     @IBAction func rightdateChange(_ sender: Any) {
@@ -90,14 +77,14 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
              curDate.setTitle(currentDate, for: .normal)
              
              print("Selected Date: \(currentDate ?? "")")
-             fetchData() // 🔁 Call API for the new date
+             fetchData()
          } else {
              print("Cannot go beyond today's date")
          }
     }
     
     @IBAction func dateChange(_ sender: Any) {
-        showDatePickerPopup(for: sender as! UIButton) // Call the date picker function
+        showDatePickerPopup(for: sender as! UIButton)
         
     }
     
@@ -130,7 +117,6 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let headerView = UIView()
         headerView.backgroundColor = UIColor.systemGray6
 
-        // Main class label
         let classLabel = UILabel()
         classLabel.font = UIFont.boldSystemFont(ofSize: 18)
         classLabel.textColor = .black
@@ -138,7 +124,6 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         classLabel.text = timetableData?.data[safe: section]?.academicTimeTable.first?.name ?? "Class: Unknown"
         headerView.addSubview(classLabel)
 
-        // Stack view for Period and Time (first half)
         let firstStackView = UIStackView()
         firstStackView.axis = .horizontal
         firstStackView.distribution = .fillEqually
@@ -157,7 +142,6 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         timeLabel.font = UIFont.systemFont(ofSize: 14)
         firstStackView.addArrangedSubview(timeLabel)
 
-        // Stack view for Subject (second half)
         let secondStackView = UIStackView()
         secondStackView.axis = .horizontal
         secondStackView.distribution = .fillEqually
@@ -194,16 +178,13 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         return headerView
     }
 
-
-
-    
     func setCurrentDate() {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd-MM-yyyy" // Format: 11-02-2025
+        dateFormatter.dateFormat = "dd-MM-yyyy"
         let currentDate = dateFormatter.string(from: Date())
         self.currentDate = currentDate
-        curDate.setTitle(self.currentDate, for: .normal) // Set button title
-        print("Current Date: \(currentDate)") // Print current date in console
+        curDate.setTitle(self.currentDate, for: .normal)
+        print("Current Date: \(currentDate)")
     }
     
     func showDatePickerPopup(for button: UIButton) {
@@ -263,12 +244,11 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
             cancelButton.heightAnchor.constraint(equalToConstant: 40)
         ])
         
-        // Store the selected button to update its title later
         curDate = button
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 70 // You can increase to 80 or 90 if needed
+        return 70
     }
 
     
@@ -282,7 +262,7 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
             currentDate = selectedDate
             
             print("Selected Date: \(selectedDate)")
-            fetchData() // 🔁 Trigger API for selected date
+            fetchData()
             
             if let backgroundView = sender.superview?.superview {
                 backgroundView.removeFromSuperview()
@@ -303,7 +283,6 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
 
     func fetchTimeTable(for date: String, token: String, completion: @escaping (Result<TimeTableResponse, Error>) -> Void) {
-        // Construct the URL
         var url: URL?
 
         if currentRole == "parent" {
@@ -341,11 +320,7 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 completion(.failure(error))
             }
         }
-
         task.resume()
     }
-
-
-    
 }
 

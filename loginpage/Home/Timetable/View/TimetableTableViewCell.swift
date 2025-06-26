@@ -1,9 +1,3 @@
-//
-//  TimetableTableViewCell.swift
-//  loginpage
-//
-//  Created by apple on 13/03/25.
-//
 
 import UIKit
 
@@ -17,12 +11,10 @@ class TimetableTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        // ✅ Hide imageLabel by default
         imageLabel.isHidden = true
         imageLabel.layer.cornerRadius = imageLabel.frame.size.width / 2
         imageLabel.clipsToBounds = true
         
-        // ✅ Set font and alignment
         imageLabel.textAlignment = .center
         imageLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
     }
@@ -31,7 +23,6 @@ class TimetableTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     
-    // ✅ Handle Image Fallback
     func configureCell(with name: String, icon: UIImage?) {
         self.name.text = name
         

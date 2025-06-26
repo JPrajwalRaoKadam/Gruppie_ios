@@ -31,7 +31,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else if role == "parent" || role == "teacher" {
             submitButton.addTarget(self, action: #selector(submitFeedbackForparent), for: .touchUpInside)
         }
-        enableKeyboardDismissOnTap()
+        
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
     }
     
@@ -74,7 +74,6 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
-    // MARK: - Submit Feedback (Parent/Teacher)
     @objc func submitFeedbackForparent() {
         guard let token = token,
               let groupId = groupId,
@@ -170,7 +169,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        let apiURL =  APIManager.shared.baseURL + "groups/\(groupId)/feedback/\(feedbackId)/questions/add"
+        let apiURL = "https://api.gruppie.in/api/v1/groups/\(groupId)/feedback/\(feedbackId)/questions/add"
         
         var questionsArray: [[String: Any]] = []
 

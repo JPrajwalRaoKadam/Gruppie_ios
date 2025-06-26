@@ -214,40 +214,44 @@ class AddHolidaysCallenderViewController: UIViewController, UITableViewDelegate,
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "AddNewHoliday", for: indexPath) as? AddNewHoliday {
-            
-            if indexPath.section == 0 {
-                // Section 0: Display holiday data
-                let holiday = holidays[indexPath.row]
-                cell.holidayTitle.text = holiday.title
-                cell.holidaydate.text = holiday.startDate
-                cell.holidayTitle.isUserInteractionEnabled = false
-                cell.holidaydate.isUserInteractionEnabled = false
-
-                cell.addMore.isHidden = true
-            } else {
-                // Section 1: Display static row (without holidays array)
-                cell.holidayTitle.text = ""
-                cell.holidaydate.text = ""
-                cell.addMore.isHidden = false
-                cell.delegate = self
-                cell.addMore.isHidden = indexPath.row != (holidayAddCount - 1)
-            }
-            
-            return cell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AddNewHoliday", for: indexPath) as? AddNewHoliday else {
+            return UITableViewCell()
         }
-        return UITableViewCell()
+        
+        if indexPath.section == 0 {
+            // Section 0: Display holiday data
+            let holiday = holidays[indexPath.row]
+            cell.holidayTitle.text = holiday.title
+            cell.holidaydate.text = holiday.startDate
+            cell.holidayTitle.isUserInteractionEnabled = false
+            cell.holidaydate.isUserInteractionEnabled = false
+            cell.addMore.isHidden = true  // No Add More button in Section 0
+        } else {
+            // Section 1: Editable rows
+            cell.holidayTitle.text = ""
+            cell.holidaydate.text = ""
+            cell.holidayTitle.isUserInteractionEnabled = true
+            cell.holidaydate.isUserInteractionEnabled = true
+            cell.delegate = self
+            
+            // Show "Add More" only for the last row
+            cell.addMore.isHidden = indexPath.row != (holidayAddCount)
+        }
+        
+        return cell
     }
-    
+
     // MARK: - TableView Delegate Methods
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 0 {
-                return 50  // Section 0 (Dynamic Holiday List)
-            } else {
-                return 90  // Section 1 (Static Row)
-            }
+            return 50 // Holidays are always fixed height
+        } else {
+            // If it's the last row (where addMore is visible), return 50, else 30
+            return indexPath.row == (holidayAddCount - 1) ? 50 : 30
+        }
     }
+
     
 //    @IBAction func backButtonTapped(_ sender: UIButton) {
 //        self.dismiss(animated: true, completion: nil)

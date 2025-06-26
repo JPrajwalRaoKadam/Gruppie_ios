@@ -9,7 +9,6 @@ class DetailFeedTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        // Style the image label for better visibility
         imageLabel.layer.cornerRadius = imageLabel.frame.size.width / 2
         imageLabel.clipsToBounds = true
         imageLabel.textAlignment = .center
@@ -24,27 +23,26 @@ class DetailFeedTableViewCell: UITableViewCell {
 
     func configure(with classData: FeedClassItem) {
         name.text = classData.name
-        imageLabel.isHidden = false // Ensure it's visible by default
-        imageLabel.text = String(classData.name.prefix(1)).uppercased() // First letter of name
+        imageLabel.isHidden = false
+        imageLabel.text = String(classData.name.prefix(1)).uppercased()
 
-        // ✅ Set background to system link color and text to white
         imageLabel.backgroundColor = .link
         imageLabel.textColor = .white
         imageLabel.clipsToBounds = true
-        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2 // Optional: make it circular
+        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
 
         if let imageUrlString = classData.image, !imageUrlString.isEmpty, let imageUrl = URL(string: imageUrlString) {
             DispatchQueue.global().async {
                 if let imageData = try? Data(contentsOf: imageUrl), let image = UIImage(data: imageData) {
                     DispatchQueue.main.async {
                         self.icon.image = image
-                        self.imageLabel.isHidden = true // Hide text if image loads
+                        self.imageLabel.isHidden = true
                     }
                 }
             }
         } else {
-            icon.image = UIImage(named: "placeholder") // Default placeholder image
-            imageLabel.isHidden = false // Show fallback text
+            icon.image = UIImage(named: "placeholder")
+            imageLabel.isHidden = false 
         }
     }
 }

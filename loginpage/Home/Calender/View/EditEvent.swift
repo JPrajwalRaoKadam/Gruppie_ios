@@ -9,6 +9,7 @@ import UIKit
 protocol CallEditEventApi : AnyObject {
     func triggerEditEventApi()
     func updateEditedEvent(editedEvent: Event?)
+    func shouldHideEditButton() -> Bool
 }
 
 class EditEvent: UIView, UITextFieldDelegate {
@@ -19,9 +20,9 @@ class EditEvent: UIView, UITextFieldDelegate {
         }
     
     var editedEvent: Event?
-    
     var groupId: String = ""
     var eventId: String = ""
+    var currentRole: String = ""
 
    weak var delegate: CallEditEventApi?
     
@@ -41,6 +42,8 @@ class EditEvent: UIView, UITextFieldDelegate {
     @IBOutlet weak var endTime: UITextField!
     @IBOutlet weak var venue: UITextField!
     @IBOutlet weak var reminderBTn: UIButton!
+    @IBOutlet weak var editButtonOutlet: UIButton!
+    @IBOutlet weak var edit: UIButton!
     
     private var selectedReminder: String?
     var currentDatePicker: UIDatePicker?
@@ -61,12 +64,29 @@ class EditEvent: UIView, UITextFieldDelegate {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        print("curr role in editevent of cal \(currentRole)")
         title.delegate = self
         startDate.delegate = self
         endDate.delegate = self
         startTime.delegate = self
         endTime.delegate = self
         venue.delegate = self
+        edit.layer.cornerRadius = 10
+//        if delegate?.shouldHideEditButton() == true {
+//               editButtonOutlet?.isHidden = true
+//           } else {
+//               editButtonOutlet?.isHidden = false
+//           }
+        DispatchQueue.main.async { [weak self] in
+              if self?.delegate?.shouldHideEditButton() == true {
+                  self?.editButtonOutlet?.isHidden = true
+              } else {
+                  self?.editButtonOutlet?.isHidden = false
+              }
+          }
+        print("Delegate set: \(delegate != nil)")
+        print("Should hide edit button: \(delegate?.shouldHideEditButton() ?? false)")
+
     }
     
     @IBAction func addStartDate(_ sender: Any) {

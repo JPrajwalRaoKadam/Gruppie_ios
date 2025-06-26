@@ -16,14 +16,14 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     var currentRole: String = ""
     var filteredEvents: [Event] = []
 
-
-    
     @IBOutlet weak var segmentControl: UISegmentedControl!
     @IBOutlet weak var calendarTableView: UITableView!
     @IBOutlet weak var addEvents: UIButton!
     @IBOutlet weak var addHolidays: UIButton!
     @IBOutlet weak var calenderView: UIView!
+    @IBOutlet weak var calviewHeight: NSLayoutConstraint!
     var calendar: FSCalendar!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("cal grpid: \(groupId)")
@@ -341,6 +341,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
         
         self.view.addSubview(backgroundView)
     }
+    
     func addEventToServer(event: Event) {
        guard let token = TokenManager.shared.getToken() else {
            print("Token not found")
@@ -451,6 +452,10 @@ func formatDate(_ dateString: String) -> String {
     func showAddHolidayView() {
 
     }
+    func shouldHideEditButton() -> Bool {
+        return currentRole.lowercased() == "teacher"
+    }
+
 //pass data to updateEvent
     func showEditEventView(with event: Event) {
         // Create a semi-transparent background view
@@ -478,6 +483,7 @@ func formatDate(_ dateString: String) -> String {
             editEventView.delegate = self
             self.selectedReminder = editEventView.reminderBTn.currentTitle ?? ""
             editEventView.groupId = self.groupId ?? ""
+            editEventView.currentRole = self.currentRole
             // Add the EditEventView to the background view
             backgroundView.addSubview(editEventView)
         }

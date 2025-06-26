@@ -86,7 +86,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("ViewController with identifier 'feedVC' not found.")
             return
         }
-        
+        feedVC.currentRole = self.currentRole
         feedVC.schoolId = school?.id ?? ""
         self.navigationController?.pushViewController(feedVC, animated: true)
     }

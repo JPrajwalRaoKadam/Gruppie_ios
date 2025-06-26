@@ -1,11 +1,9 @@
 import Foundation
 
-// MARK: - Feedback Response
 struct FeedBackResponse: Codable {
     let data: [FeedBackItem]
 }
 
-// MARK: - Feedback Item
 struct FeedBackItem: Codable {
     let feedbackId: String?
     let title: String?
@@ -24,7 +22,7 @@ struct FeedBackItem: Codable {
     let name: String?
     let createdAt: String?
 
-    let questionsArray: [QuestionData]?   // ✅ Updated to new structure
+    let questionsArray: [QuestionData]?
 
     enum CodingKeys: String, CodingKey {
         case feedbackId, title, startDate, lastDate, isActive, options, question
@@ -33,7 +31,6 @@ struct FeedBackItem: Codable {
     }
 }
 
-// MARK: - Feedback Option
 struct FeedbackOption: Codable {
     var optionNo: String
     var option: String
@@ -45,14 +42,12 @@ struct FeedbackOption: Codable {
     }
 }
 
-// MARK: - Feedback Question (Updated)
 struct QuestionData: Codable {
     var questionNo: Int?
     var question: String
     var marks: Int?
     var options: [FeedbackOption]
 }
-// MARK: - Feedback Option for Questions
 struct OptionData: Codable {
     let optionNo: String
     let option: String
@@ -60,7 +55,6 @@ struct OptionData: Codable {
     let answer: Bool
 }
 
-// MARK: - Feedback Request
 struct FeedBackRequest: Codable {
     let groupId: String
     let isActive: Bool
@@ -74,12 +68,10 @@ struct FeedBackRequest: Codable {
     let updatedAt: String
 }
 
-// MARK: - Feed Class List
 struct FeedClass: Codable {
     let data: [FeedClassItem]
 }
 
-// MARK: - Feed Class Item
 struct FeedClassItem: Codable {
     let teamId: String
     let teacherName: String?

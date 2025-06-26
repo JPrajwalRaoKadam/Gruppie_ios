@@ -19,6 +19,7 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
     @IBOutlet weak var contentImage: UIImageView!
     @IBOutlet weak var contentCancel: UIButton!
     @IBOutlet weak var pdfNameLabel: UILabel!
+    @IBOutlet weak var submitButton: UIButton!
     
     var groupId: String?
     var teamId: String?
@@ -57,6 +58,8 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
         
         contentCancel.isHidden = true
         pdfNameLabel.isHidden = true
+        
+        submitButton.layer.cornerRadius = 10
 
         addDropDownIcon(to: ChapterName, action: #selector(showChapterPicker))
         addDropDownIcon(to: topicName, action: #selector(showTopicPicker))

@@ -51,7 +51,7 @@ class DetailTimeTableViewController: UIViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-        enableKeyboardDismissOnTap()
+        
         AddButton.layer.cornerRadius = 10
         AddButton.layer.masksToBounds = true
         setupTableHeaderView()
@@ -135,14 +135,13 @@ class DetailTimeTableViewController: UIViewController {
 }
 extension DetailTimeTableViewController {
     
-    // MARK: - Show Picker for Period Selection
     func showPeriodPicker(for cell: DetailTimeTableTableViewCell) {
         let alert = UIAlertController(title: "Select Period", message: "\n\n\n\n\n\n\n\n", preferredStyle: .alert)
         
         let pickerView = UIPickerView()
         pickerView.dataSource = self
         pickerView.delegate = self
-        pickerView.tag = 1 // Tag to differentiate pickers
+        pickerView.tag = 1 
         
         alert.view.addSubview(pickerView)
         pickerView.translatesAutoresizingMaskIntoConstraints = false
@@ -395,7 +394,7 @@ extension DetailTimeTableViewController: UITableViewDelegate, UITableViewDataSou
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return indexPath.row == 0 ? 50 : 80
+        return indexPath.row == 0 ? 67 : 80
     }
 }
 
@@ -481,7 +480,6 @@ extension DetailTimeTableViewController {
                 print("🟢 Global Subject IDs: \(self.globalSubjectIds)")
                 print("🟢 Timetable Data: \(self.timeTableData)")
 
-                // Extract periods
                 let periods = self.allPeriods
                 self.timeTableData.map { $0.period }
                 print("🟢 Periods Array: \(periods)")
@@ -570,5 +568,4 @@ extension DetailTimeTableViewController {
             }
         }.resume()
     }
-
 }

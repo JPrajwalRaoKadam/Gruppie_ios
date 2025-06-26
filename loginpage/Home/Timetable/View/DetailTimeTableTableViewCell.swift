@@ -41,11 +41,11 @@ class DetailTimeTableTableViewCell: UITableViewCell {
     }
 
     @objc func didTapStartingTime() {
-        onTimeSelection?(true) // true → starting time
+        onTimeSelection?(true)
     }
 
     @objc func didTapEndingTime() {
-        onTimeSelection?(false) // false → ending time
+        onTimeSelection?(false)
     }
 
     @objc func didTapPeriod() {

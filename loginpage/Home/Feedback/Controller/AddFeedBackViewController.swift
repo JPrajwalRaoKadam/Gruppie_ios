@@ -19,8 +19,8 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     var feedbackOptions: [FeedbackOption] = []
      
     var optionNo: String?
-   var option: String?
-   var Marks: String?
+    var option: String?
+    var Marks: String?
     
     let startDatePicker = UIDatePicker()
     let endDatePicker = UIDatePicker()
@@ -55,7 +55,6 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
 
         setupDatePickers()
         setupTextFields()
-        enableKeyboardDismissOnTap()
     }
     
     override func viewDidLayoutSubviews() {
@@ -94,14 +93,11 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        // Restrict only NoOfQuestins and NoOfOptons to numbers
         if textField == NoOfQuestins || textField == NoOfOptons {
             let allowedCharacters = CharacterSet.decimalDigits
             let characterSet = CharacterSet(charactersIn: string)
             return allowedCharacters.isSuperset(of: characterSet)
         }
-
-        // Allow text for other fields like Question and Marks
         return true
     }
 
@@ -136,7 +132,6 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
                 OptionsView.isHidden.toggle()
                 OptionsButton.isHidden = true
                 
-                // Update the feedbackOptions array
                 if let count = Int(NoOfOptons.text ?? "0"), count > 0 {
                     feedbackOptions = (1...count).map { FeedbackOption(optionNo: "\($0)", option: "", marks: "", answer: false) }
                 } else {
@@ -193,7 +188,7 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
 extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return feedbackOptions.count // Use the count of feedbackOptions instead of NoOfOptons.text
+        return feedbackOptions.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -222,7 +217,6 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
         cell.Question.text = option.option
         cell.Marks.text = option.marks
 
-        // Tag text fields to know which row they belong to
         cell.Question.tag = indexPath.row
         cell.Marks.tag = indexPath.row
 
@@ -241,7 +235,7 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
                 optionNo: "\(index + 1)",
                 option: cell.Question.text ?? "",
                 marks: cell.Marks.text ?? "",
-                answer: false // Or keep a toggle/checkbox for answer if needed
+                answer: false
             )
             feedbackOptions[index] = updatedOption
         }
@@ -278,13 +272,11 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
         for i in 0..<questions.count {
             if let cell = TableView.cellForRow(at: IndexPath(row: i, section: 0)) as? AddFeedBackTableViewCell,
                let questionText = cell.Question.text, let marksText = cell.Marks.text {
-                let marksInt = Int(marksText) ?? 0  // Convert marksText to Int?
-                let question = QuestionData(question: questionText, marks: marksInt, options: feedbackOptions)  // Pass feedbackOptions here
+                let marksInt = Int(marksText) ?? 0
+                let question = QuestionData(question: questionText, marks: marksInt, options: feedbackOptions)
                 questionsArray.append(question)
             }
         }
-
-        // Ensure all options are captured in feedbackOptions
         var options: [FeedbackOption] = []
         for i in 0..<feedbackOptions.count {
             let option = feedbackOptions[i]
@@ -294,7 +286,6 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
                                           answer: option.answer))
         }
 
-        // Send the API request with the proper data
         let feedbackData = FeedBackRequest(
             groupId: groupId,
             isActive: true,
@@ -313,7 +304,7 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
             return
         }
 
-        let url = URL(string:  APIManager.shared.baseURL + "groups/\(groupId)/feedback/title/create")!
+        let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/feedback/title/create")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -333,7 +324,7 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
                 print("Feedback successfully saved!")
                 
                 DispatchQueue.main.async {
-                    self.navigationController?.popViewController(animated: true) // Go back to previous screen
+                    self.navigationController?.popViewController(animated: true)
                 }
             } else {
                 print("Failed to save feedback. Status code: \((response as? HTTPURLResponse)?.statusCode ?? 0)")

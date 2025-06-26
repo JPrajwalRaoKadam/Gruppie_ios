@@ -8,8 +8,7 @@ class PeriodViewController: UIViewController {
     var teamIds: [String] = []
     var subjects: [SubjectData] = []
     var day: Int = 0
-    var periods: [PeriodData] = [] // Store API response here
-
+    var periods: [PeriodData] = []
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -23,7 +22,7 @@ class PeriodViewController: UIViewController {
         print("Group ID: \(groupId)")
         print("Day: \(day)")
         print("Token: \(token)")
-        enableKeyboardDismissOnTap()
+        
         fetchPeriodData()
     }
     
@@ -31,14 +30,13 @@ class PeriodViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    // MARK: - API Call
     func fetchPeriodData() {
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/day/period/max/get?day=\(day)"
         guard let url = URL(string: urlString) else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // Ensure token is set if required
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -66,7 +64,6 @@ class PeriodViewController: UIViewController {
     }
 }
 
-// MARK: - UITableView Delegate & DataSource
 extension PeriodViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return periods.count
@@ -88,7 +85,6 @@ extension PeriodViewController: UITableViewDelegate, UITableViewDataSource {
         let storyboard = UIStoryboard(name: "Timetable", bundle: nil) // Change if using another storyboard
         if let periodDetailVC = storyboard.instantiateViewController(withIdentifier: "PeriodDetailViewController") as? PeriodDetailViewController {
             
-            // Pass data to PeriodDetailViewController
             periodDetailVC.token = token
             periodDetailVC.groupId = groupId
             periodDetailVC.day = day

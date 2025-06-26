@@ -38,7 +38,7 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         abtableview.delegate = self
         abtableview.register(UINib(nibName: "AbsentStudentTableViewCell", bundle: nil), forCellReuseIdentifier: "AbsentStudentTableViewCell")
         abtableview.register(UINib(nibName: "SubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectTableViewCell")
-        abtableview.register(UINib(nibName: "PeriodTableViewCell", bundle: nil), forCellReuseIdentifier: "PeriodTableViewCell")
+//        abtableview.register(UINib(nibName: "PeriodTableViewCell", bundle: nil), forCellReuseIdentifier: "PeriodTableViewCell")
         abtableview.register(UINib(nibName: "A2SubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "A2SubjectTableViewCell")
         abtableview.register(UINib(nibName: "A3PeriodTableViewCell", bundle: nil), forCellReuseIdentifier: "A3PeriodTableViewCell")
         print("Received attendanceData @ absent: \(attendanceData)")
@@ -69,9 +69,9 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         case 0:
             label.text = "Absent Students"
         case 1:
-            label.text = "Subjects"
+            label.text = "Select Subjects"
         case 2:
-            label.text = "Periods"
+            label.text = "Select Periods"
         default:
             label.text = ""
         }

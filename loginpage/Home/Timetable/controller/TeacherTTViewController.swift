@@ -1,9 +1,4 @@
-//
-//  TeacherTTViewController.swift
-//  loginpage
-//
-//  Created by apple on 22/03/25.
-//
+
 
 import UIKit
 
@@ -11,10 +6,10 @@ class TeacherTTViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
-    var timeTableData: [DaySchedule] = [] // Store API response
+    var timeTableData: [DaySchedule] = []
     var token: String = TokenManager.shared.getToken() ?? ""
-    var subjects: [SubjectData] = [] // Store fetched subjects
-    var groupId: String = "" // Group ID
+    var subjects: [SubjectData] = []
+    var groupId: String = ""
     var teamIds: [String] = []
     var userId: String = ""
 
@@ -28,7 +23,7 @@ class TeacherTTViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        enableKeyboardDismissOnTap()
+        
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -83,7 +78,6 @@ class TeacherTTViewController: UIViewController {
                 let decodedResponse = try decoder.decode(AcademicScheduleResponse.self, from: data)
                 self.timeTableData = decodedResponse.data
 
-                // ✅ Extract Periods, Subjects, and Teachers
                 self.allPeriods.removeAll()
                 self.subjectNames.removeAll()
                 self.teacherNames.removeAll()
@@ -116,7 +110,6 @@ class TeacherTTViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDelegate, UITableViewDataSource
 extension TeacherTTViewController: UITableViewDelegate, UITableViewDataSource {
 
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -222,10 +215,10 @@ extension TeacherTTViewController {
             label.textColor = .darkGray
 
             switch i {
-            case 0: // Period - move slightly right
+            case 0:
                 label.frame.origin.x += 25
                 label.textAlignment = .left
-            case 1: // Subject/Teacher - keep centered
+            case 1:
                 label.textAlignment = .center
             case 2: // Time - move slightly left
                 label.frame.origin.x -= 25
@@ -239,5 +232,4 @@ extension TeacherTTViewController {
 
         return headerView
     }
-
 }

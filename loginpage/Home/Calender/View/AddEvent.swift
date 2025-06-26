@@ -16,6 +16,7 @@ class AddEvent: UIView {
     @IBOutlet weak var endTime: UITextField!
     @IBOutlet weak var venue: UITextField!
     @IBOutlet weak var reminderBTn: UIButton!
+    @IBOutlet weak var submit: UIButton!
     
     private var doneButtonKey: UInt8 = 0
     private var cancelButtonKey: UInt8 = 0
@@ -27,6 +28,7 @@ class AddEvent: UIView {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        submit.layer.cornerRadius = 10
     }
     
     

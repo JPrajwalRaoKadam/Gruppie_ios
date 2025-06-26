@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="ipad10_2" orientation="portrait" layout="fullscreen" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -16,7 +16,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qIt-Ys-R8P" userLabel="MainView">
-                    <rect key="frame" x="0.0" y="0.0" width="357" height="449"/>
+                    <rect key="frame" x="0.0" y="-34" width="357" height="449"/>
                     <subviews>
                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="NFF-Ba-U3G">
                             <rect key="frame" x="0.0" y="38" width="358" height="350"/>
@@ -286,11 +286,10 @@
                             </constraints>
                         </stackView>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5zA-Yi-ZUx">
-                            <rect key="frame" x="140" y="411" width="95" height="30"/>
+                            <rect key="frame" x="140" y="399" width="95" height="39"/>
                             <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
-                                <constraint firstAttribute="width" constant="95" id="9QP-4S-VjC"/>
-                                <constraint firstAttribute="height" constant="30" id="hAo-ch-nEE"/>
+                                <constraint firstAttribute="width" constant="95" id="k25-LS-Zcr"/>
                             </constraints>
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <state key="normal" title="Button"/>
@@ -303,13 +302,14 @@
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <accessibility key="accessibilityConfiguration" identifier="AddEventViewController"/>
                     <constraints>
+                        <constraint firstItem="5zA-Yi-ZUx" firstAttribute="leading" secondItem="qIt-Ys-R8P" secondAttribute="leading" constant="140" id="KAW-uv-cGb"/>
                         <constraint firstAttribute="bottom" secondItem="NFF-Ba-U3G" secondAttribute="bottom" constant="61" id="NVf-tN-IEl"/>
+                        <constraint firstAttribute="bottom" secondItem="5zA-Yi-ZUx" secondAttribute="bottom" constant="11" id="Ri5-Dw-gSk"/>
                         <constraint firstItem="NFF-Ba-U3G" firstAttribute="top" secondItem="qIt-Ys-R8P" secondAttribute="top" constant="38" id="Xmx-c8-JmE"/>
                         <constraint firstAttribute="trailing" secondItem="NFF-Ba-U3G" secondAttribute="trailing" constant="-1" id="Yq9-X0-LYd"/>
-                        <constraint firstItem="5zA-Yi-ZUx" firstAttribute="bottom" secondItem="qIt-Ys-R8P" secondAttribute="bottomMargin" id="Zdf-u4-QiK"/>
-                        <constraint firstItem="5zA-Yi-ZUx" firstAttribute="leading" secondItem="qIt-Ys-R8P" secondAttribute="leading" constant="140" id="ZsT-FA-blA"/>
                         <constraint firstAttribute="height" constant="449" id="njB-pn-PZs"/>
                         <constraint firstItem="NFF-Ba-U3G" firstAttribute="leading" secondItem="qIt-Ys-R8P" secondAttribute="leading" id="wNQ-Fk-jGu"/>
+                        <constraint firstItem="5zA-Yi-ZUx" firstAttribute="top" secondItem="NFF-Ba-U3G" secondAttribute="bottom" constant="11" id="wV2-Ie-IJ7"/>
                     </constraints>
                 </view>
             </subviews>
@@ -320,10 +320,11 @@
                 <constraint firstItem="qIt-Ys-R8P" firstAttribute="trailing" secondItem="kRr-Gb-gt8" secondAttribute="trailing" id="DPO-ve-Gca"/>
                 <constraint firstItem="qIt-Ys-R8P" firstAttribute="leading" secondItem="kRr-Gb-gt8" secondAttribute="leading" id="F1O-OT-ddj"/>
                 <constraint firstItem="qIt-Ys-R8P" firstAttribute="bottom" secondItem="kRr-Gb-gt8" secondAttribute="bottom" id="rAN-kX-5xz"/>
-                <constraint firstItem="qIt-Ys-R8P" firstAttribute="top" secondItem="ol6-49-Fge" secondAttribute="top" id="zlI-l2-iK5"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="edit" destination="5zA-Yi-ZUx" id="ghd-Sy-5MB"/>
+                <outlet property="editButtonOutlet" destination="5zA-Yi-ZUx" id="pb8-q9-nhd"/>
                 <outlet property="endDate" destination="4Gj-Zf-ZRp" id="zde-ij-U3n"/>
                 <outlet property="endTime" destination="jid-3c-sLS" id="eFF-ku-3eQ"/>
                 <outlet property="reminderBTn" destination="Tyr-0l-1up" id="feI-yB-JzK"/>
@@ -332,7 +333,7 @@
                 <outlet property="title" destination="O7A-NM-tuL" id="XHn-ep-vOB"/>
                 <outlet property="venue" destination="XM1-XH-WZR" id="06O-lc-Prq"/>
             </connections>
-            <point key="canvasLocation" x="445.55555555555554" y="-17.5"/>
+            <point key="canvasLocation" x="445.03816793893128" y="-17.95774647887324"/>
         </view>
     </objects>
     <resources>

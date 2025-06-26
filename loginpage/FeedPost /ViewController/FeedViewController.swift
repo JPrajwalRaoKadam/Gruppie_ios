@@ -23,7 +23,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     let authKey = TokenManager.shared.getToken()!
     
     var lastContentOffset: CGFloat = 0 // Store the last scroll position
-    
+    var currentRole: String?
     var currentPage = 1
     var isLoading = false
     var response: PostResponse? // Holds the parsed response
@@ -38,6 +38,9 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         activityIndicator = UIActivityIndicatorView(style: .large)
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
+        if currentRole == "parent" {
+            bottomLeftButton.isHidden = true
+        }
         view.addSubview(activityIndicator)
         
         // Setup Pull to Refresh

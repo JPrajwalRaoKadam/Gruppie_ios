@@ -18,7 +18,7 @@ struct AcademicScheduleResponse: Codable {
 }
 
 struct DaySchedule: Codable {
-    let day: String   // Changed from Int to String
+    let day: String
     let sessions: [Session]
 }
 
@@ -68,30 +68,24 @@ struct SubjectsData: Codable {
     let className: String?
 }
 
-// MARK: - Root
 struct TimeTableResponse: Codable {
     let data: [TimeTableData]
 }
 
-// MARK: - Data
 struct TimeTableData: Codable {
     let examTimeTable: [ExamTimeTable]
     let academicTimeTable: [AcademicTimeTable]
 }
 
-// MARK: - ExamTimeTable (empty for now)
 struct ExamTimeTable: Codable {
-    // Define later when structure is available
 }
 
-// MARK: - AcademicTimeTable
 struct AcademicTimeTable: Codable {
     let teamId: String
     let name: String
     let classTimeTable: [ClassTimeTable]
 }
 
-// MARK: - ClassTimeTable
 struct ClassTimeTable: Codable {
     let subjectWithStaffId: String
     let subjectName: String

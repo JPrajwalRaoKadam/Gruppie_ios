@@ -37,7 +37,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         dailogboxView.isHidden = true
         Chaptertableview.delegate = self
         Chaptertableview.dataSource = self
@@ -51,7 +51,21 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
         fetchChapters()
         styleButtons()
         enableKeyboardDismissOnTap()
+        // Tap gesture to dismiss dialog when tapping outside it
+         let outsideTap = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
+         outsideTap.cancelsTouchesInView = false
+         self.view.addGestureRecognizer(outsideTap)
     }
+    @objc func handleOutsideTap(_ sender: UITapGestureRecognizer) {
+        let tapLocation = sender.location(in: self.view)
+
+        // If tap is outside the dailogboxView, hide it
+        if !dailogboxView.frame.contains(tapLocation) && !dailogboxView.isHidden {
+            dailogboxView.isHidden = true
+            print("Dialog dismissed by outside tap")
+        }
+    }
+
     private func styleButtons() {
         let buttons = [pStartButton, pEndButton, aStartButton, aEndButton]
         submitButton1.layer.cornerRadius = 10

@@ -1,9 +1,4 @@
-//
-//  AcademicTableViewCell.swift
-//  loginpage
-//
-//  Created by apple on 13/03/25.
-//
+
 
 import UIKit
 

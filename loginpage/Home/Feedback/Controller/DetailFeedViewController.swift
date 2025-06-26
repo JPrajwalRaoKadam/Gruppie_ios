@@ -10,9 +10,9 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
     var token: String?
     var feedbackItem: FeedBackItem?
     var totalNoOfQustions: String?
-    var classDataList: [FeedClassItem] = [] // Updated type
+    var classDataList: [FeedClassItem] = []
     var feedbackId: String?
-    var role: String? // <-- Add this line
+    var role: String?
 
     private let feedbackQuestionLabel: UILabel = {
            let label = UILabel()
@@ -20,7 +20,7 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
            label.textColor = .blue
            label.textAlignment = .center
            label.font = UIFont.boldSystemFont(ofSize: 16)
-           label.isHidden = true // Initially hidden
+           label.isHidden = true
            label.isUserInteractionEnabled = true
            return label
        }()
@@ -32,7 +32,6 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
         TableView.delegate = self
         TableView.dataSource = self
         
-        // Register the DetailFeedTableViewCell
         TableView.register(UINib(nibName: "DetailFeedTableViewCell", bundle: nil), forCellReuseIdentifier: "DetailFeedCell")
         
         titleName.text = feedbackItem?.title
@@ -42,17 +41,11 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
         } else {
             print("❌ Feedback Item is nil")
         }
-
-        
-        // Fetch data when the view loads
         fetchClassData()
         
         setupFeedbackQuestionLabel()
-        enableKeyboardDismissOnTap()
-
     }
-    
-    
+
     func setupFeedbackQuestionLabel() {
         view.addSubview(feedbackQuestionLabel)
         feedbackQuestionLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -63,17 +56,14 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
             feedbackQuestionLabel.heightAnchor.constraint(equalToConstant: 30)
         ])
 
-        // Add tap gesture to navigate to QuestionsViewController
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(navigateToQuestions))
         feedbackQuestionLabel.addGestureRecognizer(tapGesture)
     }
 
-    // MARK: - Show "FeedBackQuestion" on Button Tap
     @IBAction func showFeedbackQuestion(_ sender: UIButton) {
         feedbackQuestionLabel.isHidden = false
     }
 
-    // MARK: - Navigate to QuestionsViewController
     @objc func navigateToQuestions() {
         let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
         if let questionsVC = storyboard.instantiateViewController(withIdentifier: "QuestionsViewController") as? QuestionsViewController {
@@ -87,7 +77,6 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
         }
     }
 
-    // MARK: - TableView DataSource Methods
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return classDataList.count
     }
@@ -103,14 +92,13 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
         return cell
     }
     
-    // MARK: - API Call
     func fetchClassData() {
         print("🛠️ groupId:", groupId ?? "nil")
         print("🔑 Token:", token ?? "nil")
 
         guard let groupId = groupId, !groupId.isEmpty,
               let token = token, !token.isEmpty,
-              let url = URL(string:  APIManager.shared.baseURL + "groups/\(groupId)/class/get") else {
+              let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/class/get") else {
             print("❌ Invalid URL or missing groupId/token")
             return
         }
@@ -164,6 +152,4 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
     @IBAction func BackButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
-
-
 }

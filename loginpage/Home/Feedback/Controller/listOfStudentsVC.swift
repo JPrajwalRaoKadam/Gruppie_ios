@@ -4,9 +4,9 @@ class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     @IBOutlet weak var studentsTableView: UITableView!
     
-    var token: String = "" // Authentication token
-    var groupId: String = "" // Group ID
-    var teamIds: [String] = [] // Array to hold team IDs
+    var token: String = ""
+    var groupId: String = ""
+    var teamIds: [String] = []
     var teamId: String?
     var currentRole: String?
     var subjects: [SubjectData] = []
@@ -30,7 +30,6 @@ class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         print("Team IDs: \(teamIds)")
         print("Subjects Count: \(subjects.count)")
         print("------------------------------------------------")
-        enableKeyboardDismissOnTap()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -42,7 +41,6 @@ class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         self.navigationController?.popViewController(animated: true)
     }
 
-    // MARK: - UITableViewDataSource Methods
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return subjects.count
@@ -59,7 +57,6 @@ class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         return cell
     }
     
-    // MARK: - UITableViewDelegate Methods
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Make sure indices are safe

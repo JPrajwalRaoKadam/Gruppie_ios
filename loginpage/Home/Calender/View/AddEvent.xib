@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="ipad10_2" orientation="portrait" layout="fullscreen" appearance="light"/>
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
@@ -299,33 +299,36 @@
                                 <constraint firstItem="Fag-AX-yvp" firstAttribute="top" secondItem="7Ds-zH-dFu" secondAttribute="bottom" id="z30-JO-AsV"/>
                             </constraints>
                         </stackView>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lVa-4r-1he">
+                            <rect key="frame" x="103" y="380" width="150" height="40"/>
+                            <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="150" id="N71-8T-8Ct"/>
+                                <constraint firstAttribute="height" constant="40" id="vHR-bq-QUe"/>
+                            </constraints>
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <state key="normal" title="Button"/>
+                            <buttonConfiguration key="configuration" style="plain" title="Submit">
+                                <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="17"/>
+                            </buttonConfiguration>
+                            <connections>
+                                <action selector="addButton:" destination="1n4-3V-Njt" eventType="touchUpInside" id="MAX-dH-Zcm"/>
+                            </connections>
+                        </button>
                     </subviews>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <accessibility key="accessibilityConfiguration" identifier="AddEventViewController"/>
                     <constraints>
+                        <constraint firstItem="lVa-4r-1he" firstAttribute="centerX" secondItem="8Iw-Ay-HL7" secondAttribute="centerX" id="C0c-eU-F49"/>
                         <constraint firstItem="8Iw-Ay-HL7" firstAttribute="top" secondItem="YQM-85-WCo" secondAttribute="top" constant="38" id="CfQ-PP-xPs"/>
                         <constraint firstAttribute="trailing" secondItem="8Iw-Ay-HL7" secondAttribute="trailing" id="OuH-FS-2G7"/>
                         <constraint firstAttribute="height" constant="449" id="cE4-W6-V2b"/>
                         <constraint firstItem="8Iw-Ay-HL7" firstAttribute="leading" secondItem="YQM-85-WCo" secondAttribute="leading" id="fCo-Hi-kbJ"/>
+                        <constraint firstAttribute="bottom" secondItem="lVa-4r-1he" secondAttribute="bottom" constant="29" id="pY7-f3-75i"/>
                         <constraint firstAttribute="bottom" secondItem="8Iw-Ay-HL7" secondAttribute="bottom" constant="61" id="pqb-Fp-F7P"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="449" id="woJ-J9-hnl"/>
                     </constraints>
                 </view>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lVa-4r-1he">
-                    <rect key="frame" x="135" y="408" width="87" height="31"/>
-                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="87" id="6kl-YG-Hha"/>
-                        <constraint firstAttribute="height" constant="31" id="jVW-g3-AID"/>
-                    </constraints>
-                    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    <state key="normal" title="Button"/>
-                    <buttonConfiguration key="configuration" style="plain" title="Submit">
-                        <fontDescription key="titleFontDescription" type="system" pointSize="8"/>
-                    </buttonConfiguration>
-                    <connections>
-                        <action selector="addButton:" destination="1n4-3V-Njt" eventType="touchUpInside" id="MAX-dH-Zcm"/>
-                    </connections>
-                </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="CMe-Uh-y4Q"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -333,11 +336,8 @@
             <constraints>
                 <constraint firstItem="YQM-85-WCo" firstAttribute="leading" secondItem="CMe-Uh-y4Q" secondAttribute="leading" id="H16-8N-E5s"/>
                 <constraint firstItem="YQM-85-WCo" firstAttribute="trailing" secondItem="CMe-Uh-y4Q" secondAttribute="trailing" id="XjO-ot-6EB"/>
-                <constraint firstItem="CMe-Uh-y4Q" firstAttribute="bottom" secondItem="lVa-4r-1he" secondAttribute="bottom" constant="10" id="deF-uw-bIv"/>
                 <constraint firstItem="YQM-85-WCo" firstAttribute="top" secondItem="1n4-3V-Njt" secondAttribute="top" id="edO-Na-RaY"/>
-                <constraint firstItem="CMe-Uh-y4Q" firstAttribute="trailing" secondItem="lVa-4r-1he" secondAttribute="trailing" constant="135" id="q5x-i2-d8m"/>
-                <constraint firstItem="YQM-85-WCo" firstAttribute="bottom" secondItem="CMe-Uh-y4Q" secondAttribute="bottom" id="qYN-6X-Ffh"/>
-                <constraint firstItem="lVa-4r-1he" firstAttribute="leading" secondItem="CMe-Uh-y4Q" secondAttribute="leading" constant="135" id="yTZ-1u-jq9"/>
+                <constraint firstItem="YQM-85-WCo" firstAttribute="bottom" secondItem="CMe-Uh-y4Q" secondAttribute="bottom" constant="34" id="qYN-6X-Ffh"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
@@ -346,10 +346,11 @@
                 <outlet property="reminderBTn" destination="aUW-B8-93h" id="hl9-mp-LKh"/>
                 <outlet property="startDate" destination="qL8-TK-2rH" id="6GU-T0-beM"/>
                 <outlet property="startTime" destination="hF8-0S-3mo" id="0m4-3H-owE"/>
+                <outlet property="submit" destination="lVa-4r-1he" id="GXA-ef-Z8b"/>
                 <outlet property="title" destination="h5x-CG-0gj" id="JKF-wc-shP"/>
                 <outlet property="venue" destination="R9h-Au-Bfz" id="7Co-PD-eZm"/>
             </connections>
-            <point key="canvasLocation" x="446" y="-17"/>
+            <point key="canvasLocation" x="445.03816793893128" y="-17.253521126760564"/>
         </view>
     </objects>
     <resources>
