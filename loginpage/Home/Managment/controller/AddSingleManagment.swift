@@ -7,11 +7,12 @@ class AddSingleManagement: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var name: UITextField!
     @IBOutlet weak var number: UITextField!
     @IBOutlet weak var addUserButton: UIButton!
-
     @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var addMoree: UIButton!
+    
     var token: String?
     var groupIds = ""
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -19,6 +20,10 @@ class AddSingleManagement: UIViewController, UITextFieldDelegate {
 
         addUserButton.isEnabled = false
 
+        addMoree.layer.cornerRadius = 10
+        addMoree.clipsToBounds = true
+        addUserButton.layer.cornerRadius = 10
+        addUserButton.clipsToBounds = true
         name.addTarget(self, action: #selector(validateForm), for: .editingChanged)
         designation.addTarget(self, action: #selector(validateForm), for: .editingChanged)
         number.addTarget(self, action: #selector(validateForm), for: .editingChanged)
