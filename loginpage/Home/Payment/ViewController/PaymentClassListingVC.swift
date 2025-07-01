@@ -48,12 +48,6 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
                 DispatchQueue.main.async {
                     self.classTableView.reloadData()
                     self.updateUI()
-                    
-                    // ✅ If user is parent, push next VC and hide current
-                    if self.currentRole?.lowercased() == "parent" {
-                        let indexPath = IndexPath(row: 0, section: 0)
-                        self.navigateToStudentListingForParent(at: indexPath)
-                    }
                 }
             case .failure(let error):
                 print("Error fetching fee report: \(error.localizedDescription)")
@@ -78,15 +72,18 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     // MARK: - TableView DataSource Methods
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         print("counttt...\(teamData?.count)")
-        return teamData?.count ?? 0
+        return subjects.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ClassesTableViewCell", for: indexPath) as! ClassesTableViewCell
-        if let teamData = teamData?[indexPath.row] {
-            cell.configurePayment(with: teamData)
-            cell.nameLabel.text = teamData.className
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ClassesTableViewCell", for: indexPath) as? ClassesTableViewCell else {
+            return UITableViewCell()
         }
+        
+        let sub = subjects[indexPath.row]
+        cell.nameLabel?.text = sub.name
+        cell.configurePayment(with: sub)
+        
         return cell
     }
     
@@ -96,23 +93,20 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
 
     
     private func navigateToStudentListingForParent(at indexPath: IndexPath) {
-        guard let selectedTeam = teamData?[indexPath.row] else {
-            print("❌ Could not find team at index \(indexPath.row)")
-            return
-        }
 
+        let selectedTeam = subjects[indexPath.row]
         // Extract subject name from firstSubject (optional – you can adjust this logic)
         let trimmedName: String
         if let firstSubject = subjects.first,
            let range = firstSubject.name.range(of: #"(?<=\().*?(?=\))"#, options: .regularExpression) {
             trimmedName = String(firstSubject.name[range])
         } else {
-            trimmedName = selectedTeam.className ?? ""
+            trimmedName = selectedTeam.name ?? ""
         }
 
-        print("✅ Selected Team: \(selectedTeam.className)")
+        print("✅ Selected Team: \(selectedTeam.name)")
         print("📋 All teamData class names:")
-        teamData?.forEach { print("→ \($0.className)") }
+        subjects.forEach { print("→ \($0.name)") }
 
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
         if let studentListingVC = storyboard.instantiateViewController(withIdentifier: "StudentListingVC") as? StudentListingVC {
@@ -120,11 +114,11 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             studentListingVC.groupId = self.groupId
             studentListingVC.subjects = self.subjects
             studentListingVC.currentRole = self.currentRole
-            studentListingVC.teamId = selectedTeam.classId
+            studentListingVC.teamId = selectedTeam.teamId
 
             // 👇 Force view load before setting label
             _ = studentListingVC.view
-            studentListingVC.className.text = selectedTeam.className
+            studentListingVC.className.text = selectedTeam.name
 
             // Replace current VC
             var viewControllers = self.navigationController?.viewControllers ?? []

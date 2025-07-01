@@ -38,9 +38,9 @@ class ClassesTableViewCell: UITableViewCell {
             imageLabel.isHidden = true  // Optionally, hide the label
     }
     
-    func configurePayment(with teamData: TeamData ) {
-        nameLabel.text = teamData.className
-        iconImageView.image = generateImage(from: teamData.className ?? "")  // This triggers the fallback image
+    func configurePayment(with sub: SubjectData ) {
+        nameLabel.text = sub.name
+        iconImageView.image = generateImage(from: sub.name ?? "")  // This triggers the fallback image
             iconImageView.isHidden = false
             imageLabel.isHidden = true  // Optionally, hide the label
     }
