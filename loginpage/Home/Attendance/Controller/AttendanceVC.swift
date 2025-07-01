@@ -242,6 +242,8 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
                     cell.img.image = nil // Ensure no old image is displayed
                     cell.showFallbackImage(for: attendance.name)
                     cell.fallbackLabel.isHidden = false
+                    let attendance = self.attendanceData[indexPath.row]
+                    cell.classLabel.text = attendance.name
                     cell.configure(with: attendance)
                     
                 }
@@ -256,6 +258,7 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
             let subject = subjects[indexPath.row] as! SubjectData
             cell.textLabel?.text = subject.name // Replace with your custom logic
             cell.periodLabel.isHidden = false
+            cell.classLabel.text = subject.name
             cell.showFallbackImage(for: subject.name)
             return cell
         }

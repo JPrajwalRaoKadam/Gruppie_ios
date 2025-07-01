@@ -155,10 +155,10 @@ extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
             cell.configureCell(with: staff.name ?? "No Name", icon: nil)
         } else if isSubjectAgain {
             let subject = subjects[indexPath.row]
-            cell.configureCell(with: subject.gruppieClassName ?? "No Name", icon: nil)
+            cell.configureCell(with: subject.name ?? "No Name", icon: nil)
         } else {
             let subject = subjects[indexPath.row]
-            cell.configureCell(with: subject.gruppieClassName ?? "No Name", icon: nil)
+            cell.configureCell(with: subject.name ?? "No Name", icon: nil)
         }
 
         return cell
@@ -168,7 +168,7 @@ extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
         switch segmentController.selectedSegmentIndex {
         case 0:
             let selectedTeamId = teamIds[indexPath.row]
-            let selectedClassName = subjects[indexPath.row].gruppieClassName ?? "No Class Name"
+            let selectedClassName = subjects[indexPath.row].name ?? "No Class Name"
             let vc = storyboard?.instantiateViewController(withIdentifier: "AcademicViewController") as! AcademicViewController
             vc.groupId = groupId
             vc.token = token
