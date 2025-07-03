@@ -1,7 +1,7 @@
 import UIKit
 
 protocol AddSubjectTableViewCellDelegate: AnyObject {
-    func didTapCheckBox(for subject: SubjectDetail)  // Make sure SubjectDetail is used
+    func didTapCheckBox(for subject: SubjectDetail)
 }
 
 class AddSubjectTableViewCell: UITableViewCell {
@@ -18,7 +18,7 @@ class AddSubjectTableViewCell: UITableViewCell {
     func configure(with subject: SubjectDetail, isSelected: Bool) {
         self.subject = subject
         Subject.text = subject.subjectName
-        updateCheckbox(isSelected: isSelected) // ✅ Ensures correct state on reuse
+        updateCheckbox(isSelected: isSelected)
     }
 
     private func updateCheckbox(isSelected: Bool) {
@@ -28,7 +28,7 @@ class AddSubjectTableViewCell: UITableViewCell {
 
     @IBAction func checkBoxTapped(_ sender: UIButton) {
         guard let subject = subject else { return }
-        delegate?.didTapCheckBox(for: subject) // Delegate will handle selection updates
+        delegate?.didTapCheckBox(for: subject) 
     }
 
     }

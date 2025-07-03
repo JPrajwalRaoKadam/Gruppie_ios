@@ -4,8 +4,7 @@ import UIKit
 class AllSubjectViewController: UIViewController, AllSubjectDetailTableViewCellDelegate {
     @IBOutlet weak var TableView: UITableView!
     
-    // Required Data for Navigation
-    var staffList: [Staff] = [] // ✅ Store staff list here
+    var staffList: [Staff] = []
 
     var token: String = TokenManager.shared.getToken() ?? ""
     var groupId: String = ""
@@ -54,7 +53,6 @@ class AllSubjectViewController: UIViewController, AllSubjectDetailTableViewCellD
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
 extension AllSubjectViewController: UITableViewDataSource, UITableViewDelegate {
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -70,20 +68,15 @@ extension AllSubjectViewController: UITableViewDataSource, UITableViewDelegate {
             return UITableViewCell()
         }
         
-        // Get subjects for the section
         let subjectsInSection = subjectsForSection(indexPath.section)
-        
-        // Access the correct subject for the row
         let subjectDet = subjectsInSection[indexPath.row]
         self.subjectDetail = subjectDet
 
-        cell.delegate = nil // Prevent reuse issues
-        cell.delegate = self // ✅ Ensure delegate is set
+        cell.delegate = nil
+        cell.delegate = self
 
         
-        if let staffDet = subjectDet.staffName?.first  {// This is of type `SubjectStaffMember?`
-            
-            // Configure cell
+        if let staffDet = subjectDet.staffName?.first  {
             cell.configure(with: staffDet, subjectDetail: subjectDet)
         }
         
@@ -91,24 +84,21 @@ extension AllSubjectViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     
-    // MARK: - Section Header with Button
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 50))
-        headerView.backgroundColor = UIColor.systemGray6 // Lighter gray color
+        headerView.backgroundColor = UIColor.systemGray6
 
-        // Section Title
         let titleLabel = UILabel(frame: CGRect(x: 16, y: 10, width: 200, height: 30))
         titleLabel.text = sectionTitles[section]
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
         headerView.addSubview(titleLabel)
 
-        // Add Button (Rounded)
         let buttonSize: CGFloat = 36
         let button = UIButton(frame: CGRect(x: tableView.frame.width - 50, y: 7, width: buttonSize, height: buttonSize))
-        button.setTitle("+", for: .normal) // "+" to indicate adding
+        button.setTitle("+", for: .normal)
         button.backgroundColor = .blue
         button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = buttonSize / 2 // Make it circular
+        button.layer.cornerRadius = buttonSize / 2
         button.clipsToBounds = true
         button.addTarget(self, action: #selector(addButtonTapped(_:)), for: .touchUpInside)
         button.tag = section
@@ -117,7 +107,6 @@ extension AllSubjectViewController: UITableViewDataSource, UITableViewDelegate {
         return headerView
     }
     
-    // Handle Add Button Tap
     @objc func addButtonTapped(_ sender: UIButton) {
         let sectionIndex = sender.tag
         print("✅ Add button tapped for section: \(sectionTitles[sectionIndex])")
@@ -147,9 +136,7 @@ extension AllSubjectViewController {
             guard let self = self else { return }
 
             DispatchQueue.main.async {
-                self.staffList = fetchedStaffList // ✅ Store response in staffList
-
-                // Extract subjectId safely
+                self.staffList = fetchedStaffList
                 guard let subjectId = subjectDetail.subjectId else {
                     print("❌ Missing subjectId")
                     return
@@ -209,7 +196,7 @@ extension AllSubjectViewController {
                     let decodedResponse = try JSONDecoder().decode(StaffResponse.self, from: data)
                     let staffList = decodedResponse.data
                     print("✅ Fetched \(staffList.count) staff members")
-                    completion(staffList) // ✅ Return fetched staff list
+                    completion(staffList) 
                 } catch {
                     print("❌ JSON Decoding Error: \(error.localizedDescription)")
                     completion([])

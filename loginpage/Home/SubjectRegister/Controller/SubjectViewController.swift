@@ -3,33 +3,27 @@ import UIKit
 class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var TableView: UITableView!
-    var school: School? // Store school data
+    var school: School?
 
-    var subjects: [SubjectData] = [] // Store fetched subjects
-    var token: String = "" // Authentication token
-    var groupId: String = "" // Group ID
+    var subjects: [SubjectData] = []
+    var token: String = ""
+    var groupId: String = ""
     var teamIds: [String] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         enableKeyboardDismissOnTap()
-        // Register the custom cell for the table view
         TableView.register(UINib(nibName: "SubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectTableViewCell")
-        
-        // Set delegate and dataSource
         TableView.delegate = self
         TableView.dataSource = self
         
-        // Fetch the token and groupId
         self.token = TokenManager.shared.getToken() ?? ""
 
-        // Debugging prints
         print("✅ SubjectViewController Loaded with:")
         print("   🔹 Token: \(token)")
         print("   🔹 Group ID: \(groupId)")
         print("   🔹 Team IDs: \(teamIds.isEmpty ? "Not available" : teamIds.joined(separator: ", "))")
 
-        // Fetch subject data
         fetchSubjectData()
     }
     
@@ -54,7 +48,6 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             guard let data = data else { return }
             
-            // Print raw JSON response
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("📌 Raw JSON response for fetching subjects: \(jsonString)")
             }
@@ -64,12 +57,10 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
                 let response = try decoder.decode([SubjectData].self, from: data)
                 self.subjects = response
                 
-                // Print fetched subjects
                 for subject in self.subjects {
                     print("✅ Fetched Subject - Team ID: \(subject.teamId)")
                 }
                 
-                // Reload table view on main thread
                 DispatchQueue.main.async {
                     self.TableView.reloadData()
                 }
@@ -78,8 +69,6 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
         }.resume()
     }
-
-    // MARK: - UITableView DataSource Methods
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return subjects.count
@@ -96,8 +85,6 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
         return cell
     }
     
-    // MARK: - UITableView Delegate Methods
-
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedSubject = subjects[indexPath.row]
         fetchSubjectForTeam(teamId: selectedSubject.teamId)
@@ -145,13 +132,11 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
 
-        // Pass data
         allSubjectVC.subjectDetails = subjectDetails
         allSubjectVC.token = self.token
         allSubjectVC.groupId = self.groupId
         allSubjectVC.teamId = teamId
 
-        // Debugging prints
         print("✅ Navigating to AllSubjectViewController with:")
         print("   🔹 Token: \(self.token)")
         print("   🔹 Group ID: \(self.groupId)")

@@ -11,24 +11,24 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="AccountInfoCell" rowHeight="756" id="Scd-4u-vDr" customClass="AccountInfoCell" customModule="loginpage" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="293" height="576"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="AccountInfoCell" rowHeight="652" id="Scd-4u-vDr" customClass="AccountInfoCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="293" height="472"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Scd-4u-vDr" id="Rh5-r7-c1K">
-                <rect key="frame" x="0.0" y="0.0" width="293" height="576"/>
+                <rect key="frame" x="0.0" y="0.0" width="293" height="472"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6lk-Sm-Hfn" userLabel="MainView">
-                        <rect key="frame" x="10" y="0.0" width="282" height="523"/>
+                        <rect key="frame" x="10" y="0.0" width="276" height="479"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="8ul-4M-f1E">
-                                <rect key="frame" x="10" y="10" width="262" height="503"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="8ul-4M-f1E">
+                                <rect key="frame" x="10" y="10" width="256" height="459"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="22" translatesAutoresizingMaskIntoConstraints="NO" id="obh-pu-80j">
-                                        <rect key="frame" x="0.0" y="0.0" width="262" height="59"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="obh-pu-80j">
+                                        <rect key="frame" x="0.0" y="0.0" width="256" height="63"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="qA7-bH-NW8">
-                                                <rect key="frame" x="0.0" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="120" height="63"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Father Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9dt-CI-uC1">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -41,10 +41,10 @@
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="GXg-BT-5Qq">
-                                                        <rect key="frame" x="0.0" y="29" width="120" height="30"/>
+                                                        <rect key="frame" x="0.0" y="29" width="120" height="34"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="120" id="60T-2q-THI"/>
-                                                            <constraint firstAttribute="height" constant="30" id="JKw-er-AFM"/>
+                                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="34" id="PH3-MG-N7R"/>
                                                         </constraints>
                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                         <textInputTraits key="textInputTraits"/>
@@ -52,7 +52,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="42a-3x-hAC">
-                                                <rect key="frame" x="142" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="136" y="4" width="120" height="59"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mother Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sVC-cK-0oL">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -76,9 +76,12 @@
                                                 </subviews>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstItem="42a-3x-hAC" firstAttribute="leading" secondItem="qA7-bH-NW8" secondAttribute="trailing" constant="16" id="4rW-gP-lVd"/>
+                                        </constraints>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="22" translatesAutoresizingMaskIntoConstraints="NO" id="HT6-ha-Np9">
-                                        <rect key="frame" x="0.0" y="74" width="262" height="59"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="HT6-ha-Np9">
+                                        <rect key="frame" x="0.0" y="70" width="256" height="59"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="5DE-5E-qbq">
                                                 <rect key="frame" x="0.0" y="0.0" width="120" height="59"/>
@@ -105,7 +108,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="LF4-Ie-r4Y">
-                                                <rect key="frame" x="142" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="136" y="0.0" width="120" height="59"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mother phone" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CJj-2e-6II">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -129,9 +132,12 @@
                                                 </subviews>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstItem="LF4-Ie-r4Y" firstAttribute="leading" secondItem="5DE-5E-qbq" secondAttribute="trailing" constant="16" id="88T-zr-7DL"/>
+                                        </constraints>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="22" translatesAutoresizingMaskIntoConstraints="NO" id="gpy-23-OLp">
-                                        <rect key="frame" x="0.0" y="148" width="262" height="59"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="gpy-23-OLp">
+                                        <rect key="frame" x="0.0" y="136" width="256" height="59"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="EbF-KT-ctZ">
                                                 <rect key="frame" x="0.0" y="0.0" width="120" height="59"/>
@@ -158,7 +164,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="VxI-x6-A8h">
-                                                <rect key="frame" x="142" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="136" y="0.0" width="120" height="59"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mother email" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pRC-YA-Ul2">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -182,9 +188,12 @@
                                                 </subviews>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstItem="VxI-x6-A8h" firstAttribute="leading" secondItem="EbF-KT-ctZ" secondAttribute="trailing" constant="16" id="i5T-dY-dSL"/>
+                                        </constraints>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="22" translatesAutoresizingMaskIntoConstraints="NO" id="GfX-eC-LW7">
-                                        <rect key="frame" x="0.0" y="222" width="262" height="59"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="GfX-eC-LW7">
+                                        <rect key="frame" x="0.0" y="202" width="256" height="59"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="xEg-D8-hMM">
                                                 <rect key="frame" x="0.0" y="0.0" width="120" height="59"/>
@@ -211,7 +220,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="aCV-Fw-4ZI">
-                                                <rect key="frame" x="142" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="136" y="0.0" width="120" height="59"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mother qualification" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E3D-AF-swE">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -235,9 +244,12 @@
                                                 </subviews>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstItem="aCV-Fw-4ZI" firstAttribute="leading" secondItem="xEg-D8-hMM" secondAttribute="trailing" constant="16" id="tf2-dU-r1O"/>
+                                        </constraints>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="22" translatesAutoresizingMaskIntoConstraints="NO" id="kQf-rG-K4u">
-                                        <rect key="frame" x="0.0" y="296" width="262" height="59"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="kQf-rG-K4u">
+                                        <rect key="frame" x="0.0" y="268" width="256" height="59"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="skY-ZE-0VZ">
                                                 <rect key="frame" x="0.0" y="0.0" width="120" height="59"/>
@@ -264,7 +276,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="vvx-vW-Tis">
-                                                <rect key="frame" x="142" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="136" y="0.0" width="120" height="59"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mother occupation" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kDL-9c-Pff">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -288,9 +300,12 @@
                                                 </subviews>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstItem="vvx-vW-Tis" firstAttribute="leading" secondItem="skY-ZE-0VZ" secondAttribute="trailing" constant="16" id="qUa-Sf-eEO"/>
+                                        </constraints>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="22" translatesAutoresizingMaskIntoConstraints="NO" id="WqE-Q2-fui">
-                                        <rect key="frame" x="0.0" y="370" width="262" height="59"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="WqE-Q2-fui">
+                                        <rect key="frame" x="0.0" y="334" width="256" height="59"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="k0M-J9-kid">
                                                 <rect key="frame" x="0.0" y="0.0" width="120" height="59"/>
@@ -317,7 +332,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="yeI-CF-tpV">
-                                                <rect key="frame" x="142" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="136" y="0.0" width="120" height="59"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mother Aadhar no" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0uU-BQ-A9y">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -341,9 +356,12 @@
                                                 </subviews>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstItem="yeI-CF-tpV" firstAttribute="leading" secondItem="k0M-J9-kid" secondAttribute="trailing" constant="16" id="Lza-B1-rUi"/>
+                                        </constraints>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="22" translatesAutoresizingMaskIntoConstraints="NO" id="SD8-Mz-mHJ">
-                                        <rect key="frame" x="0.0" y="444" width="262" height="59"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="SD8-Mz-mHJ">
+                                        <rect key="frame" x="0.0" y="400" width="256" height="59"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="jZQ-xk-giJ">
                                                 <rect key="frame" x="0.0" y="0.0" width="120" height="59"/>
@@ -370,7 +388,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="9" translatesAutoresizingMaskIntoConstraints="NO" id="oeF-ck-Zjw">
-                                                <rect key="frame" x="142" y="0.0" width="120" height="59"/>
+                                                <rect key="frame" x="136" y="0.0" width="120" height="59"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mother Income" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BZK-Bh-ctS">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="20"/>
@@ -394,6 +412,9 @@
                                                 </subviews>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstItem="oeF-ck-Zjw" firstAttribute="leading" secondItem="jZQ-xk-giJ" secondAttribute="trailing" constant="16" id="hFO-Ab-W19"/>
+                                        </constraints>
                                     </stackView>
                                 </subviews>
                             </stackView>
@@ -431,7 +452,7 @@
                 <outlet property="motherPhone" destination="MXk-AN-T4t" id="JRt-Bc-hv1"/>
                 <outlet property="motherQualification" destination="Bxr-Zw-9mt" id="7y0-HS-AfW"/>
             </connections>
-            <point key="canvasLocation" x="713.74045801526711" y="162.67605633802819"/>
+            <point key="canvasLocation" x="713.74045801526711" y="126.05633802816902"/>
         </tableViewCell>
     </objects>
     <resources>

@@ -4,7 +4,6 @@ struct SubjectResponse: Decodable {
     let data: [SubjectData]
 }
 
-// Model for individual class data
 struct SubjectData: Decodable {
     let totalNoOfStaffAssigned: Int?
     let teamId: String

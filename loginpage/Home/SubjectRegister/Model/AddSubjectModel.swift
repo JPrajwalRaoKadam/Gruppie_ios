@@ -1,11 +1,9 @@
 import Foundation
 
-// MARK: - Main response model
 struct AddSubjectRegisterResponse: Decodable {
-    let data: [AddSubjectDetail]  // Array of subject details inside "data"
+    let data: [AddSubjectDetail]
 }
 
-// MARK: - SubjectDetail model to reflect each subject's details
 struct AddSubjectDetail: Decodable, Hashable {
     let subjectPriority: Int
     let subjectName: String
@@ -19,12 +17,10 @@ struct AddSubjectDetail: Decodable, Hashable {
         case subjectPriority, subjectName, partSubject, parentSubject, isLanguage, id, gruppieSubjectId
     }
 
-    // MARK: - Hashable Conformance
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id) // Using 'id' as a unique identifier
+        hasher.combine(id)
     }
 
-    // MARK: - Equatable Conformance (Required for Hashable)
     static func == (lhs: AddSubjectDetail, rhs: AddSubjectDetail) -> Bool {
         return lhs.id == rhs.id
     }

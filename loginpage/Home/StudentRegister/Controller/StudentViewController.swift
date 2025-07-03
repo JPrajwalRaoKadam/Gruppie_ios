@@ -304,21 +304,17 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 let response = try decoder.decode(StudentDataResponse.self, from: data)
 
                 DispatchQueue.main.async {
-                    if let firstStudent = response.data.first {
-                        let studentDbId = firstStudent.studentDbId ?? "N/A"
-                        print("Student Database ID: \(studentDbId)")
+                    let studentDbId = response.data.first?.studentDbId ?? "N/A"
+                    print("Student Database ID: \(studentDbId)")
 
-                        if let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController {
-                            detailVC.token = self.token
-                            detailVC.groupIds = self.groupIds
-                            detailVC.teamId = teamId
-                            detailVC.studentName = name
-                            detailVC.studentDbId = studentDbId
-                            detailVC.studentDetails = response.data
-                            self.navigationController?.pushViewController(detailVC, animated: true)
-                        }
-                    } else {
-                        print("No student data found")
+                    if let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController {
+                        detailVC.token = self.token
+                        detailVC.groupIds = self.groupIds
+                        detailVC.teamId = teamId
+                        detailVC.studentName = name
+                        detailVC.studentDbId = studentDbId
+                        detailVC.studentDetails = response.data // may be empty
+                        self.navigationController?.pushViewController(detailVC, animated: true)
                     }
                 }
             } catch {
@@ -328,6 +324,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         task.resume()
     }
+
     
     func filterMembers(textField: String) {
         let searchText = textField.trimmingCharacters(in: .whitespacesAndNewlines)

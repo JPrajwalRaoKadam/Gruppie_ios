@@ -98,7 +98,6 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
                 let decodedResponse = try JSONDecoder().decode(StudentSubjectResponse.self, from: data)
 
                 DispatchQueue.main.async {
-                    // 🔁 Collect all students from all subject entries
                     self.students = decodedResponse.data.flatMap { $0.studentsList }
 
                     print("📌 Total students fetched: \(self.students.count)")
@@ -116,7 +115,6 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
         task.resume()
     }
 
-    // MARK: - TableView DataSource Methods
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return students.count
     }
@@ -128,12 +126,8 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
 
         let student = students[indexPath.row]
         cell.StudentName.text = student.studentName ?? "No Name"
-
-        // Set checkbox state
         let isSelected = selectedStudentIds.contains(student.userId ?? "")
         cell.checkBoxButton.setImage(UIImage(systemName: isSelected ? "checkmark.square.fill" : "square"), for: .normal)
-
-        // Closure for checkbox tapped
         cell.checkBoxTappedAction = { [weak self] in
             guard let self = self else { return }
             let userId = student.userId
@@ -196,7 +190,6 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
                 print("📩 Raw API Response:\n\(rawResponse)")
             }
 
-            // Optional: Parse the response to confirm success
             if let httpResponse = response as? HTTPURLResponse {
                 if (200...299).contains(httpResponse.statusCode) {
                     print("✅ Students successfully added to subject!")

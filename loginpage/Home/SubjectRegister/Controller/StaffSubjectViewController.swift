@@ -10,7 +10,7 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
     @IBOutlet weak var searchLabel: UILabel!
     var subjectId: String?
     var selectedSubject: SubjectDetail?
-    var staffList: [Staffs] = []  // Updated model
+    var staffList: [Staffs] = []
     var teamId: String?
     var groupId: String?
     var token: String?
@@ -21,20 +21,17 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
         super.viewDidLoad()
         enableKeyboardDismissOnTap()
         if let priority = subjectPriority {
-                SubjectPriority.text = "\(priority)"  // Convert Int to String
+                SubjectPriority.text = "\(priority)"
             } else {
                 SubjectPriority.text = "No Priority Assigned"
             }
 
-        // Register TableView Cell
         TableView.delegate = self
         TableView.dataSource = self
         TableView.register(UINib(nibName: "StaffSubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "StaffSubjectTableViewCell")
 
-        // Styling UI
         configureUI()
         
-        // Fetch staff list
         fetchTeachingStaff()
     }
     
@@ -47,13 +44,12 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
         save.clipsToBounds = true
     }
     
-    // MARK: - TableView DataSource Methods
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print("✅ Number of Rows: \(staffList.count)")  // Debugging
+        print("✅ Number of Rows: \(staffList.count)")
         return staffList.count
     }
 
@@ -73,7 +69,6 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
         return cell
     }
 
-    // MARK: - Fetch Teaching Staff from API
     func fetchTeachingStaff() {
             guard let groupId = groupId,
                   let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching") else {
@@ -96,27 +91,22 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
                     return
                 }
                 
-                // ✅ Print raw API response
                 if let jsonString = String(data: data, encoding: .utf8) {
                     print("📌 Raw API Response StaffSubject: \(jsonString)")
                 }
                 
                 do {
-                    // ✅ Decode API response into new model
                     let decodedResponse = try JSONDecoder().decode(StaffListResponse.self, from: data)
                     
                     DispatchQueue.main.async {
-                        self.staffList = decodedResponse.data  // ✅ Assign staff list
+                        self.staffList = decodedResponse.data
                         self.TableView.reloadData()
                         
-                        // ✅ Bind SubjectName from API
                         if let subjectName = self.selectedSubject?.subjectName {
                             self.SubjectName.text = subjectName
                         } else {
                             self.SubjectName.text = "No Subject Name"
                         }
-
-                        // ✅ Bind SubjectPriority
                         if let priority = self.subjectPriority {
                             self.SubjectPriority.text = "\(priority)"
                         } else {
@@ -134,22 +124,20 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
     }
 }
 
-// ✅ Move extension outside the main class
 extension StaffSujectViewController: StaffSubjectTableViewCellDelegate {
     func didTapCheckBox(for staff: Staffs) {
         if selectedSubjects.contains(staff.staffId!) {
-            selectedSubjects.remove(staff.staffId!) // Deselect
+            selectedSubjects.remove(staff.staffId!)
         } else {
-            selectedSubjects.insert(staff.staffId!) // Select
+            selectedSubjects.insert(staff.staffId!)
         }
         
-        // ✅ Reload only the tapped row instead of entire table
         if let index = staffList.firstIndex(where: { $0.staffId == staff.staffId }) {
             let indexPath = IndexPath(row: index, section: 0)
             TableView.reloadRows(at: [indexPath], with: .automatic)
         }
         
-        print("✅ Selected: \(staff.name ?? "Unknown")") // Debugging
+        print("✅ Selected: \(staff.name ?? "Unknown")")
     }
     
     @IBAction func saveButtonTapped(_ sender: UIButton) {
@@ -181,7 +169,7 @@ extension StaffSujectViewController: StaffSubjectTableViewCellDelegate {
             "isLanguage": false,
             "optional": false,
             "staffId": selectedStaffIds,
-            "subjectName": subjectName, // ✅ Ensured subjectName is not empty
+            "subjectName": subjectName,
             "subjectPriority": Int(SubjectPriority.text ?? "0") ?? 0
         ]
 
@@ -214,7 +202,6 @@ extension StaffSujectViewController: StaffSubjectTableViewCellDelegate {
                         print("📌 API Response: \(responseString)")
                     }
 
-                    // ✅ Navigate back to the previous screen on success
                     DispatchQueue.main.async {
                         self.navigationController?.popViewController(animated: true)
                     }

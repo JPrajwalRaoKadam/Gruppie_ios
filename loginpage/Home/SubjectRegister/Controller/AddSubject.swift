@@ -180,16 +180,15 @@ class AddSubject: UIViewController {
     
     func determineSubjectPriority(for subject: SubjectDetail, sectionIndex: Int) -> Int {
         switch sectionIndex {
-        case 0: return 1 // Language-1
-        case 1: return 2 // Language-2
-        case 2: return 3 // Language-3
-        case 3: return 0 // Other Subjects
+        case 0: return 1
+        case 1: return 2
+        case 2: return 3
+        case 3: return 0
         default: return 0
         }
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
 extension AddSubject: UITableViewDataSource, UITableViewDelegate, AddSubjectTableViewCellDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -214,7 +213,6 @@ extension AddSubject: UITableViewDataSource, UITableViewDelegate, AddSubjectTabl
         return 60
     }
     
-    // MARK: - Checkbox Selection
     func didTapCheckBox(for subject: SubjectDetail) {
         print("Toggled Subject: \(subject.subjectName) - ID: \(subject.subjectId ?? "N/A")")
         

@@ -1,11 +1,9 @@
 import Foundation
 
-// Main response model
 struct SubjectRegisterResponse: Decodable {
     let data: [SubjectDetail]
 }
 
-// SubjectDetail model to reflect each subject's details
 struct SubjectDetail: Decodable, Hashable {
     let universityCode: String?
     let totalNoOfStudents: Int?
@@ -96,7 +94,6 @@ struct SubjectDetail: Decodable, Hashable {
         return nil
     }
 
-    // Conforming to Hashable
     func hash(into hasher: inout Hasher) {
         hasher.combine(subjectId)
     }
@@ -106,17 +103,15 @@ struct SubjectDetail: Decodable, Hashable {
     }
 }
 
-// SubjectStaffMember model for the staff data inside "staffName" array
 struct SubjectStaffMember: Decodable {
     let staffName: String
     let staffId: String
 }
 
-// Staff List Response
 struct StaffListResponse: Codable {
     let totalNumberOfPages: Int?
     let data: [Staffs]
-    let subjectPriority: String?  // ✅ Make sure this is Optional
+    let subjectPriority: String?
 }
 
 struct Staffs: Codable {
@@ -138,14 +133,14 @@ struct Staffs: Codable {
     let category: String?
     let motherName: String?
     let aadharNumber: String?
-    let subjectName: String?  // ✅ Add subjectName
-    let StudentName: String?  // ✅ Add subjectName
+    let subjectName: String?
+    let StudentName: String?
 
     enum CodingKeys: String, CodingKey {
         case subjectPriority, permanent, accountant, staffId, designation, type, phone, name, userId
         case payRollApprover, admissionApprover, examiner
         case bankIfscCode, bankAddress, bankName, category, motherName, aadharNumber
-        case subjectName , StudentName// ✅ Add this line
+        case subjectName , StudentName
     }
 
     init(from decoder: Decoder) throws {
@@ -197,5 +192,5 @@ struct StudentSubjectData: Codable {
 struct StudentSubjectStudent: Codable {
     let userId: String?
     let studentName: String
-    let rollNumber: String
+    let rollNumber: String?
 }

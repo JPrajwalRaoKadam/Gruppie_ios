@@ -6,8 +6,11 @@ protocol AddEventDelegate: AnyObject {
 }
 
 class AddEvent: UIView {
+    
     weak var delegate: AddEventDelegate?
     
+    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var contentView: UIView!
     
     @IBOutlet weak var title: UITextField!
     @IBOutlet weak var startDate: UITextField!
@@ -18,8 +21,6 @@ class AddEvent: UIView {
     @IBOutlet weak var reminderBTn: UIButton!
     @IBOutlet weak var submit: UIButton!
     
-    private var doneButtonKey: UInt8 = 0
-    private var cancelButtonKey: UInt8 = 0
     private var selectedReminder: String?
     var currentDatePicker: UIDatePicker?
     var currentTextField: UITextField?
@@ -31,6 +32,7 @@ class AddEvent: UIView {
         submit.layer.cornerRadius = 10
     }
     
+    // MARK: - Date & Time Actions
     
     @IBAction func addStartDate(_ sender: Any) {
         showDatePickerPopup(for: startDate)
@@ -48,303 +50,13 @@ class AddEvent: UIView {
         showTimePickerPopup(for: endTime)
     }
     
-    @IBAction func locationAction(_ sender: Any) {
-    }
-    
+    @IBAction func locationAction(_ sender: Any) { }
     
     @IBAction func reminderList(_ sender: Any) {
         fetchReminderList()
     }
     
-    func showDatePickerPopup(for textField: UITextField) {
-        // Store the text field reference
-        currentTextField = textField
-        
-        // Create a background view
-        let backgroundView = UIView(frame: UIScreen.main.bounds)
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        
-        // Add a tap gesture recognizer to dismiss the popup
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissDatePickerPopup(_:)))
-        backgroundView.addGestureRecognizer(tapGesture)
-        
-        // Create a container view for the date picker
-        let containerView = UIView()
-        containerView.backgroundColor = .white
-        containerView.layer.cornerRadius = 10
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Create the UIDatePicker
-        let datePicker = UIDatePicker()
-        datePicker.datePickerMode = .date
-        datePicker.preferredDatePickerStyle = .wheels
-        datePicker.translatesAutoresizingMaskIntoConstraints = false
-        currentDatePicker = datePicker // Assign the current date picker
-        
-        // Create a "Done" button
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle("Done", for: .normal)
-        doneButton.addTarget(self, action: #selector(datePickerDonePressed(_:)), for: .touchUpInside)
-        doneButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Create a "Cancel" button
-        let cancelButton = UIButton(type: .system)
-        cancelButton.setTitle("Cancel", for: .normal)
-        cancelButton.addTarget(self, action: #selector(datePickerCancelPressed(_:)), for: .touchUpInside)
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Add subviews to the container view
-        containerView.addSubview(datePicker)
-        containerView.addSubview(doneButton)
-        containerView.addSubview(cancelButton)
-        
-        // Add the container view to the background view
-        backgroundView.addSubview(containerView)
-        
-        // Add the background view to the main window
-        if let window = UIApplication.shared.windows.first {
-            window.addSubview(backgroundView)
-        }
-        
-        // Set constraints for the container view
-        NSLayoutConstraint.activate([
-            containerView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
-            containerView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
-            containerView.widthAnchor.constraint(equalToConstant: 300),
-            containerView.heightAnchor.constraint(equalToConstant: 300),
-            
-            datePicker.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            datePicker.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            datePicker.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
-            
-            doneButton.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: 10),
-            doneButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            doneButton.heightAnchor.constraint(equalToConstant: 40),
-            
-            cancelButton.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: 10),
-            cancelButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            cancelButton.heightAnchor.constraint(equalToConstant: 40)
-        ])
-    }
-    
-    @objc func dismissDatePickerPopup(_ gesture: UITapGestureRecognizer) {
-        // Remove the background view when tapping outside
-        if let backgroundView = gesture.view {
-            backgroundView.removeFromSuperview()
-        }
-    }
-    
-    @objc func datePickerDonePressed(_ sender: UIButton) {
-        if let datePicker = currentDatePicker, let textField = currentTextField {
-            // Format the selected date
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd" // Adjust the format as needed
-            let selectedDate = formatter.string(from: datePicker.date)
-            
-            // Update the text field with the selected date
-            textField.text = selectedDate
-            
-            // Print the selected date to the console
-           // print("Picked Date: \(selectedDate)")
-            
-            // Remove the background view to close the popup
-            if let backgroundView = sender.superview?.superview {
-                backgroundView.removeFromSuperview()
-            }
-        }
-    }
-    
-    @objc func datePickerCancelPressed(_ sender: UIButton) {
-        if let backgroundView = sender.superview?.superview {
-            backgroundView.removeFromSuperview()
-        }
-    }
-    
-    //time picker
-    func showTimePickerPopup(for textField: UITextField) {
-        // Store the text field reference
-        currentTextField2 = textField
-        
-        // Create a background view
-        let backgroundView = UIView(frame: UIScreen.main.bounds)
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        
-        // Add a tap gesture recognizer to dismiss the popup
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissTimePickerPopup(_:)))
-        backgroundView.addGestureRecognizer(tapGesture)
-        
-        // Create a container view for the time picker
-        let containerView = UIView()
-        containerView.backgroundColor = .white
-        containerView.layer.cornerRadius = 10
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Create the UIDatePicker for time selection
-        let timePicker = UIDatePicker()
-        timePicker.datePickerMode = .time
-        timePicker.preferredDatePickerStyle = .wheels
-        timePicker.translatesAutoresizingMaskIntoConstraints = false
-        currentTimePicker = timePicker // Assign the current time picker
-        
-        // Create a "Done" button
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle("Done", for: .normal)
-        doneButton.addTarget(self, action: #selector(timePickerDonePressed(_:)), for: .touchUpInside)
-        doneButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Create a "Cancel" button
-        let cancelButton = UIButton(type: .system)
-        cancelButton.setTitle("Cancel", for: .normal)
-        cancelButton.addTarget(self, action: #selector(timePickerCancelPressed(_:)), for: .touchUpInside)
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Add subviews to the container view
-        containerView.addSubview(timePicker)
-        containerView.addSubview(doneButton)
-        containerView.addSubview(cancelButton)
-        
-        // Add the container view to the background view
-        backgroundView.addSubview(containerView)
-        
-        // Add the background view to the main window
-        if let window = UIApplication.shared.windows.first {
-            window.addSubview(backgroundView)
-        }
-        
-        // Set constraints for the container view
-        NSLayoutConstraint.activate([
-            containerView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
-            containerView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
-            containerView.widthAnchor.constraint(equalToConstant: 300),
-            containerView.heightAnchor.constraint(equalToConstant: 300),
-            
-            timePicker.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            timePicker.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            timePicker.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
-            
-            doneButton.topAnchor.constraint(equalTo: timePicker.bottomAnchor, constant: 10),
-            doneButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            doneButton.heightAnchor.constraint(equalToConstant: 40),
-            
-            cancelButton.topAnchor.constraint(equalTo: timePicker.bottomAnchor, constant: 10),
-            cancelButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            cancelButton.heightAnchor.constraint(equalToConstant: 40)
-        ])
-    }
-    
-    @objc func dismissTimePickerPopup(_ gesture: UITapGestureRecognizer) {
-        // Remove the background view when tapping outside
-        if let backgroundView = gesture.view {
-            backgroundView.removeFromSuperview()
-        }
-    }
-    
-    @objc func timePickerDonePressed(_ sender: UIButton) {
-        if let timePicker = currentTimePicker, let textField = currentTextField2 {
-            // Format the selected time
-            let formatter = DateFormatter()
-            formatter.dateFormat = "hh:mm a" // Adjust the format as needed
-            let selectedTime = formatter.string(from: timePicker.date)
-            
-            // Update the text field with the selected time
-            textField.text = selectedTime
-            
-            // Print the selected time to the console
-            //print("Picked Time: \(selectedTime)")
-            
-            // Remove the background view to close the popup
-            if let backgroundView = sender.superview?.superview {
-                backgroundView.removeFromSuperview()
-            }
-        }
-    }
-    
-    @objc func timePickerCancelPressed(_ sender: UIButton) {
-        if let backgroundView = sender.superview?.superview {
-            backgroundView.removeFromSuperview()
-        }
-    }
-    
-    // Function to display the reminder list popup
-    func showReminderPopup(reminderList: [String]) {
-        let alert = UIAlertController(title: "Reminder List", message: nil, preferredStyle: .actionSheet)
-        
-        // Add each reminder as an action
-        for reminder in reminderList {
-            let action = UIAlertAction(title: reminder, style: .default) { [weak self] _ in
-                self?.selectedReminder = reminder
-                self?.reminderBTn.titleLabel?.text = self?.selectedReminder
-                print("Selected reminder: \(reminder)")
-            }
-            alert.addAction(action)
-        }
-        
-        // Add a cancel button
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
-        // Present the alert
-        if let viewController = self.getViewController() {
-            viewController.present(alert, animated: true, completion: nil)
-        }
-    }
-    
-    // Helper method to get the view controller
-    private func getViewController() -> UIViewController? {
-        var nextResponder: UIResponder? = self
-        while let responder = nextResponder {
-            if let viewController = responder as? UIViewController {
-                return viewController
-            }
-            nextResponder = responder.next
-        }
-        return nil
-    }
-    
-    func fetchReminderList() {
-        let urlString = APIManager.shared.baseURL + "gruppie/reminder/get"
-        
-        // Ensure the URL is valid
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL")
-            return
-        }
-        
-        // Create a URL request
-        let request = URLRequest(url: url)
-        
-        // Fetch data using URLSession
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error {
-                print("Error fetching reminder list: \(error)")
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received")
-                return
-            }
-            
-            do {
-                // Parse JSON
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let data = json["data"] as? [String: Any],
-                   let reminderList = data["reminderList"] as? [String] {
-                    
-                    // Present the popup on the main thread
-                    DispatchQueue.main.async {
-                        self?.showReminderPopup(reminderList: reminderList)
-                    }
-                } else {
-                    print("Invalid response format")
-                }
-            } catch {
-                print("Error parsing JSON: \(error)")
-            }
-        }.resume()
-    }
-    
     @IBAction func addButton(_ sender: Any) {
-        // Ensure all fields have values
         guard let eventTitle = title.text, !eventTitle.isEmpty,
               let eventStartDate = startDate.text, !eventStartDate.isEmpty,
               let eventEndDate = endDate.text, !eventEndDate.isEmpty,
@@ -352,49 +64,224 @@ class AddEvent: UIView {
               let eventEndTime = endTime.text, !eventEndTime.isEmpty,
               let eventVenue = venue.text, !eventVenue.isEmpty else {
             showAlert(title: "Missing Information", message: "Please fill all the fields.")
-
             return
         }
-
+        
         let eventData: [String: Any] = [
-
             "title": eventTitle,
             "startDate": eventStartDate,
             "endDate": eventEndDate,
             "startTime": eventStartTime,
             "endTime": eventEndTime,
-            "venue": eventVenue,
-            //"reminder": selectedReminder ?? ""
+            "venue": eventVenue
         ]
+        
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: eventData, options: .prettyPrinted)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("Request Body1: \(jsonString)")
                 delegate?.didAddEvent(eventData: jsonString)
                 delegate?.callAddEvent()
             }
         } catch {
             print("Error converting eventData to JSON string: \(error.localizedDescription)")
         }
-
+        
         showAlert(title: "Success", message: "Event added successfully.")
-        // Remove the view after adding the event
         self.removeFromSuperview()
     }
-    // Function to show an alert message
-    func showAlert(title: String, message: String) {
-        if let viewController = getViewController() {
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            viewController.present(alert, animated: true, completion: nil)
-        }
-        // Get the current date
-        let currentDate = Date()
+    
+    // MARK: - Date Picker
+    
+    func showDatePickerPopup(for textField: UITextField) {
+        currentTextField = textField
         
-        // Use Calendar to get the current month and year
-        let calendar = Calendar.current
-        let currentMonth = calendar.component(.month, from: currentDate)
-        let currentYear = calendar.component(.year, from: currentDate)
-      
+        let backgroundView = UIView(frame: UIScreen.main.bounds)
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissDatePickerPopup(_:)))
+        backgroundView.addGestureRecognizer(tapGesture)
+        
+        let containerView = createPopupContainer()
+        
+        let datePicker = UIDatePicker()
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .wheels
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        currentDatePicker = datePicker
+        
+        addPickerAndButtons(to: containerView, picker: datePicker, doneAction: #selector(datePickerDonePressed(_:)), cancelAction: #selector(datePickerCancelPressed(_:)))
+        backgroundView.addSubview(containerView)
+        
+        if let window = UIApplication.shared.windows.first {
+            window.addSubview(backgroundView)
+        }
+        
+        setPopupConstraints(containerView, parent: backgroundView, picker: datePicker)
+    }
+    
+    @objc func dismissDatePickerPopup(_ gesture: UITapGestureRecognizer) {
+        gesture.view?.removeFromSuperview()
+    }
+    
+    @objc func datePickerDonePressed(_ sender: UIButton) {
+        if let picker = currentDatePicker, let textField = currentTextField {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            textField.text = formatter.string(from: picker.date)
+            sender.superview?.superview?.removeFromSuperview()
+        }
+    }
+    
+    @objc func datePickerCancelPressed(_ sender: UIButton) {
+        sender.superview?.superview?.removeFromSuperview()
+    }
+    
+    // MARK: - Time Picker
+    
+    func showTimePickerPopup(for textField: UITextField) {
+        currentTextField2 = textField
+        
+        let backgroundView = UIView(frame: UIScreen.main.bounds)
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissTimePickerPopup(_:)))
+        backgroundView.addGestureRecognizer(tapGesture)
+        
+        let containerView = createPopupContainer()
+        
+        let timePicker = UIDatePicker()
+        timePicker.datePickerMode = .time
+        timePicker.preferredDatePickerStyle = .wheels
+        timePicker.translatesAutoresizingMaskIntoConstraints = false
+        currentTimePicker = timePicker
+        
+        addPickerAndButtons(to: containerView, picker: timePicker, doneAction: #selector(timePickerDonePressed(_:)), cancelAction: #selector(timePickerCancelPressed(_:)))
+        backgroundView.addSubview(containerView)
+        
+        if let window = UIApplication.shared.windows.first {
+            window.addSubview(backgroundView)
+        }
+        
+        setPopupConstraints(containerView, parent: backgroundView, picker: timePicker)
+    }
+    
+    @objc func dismissTimePickerPopup(_ gesture: UITapGestureRecognizer) {
+        gesture.view?.removeFromSuperview()
+    }
+    
+    @objc func timePickerDonePressed(_ sender: UIButton) {
+        if let picker = currentTimePicker, let textField = currentTextField2 {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "hh:mm a"
+            textField.text = formatter.string(from: picker.date)
+            sender.superview?.superview?.removeFromSuperview()
+        }
+    }
+    
+    @objc func timePickerCancelPressed(_ sender: UIButton) {
+        sender.superview?.superview?.removeFromSuperview()
+    }
+    
+    // MARK: - Reminder
+    
+    func fetchReminderList() {
+        let urlString = APIManager.shared.baseURL + "gruppie/reminder/get"
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            if let error = error {
+                print("Reminder Error: \(error)")
+                return
+            }
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let data = json["data"] as? [String: Any],
+                  let list = data["reminderList"] as? [String] else {
+                print("Invalid JSON")
+                return
+            }
+            DispatchQueue.main.async {
+                self?.showReminderPopup(reminderList: list)
+            }
+        }.resume()
+    }
+    
+    func showReminderPopup(reminderList: [String]) {
+        let alert = UIAlertController(title: "Reminder List", message: nil, preferredStyle: .actionSheet)
+        reminderList.forEach { reminder in
+            let action = UIAlertAction(title: reminder, style: .default) { [weak self] _ in
+                self?.selectedReminder = reminder
+                self?.reminderBTn.setTitle(reminder, for: .normal)
+            }
+            alert.addAction(action)
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        getViewController()?.present(alert, animated: true)
+    }
+    
+    // MARK: - Helpers
+    
+    func createPopupContainer() -> UIView {
+        let container = UIView()
+        container.backgroundColor = .white
+        container.layer.cornerRadius = 10
+        container.translatesAutoresizingMaskIntoConstraints = false
+        return container
+    }
+    
+    func addPickerAndButtons(to container: UIView, picker: UIDatePicker, doneAction: Selector, cancelAction: Selector) {
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle("Done", for: .normal)
+        doneButton.addTarget(self, action: doneAction, for: .touchUpInside)
+        doneButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        let cancelButton = UIButton(type: .system)
+        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.addTarget(self, action: cancelAction, for: .touchUpInside)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        container.addSubview(picker)
+        container.addSubview(doneButton)
+        container.addSubview(cancelButton)
+        
+        NSLayoutConstraint.activate([
+            picker.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            picker.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            picker.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            
+            doneButton.topAnchor.constraint(equalTo: picker.bottomAnchor, constant: 10),
+            doneButton.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            doneButton.heightAnchor.constraint(equalToConstant: 40),
+            
+            cancelButton.topAnchor.constraint(equalTo: picker.bottomAnchor, constant: 10),
+            cancelButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            cancelButton.heightAnchor.constraint(equalToConstant: 40)
+        ])
+    }
+    
+    func setPopupConstraints(_ container: UIView, parent: UIView, picker: UIDatePicker) {
+        NSLayoutConstraint.activate([
+            container.centerXAnchor.constraint(equalTo: parent.centerXAnchor),
+            container.centerYAnchor.constraint(equalTo: parent.centerYAnchor),
+            container.widthAnchor.constraint(equalTo: parent.widthAnchor, multiplier: 0.85),
+            container.heightAnchor.constraint(equalToConstant: 300)
+        ])
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        getViewController()?.present(alert, animated: true)
+    }
+    
+    func getViewController() -> UIViewController? {
+        var nextResponder: UIResponder? = self
+        while let responder = nextResponder {
+            if let vc = responder as? UIViewController {
+                return vc
+            }
+            nextResponder = responder.next
+        }
+        return nil
     }
 }
+

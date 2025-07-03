@@ -3,7 +3,7 @@ import UIKit
 
 protocol AllSubjectDetailTableViewCellDelegate: AnyObject {
     func didTapStaffSubject(for subjectDetail: SubjectDetail)
-    func didTapStudentSubject(for subjectDetail: SubjectDetail) // ✅ New method
+    func didTapStudentSubject(for subjectDetail: SubjectDetail)
 }
 
 class AllSubjectDetailTableViewCell: UITableViewCell {
@@ -17,17 +17,16 @@ class AllSubjectDetailTableViewCell: UITableViewCell {
     private var subjectDetail: SubjectDetail?
     
     
-    // Updated configure method to accept subject name
     func configure(with staffDetail: SubjectStaffMember, subjectDetail: SubjectDetail) {
-        self.subjectDetail = subjectDetail  // Store the subjectDetail for later use
-        subject.text = subjectDetail.subjectName    // Set subject name in label
-        staff.text = staffDetail.staffName  // Set staff name in label
+        self.subjectDetail = subjectDetail
+        subject.text = subjectDetail.subjectName
+        staff.text = staffDetail.staffName
     }
     @IBAction func staffSubjectButtonTapped(_ sender: UIButton) {
         print("🛑 StaffSubject button tapped")
         if let subjectDetail = subjectDetail {
             print("📌 Subject Name: \(subjectDetail.subjectName)")
-            delegate?.didTapStaffSubject(for: subjectDetail) // ✅ Ensure this is being called
+            delegate?.didTapStaffSubject(for: subjectDetail)
         } else {
             print("❌ subjectDetail is nil")
         }
@@ -36,7 +35,7 @@ class AllSubjectDetailTableViewCell: UITableViewCell {
         print("🛑 StudentSubject button tapped")
         if let subjectDetail = subjectDetail {
             print("📌 Subject Name: \(subjectDetail.subjectName)")
-            delegate?.didTapStudentSubject(for: subjectDetail) // ✅ Notify delegate
+            delegate?.didTapStudentSubject(for: subjectDetail) 
         } else {
             print("❌ subjectDetail is nil")
         }
