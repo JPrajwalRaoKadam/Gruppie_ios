@@ -24,7 +24,8 @@ class EditEvent: UIView, UITextFieldDelegate {
     var eventId: String = ""
     var currentRole: String = ""
 
-   weak var delegate: CallEditEventApi?
+    @IBOutlet weak var viewheight: NSLayoutConstraint!
+    weak var delegate: CallEditEventApi?
     
     // Local variables for text fields
     var editedTitle: String?
@@ -72,21 +73,18 @@ class EditEvent: UIView, UITextFieldDelegate {
         endTime.delegate = self
         venue.delegate = self
         edit.layer.cornerRadius = 10
-//        if delegate?.shouldHideEditButton() == true {
-//               editButtonOutlet?.isHidden = true
-//           } else {
-//               editButtonOutlet?.isHidden = false
-//           }
+        
         DispatchQueue.main.async { [weak self] in
-              if self?.delegate?.shouldHideEditButton() == true {
-                  self?.editButtonOutlet?.isHidden = true
-              } else {
-                  self?.editButtonOutlet?.isHidden = false
-              }
-          }
+            if self?.delegate?.shouldHideEditButton() == true {
+                self?.editButtonOutlet?.isHidden = true
+            } else {
+                self?.editButtonOutlet?.isHidden = false
+            }
+        }
+        
+        // Remove viewheight constraint manipulation
         print("Delegate set: \(delegate != nil)")
         print("Should hide edit button: \(delegate?.shouldHideEditButton() ?? false)")
-
     }
     
     @IBAction func addStartDate(_ sender: Any) {
@@ -138,8 +136,15 @@ class EditEvent: UIView, UITextFieldDelegate {
     @IBAction func editButton(_ sender: Any) {
         createEditedEvent()
         delegate?.triggerEditEventApi()
-
-        self.removeFromSuperview()
+        
+        // Find and remove the background view
+        if let superview = self.superview, superview.tag == 1002 {
+            UIView.animate(withDuration: 0.2, animations: {
+                superview.alpha = 0
+            }) { _ in
+                superview.removeFromSuperview()
+            }
+        }
     }
 
     // Helper method to get the view controller

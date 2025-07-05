@@ -204,65 +204,49 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
             return subjects.count
         }
     }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
+            fatalError("Cell could not be dequeued")
+        }
+        
         if currentRole == "admin" {
-            
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
-                fatalError("Cell could not be dequeued")
-            }
-            
             let attendance = attendanceData[indexPath.row]
-            cell.classLabel.text = attendance.name
-            print("Class Name: \(attendance.name)")
+            cell.configure(with: attendance)
             
-            // Check if the image URL is missing, empty, or contains "image_url_or_path"
+            // Reset image and fallback
+            cell.img.image = nil
+            cell.fallbackLabel.isHidden = false
+            cell.showFallbackImage(for: attendance.name)
+            
+            // Load image if available
             if let imageUrlString = attendance.image,
                !imageUrlString.isEmpty,
                imageUrlString != "image_url_or_path",
                let imageUrl = URL(string: imageUrlString) {
                 
-                // Load image asynchronously
-                URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+                URLSession.shared.dataTask(with: imageUrl) { data, _, _ in
                     if let data = data, let image = UIImage(data: data) {
                         DispatchQueue.main.async {
-                            cell.img.image = image
-                            cell.fallbackLabel.isHidden = true // Hide fallback label when image is available
-                        }
-                    } else {
-                        // Show fallback if the image fails to load
-                        DispatchQueue.main.async {
-                            cell.showFallbackImage(for: attendance.name)
-                            cell.fallbackLabel.isHidden = false
+                            // Only update if cell is still visible for this index path
+                            if tableView.indexPath(for: cell) == indexPath {
+                                cell.img.image = image
+                                cell.fallbackLabel.isHidden = true
+                            }
                         }
                     }
                 }.resume()
-            } else {
-                // Show fallback when image is missing or invalid
-                DispatchQueue.main.async {
-                    cell.img.image = nil // Ensure no old image is displayed
-                    cell.showFallbackImage(for: attendance.name)
-                    cell.fallbackLabel.isHidden = false
-                    let attendance = self.attendanceData[indexPath.row]
-                    cell.classLabel.text = attendance.name
-                    cell.configure(with: attendance)
-                    
-                }
             }
-            
-            return cell
         } else {
-            
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell", for: indexPath) as? AttendanceTableViewCell else {
-                fatalError("Cell could not be dequeued")
-            }
-            let subject = subjects[indexPath.row] as! SubjectData
-            cell.textLabel?.text = subject.name // Replace with your custom logic
-            cell.periodLabel.isHidden = false
+            let subject = subjects[indexPath.row]
             cell.classLabel.text = subject.name
+            cell.periodLabel.isHidden = false
             cell.showFallbackImage(for: subject.name)
-            return cell
         }
+        
+        return cell
     }
+
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if currentRole == "teacher" || currentRole == "parent" {

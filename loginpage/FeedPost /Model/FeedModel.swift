@@ -40,6 +40,7 @@ struct Post: Codable {
     let canEdit: Bool
     let video: String?
     let thumbnail: String?
+    let thumbnailImage: [String]?
 
     // Coding keys to handle JSON keys that don't follow Swift naming conventions
     enum CodingKeys: String, CodingKey {
@@ -66,6 +67,7 @@ struct Post: Codable {
         case canEdit
         case video
         case thumbnail
+        case thumbnailImage
     }
 }
 

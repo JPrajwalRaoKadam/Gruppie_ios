@@ -34,6 +34,14 @@ class FeedBackViewController: UIViewController {
         print("feedback ID: \(self.feedbackId)")
         print("----------------------------------------------------")
 
+        // Hide or show addButton based on role
+        if currentRole?.lowercased() == "parent" {
+            addButton.isHidden = true
+        } else if currentRole?.lowercased() == "admin" {
+            addButton.isHidden = false
+        } else {
+            addButton.isHidden = true  // Optional: hide by default for unhandled roles
+        }
     }
 
     func fetchFeedbackData() {
@@ -69,12 +77,12 @@ class FeedBackViewController: UIViewController {
                 let feedbackResponse = try decoder.decode(FeedBackResponse.self, from: data)
 
                 print("Decoded API Response:", feedbackResponse)
-                
-                self.feedbackData = feedbackResponse.data
+
+                self.feedbackData = feedbackResponse.data ?? []
                 print("Stored feedbackData:", self.feedbackData)
 
-                
-                self.feedbackQuestions = feedbackResponse.data.map { $0.questionsArray ?? [] }
+                // Fixed line
+                self.feedbackQuestions = (feedbackResponse.data ?? []).map { $0.questionsArray ?? [] }
                 print("Extracted feedbackQuestions:", self.feedbackQuestions)
 
                 DispatchQueue.main.async {
@@ -83,6 +91,7 @@ class FeedBackViewController: UIViewController {
             } catch {
                 print("Error decoding JSON:", error.localizedDescription)
             }
+
         }
         task.resume()
     }
@@ -97,8 +106,9 @@ extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FeedBackCell", for: indexPath) as! FeedBackTableViewCell
         let feedback = feedbackData[indexPath.row]
-        
-        cell.name.text = feedback.title ?? "No Title"
+
+        let imageURL: String? = nil // If you have image URL in feedback model, use that here
+        cell.configure(with: feedback.title, imageURL: imageURL)
 
         if let options = feedback.options {
             print("Options for '\(feedback.title ?? "No Title")':")

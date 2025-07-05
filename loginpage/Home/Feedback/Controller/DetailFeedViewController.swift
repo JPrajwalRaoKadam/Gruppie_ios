@@ -137,7 +137,7 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
 
             do {
                 let decodedResponse = try JSONDecoder().decode(FeedClass.self, from: data)
-                self.classDataList = decodedResponse.data // Correctly mapping response
+                self.classDataList = decodedResponse.data ?? [] // Correctly mapping response
                 
                 DispatchQueue.main.async {
                     self.TableView.reloadData()

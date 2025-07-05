@@ -11,7 +11,6 @@ class AddEvent: UIView {
     
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var contentView: UIView!
-    
     @IBOutlet weak var title: UITextField!
     @IBOutlet weak var startDate: UITextField!
     @IBOutlet weak var endDate: UITextField!
@@ -30,6 +29,7 @@ class AddEvent: UIView {
     override func awakeFromNib() {
         super.awakeFromNib()
         submit.layer.cornerRadius = 10
+        //setupFixedSizeConstraints()
     }
     
     // MARK: - Date & Time Actions
@@ -87,9 +87,16 @@ class AddEvent: UIView {
         }
         
         showAlert(title: "Success", message: "Event added successfully.")
-        self.removeFromSuperview()
+        
+        // Find and remove the background view
+        if let superview = self.superview, superview.tag == 1001 {
+            UIView.animate(withDuration: 0.2, animations: {
+                superview.alpha = 0
+            }) { _ in
+                superview.removeFromSuperview()
+            }
+        }
     }
-    
     // MARK: - Date Picker
     
     func showDatePickerPopup(for textField: UITextField) {
@@ -159,7 +166,7 @@ class AddEvent: UIView {
         if let window = UIApplication.shared.windows.first {
             window.addSubview(backgroundView)
         }
-        
+            
         setPopupConstraints(containerView, parent: backgroundView, picker: timePicker)
     }
     

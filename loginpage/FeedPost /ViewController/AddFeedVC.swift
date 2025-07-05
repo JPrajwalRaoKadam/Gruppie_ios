@@ -126,8 +126,8 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                         
                         // Construct a new Post object from postRequest
                         let newPost = Post(
-                            updatedAt: Date().iso8601String, // Generate current timestamp
-                            type: postRequest.selectedArray.first?.type ?? "", // Adjust according to API response
+                            updatedAt: Date().iso8601String,
+                            type: postRequest.selectedArray.first?.type ?? "",
                             title: postRequest.title,
                             text: postRequest.text,
                             teamName: postRequest.selectedArray.first?.name,
@@ -136,19 +136,20 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                             likes: 0,
                             isLiked: false,
                             isFavourited: false,
-                            id: UUID().uuidString, // Temporary ID until real one is fetched
-                            groupId: self.groupID ?? "", // Replace with actual group ID
+                            id: UUID().uuidString,
+                            groupId: self.groupID ?? "",
                             fileType: postRequest.fileType,
                             fileName: postRequest.fileName,
                             createdByImage: nil,
-                            createdById: "CURRENT_USER_ID", // Replace with actual user ID
-                            createdBy: "CURRENT_USER_NAME", // Replace with actual user name
+                            createdById: "CURRENT_USER_ID",
+                            createdBy: "CURRENT_USER_NAME",
                             createdAt: Date().iso8601String,
                             commentsEnabled: true,
                             comments: 0,
                             canEdit: true,
                             video: postRequest.video,
-                            thumbnail: postRequest.thumbnailImage.first
+                            thumbnail: postRequest.thumbnailImage.first,
+                            thumbnailImage: postRequest.thumbnailImage.isEmpty ? nil : postRequest.thumbnailImage // Fix here
                         )
                         
                         // Append new post to local response data

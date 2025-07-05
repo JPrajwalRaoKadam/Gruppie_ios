@@ -198,10 +198,29 @@ class FeedPostTableViewCell: UITableViewCell {
         isPlayingAudio.toggle()
     }
     
+    private func printDecodedURL(_ base64String: String) {
+        guard let decoded = decodeBase64String(base64String) else {
+            print("Failed to decode: \(base64String)")
+            return
+        }
+        print("Decoded URL: \(decoded)")
+    }
+
+    private func validateURL(_ urlString: String) -> Bool {
+        guard let url = URL(string: urlString),
+              UIApplication.shared.canOpenURL(url) else {
+            return false
+        }
+        return true
+    }
+    
     func configure(with post: Post) {
+        self.post = post
         self.grpId = post.groupId
         self.postId = post.id
-        loadFile(for: post)
+        self.videoPlayerURL = post.fileName?.first
+        
+        // Set other UI elements
         adminLabel.text = post.createdBy
         noticeLabel.text = post.title
         firstDescriptionLabel.text = post.teamName
@@ -210,24 +229,25 @@ class FeedPostTableViewCell: UITableViewCell {
         noOfComments.text = "\(post.comments)"
         noOfLikes.text = "\(post.likes)"
         timingLabel.text = convertToFormattedDate(dateString: post.updatedAt)
-        grpId = post.groupId
-        postId = post.id
-        // Set adminImageView to show the first letter of the admin's name
-        if post.isLiked {
-            likeButton.setImage(UIImage(systemName: "hand.thumbsup.fill"), for: .normal)
-        } else {
-            likeButton.setImage(UIImage(systemName: "hand.thumbsup"), for: .normal)
-        }
-        if post.createdByImage == "" {
-            updateImageViewWithFirstLetter(from: adminLabel, in: adminImageView)
-        } else {
-            loadImageForAdminImage(from: post.createdByImage ?? "") { image in
-                self.adminImageView.image = image
+        
+        // Set like button state
+        likeButton.setImage(
+            UIImage(systemName: post.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup"),
+            for: .normal
+        )
+        
+        // Load admin image
+        if let adminImageUrl = post.createdByImage, !adminImageUrl.isEmpty {
+            loadImageForAdminImage(from: adminImageUrl) { [weak self] image in
+                self?.adminImageView.image = image
             }
-            // Load image, video, or PDF based on file type
+        } else {
+            updateImageViewWithFirstLetter(from: adminLabel, in: adminImageView)
         }
+        
+        // Load main content
+        loadFile(for: post)
     }
-    
     func updateLikeCount(_ count: Int) {
         noOfLikes.text = "\(count)"
     }
@@ -290,55 +310,63 @@ class FeedPostTableViewCell: UITableViewCell {
     
     //     Function to load the file based on its type
     func loadFile(for post: Post) {
-        guard let fileType = post.fileType else {
+        guard let fileType = post.fileType?.lowercased() else {
             mainImageView.image = nil
             return
         }
         
-        let fileName = post.fileName?.first
+        let fileName = post.fileName?.first ?? ""
+        
+        // Debug print
+        print("Loading file of type: \(fileType), name: \(fileName)")
+        
+        // Reset UI elements
+        downloadButton.isHidden = false
+        playPauseButton.isHidden = true
+        audioView.isHidden = true
         
         switch fileType {
         case "image":
-            downloadButton.isHidden = false
-            playPauseButton.isHidden = true
-            loadImage(from: fileName ?? "new_banner")
+            loadImage(from: fileName) { [weak self] image in
+                DispatchQueue.main.async {
+                    self?.mainImageView.image = image
+                    self?.mainImageView.contentMode = .scaleAspectFill
+                }
+            }
             
         case "video":
-            playPauseButton.isHidden = true
-            downloadButton.isHidden = false
-            setVideoThumbnail(from: fileName ?? "new_banner") { thumbnailImage in
+            playPauseButton.isHidden = false
+            setVideoThumbnail(from: fileName) { [weak self] thumbnailImage in
                 DispatchQueue.main.async {
-                    if let image = thumbnailImage {
-                        self.mainImageView.image = image
-                    } else {
-                        print("Failed to fetch thumbnail")
-                    }
+                    self?.mainImageView.image = thumbnailImage
+                    self?.mainImageView.contentMode = .scaleAspectFill
                 }
             }
+            
         case "youtube":
-            downloadButton.isHidden = false
-            playPauseButton.isHidden = true
-            setVideoThumbnail(from: fileName ?? "new_banner") { thumbnailImage in
-                DispatchQueue.main.async {
-                    if let image = thumbnailImage {
-                        self.mainImageView.image = image
-                    } else {
-                        print("Failed to fetch thumbnail")
+            playPauseButton.isHidden = false
+            if let youtubeURL = post.video {
+                setYouTubeThumbnail(from: youtubeURL) { [weak self] thumbnailImage in
+                    DispatchQueue.main.async {
+                        self?.mainImageView.image = thumbnailImage
+                        self?.mainImageView.contentMode = .scaleAspectFill
                     }
                 }
+            } else {
+                mainImageView.image = UIImage(named: "youtube_placeholder")
             }
+            
         case "pdf":
             loadPDFIcon()
-            downloadButton.isHidden = false
-            playPauseButton.isHidden = true
+            
         case "audio":
-//            audioView.isHidden = false
+            audioView.isHidden = false
+            downloadButton.isHidden = true
             setupAudioPlayer()
             setupSlider()
-            downloadButton.isHidden = true
-            playPauseButton.isHidden = true
+            
         default:
-            mainImageView.image = nil
+            mainImageView.image = UIImage(named: "file_placeholder")
         }
     }
     
@@ -365,78 +393,253 @@ class FeedPostTableViewCell: UITableViewCell {
     
     
     // Function to load an image from URL
-    func loadImage(from urlString: String) {
-        guard let decodedURLString = decodeBase64String(urlString),
-              let url = URL(string: decodedURLString) else {
-            DispatchQueue.main.async {
-                self.mainImageView.image = nil
-            }
+    func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+        
+        printDecodedURL(urlString) // 👈 DEBUG: Print the decoded URL
+          
+          guard let decodedURLString = decodeBase64String(urlString) else {
+              completion(UIImage(named: "image_placeholder"))
+              return
+          }
+          
+          // Add this validation check
+          if !validateURL(decodedURLString) { // 👈 DEBUG: Validate URL
+              print("Invalid URL: \(decodedURLString)")
+          }
+        
+        guard let decodedURLString = decodeBase64String(urlString) else {
+            completion(UIImage(named: "image_placeholder"))
             return
         }
         
-        let urlRequest = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+        print("Decoded image URL: \(decodedURLString)")
         
-        let task = URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+        guard let url = URL(string: decodedURLString) else {
+            print("Invalid image URL")
+            completion(UIImage(named: "image_placeholder"))
+            return
+        }
+        
+        // Use URLSession with a timeout
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 30
+        let session = URLSession(configuration: configuration)
+        
+        session.dataTask(with: url) { data, response, error in
             if let error = error {
-                print("Failed to load image: \(error.localizedDescription)")
+                print("Error loading image: \(error.localizedDescription)")
                 DispatchQueue.main.async {
-                    self.mainImageView.image = nil
+                    completion(UIImage(named: "image_placeholder"))
                 }
                 return
             }
             
-            if let data = data, let image = UIImage(data: data) {
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode),
+                  let data = data else {
+                print("Invalid response or no data")
                 DispatchQueue.main.async {
-                    self.mainImageView.image = image
+                    completion(UIImage(named: "image_placeholder"))
+                }
+                return
+            }
+            
+            if let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    completion(image)
                 }
             } else {
+                print("Failed to create image from data")
                 DispatchQueue.main.async {
-                    self.mainImageView.image = nil
+                    completion(UIImage(named: "image_placeholder"))
                 }
             }
-        }
-        task.resume()
+        }.resume()
     }
     
+
     func setVideoThumbnail(from videoURLString: String, completion: @escaping (UIImage?) -> Void) {
-        // Check if it's a YouTube video
-        if let videoId = extractYouTubeVideoId(from: videoURLString) {
-            // Generate YouTube thumbnail URL
-            let thumbnailURLString = "https://img.youtube.com/vi/\(videoId)/0.jpg"
-            if let thumbnailURL = URL(string: thumbnailURLString) {
-                // Fetch the YouTube thumbnail image
-                fetchImage(from: thumbnailURL, completion: completion)
+        
+        printDecodedURL(videoURLString) // 👈 DEBUG: Print the decoded URL
+           
+           guard let decodedURLString = decodeBase64String(videoURLString) else {
+               completion(UIImage(named: "video_placeholder"))
+               return
+           }
+           
+           // Add this validation check
+           if !validateURL(decodedURLString) { // 👈 DEBUG: Validate URL
+               print("Invalid video URL: \(decodedURLString)")
+           }
+           
+        // First decode the base64 URL if needed
+        guard let decodedURLString = decodeBase64String(videoURLString) else {
+            completion(UIImage(named: "video_placeholder"))
+            return
+        }
+        
+        print("Decoded URL string: \(decodedURLString)")
+        
+        // Check if this is a file URL
+        if decodedURLString.hasPrefix("file://") {
+            // Handle local file URL
+            let filePath = String(decodedURLString.dropFirst("file://".count))
+            let fileURL = URL(fileURLWithPath: filePath)
+            
+            // Verify file exists
+            if FileManager.default.fileExists(atPath: filePath) {
+                generateThumbnailForLocalVideo(url: fileURL, completion: completion)
             } else {
-                print("Error: Invalid YouTube thumbnail URL")
-                completion(nil)
+                print("File does not exist at path: \(filePath)")
+                completion(UIImage(named: "video_placeholder"))
             }
-        } else if let videoURL = URL(string: videoURLString) {
-            // Generate thumbnail for local/remote video
-            generateThumbnail(from: videoURL, completion: completion)
+        } else if let url = URL(string: decodedURLString) {
+            // Handle remote URL
+            if url.absoluteString.contains("youtube.com") || url.absoluteString.contains("youtu.be") {
+                setYouTubeThumbnail(from: decodedURLString, completion: completion)
+            } else {
+                generateThumbnailForRemoteVideo(url: url, completion: completion)
+            }
         } else {
-            print("Error: Invalid video URL")
-            completion(nil)
+            completion(UIImage(named: "video_placeholder"))
         }
     }
-    
-    private func extractYouTubeVideoId(from urlString: String) -> String? {
-        let pattern = "v=([a-zA-Z0-9_-]{11})" // YouTube video ID regex pattern
-        if let regex = try? NSRegularExpression(pattern: pattern),
-           let match = regex.firstMatch(in: urlString, range: NSRange(urlString.startIndex..., in: urlString)),
-           let range = Range(match.range(at: 1), in: urlString) {
-            return String(urlString[range])
+
+    private func generateThumbnailForLocalVideo(url: URL, completion: @escaping (UIImage?) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let asset = AVAsset(url: url)
+            let assetImageGenerator = AVAssetImageGenerator(asset: asset)
+            assetImageGenerator.appliesPreferredTrackTransform = true
+            
+            // Try multiple time points if first fails
+            let timePoints = [0.1, 1.0, 5.0] // seconds - start with 0.1s
+            
+            for time in timePoints {
+                do {
+                    let cmTime = CMTime(seconds: time, preferredTimescale: 600)
+                    let cgImage = try assetImageGenerator.copyCGImage(at: cmTime, actualTime: nil)
+                    let thumbnail = UIImage(cgImage: cgImage)
+                    DispatchQueue.main.async {
+                        completion(thumbnail)
+                    }
+                    return
+                } catch {
+                    print("Error generating thumbnail at \(time) seconds: \(error.localizedDescription)")
+                }
+            }
+            
+            DispatchQueue.main.async {
+                completion(UIImage(named: "video_placeholder"))
+            }
         }
+    }
+
+    private func generateThumbnailForRemoteVideo(url: URL, completion: @escaping (UIImage?) -> Void) {
+        // First download a small portion of the video to generate thumbnail
+        let tempFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
+        
+        let downloadTask = URLSession.shared.downloadTask(with: url) { tempLocation, response, error in
+            guard let tempLocation = tempLocation else {
+                DispatchQueue.main.async {
+                    completion(UIImage(named: "video_placeholder"))
+                }
+                return
+            }
+            
+            do {
+                try FileManager.default.moveItem(at: tempLocation, to: tempFileURL)
+                self.generateThumbnailForLocalVideo(url: tempFileURL) { image in
+                    try? FileManager.default.removeItem(at: tempFileURL)
+                    completion(image)
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    completion(UIImage(named: "video_placeholder"))
+                }
+            }
+        }
+        downloadTask.resume()
+    }
+    
+    func setYouTubeThumbnail(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+        guard let videoId = extractYouTubeVideoId(from: urlString) else {
+            completion(UIImage(named: "youtube_placeholder"))
+            return
+        }
+        
+        // Try different quality levels in order
+        let thumbnailURLs = [
+            URL(string: "https://img.youtube.com/vi/\(videoId)/maxresdefault.jpg"),
+            URL(string: "https://img.youtube.com/vi/\(videoId)/hqdefault.jpg"),
+            URL(string: "https://img.youtube.com/vi/\(videoId)/mqdefault.jpg"),
+            URL(string: "https://img.youtube.com/vi/\(videoId)/default.jpg")
+        ].compactMap { $0 }
+        
+        tryThumbnailURLs(thumbnailURLs, completion: completion)
+    }
+
+    private func extractYouTubeVideoId(from urlString: String) -> String? {
+        let patterns = [
+            #"youtu\.be\/([^\?]+)"#,                      // youtu.be/<id>
+            #"youtube\.com\/watch\?v=([^&]+)"#,            // youtube.com/watch?v=<id>
+            #"youtube\.com\/embed\/([^\/]+)"#,            // youtube.com/embed/<id>
+            #"youtube\.com\/v\/([^\/]+)"#                 // youtube.com/v/<id>
+        ]
+        
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern),
+               let match = regex.firstMatch(in: urlString, range: NSRange(urlString.startIndex..., in: urlString)),
+               let range = Range(match.range(at: 1), in: urlString) {
+                return String(urlString[range])
+            }
+        }
+        
         return nil
     }
+
+    private func tryThumbnailURLs(_ urls: [URL], index: Int = 0, completion: @escaping (UIImage?) -> Void) {
+        guard index < urls.count else {
+            completion(UIImage(named: "youtube_placeholder"))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: urls[index]) { data, _, error in
+            if let data = data, let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    completion(image)
+                }
+            } else {
+                self.tryThumbnailURLs(urls, index: index + 1, completion: completion)
+            }
+        }.resume()
+    }
+    
     
     private func fetchImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
-        URLSession.shared.dataTask(with: url) { data, _, error in
+        print("Fetching image from URL: \(url.absoluteString)")
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Error fetching image: \(error.localizedDescription)")
                 completion(nil)
-            } else if let data = data, let image = UIImage(data: data) {
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response")
+                completion(nil)
+                return
+            }
+            
+            print("Image fetch status code: \(httpResponse.statusCode)")
+            
+            if let data = data {
+                print("Received image data of size: \(data.count) bytes")
+                let image = UIImage(data: data)
                 completion(image)
             } else {
+                print("No image data received")
                 completion(nil)
             }
         }.resume()
@@ -468,18 +671,64 @@ class FeedPostTableViewCell: UITableViewCell {
     
     // Decode base64 encoded URL string
     func decodeBase64String(_ base64String: String) -> String? {
-        guard let decodedData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),
-              let decodedString = String(data: decodedData, encoding: .utf8) else {
+        guard !base64String.isEmpty else { return nil }
+        
+        // Check if it's already a URL (not base64 encoded)
+        if base64String.hasPrefix("http://") ||
+           base64String.hasPrefix("https://") ||
+           base64String.hasPrefix("file://") {
+            return base64String
+        }
+        
+        // Clean the string by removing newlines and whitespace
+        let cleanedString = base64String
+            .replacingOccurrences(of: "\n", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Try decoding as base64
+        guard let decodedData = Data(base64Encoded: cleanedString),
+              var decodedString = String(data: decodedData, encoding: .utf8) else {
             return nil
         }
+        
+        // Clean the decoded string as well
+        decodedString = decodedString
+            .replacingOccurrences(of: "\n", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Handle potential URL encoding issues
+        if decodedString.hasPrefix("file://") {
+            return decodedString
+        }
+        
+        // If it looks like a URL but isn't properly encoded
+        if decodedString.contains("http://") || decodedString.contains("https://") {
+            return decodedString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        }
+        
         return decodedString
     }
     
-    
     // Function to load PDF icon
     func loadPDFIcon() {
-        // Set an image or icon for PDF
-        mainImageView.image = UIImage(named: "defaultpdf")  // Ensure you have a PDF icon in your assets
+        // First try to load thumbnail if available
+        if let thumbnailImage = post?.thumbnailImage?.first,
+           let image = loadImageFromBase64(thumbnailImage) {
+            mainImageView.image = image
+            return
+        }
+        
+        // Fallback to default PDF icon
+        mainImageView.image = UIImage(named: "pdf_icon")
+        mainImageView.contentMode = .scaleAspectFit
+        mainImageView.backgroundColor = .lightGray
+    }
+
+    private func loadImageFromBase64(_ base64String: String) -> UIImage? {
+        guard let decodedData = Data(base64Encoded: base64String) else {
+            return nil
+        }
+        return UIImage(data: decodedData)
     }
     
     func setupAudioPlayer() {

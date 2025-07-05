@@ -1,9 +1,11 @@
 import Foundation
 
+// Top-level response model
 struct FeedBackResponse: Codable {
-    let data: [FeedBackItem]
+    let data: [FeedBackItem]?
 }
 
+// Feedback item model
 struct FeedBackItem: Codable {
     let feedbackId: String?
     let title: String?
@@ -21,40 +23,38 @@ struct FeedBackItem: Codable {
     let feedbackBy: String?
     let name: String?
     let createdAt: String?
-
     let questionsArray: [QuestionData]?
-
-    enum CodingKeys: String, CodingKey {
-        case feedbackId, title, startDate, lastDate, isActive, options, question
-        case noOfQuestions, noOfOptions, groupId, updatedAt, insertedAt
-        case feedbackTo, feedbackBy, name, createdAt, questionsArray
-    }
 }
 
+// Feedback option model (made all fields optional to prevent decoding errors)
 struct FeedbackOption: Codable {
-    var optionNo: String
-    var option: String
-    var marks: String
-    var answer: Bool
+    var optionNo: String?
+    var option: String?
+    var marks: String?
+    var answer: Bool?
 
     enum CodingKeys: String, CodingKey {
         case optionNo, option, marks, answer
     }
 }
 
+// Question data model (made properties optional)
 struct QuestionData: Codable {
     var questionNo: Int?
-    var question: String
+    var question: String?
     var marks: Int?
-    var options: [FeedbackOption]
-}
-struct OptionData: Codable {
-    let optionNo: String
-    let option: String
-    let marks: String
-    let answer: Bool
+    var options: [FeedbackOption]?
 }
 
+// Option data model (optional fields for safety, though not used in your JSON above)
+struct OptionData: Codable {
+    let optionNo: String?
+    let option: String?
+    let marks: String?
+    let answer: Bool?
+}
+
+// Feedback request model
 struct FeedBackRequest: Codable {
     let groupId: String
     let isActive: Bool
@@ -68,10 +68,12 @@ struct FeedBackRequest: Codable {
     let updatedAt: String
 }
 
+// FeedClass response model
 struct FeedClass: Codable {
-    let data: [FeedClassItem]
+    let data: [FeedClassItem]?
 }
 
+// FeedClass item model with defensive decoding
 struct FeedClassItem: Codable {
     let teamId: String
     let teacherName: String?
@@ -123,7 +125,6 @@ struct FeedClassItem: Codable {
         role = try container.decode(String.self, forKey: .role)
         phone = try container.decode(String.self, forKey: .phone)
 
-        // Handle numberOfTimeAttendance safely
         if let numberString = try? container.decode(String.self, forKey: .numberOfTimeAttendance) {
             numberOfTimeAttendance = numberString
         } else if let numberInt = try? container.decode(Int.self, forKey: .numberOfTimeAttendance) {

@@ -42,7 +42,9 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
             bottomLeftButton.isHidden = true
         }
         view.addSubview(activityIndicator)
-        
+        if currentRole == "teacher"{
+                    bottomLeftButton.isHidden = true
+                }
         // Setup Pull to Refresh
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)

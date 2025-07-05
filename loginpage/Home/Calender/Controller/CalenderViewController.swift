@@ -139,17 +139,21 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     }
 
 
-
+    @IBAction func addEventAction(_ sender: Any) {
+       
+            showAddEventView()
+    }
+    
     @IBAction func backButtonAction(_ sender: Any) {
             self.navigationController?.popViewController(animated: true)
         }
 
-    @IBAction func addEventAction(_ sender: UISegmentedControl) {
-        showAddEventView()
-    }
+//    @IBAction func addEventAction(_ sender: UISegmentedControl) {
+//        showAddEventView()
+//    }
 
     @IBAction func addHolidayAction(_ sender: UISegmentedControl) {
-        let storyboard = UIStoryboard(name: "calender", bundle: nil)  
+        let storyboard = UIStoryboard(name: "calender", bundle: nil)
            if let addHolidaysVC = storyboard.instantiateViewController(withIdentifier: "AddHolidaysViewController") as? AddHolidaysCallenderViewController {
                addHolidaysVC.groupId = self.groupId // Pass the groupId
                addHolidaysVC.currentRole = currentRole
@@ -310,37 +314,89 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
         print("received Event \(eventData)")
         self.eventData = eventData
     }
-    
     func showAddEventView() {
+        // Create background dimming view
         let backgroundView = UIView(frame: self.view.bounds)
         backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        backgroundView.tag = 1001 // For easy reference
+        backgroundView.alpha = 0 // Start transparent
         
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissEditEventView(_:)))
+        // Add tap to dismiss gesture
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissAddEventView(_:)))
         backgroundView.addGestureRecognizer(tapGesture)
         
-        // Attempt to load the nib
-        guard let addEventView = Bundle.main.loadNibNamed("AddEvent", owner: self, options: nil)?.first as? AddEvent else {
-            print("Failed to load AddEvent nib.")
+        // Load AddEvent view from nib
+        guard let addEventView = Bundle.main.loadNibNamed("AddEvent", owner: nil, options: nil)?.first as? AddEvent else {
+            print("Failed to load AddEvent nib")
             return
         }
         
-        // Set the size and center position for the EditEventView
-        let width: CGFloat = self.view.frame.width * 0.8 // 80% of screen width
-        let height: CGFloat = self.view.frame.height * 0.5 // 50% of screen height
-        addEventView.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        addEventView.center = backgroundView.center
-        // Customize the view (optional: rounded corners, shadow)
-        addEventView.layer.cornerRadius = 10
+        // Configure the view
+        addEventView.translatesAutoresizingMaskIntoConstraints = false
+        addEventView.layer.cornerRadius = 12
         addEventView.layer.masksToBounds = true
         addEventView.delegate = self
-
-        addEventView.reminderBTn.currentTitle ?? ""
-       //print("Group ID passed to AddEvent: \(addEventView.groupId)")
-        // Add the EditEventView to the background view
+        
+        // Add to background view
         backgroundView.addSubview(addEventView)
         
+        // Add to main view
         self.view.addSubview(backgroundView)
+        
+        // Set constraints for AddEvent view
+        NSLayoutConstraint.activate([
+            addEventView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
+            addEventView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
+            addEventView.widthAnchor.constraint(equalToConstant: 357),
+            addEventView.heightAnchor.constraint(equalToConstant: 449)
+        ])
+        
+        // Animate appearance
+        UIView.animate(withDuration: 0.3) {
+            backgroundView.alpha = 1
+        }
     }
+
+    @objc func dismissAddEventView(_ sender: UITapGestureRecognizer) {
+        if let backgroundView = sender.view {
+            UIView.animate(withDuration: 0.2, animations: {
+                backgroundView.alpha = 0
+            }) { _ in
+                backgroundView.removeFromSuperview()
+            }
+        }
+    }
+    
+//    func showAddEventView() {
+//        let backgroundView = UIView(frame: self.view.bounds)
+//        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+//
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissEditEventView(_:)))
+//        backgroundView.addGestureRecognizer(tapGesture)
+//
+//        // Attempt to load the nib
+//        guard let addEventView = Bundle.main.loadNibNamed("AddEvent", owner: self, options: nil)?.first as? AddEvent else {
+//            print("Failed to load AddEvent nib.")
+//            return
+//        }
+//
+//        // Set the size and center position for the EditEventView
+//        let width: CGFloat = self.view.frame.width * 0.8 // 80% of screen width
+//        let height: CGFloat = self.view.frame.height * 0.5 // 50% of screen height
+//        addEventView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+//        addEventView.center = backgroundView.center
+//        // Customize the view (optional: rounded corners, shadow)
+//        addEventView.layer.cornerRadius = 10
+//        addEventView.layer.masksToBounds = true
+//        addEventView.delegate = self
+//
+//        addEventView.reminderBTn.currentTitle ?? ""
+//       //print("Group ID passed to AddEvent: \(addEventView.groupId)")
+//        // Add the EditEventView to the background view
+//        backgroundView.addSubview(addEventView)
+//
+//        self.view.addSubview(backgroundView)
+//    }
     
     func addEventToServer(event: Event) {
        guard let token = TokenManager.shared.getToken() else {
@@ -457,63 +513,115 @@ func formatDate(_ dateString: String) -> String {
     }
 
 //pass data to updateEvent
+//    func showEditEventView(with event: Event) {
+//        // Create a semi-transparent background view
+//        let backgroundView = UIView()
+//        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+//        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+//        self.view.addSubview(backgroundView)
+//
+//        // Fill the entire screen
+//        NSLayoutConstraint.activate([
+//            backgroundView.topAnchor.constraint(equalTo: self.view.topAnchor),
+//            backgroundView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+//            backgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+//            backgroundView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+//        ])
+//
+//        // Add tap to dismiss gesture
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissEditEventView(_:)))
+//        backgroundView.addGestureRecognizer(tapGesture)
+//
+//        // Load EditEvent view
+//        if let editEventView = Bundle.main.loadNibNamed("EditEvent", owner: self, options: nil)?.first as? EditEvent {
+//            editEventView.translatesAutoresizingMaskIntoConstraints = false
+//            editEventView.layer.cornerRadius = 10
+//            editEventView.layer.masksToBounds = true
+//            editEventView.delegate = self
+//            editEventView.groupId = self.groupId ?? ""
+//            editEventView.currentRole = self.currentRole
+//            editEventView.event = event
+//            editEventView.reloadInputViews()
+//            self.selectedReminder = editEventView.reminderBTn.currentTitle ?? ""
+//
+//            backgroundView.addSubview(editEventView)
+//
+//            // Apply constraints — responsive layout
+//            NSLayoutConstraint.activate([
+//                editEventView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
+//                editEventView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
+//
+//                // Width: up to 500pt or 90% of screen (whichever is smaller)
+//                editEventView.widthAnchor.constraint(lessThanOrEqualToConstant: 500),
+//                editEventView.widthAnchor.constraint(equalTo: backgroundView.widthAnchor, multiplier: 0.9),
+//
+//                // Height: up to 400pt or 70% of screen (whichever is smaller)
+//                editEventView.heightAnchor.constraint(lessThanOrEqualToConstant: 400),
+//                editEventView.heightAnchor.constraint(equalTo: backgroundView.heightAnchor, multiplier: 0.7),
+//
+//                // Minimum height to prevent collapsing
+//                editEventView.heightAnchor.constraint(greaterThanOrEqualToConstant: 250)
+//            ])
+//        }
+//    }
     func showEditEventView(with event: Event) {
-        // Create a semi-transparent background view
-        let backgroundView = UIView()
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        // Create background dimming view
+        let backgroundView = UIView(frame: self.view.bounds)
         backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        self.view.addSubview(backgroundView)
-        
-        // Fill the entire screen
-        NSLayoutConstraint.activate([
-            backgroundView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-            backgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            backgroundView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
-        ])
+        backgroundView.tag = 1002 // Different tag from AddEvent
+        backgroundView.alpha = 0 // Start transparent
         
         // Add tap to dismiss gesture
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissEditEventView(_:)))
         backgroundView.addGestureRecognizer(tapGesture)
         
-        // Load EditEvent view
-        if let editEventView = Bundle.main.loadNibNamed("EditEvent", owner: self, options: nil)?.first as? EditEvent {
-            editEventView.translatesAutoresizingMaskIntoConstraints = false
-            editEventView.layer.cornerRadius = 10
-            editEventView.layer.masksToBounds = true
-            editEventView.delegate = self
-            editEventView.groupId = self.groupId ?? ""
-            editEventView.currentRole = self.currentRole
-            editEventView.event = event
-            editEventView.reloadInputViews()
-            self.selectedReminder = editEventView.reminderBTn.currentTitle ?? ""
-            
-            backgroundView.addSubview(editEventView)
-
-            // Apply constraints — responsive layout
-            NSLayoutConstraint.activate([
-                editEventView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
-                editEventView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
-
-                // Width: up to 500pt or 90% of screen (whichever is smaller)
-                editEventView.widthAnchor.constraint(lessThanOrEqualToConstant: 500),
-                editEventView.widthAnchor.constraint(equalTo: backgroundView.widthAnchor, multiplier: 0.9),
-
-                // Height: up to 400pt or 70% of screen (whichever is smaller)
-                editEventView.heightAnchor.constraint(lessThanOrEqualToConstant: 400),
-                editEventView.heightAnchor.constraint(equalTo: backgroundView.heightAnchor, multiplier: 0.7),
-
-                // Minimum height to prevent collapsing
-                editEventView.heightAnchor.constraint(greaterThanOrEqualToConstant: 250)
-            ])
+        // Load EditEvent view from nib
+        guard let editEventView = Bundle.main.loadNibNamed("EditEvent", owner: nil, options: nil)?.first as? EditEvent else {
+            print("Failed to load EditEvent nib")
+            return
+        }
+        
+        // Configure the view
+        editEventView.translatesAutoresizingMaskIntoConstraints = false
+        editEventView.layer.cornerRadius = 12
+        editEventView.layer.masksToBounds = true
+        editEventView.delegate = self
+        editEventView.groupId = self.groupId
+        editEventView.currentRole = self.currentRole
+        editEventView.event = event
+        self.selectedReminder = editEventView.reminderBTn.currentTitle ?? ""
+        
+        // Add to background view
+        backgroundView.addSubview(editEventView)
+        
+        // Add to main view
+        self.view.addSubview(backgroundView)
+        
+        // Set constraints for EditEvent view
+        NSLayoutConstraint.activate([
+            editEventView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
+            editEventView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
+            editEventView.widthAnchor.constraint(equalToConstant: 336),
+            editEventView.heightAnchor.constraint(equalToConstant: 444)
+        ])
+        
+        // Animate appearance
+        UIView.animate(withDuration: 0.3) {
+            backgroundView.alpha = 1
         }
     }
 
-
-    @objc private func dismissEditEventView(_ sender: UITapGestureRecognizer) {
-        // Remove the background view from the main view
-        sender.view?.removeFromSuperview()
+    @objc func dismissEditEventView(_ sender: UITapGestureRecognizer) {
+        if let backgroundView = sender.view {
+            UIView.animate(withDuration: 0.2, animations: {
+                backgroundView.alpha = 0
+            }) { _ in
+                backgroundView.removeFromSuperview()
+            }
+        }
     }
+
+ 
 
     func updateEditedEvent(editedEvent: Event?) {
             // Update your view controller's editedEvent property
@@ -654,4 +762,5 @@ func formatDate(_ dateString: String) -> String {
         }
     }
 }
+
 
