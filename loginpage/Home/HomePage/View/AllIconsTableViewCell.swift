@@ -16,6 +16,7 @@ class AllIconsTableViewCell: UITableViewCell {
     
     weak var delegate: AllIconsTableViewCellDelegate?
     var featureIcons: [FeatureIcon] = []
+    private var isProcessingSelection = false
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -84,6 +85,11 @@ extension AllIconsTableViewCell: UICollectionViewDelegate, UICollectionViewDataS
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard !isProcessingSelection else {
+               print("Tap ignored – already processing.")
+               return
+           }
+
         delegate?.didSelectIcon(featureIcons[indexPath.row])
     }
 

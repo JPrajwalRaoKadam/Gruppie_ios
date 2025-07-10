@@ -15,34 +15,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
         
-        if let windowScene = scene as? UIWindowScene {
-            let window = UIWindow(windowScene: windowScene)
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-
-            // Check if user is logged in
-            let isLoggedIn = UserDefaults.standard.bool(forKey: "isLoggedIn")
-            
-            if isLoggedIn {
-                // User is logged in — navigate to HomeVC directly
-                let homeVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as! GrpViewController
-                let navController = UINavigationController(rootViewController: homeVC)
-                navController.overrideUserInterfaceStyle = .light
-                window.rootViewController = navController
-            } else {
-                // User not logged in — show login screen
-                let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-                let navController = UINavigationController(rootViewController: loginVC)
-                navController.overrideUserInterfaceStyle = .light
-                window.rootViewController = navController
-            }
-
-            // Force Light Mode globally
-            window.overrideUserInterfaceStyle = .light
-            window.backgroundColor = .white // Ensures white background
-            self.window = window
-            window.makeKeyAndVisible()
+        guard let windowScene = scene as? UIWindowScene else { return }
+        
+        let window = UIWindow(windowScene: windowScene)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let isLoggedIn = UserDefaults.standard.bool(forKey: "isLoggedIn")
+        
+        let navController: UINavigationController
+        
+        if isLoggedIn {
+            let homeVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as! GrpViewController
+            navController = UINavigationController(rootViewController: homeVC)
+        } else {
+            let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+            navController = UINavigationController(rootViewController: loginVC)
         }
+        
+        // Force light mode
+        navController.overrideUserInterfaceStyle = .light
+        window.overrideUserInterfaceStyle = .light
+        
+        // Fix for top spacing issue: set nav bar not translucent
+        navController.navigationBar.isTranslucent = false
+        navController.navigationBar.backgroundColor = .white
+        
+        window.rootViewController = navController
+        window.backgroundColor = .white
+        self.window = window
+        window.makeKeyAndVisible()
+        
     }
+    
 
     // Other default scene methods unchanged...
     func sceneDidDisconnect(_ scene: UIScene) {}

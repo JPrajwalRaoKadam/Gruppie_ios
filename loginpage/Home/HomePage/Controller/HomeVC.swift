@@ -25,6 +25,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     private var pageViewController: UIPageViewController? // UIPageViewController instance
     private var currentPageIndex: Int = 0 // Current page index
     private var timer: Timer?
+    private var isProcessingSelection = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -171,6 +172,11 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !isProcessingSelection else {
+               print("Tap ignored – already processing.")
+               return
+           }
+
         guard indexPath.section > 0 else { return }
         let selectedActivity = groupDatas[indexPath.section - 1]
         

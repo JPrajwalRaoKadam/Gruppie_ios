@@ -10,6 +10,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     var schools: [School] = [] // Received from SetPINViewController
     var groupDatas: [GroupData] = []
     var currentRole: String?
+    private var isProcessingSelection = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -102,6 +103,13 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard !isProcessingSelection else {
+            print("Tap ignored – already processing.")
+            return
+        }
+
+        isProcessingSelection = true
+
         let schoolData = schools[indexPath.item]
         print("Selected school: \(schoolData.shortName) with ID: \(schoolData.id)")
 
@@ -137,11 +145,14 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
             dispatchGroup.notify(queue: .main) {
                 homeVC.imageUrls = imageUrls ?? []
                 self.navigationController?.pushViewController(homeVC, animated: true)
+                self.isProcessingSelection = false
             }
 
             DispatchQueue.main.async {
                 self.teamCollectionView.reloadData()
             }
+        } else {
+            self.isProcessingSelection = false
         }
     }
 
