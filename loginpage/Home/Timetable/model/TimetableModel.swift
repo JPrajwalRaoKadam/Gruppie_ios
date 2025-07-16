@@ -1,5 +1,3 @@
-
-
 import Foundation
 struct TimetableResponse: Codable {
     let data: [ClassData]
@@ -10,8 +8,6 @@ struct ClassData: Codable {
     let className: String
     let classTeacher: String
 }
-
-
 
 struct AcademicScheduleResponse: Codable {
     let data: [DaySchedule]

@@ -13,6 +13,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var skipOutlet: UIButton!
     @IBOutlet weak var nextOutlet: UIButton!
     @IBOutlet weak var backButton1: UIButton!
+    @IBOutlet weak var skip: UIButton!
     
     var images: [ImageData] = []
     var schools: [School] = [] // Received from SetPINViewController
@@ -24,6 +25,10 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
         setupTextFields()
         butttonStyles()
         enableKeyboardDismissOnTap()
+        
+        let underlineAttribute = [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
+        let underlineAttributedString = NSAttributedString(string: "skip", attributes: underlineAttribute)
+        skip.setAttributedTitle(underlineAttributedString, for: .normal)
         callAPIAndNavigate { [weak self] in
             print("API call finished, reloading collection view...")
         }

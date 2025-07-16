@@ -7,9 +7,8 @@ class DetailTableViewCell: UITableViewCell {
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var whatsAppImageView: UIImageView!
     @IBOutlet weak var callImageView: UIImageView!
-    @IBOutlet weak var imageLabel: UILabel! // Label for fallback text
+    @IBOutlet weak var imageLabel: UILabel!
 
-    // MARK: - Lifecycle Methods
     override func awakeFromNib() {
         super.awakeFromNib()
         setupUI()
@@ -19,11 +18,8 @@ class DetailTableViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        // Make icon circular
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
-        
-        // Make imageLabel circular and fill the image view
         imageLabel.layer.cornerRadius = iconImageView.frame.width / 2
         imageLabel.clipsToBounds = true
     }
@@ -32,14 +28,11 @@ class DetailTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
 
-    // MARK: - UI Configuration
     private func setupUI() {
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
         iconImageView.contentMode = .scaleAspectFill
         iconImageView.backgroundColor = UIColor.systemBlue
-
-        // Setup fallback label (must be subview of iconImageView in storyboard)
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
         imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
@@ -47,7 +40,6 @@ class DetailTableViewCell: UITableViewCell {
         imageLabel.backgroundColor = .clear
     }
 
-    // MARK: - Gesture Recognizers
     private func setupGestureRecognizers() {
         let callTapGesture = UITapGestureRecognizer(target: self, action: #selector(callTapped))
         callImageView.addGestureRecognizer(callTapGesture)
@@ -58,7 +50,6 @@ class DetailTableViewCell: UITableViewCell {
         whatsAppImageView.isUserInteractionEnabled = true
     }
 
-    // MARK: - Configuration Method
     func configure(name: String, designation: Int, icon: UIImage?, phoneNumber: String) {
         nameLabel.text = name
         designationLabel.text = "\(designation)"
@@ -72,12 +63,11 @@ class DetailTableViewCell: UITableViewCell {
             iconImageView.backgroundColor = UIColor.systemBlue
 
             let firstLetter = String(name.prefix(1)).uppercased()
-            print("Fallback Text: \(firstLetter)") // Debug print
+            print("Fallback Text: \(firstLetter)")
 
             imageLabel.text = firstLetter
             imageLabel.isHidden = false
 
-            // Ensure imageLabel fills iconImageView (if not using constraints in storyboard)
             imageLabel.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 imageLabel.centerXAnchor.constraint(equalTo: iconImageView.centerXAnchor),
@@ -88,7 +78,6 @@ class DetailTableViewCell: UITableViewCell {
         }
     }
 
-    // MARK: - Actions
     @objc private func callTapped() {
         print("Call button tapped")
     }

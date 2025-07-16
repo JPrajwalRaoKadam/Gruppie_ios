@@ -1,14 +1,7 @@
-//
-//  Detail.swift
-//  loginpage
-//
-//  Created by Apple on 04/02/25.
-//
-
 import Foundation
 
 struct Student: Codable {
-    let teamId: String// Ensure this exists
+    let teamId: String
     let studentId: String
     let name: String
     let designation: String
@@ -17,7 +10,6 @@ struct Student: Codable {
     let decodedImageUrl: String?
 }
 
-// Model for the response containing student details
 struct StudentDetailsResponse: Codable {
-    let data: [Student] // Array of students' details
+    let data: [Student] 
 }

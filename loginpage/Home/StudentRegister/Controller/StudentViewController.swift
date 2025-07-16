@@ -313,7 +313,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
                         detailVC.teamId = teamId
                         detailVC.studentName = name
                         detailVC.studentDbId = studentDbId
-                        detailVC.studentDetails = response.data // may be empty
+                        detailVC.studentDetails = response.data
                         self.navigationController?.pushViewController(detailVC, animated: true)
                     }
                 }

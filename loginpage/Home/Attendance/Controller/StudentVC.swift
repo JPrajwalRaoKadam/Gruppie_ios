@@ -53,48 +53,61 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
     func didTapAttendanceStatu(attendanceId: String) {
         print("Tapped attendance with ID:", attendanceId)
     }
-    
+
     @IBAction func addMoreButtonTapped(_ sender: Any) {
         // Remove if already shown
         if let existingView = self.view.viewWithTag(1001) {
             existingView.removeFromSuperview()
+            self.view.viewWithTag(1000)?.removeFromSuperview() // also remove background
             return
         }
 
-        // Create a slide-in view
         let menuWidth: CGFloat = 200
         let menuHeight: CGFloat = 100
         let xStart = self.view.frame.width
-        
-        let menuView = UIView(frame: CGRect(x: xStart, y: 80, width: menuWidth, height: menuHeight)) // adjust y to fit your layout
-        menuView.backgroundColor = UIColor.white
+
+        // 🔹 Transparent background to detect taps outside
+        let backgroundView = UIView(frame: self.view.bounds)
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.0)
+        backgroundView.tag = 1000
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissMenuView))
+        backgroundView.addGestureRecognizer(tapGesture)
+        self.view.addSubview(backgroundView)
+
+        // 🔹 Slide-in menu view
+        let menuView = UIView(frame: CGRect(x: xStart, y: 80, width: menuWidth, height: menuHeight))
+        menuView.backgroundColor = .white
         menuView.layer.shadowColor = UIColor.black.cgColor
         menuView.layer.shadowOpacity = 0.3
         menuView.layer.shadowOffset = CGSize(width: -2, height: 2)
         menuView.layer.cornerRadius = 10
         menuView.tag = 1001
 
-        // Add buttons
+        // Buttons
         let declareBtn = UIButton(frame: CGRect(x: 0, y: 0, width: menuWidth, height: 50))
         declareBtn.setTitle("Declare Holiday", for: .normal)
         declareBtn.setTitleColor(.black, for: .normal)
         declareBtn.addTarget(self, action: #selector(showDeclareHolidayAlert), for: .touchUpInside)
-        
+
         let reportBtn = UIButton(frame: CGRect(x: 0, y: 50, width: menuWidth, height: 50))
         reportBtn.setTitle("Attendance Report", for: .normal)
         reportBtn.setTitleColor(.black, for: .normal)
         reportBtn.addTarget(self, action: #selector(showAttendanceReport), for: .touchUpInside)
 
-        // Add to view
         menuView.addSubview(declareBtn)
         menuView.addSubview(reportBtn)
         self.view.addSubview(menuView)
 
-        // Animate sliding in from right
+        // Slide in animation
         UIView.animate(withDuration: 0.3) {
-            menuView.frame.origin.x = self.view.frame.width - menuWidth - 16 // Slide in
+            menuView.frame.origin.x = self.view.frame.width - menuWidth - 16
         }
     }
+    @objc func dismissMenuView() {
+        self.view.viewWithTag(1001)?.removeFromSuperview() // Menu view
+        self.view.viewWithTag(1000)?.removeFromSuperview() // Background view
+    }
+
     @objc func showDeclareHolidayAlert() {
         if let menu = self.view.viewWithTag(1001) {
             menu.removeFromSuperview()

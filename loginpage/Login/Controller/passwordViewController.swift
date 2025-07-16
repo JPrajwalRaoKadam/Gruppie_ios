@@ -8,6 +8,8 @@ class passwordViewController: UIViewController {
     @IBOutlet weak var password: UITextField!
     @IBOutlet weak var continueOutlet: UIButton!
     @IBOutlet weak var backOutlet: UIButton!
+    @IBOutlet weak var forgotPassword: UIButton!
+    @IBOutlet weak var phonenumber: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -15,9 +17,16 @@ class passwordViewController: UIViewController {
         enableKeyboardDismissOnTap()
         // Log phone data for debugging
         if let phoneData = phoneData {
-            print("Phone: \(phoneData.phone), Country Code: \(phoneData.countryCode)")
-        }
+               print("Phone: \(phoneData.phone), Country Code: \(phoneData.countryCode)")
+               // Safely unwrap and format the phone number without Optional() or quotes
+               phonenumber.text = "Enter the password set by you for \(phoneData.phone)"
+           }
+        
+        let underlineAttribute = [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
+        let underlineAttributedString = NSAttributedString(string: "forgotPassword", attributes: underlineAttribute)
+        forgotPassword.setAttributedTitle(underlineAttributedString, for: .normal)
     }
+  
     
     func butttonStyles() {
         continueOutlet.layer.cornerRadius = 10

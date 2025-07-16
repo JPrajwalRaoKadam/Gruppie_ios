@@ -23,23 +23,10 @@
                             <constraint firstAttribute="width" constant="239" id="QPc-9a-5ta"/>
                             <constraint firstAttribute="height" constant="21" id="R17-zq-6pz"/>
                         </constraints>
-                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Prd-jO-Nun">
-                        <rect key="frame" x="282" y="19" width="20" height="20"/>
-                        <constraints>
-                            <constraint firstAttribute="width" constant="20" id="7xE-T3-Xh4"/>
-                            <constraint firstAttribute="height" constant="20" id="ujg-Ka-IvR"/>
-                        </constraints>
-                        <color key="tintColor" white="0.28000000000000003" alpha="1" colorSpace="calibratedWhite"/>
-                        <state key="normal" title="Button"/>
-                        <buttonConfiguration key="configuration" style="plain" image="remove"/>
-                        <connections>
-                            <action selector="deleteButton:" destination="NjR-sB-QU2" eventType="touchUpInside" id="Aeg-oK-dZS"/>
-                        </connections>
-                    </button>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="topic" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="G5Q-gn-IRX">
                         <rect key="frame" x="20" y="36" width="239" height="21"/>
                         <constraints>
@@ -50,16 +37,26 @@
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Prd-jO-Nun">
+                        <rect key="frame" x="300" y="25" width="20" height="20"/>
+                        <color key="tintColor" white="0.28000000000000003" alpha="1" colorSpace="calibratedWhite"/>
+                        <state key="normal" title="Button"/>
+                        <buttonConfiguration key="configuration" style="plain" image="remove"/>
+                        <connections>
+                            <action selector="deleteButton:" destination="NjR-sB-QU2" eventType="touchUpInside" id="Aeg-oK-dZS"/>
+                        </connections>
+                    </button>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="Prd-jO-Nun" secondAttribute="trailing" constant="33" id="4xV-LH-VGm"/>
                     <constraint firstAttribute="bottom" secondItem="G5Q-gn-IRX" secondAttribute="bottom" constant="10" id="C1n-a4-mPX"/>
+                    <constraint firstItem="Prd-jO-Nun" firstAttribute="leading" secondItem="Rn2-rw-2r2" secondAttribute="trailing" constant="41" id="Ict-ch-5no"/>
                     <constraint firstItem="Rn2-rw-2r2" firstAttribute="leading" secondItem="4u1-dZ-Cai" secondAttribute="leading" constant="20" id="IwC-78-ncb"/>
-                    <constraint firstItem="Prd-jO-Nun" firstAttribute="top" secondItem="4u1-dZ-Cai" secondAttribute="top" constant="19" id="L5v-wh-K4S"/>
+                    <constraint firstItem="Prd-jO-Nun" firstAttribute="top" secondItem="4u1-dZ-Cai" secondAttribute="topMargin" constant="-104" id="KmF-FO-pSY"/>
+                    <constraint firstItem="Prd-jO-Nun" firstAttribute="centerY" secondItem="4u1-dZ-Cai" secondAttribute="centerY" id="RPs-14-nRm"/>
                     <constraint firstItem="G5Q-gn-IRX" firstAttribute="leading" secondItem="4u1-dZ-Cai" secondAttribute="leading" constant="20" id="RsN-ez-zFZ"/>
                     <constraint firstItem="Rn2-rw-2r2" firstAttribute="top" secondItem="4u1-dZ-Cai" secondAttribute="top" constant="10" id="hRC-SN-4R7"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="Prd-jO-Nun" secondAttribute="trailing" constant="-5" id="iR1-xv-875"/>
                     <constraint firstItem="G5Q-gn-IRX" firstAttribute="top" secondItem="Rn2-rw-2r2" secondAttribute="bottom" constant="5" id="jP2-Qk-RBD"/>
-                    <constraint firstAttribute="bottom" secondItem="Prd-jO-Nun" secondAttribute="bottom" constant="31" id="yt8-i6-aGC"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="SMe-bd-gzZ"/>

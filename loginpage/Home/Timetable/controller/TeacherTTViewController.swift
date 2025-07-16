@@ -1,5 +1,3 @@
-
-
 import UIKit
 
 class TeacherTTViewController: UIViewController {
@@ -42,7 +40,6 @@ class TeacherTTViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    // ✅ Expand Current Day Section Automatically
     func expandCurrentDaySection() {
         let currentDay = Calendar.current.component(.weekday, from: Date())
         let currentIndex = (currentDay == 1) ? 6 : currentDay - 2

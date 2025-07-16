@@ -1,6 +1,7 @@
 import UIKit
 
 class AddCombineClass: UIViewController {
+    
     @IBOutlet weak var teamName: UITextField!
     @IBOutlet weak var AddButton: UIButton!
     @IBOutlet weak var MainView: UIView!

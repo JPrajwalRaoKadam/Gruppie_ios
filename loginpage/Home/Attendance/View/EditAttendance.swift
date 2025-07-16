@@ -5,7 +5,6 @@ protocol EditAttendanceDelegate: AnyObject {
     func didTapEditAttendance(status: String, attendanceId: String, userId: String)
 }
 
-/// A custom popup view to edit or delete attendance
 class EditAttendance: UIView {
     // MARK: - Outlets
     @IBOutlet weak var attendanceStatus: UITextField!
@@ -50,11 +49,32 @@ class EditAttendance: UIView {
             editButtonOutlet.isHidden = false
         }
     }
-    // MARK: - Button Actions
-    @IBAction func deleteButton(_ sender: Any) {
+    
+   @IBAction func deleteButton(_ sender: Any) {
         guard let id = attendanceId else { return }
-        delegate?.didTapDeleteAttendance(attendanceId: id)
-        removeFromSuperview()
+
+        // Create alert
+        let alert = UIAlertController(title: "Confirm Delete",
+                                      message: "Are you sure you want to delete this attendance?",
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: { _ in
+            self.delegate?.didTapDeleteAttendance(attendanceId: id)
+            self.removeFromSuperview()
+        }))
+
+        // ✅ Fix: Get key window and root view controller safely
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+            
+            var presentingVC = rootVC
+            while let presented = presentingVC.presentedViewController {
+                presentingVC = presented
+            }
+            presentingVC.present(alert, animated: true, completion: nil)
+        } else {
+            print("❌ Could not find a valid view controller to present alert.")
+        }
     }
 
     @IBAction func editButton(_ sender: Any) {

@@ -106,9 +106,8 @@ extension FeedBackViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FeedBackCell", for: indexPath) as! FeedBackTableViewCell
         let feedback = feedbackData[indexPath.row]
-
-        let imageURL: String? = nil // If you have image URL in feedback model, use that here
-        cell.configure(with: feedback.title, imageURL: imageURL)
+        
+        cell.name.text = feedback.title ?? "No Title"
 
         if let options = feedback.options {
             print("Options for '\(feedback.title ?? "No Title")':")

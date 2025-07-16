@@ -5,6 +5,8 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
    
     @IBOutlet weak var curDate: UIButton!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var backButton: UIButton!
+
     
     var currentDatePicker: UIDatePicker?
     var currentDate : String?
@@ -49,6 +51,10 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
     }
     
+    @IBAction func backButtonTapped(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
+        
+    }
     @IBAction func leftdateChange(_ sender: Any) {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "dd-MM-yyyy"
@@ -250,7 +256,11 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 70
     }
-
+    
+    @objc func backButtonTapped() {
+           // Navigate back to previous view controller
+           self.navigationController?.popViewController(animated: true)
+       }
     
     @objc func datePickerDonePressed(_ sender: UIButton) {
         if let datePicker = currentDatePicker {

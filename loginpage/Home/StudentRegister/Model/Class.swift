@@ -5,15 +5,15 @@ struct ClassListResponse: Codable {
 }
 
 struct ClassList: Codable {
-    let classes: [ClassType] // Access classTypeId from this level
+    let classes: [ClassType] 
 }
 
 struct ClassType: Codable {
     let type: String
     let departmentName: String?
     let departmentId: String?
-    let classTypeId: String  // This is inside ClassType
-    var classList: [ClassItem] // Now mutable
+    let classTypeId: String
+    var classList: [ClassItem]
 
     enum CodingKeys: String, CodingKey {
         case type, departmentName, departmentId, classTypeId

@@ -21,10 +21,10 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DkG-PU-HIX">
                         <rect key="frame" x="0.0" y="0.0" width="297" height="123"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="13" translatesAutoresizingMaskIntoConstraints="NO" id="tDz-el-hsW">
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="13" translatesAutoresizingMaskIntoConstraints="NO" id="tDz-el-hsW">
                                 <rect key="frame" x="10" y="0.0" width="277" height="123"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="37" translatesAutoresizingMaskIntoConstraints="NO" id="Y9k-47-KaT">
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="37" translatesAutoresizingMaskIntoConstraints="NO" id="Y9k-47-KaT">
                                         <rect key="frame" x="0.0" y="0.0" width="277" height="55"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="1" translatesAutoresizingMaskIntoConstraints="NO" id="maG-Cf-1XV">
@@ -77,7 +77,7 @@
                                             </stackView>
                                         </subviews>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="37" translatesAutoresizingMaskIntoConstraints="NO" id="3cI-4l-KTL">
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="37" translatesAutoresizingMaskIntoConstraints="NO" id="3cI-4l-KTL">
                                         <rect key="frame" x="0.0" y="68" width="277" height="55"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="1" translatesAutoresizingMaskIntoConstraints="NO" id="mnl-N6-6E9">
@@ -131,6 +131,12 @@
                                         </subviews>
                                     </stackView>
                                 </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="Y9k-47-KaT" secondAttribute="trailing" id="7SY-0o-Hhc"/>
+                                    <constraint firstItem="Y9k-47-KaT" firstAttribute="leading" secondItem="tDz-el-hsW" secondAttribute="leading" id="OEB-LY-S5t"/>
+                                    <constraint firstItem="3cI-4l-KTL" firstAttribute="leading" secondItem="tDz-el-hsW" secondAttribute="leading" id="rCN-Qo-BjC"/>
+                                    <constraint firstAttribute="trailing" secondItem="3cI-4l-KTL" secondAttribute="trailing" id="vDZ-wZ-DBS"/>
+                                </constraints>
                             </stackView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>

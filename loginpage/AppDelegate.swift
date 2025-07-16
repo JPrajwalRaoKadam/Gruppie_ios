@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         // Global tap protection for buttons and cells
-        UIButton.enableGlobalTapProtection()
+        UIControl.enableGlobalTapProtection()
         UINavigationController.swizzlePush()
         UIViewController.swizzlePresent()
         

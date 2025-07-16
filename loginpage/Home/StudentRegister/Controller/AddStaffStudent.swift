@@ -33,6 +33,7 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
             }
         }
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -41,17 +42,12 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
         print("User ID AddStaffStudent: \(userId)")
 
         TableView.register(UINib(nibName: "AddStaffStudentCellTableViewCell", bundle: nil), forCellReuseIdentifier: "AddStaffStudentCell")
-
         addButton.layer.cornerRadius = 10
         addButton.layer.masksToBounds = true
-
         TableView.delegate = self
         TableView.dataSource = self
-
         TableView.estimatedRowHeight = 100
         TableView.rowHeight = UITableView.automaticDimension
-
-        // TableView border and corner styling
         TableView.layer.cornerRadius = 15
         TableView.layer.masksToBounds = true
         TableView.layer.borderWidth = 1.0
@@ -66,7 +62,7 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
 
 
     func assignStaffToClass(userId: String, completion: @escaping (Bool) -> Void) {
-        let urlString = APIManager.shared.baseURL + "groups/62b4265f97d24b15e8123155/team/62b4265f97d24b15e8123158/assign/class/teacher"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/62b4265f97d24b15e8123158/assign/class/teacher"
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
             completion(false)

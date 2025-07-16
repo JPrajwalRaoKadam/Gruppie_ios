@@ -37,8 +37,6 @@ class AccountInfoCell: UITableViewCell {
         }
     }
 
-
-    // ✅ Function to collect updated data from fields
     func collectUpdatedData() -> AccountInfo {
         return AccountInfo(
             fatherName: fatherName.text ?? "",

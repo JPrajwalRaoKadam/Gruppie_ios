@@ -56,17 +56,3 @@ class ThreeFourthPresentationController: UIPresentationController {
         presentedView?.clipsToBounds = true
     }
 }
-//extension ThreeFourthPresentationController: UIViewControllerTransitioningDelegate {
-//    func presentationController(forPresented presented: UIViewController,
-//                                presenting: UIViewController?,
-//                                source: UIViewController) -> UIPresentationController? {
-//        return ThreeFourthPresentationController(presentedViewController: presented, presenting: presenting)
-//    }
-//
-//    func presentAbsentStudents() {
-//        let vc = AbsentStudentVC()
-//        vc.modalPresentationStyle = .custom
-//        vc.transitioningDelegate = self
-//        present(vc, animated: true, completion: nil)
-//    }
-//}

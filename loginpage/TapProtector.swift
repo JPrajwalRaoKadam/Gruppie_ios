@@ -10,7 +10,7 @@ import ObjectiveC
 
 // MARK: - UIButton Tap Protection
 
-extension UIButton {
+extension UIControl {
     private static var hasSwizzled = false
     private struct AssociatedKeys {
         static var isIgnoring = "isIgnoring"
@@ -25,8 +25,8 @@ extension UIButton {
         guard !hasSwizzled else { return }
         hasSwizzled = true
 
-        let original = class_getInstanceMethod(self, #selector(UIButton.sendAction(_:to:for:)))
-        let swizzled = class_getInstanceMethod(self, #selector(UIButton.swizzled_sendAction(_:to:for:)))
+        let original = class_getInstanceMethod(UIControl.self, #selector(UIControl.sendAction(_:to:for:)))
+        let swizzled = class_getInstanceMethod(UIControl.self, #selector(UIControl.swizzled_sendAction(_:to:for:)))
 
         if let original = original, let swizzled = swizzled {
             method_exchangeImplementations(original, swizzled)
@@ -34,14 +34,16 @@ extension UIButton {
     }
 
     @objc private func swizzled_sendAction(_ action: Selector, to target: Any?, for event: UIEvent?) {
-        guard !isIgnoring else { return }
+        if let button = self as? UIButton {
+            guard !button.isIgnoring else { return }
 
-        isIgnoring = true
-        self.isEnabled = false
+            button.isIgnoring = true
+            button.isEnabled = false
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.isIgnoring = false
-            self.isEnabled = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                button.isIgnoring = false
+                button.isEnabled = true
+            }
         }
 
         swizzled_sendAction(action, to: target, for: event)

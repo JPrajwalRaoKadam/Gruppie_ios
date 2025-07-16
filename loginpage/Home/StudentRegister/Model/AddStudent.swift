@@ -99,7 +99,6 @@ struct StudentData: Codable {
     var accountInfo: AccountInfo?
 }
 
-// MARK: - Custom Encoding to Convert nil Strings to ""
 extension StudentData {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case userId, userDownloadedApp, teamId, studentDbId, studentRegId, groupId,
@@ -301,7 +300,6 @@ struct StaffMember: Codable {
     }
 }
 
-// Custom Enum to Handle Mixed Bool & String Types
 enum StringOrBool: Codable {
     case string(String)
     case bool(Bool)
@@ -334,7 +332,6 @@ enum StringOrBool: Codable {
     }
 }
 
-// Helper Function to Get Permanent Value as String
 func getPermanentValue(_ permanent: StringOrBool) -> String {
     switch permanent {
     case .string(let value):
@@ -343,8 +340,6 @@ func getPermanentValue(_ permanent: StringOrBool) -> String {
         return value ? "Yes" : "No"
     }
 }
-
-
 
 struct StudentProfileUpdate: Codable {
     var aadharNumber: String

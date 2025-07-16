@@ -200,7 +200,7 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
 //
 //        return cell
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "AddFeedBackCell", for: indexPath) as! AddFeedBackTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "", for: indexPath) as! AddFeedBackTableViewCell
        
 //        cell.QuestionNo.text = "\(indexPath.row + 1)"
 //        self.option = cell.Question.text

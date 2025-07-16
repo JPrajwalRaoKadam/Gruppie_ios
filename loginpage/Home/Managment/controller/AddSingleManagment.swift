@@ -7,28 +7,28 @@ class AddSingleManagement: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var name: UITextField!
     @IBOutlet weak var number: UITextField!
     @IBOutlet weak var addUserButton: UIButton!
+    @IBOutlet weak var addMoreButton: UIButton!
+
     @IBOutlet weak var backButton: UIButton!
-    @IBOutlet weak var addMoree: UIButton!
-    
     var token: String?
     var groupIds = ""
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         number.delegate = self
-
         addUserButton.isEnabled = false
-
-        addMoree.layer.cornerRadius = 10
-        addMoree.clipsToBounds = true
-        addUserButton.layer.cornerRadius = 10
-        addUserButton.clipsToBounds = true
         name.addTarget(self, action: #selector(validateForm), for: .editingChanged)
         designation.addTarget(self, action: #selector(validateForm), for: .editingChanged)
         number.addTarget(self, action: #selector(validateForm), for: .editingChanged)
         enableKeyboardDismissOnTap()
+        addUserButton.layer.cornerRadius = 10
+        addMoreButton.layer.cornerRadius = 10
+        addUserButton.clipsToBounds = true
+        addMoreButton.clipsToBounds = true
+        
     }
+
     @objc func validateForm() {
         addUserButton.isEnabled = !(name.text?.isEmpty ?? true || designation.text?.isEmpty ?? true || number.text?.isEmpty ?? true)
     }

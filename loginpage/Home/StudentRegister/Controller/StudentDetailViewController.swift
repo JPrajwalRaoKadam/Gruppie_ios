@@ -38,8 +38,6 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         enableKeyboardDismissOnTap()
     }
 
-    // MARK: - Button Actions
-
     @IBAction func whatsappButtonTapped(_ sender: UIButton) {
         guard let phoneNumber = student?.phone, !phoneNumber.isEmpty else {
             print("Error: Phone number is missing")
@@ -108,9 +106,6 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }
 
-
-    // MARK: - TableView Delegates
-
     func numberOfSections(in tableView: UITableView) -> Int { return 3 }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { return 1 }
@@ -159,8 +154,6 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 40
     }
-
-    // MARK: - Helper Methods
 
     func collectUpdatedData() -> StudentData {
         var profile = StudentData()
@@ -310,6 +303,7 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         }.resume()
     }
 }
+
 extension StudentDetailViewController: BasicInfoCellDelegate {
     func didUpdateField(field: String, value: String) {
         switch field {

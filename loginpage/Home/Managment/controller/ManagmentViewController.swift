@@ -27,7 +27,7 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
             print("Received token: No token provided")
         }
         tableView.dataSource = self
-        tableView.delegate = self  // ← Add this!
+        tableView.delegate = self
 
         tableView.register(UINib(nibName: "Member_TableViewCell", bundle: nil), forCellReuseIdentifier: "Member_TableViewCell")
         searchView.isHidden = true
@@ -51,14 +51,14 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
        }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "Member_TableViewCell", for: indexPath) as? Member_TableViewCell {
-            let member = filteredMembers[indexPath.row] // ← Use filteredMembers
+            let member = filteredMembers[indexPath.row]
             cell.configureCell(with: member)
             return cell
         }
         return UITableViewCell()
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let member = filteredMembers[indexPath.row] // ← Use filteredMembers
+        let member = filteredMembers[indexPath.row]
         guard indexPath.row < groupIds.count else {
             print("Error: Index out of bounds for groupIds array.")
             return
@@ -134,7 +134,7 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
                 moreDetailVC.token = self.token ?? ""
                 moreDetailVC.groupIds = self.groupIds
                 moreDetailVC.member = member
-                moreDetailVC.userId = member.userId // Pass userId separately
+                moreDetailVC.userId = member.userId
                 print("Navigating to MoreDetailViewController with member: \(member)")
                 self.navigationController?.pushViewController(moreDetailVC, animated: true)
             } else {
@@ -144,7 +144,7 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
     }
     func callAddManagementAPI() {
         guard let token = token else {
-            print("Token is nil, cannot make API call.")
+            print("Token is nil, cannot make API call")
             return
         }
         guard let groupId = groupIds.first else {

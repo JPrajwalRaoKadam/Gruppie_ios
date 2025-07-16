@@ -128,7 +128,7 @@ class TimetableViewController: UIViewController {
     }
 }
 
-extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
+    extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if isDayIselected {

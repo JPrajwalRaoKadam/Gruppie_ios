@@ -46,7 +46,6 @@ class EducationInfoCell: UITableViewCell, UIPickerViewDelegate, UIPickerViewData
         disability.inputView = disabilityPicker
         disability.inputAccessoryView = createToolbar(selector: #selector(doneSelectingDisability))
 
-        // DOB DatePicker
         dobPicker.datePickerMode = .date
         if #available(iOS 14.0, *) {
             dobPicker.preferredDatePickerStyle = .wheels

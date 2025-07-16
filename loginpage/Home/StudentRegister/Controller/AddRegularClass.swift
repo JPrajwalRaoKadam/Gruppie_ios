@@ -56,6 +56,7 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("Selected section: \(classData[indexPath.section].type)")
     }
+    
     func didTapIncrementButton(for classItem: ClassItem, at indexPath: IndexPath) {
         let updatedSections = classItem.noOfSections + 1
 
@@ -102,7 +103,6 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
         }.resume()
     }
 
-
     private func updateSectionsCount(for indexPath: IndexPath, newCount: Int) {
         guard indexPath.section < classData.count else { return }
 
@@ -116,8 +116,8 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
 
         TableView.reloadSections([indexPath.section], with: .automatic)
     }
+    
     @IBAction func BackButton(_ sender: UIButton) {
-        // Navigate back to the previous view controller
         navigationController?.popViewController(animated: true)
     }
 }

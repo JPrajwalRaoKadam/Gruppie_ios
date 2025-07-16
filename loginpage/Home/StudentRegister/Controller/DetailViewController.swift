@@ -46,6 +46,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         print("Student details count: \(studentDetails.count)")
         enableKeyboardDismissOnTap()
     }
+    
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden
         searchView.isHidden = !shouldShow
@@ -67,6 +68,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             searchTextField = nil
         }
     }
+    
     func filterMembers(textField: String) {
         let searchText = textField.trimmingCharacters(in: .whitespacesAndNewlines)
         
@@ -83,15 +85,11 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         TableView.reloadData()
     }
 
-    
-func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+   func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
     let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
     filterMembers(textField: searchText)
     return true
-}
-
-
-
+    }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return filteredStudentDetails.count
     }
@@ -108,6 +106,7 @@ func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange
 
         return cell
     }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedStudent = studentDetails[indexPath.row]
         
@@ -135,6 +134,7 @@ func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange
             }
         }
     }
+    
     @IBAction func addButtonTapped(_ sender: UIButton) {
         let alertController = UIAlertController(title: "Select Option", message: "Choose an action", preferredStyle: .actionSheet)
 

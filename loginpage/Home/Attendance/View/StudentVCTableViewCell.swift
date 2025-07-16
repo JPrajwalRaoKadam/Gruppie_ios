@@ -38,15 +38,6 @@ protocol StudentCellDelegate: AnyObject {
             attenStatusStackView.alignment = .center
         }
         
-//        override func awakeFromNib() {
-//            super.awakeFromNib()
-//            btnStyles()
-//            setupCheckButton(initiallySelected: true)
-//            print("......lllklkllll......\(lastDaysAttendance.count)")
-//            print("STU\(students?.count)")
-//            print("studentId: \(studentID)")
-//        }
-        
         func setAttendanceVisibility(isHidden: Bool) {
             //attenStatus.isHidden = isHidden
             attenStatusStackView.isHidden = isHidden
@@ -69,31 +60,13 @@ protocol StudentCellDelegate: AnyObject {
             rollNo.text      = "Roll No: \(student.rollNumber)"
             // … load image, configure button, etc. …
         }
-        
-        //      @IBAction func attenStatusTapped(_ sender: UIButton) {
-        //          guard let ip = indexPath else { return }
-        //          // Delegate gets both student and indexPath so it can pick the right entry
-        //          if let student = students?.first, let indexPath = indexPath {
-        //              //                delegate?.didTapAttendanceStatus(for: student, at: indexPath)
-        //              //            }
-        //          }
-        //      }
+     
         @IBAction func attenStatusTapped(_ sender: UIButton) {
             guard let student = students?[indexPath?.row ?? 0],
                   let indexPath = indexPath else { return }
             delegate?.didTapAttendanceStatus(for: student, at: indexPath)
         }
-        //      @IBAction func attenStatusTapped(_ sender: UIButton) {
-        //          guard let indexPath = indexPath,
-        //                let students = students,
-        //                indexPath.row < students.count else { return }
-        //
-        //          let student = students[indexPath.row]
-        //          delegate?.didTapAttendanceStatus(for: student, attendanceList: lastDaysAttendance, at: indexPath)
-        //      }
-        
-        
-        
+    
         @IBAction func checkButtonTapped(_ sender: UIButton) {
             sender.isSelected.toggle()
             checkButton.backgroundColor = .white
@@ -136,31 +109,12 @@ protocol StudentCellDelegate: AnyObject {
             checkButton.tintColor = .systemGreen
             checkButton.backgroundColor = .white
         }
-//        private func setupCheckButton() {
-//            checkButton.setImage(UIImage(systemName: "square"), for: .normal) // Unchecked
-//            checkButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected) // Checked
-//            checkButton.tintColor = .systemGreen // This sets the checkmark color to green
-//            checkButton.addTarget(self, action: #selector(checkButtonTapped), for: .touchUpInside)
-//        }
-
-
-
 
         @objc func checkButtonTapped() {
             checkButton.isSelected.toggle()
             contentView.backgroundColor = .white
         }
         
-//        func configureAttendanceStatus(attendance: String) {
-//            let lowercased = attendance.lowercased()
-//            switch lowercased {
-//            case "holiday":    set(status: "H", color: .systemBlue)
-//            case "present":    set(status: "P", color: .systemGreen)
-//            case "absent":     set(status: "A", color: .systemRed)
-//            case "leave":      set(status: "L", color: .systemYellow)
-//            default:            set(status: "-", color: .lightGray)
-//            }
-//        }
         func configureAttendanceButtons(lastDaysAttendance: [StudentAttendance]) {
             // Clear any existing buttons
             attenStatusStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -198,13 +152,5 @@ protocol StudentCellDelegate: AnyObject {
             button.heightAnchor.constraint(equalToConstant: 20).isActive = true
         }
 
-        
-//        private func set(status: String, color: UIColor) {
-//            attenStatus.setTitle(status, for: .normal)
-//            attenStatus.backgroundColor = color
-//            attenStatus.setTitleColor(.white, for: .normal)
-//            attenStatus.layer.cornerRadius = 8
-//            attenStatus.clipsToBounds = true
-//        }
     }
 
