@@ -26,7 +26,7 @@ class TeachingStaff: UITableViewCell {
         if let imageURL = staff.imageURL, let url = URL(string: imageURL) {
             loadImage(from: url)
         } else {
-            showFallbackImage(for: staff.name)
+            showFallbackImage(for: staff.name ?? "")
         }
     }
 

@@ -52,7 +52,6 @@ class AddStaffViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.clipsToBounds = true
 //        addButton.layer.cornerRadius = 10
 //        addButton.clipsToBounds = true
-        enableKeyboardDismissOnTap()
     }
 
 

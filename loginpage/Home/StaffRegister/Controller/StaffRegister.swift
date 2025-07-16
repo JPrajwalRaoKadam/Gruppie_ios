@@ -48,7 +48,6 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
             fetchNonTeachingStaffData()
         }
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
-        enableKeyboardDismissOnTap()
     }
     
     @objc func searchButtonTappedAction() {
