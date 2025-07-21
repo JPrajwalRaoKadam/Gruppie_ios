@@ -113,20 +113,36 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="26" baselineAdjustment="alignBaselines" showsExpansionTextWhenTruncated="YES" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BUR-1i-uwL">
-                                        <rect key="frame" x="15" y="18" width="363" height="116"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="26" baselineAdjustment="alignBaselines" showsExpansionTextWhenTruncated="YES" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BUR-1i-uwL" customClass="LinkLabel" customModule="loginpage" customModuleProvider="target">
+                                        <rect key="frame" x="15" y="27" width="363" height="82"/>
                                         <string key="text">The Android 14 Preview program runs from February 2023 until the final public release to AOSP and OEMs, planned for later in the year. At key development milestones, we'll deliver updates for your development and testing environments.</string>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Y37-Qg-tcz">
+                                        <rect key="frame" x="304.66666666666669" y="2" width="80.333333333333314" height="17"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="17" id="4ai-NV-Zan"/>
+                                        </constraints>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Read More">
+                                            <fontDescription key="titleFontDescription" type="system" pointSize="11"/>
+                                        </buttonConfiguration>
+                                        <connections>
+                                            <action selector="readMoreButtonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="Shl-mQ-1kW"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstItem="BUR-1i-uwL" firstAttribute="top" secondItem="9Qk-P0-7Gb" secondAttribute="bottom" constant="-1" id="28P-zg-JM0"/>
+                                    <constraint firstItem="BUR-1i-uwL" firstAttribute="top" secondItem="9Qk-P0-7Gb" secondAttribute="bottom" constant="8" id="28P-zg-JM0"/>
                                     <constraint firstItem="9Qk-P0-7Gb" firstAttribute="leading" secondItem="hUw-fg-RVA" secondAttribute="leading" constant="15" id="Dcs-ni-QeI"/>
                                     <constraint firstItem="BUR-1i-uwL" firstAttribute="leading" secondItem="hUw-fg-RVA" secondAttribute="leading" constant="15" id="Lqd-7e-r6c"/>
-                                    <constraint firstAttribute="bottom" secondItem="BUR-1i-uwL" secondAttribute="bottom" constant="1" id="Z5e-zv-h71"/>
+                                    <constraint firstAttribute="bottom" secondItem="BUR-1i-uwL" secondAttribute="bottom" constant="26" id="Z5e-zv-h71"/>
+                                    <constraint firstItem="BUR-1i-uwL" firstAttribute="top" secondItem="Y37-Qg-tcz" secondAttribute="bottom" constant="8" id="ZpM-Pv-tpn"/>
+                                    <constraint firstItem="Y37-Qg-tcz" firstAttribute="top" secondItem="hUw-fg-RVA" secondAttribute="top" constant="2" id="aqY-Y3-gK7"/>
+                                    <constraint firstAttribute="trailing" secondItem="Y37-Qg-tcz" secondAttribute="trailing" constant="8" id="eDg-Do-Gpz"/>
                                     <constraint firstAttribute="trailing" secondItem="BUR-1i-uwL" secondAttribute="trailing" constant="15" id="pz9-Iy-eni"/>
                                     <constraint firstItem="9Qk-P0-7Gb" firstAttribute="top" secondItem="hUw-fg-RVA" secondAttribute="top" constant="2" id="wt8-Al-NaS"/>
                                 </constraints>
@@ -466,6 +482,7 @@
                 <outlet property="noOfViews" destination="Nxm-Ku-Jci" id="ERo-bb-sSW"/>
                 <outlet property="noticeLabel" destination="qU4-E9-Qut" id="pou-gB-oEV"/>
                 <outlet property="playPauseButton" destination="DNu-YX-PCL" id="bRj-OK-iQ7"/>
+                <outlet property="readMoreButton" destination="Y37-Qg-tcz" id="vYX-wo-3LC"/>
                 <outlet property="shareButton" destination="PXy-5l-y8d" id="EEi-IG-gxa"/>
                 <outlet property="timingLabel" destination="iDY-Fg-2yN" id="dBL-hQ-EDw"/>
             </connections>

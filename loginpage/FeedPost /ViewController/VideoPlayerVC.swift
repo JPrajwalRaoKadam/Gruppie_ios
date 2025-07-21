@@ -35,7 +35,7 @@ class VideoPlayerVC: UIViewController {
         }
         
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill // Ensures the image fills the entire player view without distortion
+        imageView.contentMode = .scaleAspectFit // Ensures the image fills the entire player view without distortion
         imageView.frame = playerView.bounds // Make the image view size match the player view's size
         playerView.addSubview(imageView)
         
@@ -112,19 +112,43 @@ class VideoPlayerVC: UIViewController {
     }
     
     private func loadImage(from url: URL, into imageView: UIImageView) {
-            DispatchQueue.global().async {
-                if let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        imageView.image = image
+        DispatchQueue.global().async {
+            if let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    imageView.image = image
+                    
+                    // Calculate the proper frame to maintain aspect ratio
+                    let imageRatio = image.size.width / image.size.height
+                    let viewRatio = imageView.bounds.width / imageView.bounds.height
+                    
+                    if imageRatio > viewRatio {
+                        // Image is wider than view - fit to width
+                        let height = imageView.bounds.width / imageRatio
+                        imageView.frame = CGRect(
+                            x: 0,
+                            y: (imageView.bounds.height - height) / 2,
+                            width: imageView.bounds.width,
+                            height: height
+                        )
+                    } else {
+                        // Image is taller than view - fit to height
+                        let width = imageView.bounds.height * imageRatio
+                        imageView.frame = CGRect(
+                            x: (imageView.bounds.width - width) / 2,
+                            y: 0,
+                            width: width,
+                            height: imageView.bounds.height
+                        )
                     }
-                } else {
-                    DispatchQueue.main.async {
-                        imageView.image = UIImage(named: "placeholder_image")
-                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    imageView.image = UIImage(named: "placeholder_image")
+                    imageView.contentMode = .center  // Center the placeholder if it's smaller
                 }
             }
         }
-    
+    }
     func displayPDFInUIView(from urlString: String, on containerView: UIView) {
         // Step 1: Convert the URL string to a URL
         playPauseButton.isHidden = true

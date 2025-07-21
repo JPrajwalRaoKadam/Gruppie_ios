@@ -21,7 +21,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
 
         
     let authKey = TokenManager.shared.getToken()!
-    
+    var loadingIndicator: UIActivityIndicatorView!
     var lastContentOffset: CGFloat = 0 // Store the last scroll position
     var currentRole: String?
     var currentPage = 1
@@ -34,24 +34,25 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         self.navigationController?.isNavigationBarHidden = true
         feedTableView.register(UINib(nibName: "FeedPostTableViewCell", bundle: nil), forCellReuseIdentifier: "FeedPostTableViewCell")
-        // Setup Activity Indicator
-        activityIndicator = UIActivityIndicatorView(style: .large)
-        activityIndicator.center = view.center
-        activityIndicator.hidesWhenStopped = true
-        if currentRole == "parent" {
+        
+        // Setup single loading indicator
+        loadingIndicator = UIActivityIndicatorView(style: .large)
+        loadingIndicator.center = view.center
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.color = .black
+        view.addSubview(loadingIndicator)
+        
+        // Role-based UI setup
+        if currentRole == "parent" || currentRole == "teacher" {
             bottomLeftButton.isHidden = true
         }
-        view.addSubview(activityIndicator)
-        if currentRole == "teacher"{
-                    bottomLeftButton.isHidden = true
-                }
-        // Setup Pull to Refresh
+        
+        // Pull to Refresh
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         feedTableView.refreshControl = refreshControl
         enableKeyboardDismissOnTap()
     }
-    
     
     @IBAction func backButtonAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
@@ -79,19 +80,18 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         CustomTabManager.addTabBar(self, isRemoveLast: false, selectIndex: 1, bottomConstraint: &self.tableViewBottomConstraint)
         
-        fetchPostsWithAuth(page: currentPage) { result in
-            switch result {
-            case .success(let fetchedResponse):
-                print("🎉 Successfully fetched data.")
-                self.response = fetchedResponse
-                DispatchQueue.main.async {
-                    self.feedTableView.reloadData()
+        loadingIndicator.startAnimating()
+        fetchPostsWithAuth(page: currentPage) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let fetchedResponse):
+                    self?.response = fetchedResponse
+                    self?.feedTableView.reloadData() // Will trigger cell display
+                case .failure(let error):
+                    print("Failed to fetch data: \(error.localizedDescription)")
                 }
-            case .failure(let error):
-                print("❌ Failed to fetch data: \(error.localizedDescription)")
             }
         }
     }
@@ -114,39 +114,26 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     func loadMorePosts() {
         guard !isLoading else { return }
         
-        // Show loader for pagination
-        activityIndicator.startAnimating()
-
-        // Set isLoading to true to prevent multiple requests
         isLoading = true
-        currentPage += 1 // Increment the page for the next batch of posts
+        currentPage += 1
+        loadingIndicator.startAnimating()
         
-        // Fetch posts for the next page
-        fetchPostsWithAuth(page: currentPage) { result in
-            switch result {
-            case .success(let fetchedResponse):
-                print("🎉 Successfully fetched more data.")
-                
-                // Check if fetchedResponse.data is non-empty
-                if !fetchedResponse.data.isEmpty {
-                    // Append new posts to the existing data
-                    self.response?.data.append(contentsOf: fetchedResponse.data)
-                    
-                    DispatchQueue.main.async {
-                        self.feedTableView.reloadData() // Reload the table view to display the new data
-                    }
-                }
-            case .failure(let error):
-                print("❌ Failed to fetch more data: \(error.localizedDescription)")
-            }
-            
-            // Hide loader after data is fetched
+        fetchPostsWithAuth(page: currentPage) { [weak self] result in
             DispatchQueue.main.async {
-                self.activityIndicator.stopAnimating()
+                self?.loadingIndicator.stopAnimating()
+                self?.isLoading = false
+                
+                switch result {
+                case .success(let fetchedResponse):
+                    print("🎉 Successfully fetched more data.")
+                    if !fetchedResponse.data.isEmpty {
+                        self?.response?.data.append(contentsOf: fetchedResponse.data)
+                        self?.feedTableView.reloadData()
+                    }
+                case .failure(let error):
+                    print("❌ Failed to fetch more data: \(error.localizedDescription)")
+                }
             }
-            
-            // Set isLoading to false after the request completes
-            self.isLoading = false
         }
     }
 
@@ -157,10 +144,26 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return response?.data.count ?? 0
+        let count = response?.data.count ?? 0
+        if count == 0 {
+            // Show a message when no data is available
+            let messageLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: tableView.bounds.height))
+            messageLabel.text = "No posts available"
+            messageLabel.textColor = .gray
+            messageLabel.textAlignment = .center
+            tableView.backgroundView = messageLabel
+            tableView.separatorStyle = .none
+        } else {
+            tableView.backgroundView = nil
+            tableView.separatorStyle = .singleLine
+        }
+        return count
     }
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // Stop loading when first cell is being configured
+            if indexPath.row == 0 {
+                loadingIndicator.stopAnimating()
+            }
         if let cell = feedTableView.dequeueReusableCell(withIdentifier: "FeedPostTableViewCell", for: indexPath) as? FeedPostTableViewCell,
            let post = response?.data[indexPath.row] {
             cell.post = post
@@ -194,6 +197,19 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         return UITableViewCell()
     }
 
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // Fade-in animation
+        cell.alpha = 0
+        UIView.animate(withDuration: 0.5) {
+            cell.alpha = 1
+        }
+        
+        // Ensure loading indicator is stopped when cells are displayed
+        if indexPath.row == (response?.data.count ?? 0) - 1 {
+            loadingIndicator.stopAnimating()
+        }
+    }
+    
     func taptoNaviagteWithURL(cell: FeedPostTableViewCell, videoURL: String) {
         let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
         guard let videoViewController = storyboard.instantiateViewController(withIdentifier: "VideoPlayerVC") as? VideoPlayerVC else {
@@ -208,6 +224,11 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     // MARK: - API Call
     func fetchPostsWithAuth(page: Int, completion: @escaping (Result<PostResponse, Error>) -> Void) {
         print("eeegggtgtgt\(schoolId)")
+        // Start loading (in case it's not already running)
+          DispatchQueue.main.async {
+              self.loadingIndicator.startAnimating()
+          }
+              
         let urlString = APIManager.shared.baseURL + "groups/\(schoolId)/all/post/get?page=\(page)"
         guard let url = URL(string: urlString) else {
             print("🚨 Invalid URL: \(urlString)")
@@ -223,39 +244,55 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         print("🌐 Making request to URL: \(urlString)")
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ Error during request: \(error.localizedDescription)")
-                completion(.failure(error))
-                return
-            }
-
-            if let httpResponse = response as? HTTPURLResponse {
-                print("📩 HTTP Status Code: \(httpResponse.statusCode)")
-                if !(200...299).contains(httpResponse.statusCode) {
-                    print("🚨 Invalid Response Status: \(httpResponse.statusCode)")
-                    completion(.failure(NSError(domain: "Invalid Response", code: httpResponse.statusCode, userInfo: nil)))
+            DispatchQueue.main.async {
+                self.loadingIndicator.stopAnimating()
+                if let error = error {
+                    print("❌ Error during request: \(error.localizedDescription)")
+                    completion(.failure(error))
                     return
                 }
-            }
-
-            guard let data = data else {
-                print("🚨 No data received from server.")
-                completion(.failure(NSError(domain: "No Data", code: 404, userInfo: nil)))
-                return
-            }
-
-            print("📦 Data received: \(String(data: data, encoding: .utf8) ?? "Unable to parse data as string")")
-
-            do {
-                let decodedResponse = try JSONDecoder().decode(PostResponse.self, from: data)
-                completion(.success(decodedResponse))
-            } catch {
-                print("❌ JSON Parsing Error: \(error.localizedDescription)")
-                completion(.failure(error))
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("📩 HTTP Status Code: \(httpResponse.statusCode)")
+                    if !(200...299).contains(httpResponse.statusCode) {
+                        print("🚨 Invalid Response Status: \(httpResponse.statusCode)")
+                        completion(.failure(NSError(domain: "Invalid Response", code: httpResponse.statusCode, userInfo: nil)))
+                        return
+                    }
+                }
+                
+                guard let data = data else {
+                    print("🚨 No data received from server.")
+                    completion(.failure(NSError(domain: "No Data", code: 404, userInfo: nil)))
+                    return
+                }
+                
+                print("📦 Data received: \(String(data: data, encoding: .utf8) ?? "Unable to parse data as string")")
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(PostResponse.self, from: data)
+                    completion(.success(decodedResponse))
+                } catch {
+                    print("❌ JSON Parsing Error: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
             }
         }
         task.resume()
     }
+    
+    func didTapReadMore(text: String, from cell: FeedPostTableViewCell) {
+            let fullTextVC = FullTextViewController()
+            fullTextVC.fullText = text
+            fullTextVC.modalPresentationStyle = .pageSheet
+            
+            if let sheet = fullTextVC.sheetPresentationController {
+                sheet.detents = [.medium(), .large()]
+                sheet.prefersGrabberVisible = true
+            }
+            
+            present(fullTextVC, animated: true)
+        }
     
     func didTapLikeButton(cell: FeedPostTableViewCell) {
         guard let indexPath = feedTableView.indexPath(for: cell) else { return }
