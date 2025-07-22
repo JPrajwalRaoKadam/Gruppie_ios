@@ -53,7 +53,6 @@ class FeedPostTableViewCell: UITableViewCell {
     
     private var isExpanded = false
     private let maxLinesWhenCollapsed = 3
-//    private var readMoreButton: UIButton?
     
     // MARK: - Lifecycle
     override func awakeFromNib() {
@@ -104,38 +103,34 @@ class FeedPostTableViewCell: UITableViewCell {
         self.grpId = post.groupId
         self.postId = post.id
         self.videoPlayerURL = post.fileName?.first
-        
+
         // Set other UI elements
         adminLabel.text = post.createdBy
         noticeLabel.text = post.title
         firstDescriptionLabel.text = post.teamName
-        
+
         if let text = post.text {
             descriptionLabel.text = text
             descriptionLabel.setTextWithLinks(text)
         }
-        
-        // Configure description label with read more functionality
-        descriptionLabel.text = post.text
-        descriptionLabel.numberOfLines = maxLinesWhenCollapsed
+
+        // Handle collapsing
         descriptionLabel.numberOfLines = isExpanded ? 0 : maxLinesWhenCollapsed
-        
+
         noOfViews.text = post.postViewedCount
         noOfComments.text = "\(post.comments)"
         noOfLikes.text = "\(post.likes)"
         timingLabel.text = convertToFormattedDate(dateString: post.updatedAt)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.updateReadMoreButtonVisibility()
-        }
-        
+
+        // Don't call updateReadMoreButtonVisibility() here anymore!
+
         // Set like button state
         likeButton.setImage(
             UIImage(systemName: post.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup"),
             for: .normal
         )
-        
-        // Load admin image
+
+        // Admin image
         if let adminImageUrl = post.createdByImage, !adminImageUrl.isEmpty {
             loadImageForAdminImage(from: adminImageUrl) { [weak self] image in
                 self?.adminImageView.image = image
@@ -143,16 +138,14 @@ class FeedPostTableViewCell: UITableViewCell {
         } else {
             updateImageViewWithFirstLetter(from: adminLabel, in: adminImageView)
         }
-        
-        // Load main content
+
+        // Load media content
         loadFile(for: post)
-        
-        // Layout the cell first, then setup read more button
-        DispatchQueue.main.async { [weak self] in
-            self?.readMoreButton.isHidden = true
-        }
+
+        // Let layoutSubviews decide read more visibility
+        readMoreButton.isHidden = true
     }
-    
+
     // MARK: - Read More Functionality
       
     @IBAction func readMoreButtonTapped(_ sender: UIButton) {
@@ -165,7 +158,7 @@ class FeedPostTableViewCell: UITableViewCell {
             readMoreButton?.isHidden = true
             return
         }
-        
+
         let size = CGSize(width: descriptionLabel.bounds.width, height: .greatestFiniteMagnitude)
         let options: NSStringDrawingOptions = [.usesLineFragmentOrigin, .usesFontLeading]
         let textHeight = (text as NSString).boundingRect(
@@ -174,7 +167,7 @@ class FeedPostTableViewCell: UITableViewCell {
             attributes: [.font: descriptionLabel.font ?? UIFont.systemFont(ofSize: 17)],
             context: nil
         ).height
-        
+
         let maxHeight = descriptionLabel.font.lineHeight * CGFloat(maxLinesWhenCollapsed)
         readMoreButton?.isHidden = textHeight <= maxHeight
     }
@@ -682,65 +675,72 @@ class LinkLabel: UILabel {
     }
     
     func setTextWithLinks(_ text: String) {
-        let attributedString = NSMutableAttributedString(string: text)
-        
-        // Improved URL detection
+        let fontToUse = self.font ?? UIFont.systemFont(ofSize: 16)
+        let attributedString = NSMutableAttributedString(string: text, attributes: [.font: fontToUse])
+
         let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
-        let matches = detector?.matches(in: text,
-                                      options: [],
-                                      range: NSRange(location: 0, length: text.utf16.count)) ?? []
-        
+        let matches = detector?.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)) ?? []
+
         links.removeAll()
         linkRanges.removeAll()
-        
+
         for match in matches {
             guard match.resultType == .link, let url = match.url else { continue }
-            
+
             let range = match.range
             let urlString = (text as NSString).substring(with: range)
-            
-            // Store the URL and its range
+
             links[urlString] = url
             linkRanges.append(range)
-            
-            // Apply link styling
+
             attributedString.addAttributes(linkAttributes, range: range)
         }
-        
-        attributedText = attributedString
+
+        self.attributedText = attributedString
     }
-    
+
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        guard gesture.state == .ended else { return }
-        
-        let touchPoint = gesture.location(in: self)
-        
-        // Find which character was tapped
+        guard let attributedText = self.attributedText else { return }
+
+        // Create layout manager, text container and NSTextStorage
         let layoutManager = NSLayoutManager()
-        let textContainer = NSTextContainer(size: bounds.size)
-        let textStorage = NSTextStorage(attributedString: attributedText ?? NSAttributedString())
-        
+        let textContainer = NSTextContainer(size: self.bounds.size)
+        let textStorage = NSTextStorage(attributedString: attributedText)
+
+        // Configure
         layoutManager.addTextContainer(textContainer)
         textStorage.addLayoutManager(layoutManager)
-        
+
         textContainer.lineFragmentPadding = 0
-        textContainer.lineBreakMode = lineBreakMode
-        textContainer.maximumNumberOfLines = numberOfLines
-        
-        let characterIndex = layoutManager.characterIndex(
-            for: touchPoint,
+        textContainer.maximumNumberOfLines = self.numberOfLines
+        textContainer.lineBreakMode = self.lineBreakMode
+
+        // Get the tapped character location
+        let location = gesture.location(in: self)
+        let textBoundingBox = layoutManager.usedRect(for: textContainer)
+        let textOffset = CGPoint(
+            x: (bounds.size.width - textBoundingBox.size.width) * 0.5 - textBoundingBox.origin.x,
+            y: (bounds.size.height - textBoundingBox.size.height) * 0.5 - textBoundingBox.origin.y
+        )
+        let locationInTextContainer = CGPoint(x: location.x - textOffset.x, y: location.y - textOffset.y)
+
+        // Get index of character
+        let index = layoutManager.characterIndex(
+            for: locationInTextContainer,
             in: textContainer,
             fractionOfDistanceBetweenInsertionPoints: nil
         )
-        
-        // Check if the tap was on a link
+
+        // Check if tapped on link
         for (range, urlString) in zip(linkRanges, links.keys) {
-            if range.contains(characterIndex), let url = links[urlString] {
+            if range.contains(index), let url = links[urlString] {
                 onLinkTapped?(url)
                 return
             }
         }
     }
+
+    
 }
 //    @IBAction func shareButtonAction(_ sender: Any) {
 //        // Prepare the content you want to share
