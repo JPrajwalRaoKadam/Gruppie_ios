@@ -39,12 +39,6 @@ class AllSubjectViewController: UIViewController, AllSubjectDetailTableViewCellD
     }
     
     func addNewSubject(to section: Int) {
-//        let newSubject = SubjectDetail(subjectName: "New Subject", subjectPriority: section + 1)
-//        subjectDetails.append(newSubject)
-//        
-//        // Reload only the affected section
-//        let indexSet = IndexSet(integer: section)
-//        TableView.reloadSections(indexSet, with: .automatic)
         if let subjectDetail = self.subjectDetail {
             self.didTapAddButton(for: subjectDetail, sectionIndex: section)
         }
@@ -205,6 +199,7 @@ extension AllSubjectViewController {
             task.resume()
         }
     }
+
 extension AllSubjectViewController {
     
     func didTapAddButton(for subjectDetail: SubjectDetail, sectionIndex: Int) {
@@ -289,6 +284,7 @@ extension AllSubjectViewController {
         }
         task.resume()
     }
+    
     func didTapStudentSubject(for subjectDetail: SubjectDetail) {
         print("✅ Student Subject Button Tapped for \(subjectDetail.subjectName)")
 

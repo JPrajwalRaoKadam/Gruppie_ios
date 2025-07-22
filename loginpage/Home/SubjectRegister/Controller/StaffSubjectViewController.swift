@@ -205,8 +205,8 @@ extension StaffSujectViewController: StaffSubjectTableViewCellDelegate {
                     DispatchQueue.main.async {
                         self.navigationController?.popViewController(animated: true)
                     }
-
-                } else {
+                }
+                else {
                     print("❌ Failed with Status Code: \(httpResponse.statusCode)")
                     if let data = data, let errorMessage = String(data: data, encoding: .utf8) {
                         print("❌ API Error Message: \(errorMessage)")
