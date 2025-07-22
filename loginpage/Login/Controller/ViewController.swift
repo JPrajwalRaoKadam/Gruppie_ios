@@ -7,7 +7,7 @@ struct PhoneData: Codable {
 }
 
 class ViewController: UIViewController, UITextFieldDelegate {
-
+    
     @IBOutlet weak var ind: UIButton!
     @IBOutlet weak var phoneNumberTextField: UITextField!
     @IBOutlet weak var ContinueButton: UIButton!
@@ -15,13 +15,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
-        butttonStyles()
+        styleUI()
         phoneNumberTextField.delegate = self
         phoneNumberTextField.keyboardType = .numberPad
+        
+        // ✅ Use global extension if already defined
         enableKeyboardDismissOnTap()
     }
     
-    func butttonStyles(){
+    func styleUI() {
         ContinueButton.layer.cornerRadius = 10
         phoneNumberTextField.layer.cornerRadius = 10
         phoneNumberTextField.clipsToBounds = true
@@ -29,8 +31,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     @IBAction func submitButtonPressed(_ sender: Any) {
-        // Reduce opacity when button is clicked
-
         guard let phoneNumber = phoneNumberTextField.text, phoneNumber.count == 10 else {
             showAlert(message: "Please enter a valid 10-digit phone number.")
             return
@@ -38,83 +38,27 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
         let phoneData = PhoneData(phone: phoneNumber, countryCode: "IN")
         savePhoneNumberToCoreData(phoneData: phoneData)
-        checkUserExistence(with: phoneData)
-    }
-    
-    func savePhoneNumberToCoreData(phoneData: PhoneData) {
-            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-            let context = appDelegate.persistentContainer.viewContext
-            let entity = NSEntityDescription.entity(forEntityName: "User", in: context)!
-            let user = NSManagedObject(entity: entity, insertInto: context)
-            user.setValue(phoneData.phone, forKey: "phone")
-            
-            do {
-                try context.save()
-            } catch {
-                print("Failed to save phone number: \(error)")
-            }
-        }
 
-    func checkUserExistence(with phoneData: PhoneData) {
-        guard let url = URL(string: APIManager.shared.baseURL + "user/exist/category/app?category=school&appName=GC2") else {
-            showAlert(message: "Invalid API URL.")
-            return
-        }
+        // ✅ Use central API manager
+        APIManager.shared.checkUserAcrossServers(phoneData: phoneData) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                switch result {
+                case .success(let (response, server)):
+                    print("✅ Using server: \(server.rawValue)")
+                    self.handleResponseData(response, phoneNumber: phoneData.phone, countryCode: phoneData.countryCode)
 
-        do {
-            let jsonData = try JSONEncoder().encode(phoneData)
-            request.httpBody = jsonData
-        } catch {
-            showAlert(message: "Failed to prepare request. Please try again.")
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Network error: \(error.localizedDescription)")
-                }
-                return
-            }
-
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "No data received.")
-                }
-                return
-            }
-
-            // Print raw data for debugging
-            if let rawResponse = String(data: data, encoding: .utf8) {
-                print("Raw Response Data: \(rawResponse)")
-            }
-
-            do {
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let responseData = jsonResponse["data"] as? [String: Any] {
-                    DispatchQueue.main.async {
-                        self.handleResponseData(responseData, phoneNumber: phoneData.phone, countryCode: phoneData.countryCode)
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        self.showAlert(message: "Invalid response format.")
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Error processing response. Please try again.")
+                case .failure(let error):
+                    print("❌ All servers failed: \(error.localizedDescription)")
+                    self.showAlert(message: "Unable to connect to any server. Please try again later.")
                 }
             }
         }
-        task.resume()
     }
 
     func handleResponseData(_ responseData: [String: Any], phoneNumber: String, countryCode: String) {
-        print("Response Data: \(responseData)")
+        print("📦 Response Data: \(responseData)")
         guard let isUserExist = responseData["isUserExist"] as? Bool,
               let isAllowedToAccessApp = responseData["isAllowedToAccessApp"] as? Bool else {
             showAlert(message: "Invalid response data.")
@@ -122,32 +66,30 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
 
         if isUserExist && isAllowedToAccessApp {
-            // Navigate directly to PasswordViewController
             navigateToPasswordViewController(with: PhoneData(phone: phoneNumber, countryCode: countryCode))
         } else if !isUserExist && isAllowedToAccessApp {
-            // Navigate to CreateAccountViewController
             navigateToCreateAccountScreen(with: phoneNumber)
         } else {
-            // Show alert for access denial
             showAlert(message: "User not allowed to access this app.")
         }
     }
 
     func navigateToPasswordViewController(with phoneData: PhoneData) {
-        print("Navigating to password page")
+        print("➡️ Navigating to PasswordViewController")
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let vc = storyboard.instantiateViewController(withIdentifier: "passwordViewController") as? passwordViewController else {
-            print("ViewController with identifier 'passwordViewController' not found.")
+            print("❌ ViewController with identifier 'passwordViewController' not found.")
             return
         }
-        vc.phoneData = phoneData // Pass the phone data, including country code
+        vc.phoneData = phoneData
         self.navigationController?.pushViewController(vc, animated: true)
     }
 
     func navigateToCreateAccountScreen(with phoneNumber: String) {
+        print("➡️ Navigating to CreateAccountViewController")
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let vc = storyboard.instantiateViewController(withIdentifier: "CreateAccountViewController") as? CreateAccountViewController else {
-            print("ViewController with identifier 'CreateAccountViewController' not found.")
+            print("❌ ViewController with identifier 'CreateAccountViewController' not found.")
             return
         }
         vc.phoneNumber = phoneNumber
@@ -159,6 +101,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
             let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
+        }
+    }
+
+    func savePhoneNumberToCoreData(phoneData: PhoneData) {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let context = appDelegate.persistentContainer.viewContext
+        let entity = NSEntityDescription.entity(forEntityName: "User", in: context)!
+        let user = NSManagedObject(entity: entity, insertInto: context)
+        user.setValue(phoneData.phone, forKey: "phone")
+        
+        do {
+            try context.save()
+        } catch {
+            print("❌ Failed to save phone number: \(error)")
         }
     }
 
