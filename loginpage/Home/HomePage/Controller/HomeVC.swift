@@ -16,6 +16,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var subjects: [SubjectData] = [] // Store fetched subjects
     var teamIds: [String] = []
     var userIds: [String] = []
+    var userId:String = ""
     var featureIcons: [FeatureIcon] = []
     
     @IBOutlet weak var tableView: UITableView! // TableView outlet
@@ -190,6 +191,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon
         switch featureIcon.name {
+        case "Staff Diary":
+            fetchStaffDataAndNavigate()
         case "Calendar":
             navigateToCalendarViewController()
         case "Management Register":
@@ -210,6 +213,9 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 return
             }
         case "Student Register":
+            fetchStudentDataAndNavigate()
+        case "Student Diary":
+            fetchSubjectDataAndNavigate()
             fetchStudentDataAndNavigate()
         case "Subject Register":
             fetchSubjectDataAndNavigate()
@@ -449,6 +455,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                         subjects.append(subject)
                         teamIds.append(subject.teamId)
                         self.teamIds.append(subject.teamId)
+                        self.userId = subject.userId ?? ""
                         self.userIds.append(subject.userId ?? "")
 
                     }
@@ -708,6 +715,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
             dispatchGroup.notify(queue: .main) {
                 switch self.featureIcon?.name {
+                case "Staff Diary":
+                    self.navigateToStaffDiary(teachingStaff: teachingStaff)
                 case "Staff Register":
                     self.navigateToStaffRegister(teachingStaff: teachingStaff)
                 case "Time Table":
@@ -715,6 +724,51 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 default:
                     print("No navigation configured for type: \(self.featureIcon?.name)")
                 }
+            }
+        }
+    
+    private func navigateToStaffDiary(teachingStaff: [Staff]) {
+            print("Teaching Staff List:")
+            for staff in teachingStaff {
+                print("qqqqqqqqqqqName: \(staff.name), Phone: \(staff.phone)")
+            }
+
+            if currentRole == "parent" || currentRole == "student" || currentRole == "admin" {
+                let storyboard = UIStoryboard(name: "StaffDiary", bundle: nil)
+                guard let staffDiaryVC = storyboard.instantiateViewController(withIdentifier: "StaffDiaryVc") as? StaffDiaryVc else {
+                    print("Failed to instantiate StaffDiaryVc")
+                    return
+                }
+
+                staffDiaryVC.token = TokenManager.shared.getToken() ?? ""
+                staffDiaryVC.groupIds = school?.id ?? ""
+                staffDiaryVC.teachingStaffData = teachingStaff
+                staffDiaryVC.currentRole = self.currentRole
+
+                print("✅ Assigned \(teachingStaff.count) staff to staffDiaryVC")
+                navigationController?.pushViewController(staffDiaryVC, animated: true)
+
+            } else if currentRole == "teacher" {
+                let storyboard = UIStoryboard(name: "StaffDiary", bundle: nil)
+                guard let staffDaysVC = storyboard.instantiateViewController(withIdentifier: "StaffDaysViewController") as? StaffDaysViewController else {
+                    print("Failed to instantiate StaffDaysViewController")
+                    return
+                }
+
+                staffDaysVC.token = TokenManager.shared.getToken() ?? ""
+                staffDaysVC.groupIds = school?.id ?? ""
+                staffDaysVC.currentRole = self.currentRole
+                staffDaysVC.teachingStaff = teachingStaff
+
+                if let teacherUserId = teachingStaff.first?.userId {
+                    staffDaysVC.userId = teacherUserId
+                    print("👨‍🏫 Passed userId to StaffDaysViewController: \(teacherUserId)")
+                } else {
+                    print("❌ No userId found in teachingStaff")
+                }
+
+                print("✅ Navigating directly to StaffDaysViewController for staff role")
+                navigationController?.pushViewController(staffDaysVC, animated: true)
             }
         }
     
@@ -784,9 +838,52 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
             
             dispatchGroup.notify(queue: .main) {
-                self.navigateToStudentRegister(studentTeams: studentTeams)
-                self.studentTeams = studentTeams
+                switch self.featureIcon?.name {
+                case "Student Diary":
+                    self.navigateToStudentDiary(studentTeams: studentTeams)
+                case "Student Register":
+                    self.navigateToStudentRegister(studentTeams: studentTeams)
+                    self.studentTeams = studentTeams
+                default:
+                    print("No navigation configured for type: \(self.featureIcon?.name)")
+                }
             }
+        }
+    
+    private func navigateToStudentDiary(studentTeams: [StudentTeam]) {
+            if currentRole == "teacher" || currentRole == "admin" {
+                let storyboard = UIStoryboard(name: "Student1", bundle: nil)
+                guard let studentDiaryVC = storyboard.instantiateViewController(withIdentifier: "StudentViewController1") as? StudentViewController1 else {
+                    print("Failed to instantiate StudentViewController1")
+                    return
+                }
+
+                studentDiaryVC.studentTeams = studentTeams
+                studentDiaryVC.token = TokenManager.shared.getToken() ?? ""
+                studentDiaryVC.groupIds = school?.id ?? ""
+                studentDiaryVC.currentRole = self.currentRole
+
+                self.navigationController?.pushViewController(studentDiaryVC, animated: true)
+
+            } else if currentRole == "parent" {
+                let storyboard = UIStoryboard(name: "Student1", bundle: nil)
+                guard let studentDaysVC = storyboard.instantiateViewController(withIdentifier: "StudentDaysViewController") as? StudentDaysViewController else {
+                    print("Failed to instantiate StudentDaysViewController")
+                    return
+                }
+
+                let teamId = studentTeams.first?.teamId
+                studentDaysVC.currentRole = self.currentRole
+                studentDaysVC.studentTeams = studentTeams
+                studentDaysVC.token = TokenManager.shared.getToken() ?? ""
+                studentDaysVC.groupIds = school?.id ?? ""
+                studentDaysVC.teamId = teamId ?? ""
+                studentDaysVC.userId = self.userId
+                print("✅ Navigating directly to StudentDaysViewController for student role with userId: \(self.userId)")
+                print("✅ Navigating directly to StudentDaysViewController for student role with teamId: \(teamId)")
+                navigationController?.pushViewController(studentDaysVC, animated: true)
+            }
+
         }
     
     private func fetchStudentData(from urlString: String, token: String, completion: @escaping ([StudentTeam]) -> Void) {

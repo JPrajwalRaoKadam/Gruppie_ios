@@ -22,30 +22,52 @@ class VideoPlayerVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updatePlayPauseButton()
-        print("\(videoPlayerURL).....ooppppppppddddd")
-        convert(from: videoPlayerURL ?? "", on: playerView)
-        displayPDFInUIView(from: videoPlayerURL ?? "", on: playerView)
-        player?.addObserver(self, forKeyPath: #keyPath(AVPlayer.timeControlStatus), options: [.new], context: nil)
-        if let videoId = extractVideoId(from: videoPlayerURL ?? "") {
+
+        playPauseButton.isHidden = true  // Hide by default
+        guard let base64String = videoPlayerURL else {
+            print("No URL string provided.")
+            return
+        }
+
+        // Step 1: Decode Base64 to URL string
+        let cleanedBase64 = base64String.replacingOccurrences(of: "\n", with: "")
+        guard let decodedData = Data(base64Encoded: cleanedBase64),
+              let decodedURLString = String(data: decodedData, encoding: .utf8) else {
+            print("Base64 decoding failed.")
+            return
+        }
+
+        videoPlayerURL = decodedURLString  // Save the decoded URL
+
+        print("✅ Decoded URL: \(decodedURLString)")
+
+        // Step 2: Detect YouTube
+        if let videoId = extractVideoId(from: decodedURLString) {
             setupPlayerView()
             loadYouTubeVideo(videoId: videoId)
-        } else {
-            print("Invalid YouTube URL")
+            return
         }
-        
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit // Ensures the image fills the entire player view without distortion
-        imageView.frame = playerView.bounds // Make the image view size match the player view's size
-        playerView.addSubview(imageView)
-        
-        // Load the image from the URL
-        if let urlString = videoPlayerURL, let url = URL(string: urlString) {
-            loadImage(from: url, into: imageView)
+
+        // Step 3: Detect PDF
+        if decodedURLString.lowercased().hasSuffix(".pdf") {
+            displayPDFInUIView(from: decodedURLString, on: playerView)
+            return
         }
-        
+
+        // Step 4: Detect Image
+        if decodedURLString.lowercased().hasSuffix(".jpg") ||
+            decodedURLString.lowercased().hasSuffix(".jpeg") ||
+            decodedURLString.lowercased().hasSuffix(".png") {
+            displayImage(from: decodedURLString, in: playerView)
+            return
+        }
+
+        // Step 5: Default — Play as Video
+        playVideo(from: decodedURLString, on: playerView)
+        player?.addObserver(self, forKeyPath: #keyPath(AVPlayer.timeControlStatus), options: [.new], context: nil)
     }
-    
+
+
     @IBAction func backButtonAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
@@ -62,6 +84,32 @@ class VideoPlayerVC: UIViewController {
 //        }
 //        updatePlayPauseButton()
     }
+    
+    func displayImage(from urlString: String, in view: UIView) {
+        playPauseButton.isHidden = true  // Hide play/pause for image
+        view.subviews.forEach { $0.removeFromSuperview() }
+
+        let imageView = UIImageView(frame: view.bounds)
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        view.addSubview(imageView)
+
+        if let url = URL(string: urlString) {
+            DispatchQueue.global().async {
+                if let data = try? Data(contentsOf: url),
+                   let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        imageView.image = image
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        imageView.image = UIImage(named: "placeholder_image")
+                    }
+                }
+            }
+        }
+    }
+
     
     // Function to decode Base64 string and play the video
     func convert(from base64EncodedString: String, on view: UIView) {
@@ -85,30 +133,37 @@ class VideoPlayerVC: UIViewController {
     // Function to play the video
     func playVideo(from urlString: String, on view: UIView) {
         playPauseButton.isHidden = false
-        guard let url = URL(string: urlString) else {
-            print("Error: Invalid URL")
+
+        // First try decoding percent-encoded string
+        let decodedURLString = urlString.removingPercentEncoding ?? urlString
+
+        let url: URL?
+        if decodedURLString.starts(with: "file://") {
+            let localPath = String(decodedURLString.dropFirst("file://".count))
+            url = URL(fileURLWithPath: localPath)
+        } else {
+            url = URL(string: decodedURLString)
+        }
+
+        guard let validURL = url else {
+            print("Error: Invalid video URL → \(urlString)")
             return
         }
 
-        // Remove any existing player layers
+        print("🎬 Final video URL to play:", validURL)
+
+        // Remove existing video layer
         view.layer.sublayers?.removeAll(where: { $0 is AVPlayerLayer })
 
-        // Create the AVPlayer
-        player = AVPlayer(url: url)
-
-        // Create the AVPlayerLayer
+        // Setup player
+        player = AVPlayer(url: validURL)
         let playerLayer = AVPlayerLayer(player: player)
         playerLayer.frame = view.bounds
         playerLayer.videoGravity = .resizeAspectFill
-
-        // Add the playerLayer to the view
         view.layer.addSublayer(playerLayer)
 
-        // Start playing the video
         player?.play()
-        
         updatePlayPauseButton()
-        
     }
     
     private func loadImage(from url: URL, into imageView: UIImageView) {
@@ -152,6 +207,7 @@ class VideoPlayerVC: UIViewController {
     func displayPDFInUIView(from urlString: String, on containerView: UIView) {
         // Step 1: Convert the URL string to a URL
         playPauseButton.isHidden = true
+        containerView.subviews.forEach { $0.removeFromSuperview() }
         guard let pdfURL = URL(string: urlString) else {
             print("Error: Invalid URL")
             return

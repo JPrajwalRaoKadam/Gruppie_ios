@@ -1,10 +1,3 @@
-//
-//  FeedPostTableViewCell.swift
-//  loginpage
-//
-//  Created by Prajwal rao Kadam J on 30/12/24.
-//
-
 import UIKit
 import AVFoundation
 import AVKit
@@ -38,6 +31,7 @@ class FeedPostTableViewCell: UITableViewCell {
     @IBOutlet weak var mainImageView: UIImageView!
     @IBOutlet weak var likeButton: UIButton!
     @IBOutlet weak var downloadButton: UIButton!
+    @IBOutlet weak var cardView: UIView!
     
     // MARK: - Properties
     var videoUrl: URL?
@@ -53,11 +47,16 @@ class FeedPostTableViewCell: UITableViewCell {
     
     private var isExpanded = false
     private let maxLinesWhenCollapsed = 3
+    private var thumbnailCache = NSCache<NSString, UIImage>()
     
     // MARK: - Lifecycle
     override func awakeFromNib() {
         super.awakeFromNib()
         setupCell()
+        backgroundColor = .clear
+        contentView.backgroundColor = .white
+        self.contentView.backgroundColor = .clear
+        self.backgroundColor = .clear
     }
     
     override func prepareForReuse() {
@@ -67,26 +66,58 @@ class FeedPostTableViewCell: UITableViewCell {
         audioPlayer?.pause()
         audioPlayer = nil
         timeObserverToken = nil
+        mainImageView.image = nil
+        playPauseButton.isHidden = true
+        audioView.isHidden = true
     }
     
     override func layoutSubviews() {
-           super.layoutSubviews()
-           updateReadMoreButtonVisibility()
-       }
+        super.layoutSubviews()
+        let verticalSpacing: CGFloat = 8
+        let horizontalSpacing: CGFloat = 1
+
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(
+            top: verticalSpacing / 2,
+            left: horizontalSpacing,
+            bottom: verticalSpacing / 2,
+            right: horizontalSpacing
+        ))
+
+        contentView.layer.cornerRadius = 10
+        contentView.layer.masksToBounds = true
+
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOffset = CGSize(width: 0, height: 1)
+        layer.shadowOpacity = 0.1
+        layer.shadowRadius = 3
+        layer.masksToBounds = false
+        backgroundColor = .clear
+        
+        updateReadMoreButtonVisibility()
+    }
     
     // MARK: - Setup
     private func setupCell() {
         audioView.isHidden = true
+        cardView.layer.cornerRadius = 12
+        cardView.layer.masksToBounds = false
+        cardView.layer.shadowColor = UIColor.black.cgColor
+        cardView.layer.shadowOpacity = 0.4
+        cardView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        cardView.layer.shadowRadius = 8
+        cardView.backgroundColor = .white
+        
+        cardView.layer.borderColor = UIColor.black.cgColor
+        cardView.layer.borderWidth = 0.5
+        
         mainImageView.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
-        mainImageView?.addGestureRecognizer(tapGesture)
+        mainImageView.addGestureRecognizer(tapGesture)
         
         descriptionLabel.numberOfLines = maxLinesWhenCollapsed
         descriptionLabel.lineBreakMode = .byTruncatingTail
         
-        // Set up link handling
         descriptionLabel.onLinkTapped = { [weak self] url in
-            // Ensure the URL has a scheme (add https if missing)
             var finalURL = url
             if url.scheme == nil {
                 finalURL = URL(string: "https://\(url.absoluteString)") ?? url
@@ -96,66 +127,78 @@ class FeedPostTableViewCell: UITableViewCell {
                 UIApplication.shared.open(finalURL, options: [:], completionHandler: nil)
             }
         }
+        
+        // Configure image view for better rendering
+        mainImageView.contentMode = .scaleAspectFill
+        mainImageView.clipsToBounds = true
+        mainImageView.layer.cornerRadius = 8
     }
+    
     // MARK: - Configuration
     func configure(with post: Post) {
         self.post = post
         self.grpId = post.groupId
         self.postId = post.id
         self.videoPlayerURL = post.fileName?.first
-
-        // Set other UI elements
+        
+        // Reset UI elements
+        audioView.isHidden = true
+        playPauseButton.isHidden = true
+        downloadButton.isHidden = false
+        
+        // Set text content
         adminLabel.text = post.createdBy
         noticeLabel.text = post.title
         firstDescriptionLabel.text = post.teamName
-
+        
         if let text = post.text {
             descriptionLabel.text = text
             descriptionLabel.setTextWithLinks(text)
         }
-
-        // Handle collapsing
+        
         descriptionLabel.numberOfLines = isExpanded ? 0 : maxLinesWhenCollapsed
-
+        
+        // Set counts and timing
         noOfViews.text = post.postViewedCount
         noOfComments.text = "\(post.comments)"
         noOfLikes.text = "\(post.likes)"
         timingLabel.text = convertToFormattedDate(dateString: post.updatedAt)
-
-        // Don't call updateReadMoreButtonVisibility() here anymore!
-
+        
         // Set like button state
         likeButton.setImage(
             UIImage(systemName: post.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup"),
             for: .normal
         )
-
-        // Admin image
-        if let adminImageUrl = post.createdByImage, !adminImageUrl.isEmpty {
+        
+        // Configure admin image
+        configureAdminImage(with: post.createdByImage)
+        
+        // Load media content
+        loadFile(for: post)
+    }
+    
+    private func configureAdminImage(with imageUrl: String?) {
+        if let adminImageUrl = imageUrl, !adminImageUrl.isEmpty {
             loadImageForAdminImage(from: adminImageUrl) { [weak self] image in
                 self?.adminImageView.image = image
+                self?.adminImageView.contentMode = .scaleAspectFill
+                self?.adminImageView.layer.cornerRadius = self?.adminImageView.bounds.width ?? 0 / 2
+                self?.adminImageView.clipsToBounds = true
             }
         } else {
             updateImageViewWithFirstLetter(from: adminLabel, in: adminImageView)
         }
-
-        // Load media content
-        loadFile(for: post)
-
-        // Let layoutSubviews decide read more visibility
-        readMoreButton.isHidden = true
     }
-
+    
     // MARK: - Read More Functionality
-      
     @IBAction func readMoreButtonTapped(_ sender: UIButton) {
-            guard let text = descriptionLabel.text else { return }
-            delegate?.didTapReadMore(text: text, from: self)
-        }
-        
+        guard let text = descriptionLabel.text else { return }
+        delegate?.didTapReadMore(text: text, from: self)
+    }
+    
     private func updateReadMoreButtonVisibility() {
         guard let text = descriptionLabel.text, !text.isEmpty else {
-            readMoreButton?.isHidden = true
+            readMoreButton.isHidden = true
             return
         }
 
@@ -169,52 +212,8 @@ class FeedPostTableViewCell: UITableViewCell {
         ).height
 
         let maxHeight = descriptionLabel.font.lineHeight * CGFloat(maxLinesWhenCollapsed)
-        readMoreButton?.isHidden = textHeight <= maxHeight
+        readMoreButton.isHidden = textHeight <= maxHeight
     }
-    
-        
-        private func descriptionTextRect(forBounds bounds: CGRect, limitedToNumberOfLines: Int) -> CGRect {
-            guard let text = descriptionLabel.text else { return .zero }
-            
-            let size = CGSize(width: bounds.width, height: .greatestFiniteMagnitude)
-            let attributes: [NSAttributedString.Key: Any] = [.font: descriptionLabel.font as Any]
-            
-            let options: NSStringDrawingOptions = [.usesLineFragmentOrigin, .usesFontLeading]
-            let textRect = text.boundingRect(
-                with: size,
-                options: options,
-                attributes: attributes,
-                context: nil
-            )
-            
-            let lineHeight = descriptionLabel.font.lineHeight
-            let maxHeight = lineHeight * CGFloat(limitedToNumberOfLines)
-            
-            return CGRect(
-                x: bounds.origin.x,
-                y: bounds.origin.y,
-                width: min(textRect.width, bounds.width),
-                height: min(textRect.height, maxHeight)
-            )
-        }
-        
-        private func shouldShowReadMore() -> Bool {
-            guard let text = descriptionLabel.text, !text.isEmpty else { return false }
-            
-            let labelSize = CGSize(width: descriptionLabel.bounds.width, height: .greatestFiniteMagnitude)
-            let textHeight = (text as NSString)
-                .boundingRect(
-                    with: labelSize,
-                    options: .usesLineFragmentOrigin,
-                    attributes: [.font: descriptionLabel.font as Any],
-                    context: nil
-                )
-                .height
-            
-            let maxHeight = descriptionLabel.font.lineHeight * CGFloat(maxLinesWhenCollapsed)
-            return textHeight > maxHeight
-        }
-        
     
     // MARK: - Helper Methods
     func updateLikeCount(_ count: Int) {
@@ -240,116 +239,330 @@ class FeedPostTableViewCell: UITableViewCell {
         
         let letterImage = generateLetterImage(from: String(firstLetter).uppercased())
         imageView.image = letterImage
+        imageView.contentMode = .center
+        imageView.backgroundColor = .systemGray5
+        imageView.layer.cornerRadius = imageView.bounds.width / 2
+        imageView.clipsToBounds = true
     }
     
     func generateLetterImage(from letter: String) -> UIImage? {
-        let letterLabel = UILabel()
-        letterLabel.text = letter
-        letterLabel.font = UIFont.boldSystemFont(ofSize: 30)
-        letterLabel.textColor = .white
-        letterLabel.textAlignment = .center
-        letterLabel.backgroundColor = .gray
-        letterLabel.layer.cornerRadius = 25
-        letterLabel.layer.masksToBounds = true
-        letterLabel.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 50, height: 50))
         
-        UIGraphicsBeginImageContextWithOptions(letterLabel.bounds.size, false, 0)
-        letterLabel.layer.render(in: UIGraphicsGetCurrentContext()!)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return image
+        return renderer.image { ctx in
+            let rectangle = CGRect(x: 0, y: 0, width: 50, height: 50)
+            ctx.cgContext.setFillColor(UIColor.systemGray5.cgColor)
+            ctx.cgContext.addEllipse(in: rectangle)
+            ctx.cgContext.drawPath(using: .fill)
+            
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = .center
+            
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.boldSystemFont(ofSize: 24),
+                .paragraphStyle: paragraphStyle,
+                .foregroundColor: UIColor.systemBlue
+            ]
+            
+            let string = letter
+            let attributedString = NSAttributedString(string: string, attributes: attrs)
+            let stringRect = CGRect(x: 0, y: 10, width: 50, height: 30)
+            attributedString.draw(in: stringRect)
+        }
     }
     
     // MARK: - File Loading
     func loadFile(for post: Post) {
         guard let fileType = post.fileType?.lowercased() else {
-            mainImageView.image = nil
+            mainImageView.image = UIImage(named: "file_placeholder")
             return
         }
-        
-        let fileName = post.fileName?.first ?? ""
-        
+
         // Reset UI elements
         downloadButton.isHidden = false
         playPauseButton.isHidden = true
         audioView.isHidden = true
-        
+        mainImageView.image = nil
+
+        // Handle case where there are no files
+        guard let firstFileName = post.fileName?.first else {
+            mainImageView.image = UIImage(named: "file_placeholder")
+            return
+        }
+
+        // Decode the base64 URL
+        guard let decodedURLString = decodeBase64String(firstFileName) else {
+            mainImageView.image = UIImage(named: "file_placeholder")
+            return
+        }
+
         switch fileType {
         case "image":
-            loadImage(from: fileName) { [weak self] image in
-                DispatchQueue.main.async {
-                    self?.mainImageView.image = image
-                    self?.mainImageView.contentMode = .scaleAspectFill
-                }
+            loadImage(from: decodedURLString) { [weak self] image in
+                self?.mainImageView.image = image
+                self?.mainImageView.contentMode = .scaleAspectFill
             }
-            
+
         case "video":
             playPauseButton.isHidden = false
-            setVideoThumbnail(from: fileName) { [weak self] thumbnailImage in
+            loadVideoThumbnail(from: decodedURLString) { [weak self] thumbnailImage in
                 DispatchQueue.main.async {
-                    self?.mainImageView.image = thumbnailImage
+                    self?.mainImageView.image = thumbnailImage ?? UIImage(named: "video_placeholder")
                     self?.mainImageView.contentMode = .scaleAspectFill
                 }
             }
-            
-        case "youtube":
-            playPauseButton.isHidden = false
-            if let youtubeURL = post.video {
-                setYouTubeThumbnail(from: youtubeURL) { [weak self] thumbnailImage in
-                    DispatchQueue.main.async {
-                        self?.mainImageView.image = thumbnailImage
-                        self?.mainImageView.contentMode = .scaleAspectFill
-                    }
-                }
-            } else {
-                mainImageView.image = UIImage(named: "youtube_placeholder")
-            }
-            
+
         case "pdf":
-            loadPDFIcon()
-            
+            loadPDFThumbnail(for: post)
+
         case "audio":
             audioView.isHidden = false
             downloadButton.isHidden = true
-            setupAudioPlayer()
+            setupAudioPlayer(with: decodedURLString)
             setupSlider()
-            
+
         default:
             mainImageView.image = UIImage(named: "file_placeholder")
         }
     }
     
-    // ... [Keep all your existing methods for image loading, video thumbnail generation, etc.] ...
+    // MARK: - Image Loading
+    private func loadImageForAdminImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+        guard let url = URL(string: urlString) else {
+            completion(nil)
+            return
+        }
+        
+        // Check cache first
+        if let cachedImage = thumbnailCache.object(forKey: urlString as NSString) {
+            completion(cachedImage)
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Error loading admin image: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            if let data = data, let image = UIImage(data: data) {
+                self.thumbnailCache.setObject(image, forKey: urlString as NSString)
+                DispatchQueue.main.async {
+                    completion(image)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+            }
+        }.resume()
+    }
+    
+    private func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+        guard let url = URL(string: urlString) else {
+            completion(UIImage(named: "image_placeholder"))
+            return
+        }
+        
+        // Check cache first
+        if let cachedImage = thumbnailCache.object(forKey: urlString as NSString) {
+            completion(cachedImage)
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Error loading image: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion(UIImage(named: "image_placeholder"))
+                }
+                return
+            }
+            
+            if let data = data, let image = UIImage(data: data) {
+                self.thumbnailCache.setObject(image, forKey: urlString as NSString)
+                DispatchQueue.main.async {
+                    completion(image)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(UIImage(named: "image_placeholder"))
+                }
+            }
+        }.resume()
+    }
+    
+    // MARK: - Video Thumbnail
+    private func loadVideoThumbnail(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+        // Check cache first
+        if let cachedImage = thumbnailCache.object(forKey: urlString as NSString) {
+            completion(cachedImage)
+            return
+        }
+        
+        if urlString.isYouTubeURL {
+            loadYouTubeThumbnail(from: urlString, completion: completion)
+            return
+        }
+        
+        guard let url = URL(string: urlString) else {
+            completion(UIImage(named: "video_placeholder"))
+            return
+        }
+        
+        if url.isFileURL {
+            generateLocalVideoThumbnail(url: url, completion: completion)
+        } else {
+            generateRemoteVideoThumbnail(url: url, completion: completion)
+        }
+    }
+    
+    private func loadYouTubeThumbnail(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+        guard let videoId = urlString.youtubeVideoID else {
+            completion(UIImage(named: "youtube_placeholder"))
+            return
+        }
+        
+        let thumbnailURLs = [
+            URL(string: "https://img.youtube.com/vi/\(videoId)/maxresdefault.jpg"),
+            URL(string: "https://img.youtube.com/vi/\(videoId)/hqdefault.jpg"),
+            URL(string: "https://img.youtube.com/vi/\(videoId)/mqdefault.jpg"),
+            URL(string: "https://img.youtube.com/vi/\(videoId)/default.jpg")
+        ].compactMap { $0 }
+        
+        tryThumbnailURLs(thumbnailURLs, for: urlString, completion: completion)
+    }
+    
+    private func generateLocalVideoThumbnail(url: URL, completion: @escaping (UIImage?) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let asset = AVAsset(url: url)
+            let assetImageGenerator = AVAssetImageGenerator(asset: asset)
+            assetImageGenerator.appliesPreferredTrackTransform = true
+            assetImageGenerator.maximumSize = CGSize(width: 400, height: 400)
+            
+            let timePoints = [CMTime(seconds: 1.0, preferredTimescale: 600)]
+            
+            for time in timePoints {
+                do {
+                    let cgImage = try assetImageGenerator.copyCGImage(at: time, actualTime: nil)
+                    let thumbnail = UIImage(cgImage: cgImage)
+                    DispatchQueue.main.async {
+                        completion(thumbnail)
+                    }
+                    return
+                } catch {
+                    print("Error generating thumbnail: \(error.localizedDescription)")
+                }
+            }
+            
+            DispatchQueue.main.async {
+                completion(UIImage(named: "video_placeholder"))
+            }
+        }
+    }
+    
+    private func generateRemoteVideoThumbnail(url: URL, completion: @escaping (UIImage?) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let asset = AVAsset(url: url)
+            let assetImageGenerator = AVAssetImageGenerator(asset: asset)
+            assetImageGenerator.appliesPreferredTrackTransform = true
+            assetImageGenerator.maximumSize = CGSize(width: 400, height: 400)
+            
+            let timePoints = [CMTime(seconds: 1.0, preferredTimescale: 600)]
+            
+            for time in timePoints {
+                do {
+                    let cgImage = try assetImageGenerator.copyCGImage(at: time, actualTime: nil)
+                    let thumbnail = UIImage(cgImage: cgImage)
+                    DispatchQueue.main.async {
+                        completion(thumbnail)
+                    }
+                    return
+                } catch {
+                    print("Error generating thumbnail: \(error.localizedDescription)")
+                }
+            }
+            
+            DispatchQueue.main.async {
+                completion(UIImage(named: "video_placeholder"))
+            }
+        }
+    }
+    
+    private func tryThumbnailURLs(_ urls: [URL], for cacheKey: String, index: Int = 0, completion: @escaping (UIImage?) -> Void) {
+        guard index < urls.count else {
+            completion(UIImage(named: "youtube_placeholder"))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: urls[index]) { [weak self] data, _, error in
+            guard let self = self else { return }
+            
+            if let data = data, let image = UIImage(data: data) {
+                self.thumbnailCache.setObject(image, forKey: cacheKey as NSString)
+                DispatchQueue.main.async {
+                    completion(image)
+                }
+            } else {
+                self.tryThumbnailURLs(urls, for: cacheKey, index: index + 1, completion: completion)
+            }
+        }.resume()
+    }
+    
+    // MARK: - PDF Thumbnail
+    private func loadPDFThumbnail(for post: Post) {
+        if let thumbnailImage = post.thumbnailImage?.first,
+           let image = loadImageFromBase64(thumbnailImage) {
+            mainImageView.image = image
+            mainImageView.contentMode = .scaleAspectFit
+            return
+        }
+        
+        mainImageView.image = UIImage(named: "defaultpdf")
+        mainImageView.contentMode = .scaleAspectFit
+        mainImageView.backgroundColor = .systemGray6
+    }
+    
+    private func loadImageFromBase64(_ base64String: String) -> UIImage? {
+        guard let decodedData = Data(base64Encoded: base64String) else {
+            return nil
+        }
+        return UIImage(data: decodedData)
+    }
     
     // MARK: - Audio Player
-    func setupAudioPlayer() {
-        guard let url = decodeBase64String(videoPlayerURL ?? "") else { return }
-        guard let url = URL(string: url) else {
+    private func setupAudioPlayer(with urlString: String) {
+        guard let url = URL(string: urlString) else {
             print("Invalid URL")
             return
         }
         
         audioPlayer = AVPlayer(url: url)
         
-        let interval = CMTime(seconds: 1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserverToken = audioPlayer?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self = self, let duration = self.audioPlayer?.currentItem?.duration else { return }
             let totalSeconds = CMTimeGetSeconds(duration)
             let currentSeconds = CMTimeGetSeconds(time)
             
-            self.audioSlider.value = Float(currentSeconds / totalSeconds)
+            if totalSeconds.isFinite && totalSeconds > 0 {
+                self.audioSlider.value = Float(currentSeconds / totalSeconds)
+            }
         }
     }
     
-    func setupSlider() {
+    private func setupSlider() {
         audioSlider.minimumValue = 0
         audioSlider.maximumValue = 1
         audioSlider.value = 0
         audioSlider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
     }
     
-    @objc func sliderValueChanged(_ sender: UISlider) {
+    @objc private func sliderValueChanged(_ sender: UISlider) {
         guard let player = audioPlayer, let duration = player.currentItem?.duration else { return }
         
         let totalSeconds = CMTimeGetSeconds(duration)
@@ -388,7 +601,12 @@ class FeedPostTableViewCell: UITableViewCell {
     }
     
     @IBAction func playPauseButtonAction(_ sender: Any) {
-        delegate?.taptoNaviagteWithURL(cell: self, videoURL: videoPlayerURL ?? "")
+        guard let videoURLString = videoPlayerURL,
+              let decodedURLString = decodeBase64String(videoURLString) else {
+            return
+        }
+        
+        delegate?.taptoNaviagteWithURL(cell: self, videoURL: decodedURLString)
     }
     
     @IBAction func downloadButtonAction(_ sender: Any) {
@@ -414,240 +632,34 @@ class FeedPostTableViewCell: UITableViewCell {
         }
     }
     
-    // MARK: - Image Loading Methods
-    private func loadImageForAdminImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
-        guard let decodedURLString = decodeBase64String(urlString),
-              let url = URL(string: decodedURLString) else {
-            completion(nil)
-            return
-        }
-        
-        URLSession.shared.dataTask(with: url) { data, _, error in
-            if let error = error {
-                print("Error loading admin image: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    completion(image)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    completion(nil)
-                }
-            }
-        }.resume()
-    }
-    
-    private func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
-        guard let decodedURLString = decodeBase64String(urlString),
-              let url = URL(string: decodedURLString) else {
-            completion(UIImage(named: "image_placeholder"))
-            return
-        }
-        
-        URLSession.shared.dataTask(with: url) { data, _, error in
-            if let error = error {
-                print("Error loading image: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    completion(UIImage(named: "image_placeholder"))
-                }
-                return
-            }
-            
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    completion(image)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    completion(UIImage(named: "image_placeholder"))
-                }
-            }
-        }.resume()
-    }
-    
-    // MARK: - Thumbnail Methods
-    private func setVideoThumbnail(from videoURLString: String, completion: @escaping (UIImage?) -> Void) {
-        guard let decodedURLString = decodeBase64String(videoURLString) else {
-            completion(UIImage(named: "video_placeholder"))
-            return
-        }
-        
-        if decodedURLString.hasPrefix("file://") {
-            let filePath = String(decodedURLString.dropFirst("file://".count))
-            let fileURL = URL(fileURLWithPath: filePath)
-            generateThumbnailForLocalVideo(url: fileURL, completion: completion)
-        } else if let url = URL(string: decodedURLString) {
-            generateThumbnailForRemoteVideo(url: url, completion: completion)
-        } else {
-            completion(UIImage(named: "video_placeholder"))
-        }
-    }
-    
-    private func setYouTubeThumbnail(from urlString: String, completion: @escaping (UIImage?) -> Void) {
-        guard let videoId = extractYouTubeVideoId(from: urlString) else {
-            completion(UIImage(named: "youtube_placeholder"))
-            return
-        }
-        
-        let thumbnailURLs = [
-            URL(string: "https://img.youtube.com/vi/\(videoId)/maxresdefault.jpg"),
-            URL(string: "https://img.youtube.com/vi/\(videoId)/hqdefault.jpg"),
-            URL(string: "https://img.youtube.com/vi/\(videoId)/mqdefault.jpg"),
-            URL(string: "https://img.youtube.com/vi/\(videoId)/default.jpg")
-        ].compactMap { $0 }
-        
-        tryThumbnailURLs(thumbnailURLs, completion: completion)
-    }
-    
-    private func generateThumbnailForLocalVideo(url: URL, completion: @escaping (UIImage?) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let asset = AVAsset(url: url)
-            let assetImageGenerator = AVAssetImageGenerator(asset: asset)
-            assetImageGenerator.appliesPreferredTrackTransform = true
-            
-            let timePoints = [0.1, 1.0, 5.0]
-            
-            for time in timePoints {
-                do {
-                    let cmTime = CMTime(seconds: time, preferredTimescale: 600)
-                    let cgImage = try assetImageGenerator.copyCGImage(at: cmTime, actualTime: nil)
-                    let thumbnail = UIImage(cgImage: cgImage)
-                    DispatchQueue.main.async {
-                        completion(thumbnail)
-                    }
-                    return
-                } catch {
-                    print("Error generating thumbnail at \(time) seconds: \(error.localizedDescription)")
-                }
-            }
-            
-            DispatchQueue.main.async {
-                completion(UIImage(named: "video_placeholder"))
-            }
-        }
-    }
-    
-    private func generateThumbnailForRemoteVideo(url: URL, completion: @escaping (UIImage?) -> Void) {
-        let tempFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
-        
-        let downloadTask = URLSession.shared.downloadTask(with: url) { tempLocation, response, error in
-            guard let tempLocation = tempLocation else {
-                DispatchQueue.main.async {
-                    completion(UIImage(named: "video_placeholder"))
-                }
-                return
-            }
-            
-            do {
-                try FileManager.default.moveItem(at: tempLocation, to: tempFileURL)
-                self.generateThumbnailForLocalVideo(url: tempFileURL) { image in
-                    try? FileManager.default.removeItem(at: tempFileURL)
-                    completion(image)
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    completion(UIImage(named: "video_placeholder"))
-                }
-            }
-        }
-        downloadTask.resume()
-    }
-    
-    private func extractYouTubeVideoId(from urlString: String) -> String? {
-        let patterns = [
-            #"youtu\.be\/([^\?]+)"#,
-            #"youtube\.com\/watch\?v=([^&]+)"#,
-            #"youtube\.com\/embed\/([^\/]+)"#,
-            #"youtube\.com\/v\/([^\/]+)"#
-        ]
-        
-        for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern),
-               let match = regex.firstMatch(in: urlString, range: NSRange(urlString.startIndex..., in: urlString)),
-               let range = Range(match.range(at: 1), in: urlString) {
-                return String(urlString[range])
-            }
-        }
-        
-        return nil
-    }
-    
-    private func tryThumbnailURLs(_ urls: [URL], index: Int = 0, completion: @escaping (UIImage?) -> Void) {
-        guard index < urls.count else {
-            completion(UIImage(named: "youtube_placeholder"))
-            return
-        }
-        
-        URLSession.shared.dataTask(with: urls[index]) { data, _, error in
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    completion(image)
-                }
-            } else {
-                self.tryThumbnailURLs(urls, index: index + 1, completion: completion)
-            }
-        }.resume()
-    }
-    
-    // MARK: - PDF Icon
-    private func loadPDFIcon() {
-        if let thumbnailImage = post?.thumbnailImage?.first,
-           let image = loadImageFromBase64(thumbnailImage) {
-            mainImageView.image = image
-            return
-        }
-        
-        mainImageView.image = UIImage(named: "pdf_icon")
-        mainImageView.contentMode = .scaleAspectFit
-        mainImageView.backgroundColor = .lightGray
-    }
-    
-    private func loadImageFromBase64(_ base64String: String) -> UIImage? {
-        guard let decodedData = Data(base64Encoded: base64String) else {
-            return nil
-        }
-        return UIImage(data: decodedData)
-    }
-    
     // MARK: - Base64 Decoding
     private func decodeBase64String(_ base64String: String) -> String? {
         guard !base64String.isEmpty else { return nil }
-        
-        if base64String.hasPrefix("http://") ||
-            base64String.hasPrefix("https://") ||
-            base64String.hasPrefix("file://") {
-            return base64String
-        }
         
         let cleanedString = base64String
             .replacingOccurrences(of: "\n", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         
+        // If it's already a URL (not base64), return it
+        if cleanedString.hasPrefix("http://") ||
+           cleanedString.hasPrefix("https://") ||
+           cleanedString.hasPrefix("file://") {
+            return cleanedString
+        }
+        
+        // Decode base64
         guard let decodedData = Data(base64Encoded: cleanedString),
-              var decodedString = String(data: decodedData, encoding: .utf8) else {
+              let decodedString = String(data: decodedData, encoding: .utf8) else {
             return nil
         }
         
-        decodedString = decodedString
+        return decodedString
             .replacingOccurrences(of: "\n", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        if decodedString.hasPrefix("file://") {
-            return decodedString
-        }
-        
-        if decodedString.contains("http://") || decodedString.contains("https://") {
-            return decodedString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        }
-        
-        return decodedString
     }
 }
-     
+//
+//// MARK: - LinkLabel
 class LinkLabel: UILabel {
     private var links: [String: URL] = [:]
     private var linkRanges: [NSRange] = []
@@ -702,12 +714,10 @@ class LinkLabel: UILabel {
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
         guard let attributedText = self.attributedText else { return }
 
-        // Create layout manager, text container and NSTextStorage
         let layoutManager = NSLayoutManager()
         let textContainer = NSTextContainer(size: self.bounds.size)
         let textStorage = NSTextStorage(attributedString: attributedText)
 
-        // Configure
         layoutManager.addTextContainer(textContainer)
         textStorage.addLayoutManager(layoutManager)
 
@@ -715,7 +725,6 @@ class LinkLabel: UILabel {
         textContainer.maximumNumberOfLines = self.numberOfLines
         textContainer.lineBreakMode = self.lineBreakMode
 
-        // Get the tapped character location
         let location = gesture.location(in: self)
         let textBoundingBox = layoutManager.usedRect(for: textContainer)
         let textOffset = CGPoint(
@@ -724,14 +733,12 @@ class LinkLabel: UILabel {
         )
         let locationInTextContainer = CGPoint(x: location.x - textOffset.x, y: location.y - textOffset.y)
 
-        // Get index of character
         let index = layoutManager.characterIndex(
             for: locationInTextContainer,
             in: textContainer,
             fractionOfDistanceBetweenInsertionPoints: nil
         )
 
-        // Check if tapped on link
         for (range, urlString) in zip(linkRanges, links.keys) {
             if range.contains(index), let url = links[urlString] {
                 onLinkTapped?(url)
@@ -739,9 +746,42 @@ class LinkLabel: UILabel {
             }
         }
     }
-
-    
 }
+//
+//// MARK: - URL Extensions
+extension String {
+    var isYouTubeURL: Bool {
+        return contains("youtube.com") || contains("youtu.be")
+    }
+    
+    var youtubeVideoID: String? {
+        let patterns = [
+            #"youtu\.be\/([^\?]+)"#,
+            #"youtube\.com\/watch\?v=([^&]+)"#,
+            #"youtube\.com\/embed\/([^\/]+)"#,
+            #"youtube\.com\/v\/([^\/]+)"#
+        ]
+        
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern),
+               let match = regex.firstMatch(in: self, range: NSRange(startIndex..., in: self)),
+               let range = Range(match.range(at: 1), in: self) {
+                return String(self[range])
+            }
+        }
+        
+        return nil
+    }
+}
+//
+extension URL {
+    var isFileURL: Bool {
+        return scheme == "file"
+    }
+}
+//
+
+
 //    @IBAction func shareButtonAction(_ sender: Any) {
 //        // Prepare the content you want to share
 //        let url = decodeBase64String(videoPlayerURL ?? "")

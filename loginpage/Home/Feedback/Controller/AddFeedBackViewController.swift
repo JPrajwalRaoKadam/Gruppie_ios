@@ -47,7 +47,7 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
 
         TableView.delegate = self
         TableView.dataSource = self
-        TableView.register(UINib(nibName: "AddFeedBackTableViewCell", bundle: nil), forCellReuseIdentifier: "AddFeedBackCell")
+        TableView.register(UINib(nibName: "AddFeedBackTableViewCell", bundle: nil), forCellReuseIdentifier: "AddFeedBackTableViewCell")
         
         print("Received Group ID Add Feedback: \(groupId ?? "No Group ID")")
         print("Received Token Add Feedback: \(token ?? "No Token")")
@@ -200,8 +200,8 @@ extension AddFeedBackViewController: UITableViewDataSource, UITableViewDelegate 
 //
 //        return cell
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "", for: indexPath) as! AddFeedBackTableViewCell
-       
+        let cell = tableView.dequeueReusableCell(withIdentifier: "AddFeedBackTableViewCell", for: indexPath) as! AddFeedBackTableViewCell
+
 //        cell.QuestionNo.text = "\(indexPath.row + 1)"
 //        self.option = cell.Question.text
         

@@ -11,6 +11,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     var groupDatas: [GroupData] = []
     var currentRole: String?
     private var isProcessingSelection = false
+    var logoutDropdownView: UIView?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,7 +23,9 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
             // Prefetch all images to cache
             let urls = self.schools.compactMap { self.getImageURL(from: $0.image) }
             SDWebImagePrefetcher.shared.prefetchURLs(urls)
-
+            let tapOutside = UITapGestureRecognizer(target: self, action: #selector(dismissLogoutDropdown))
+            tapOutside.cancelsTouchesInView = false
+            self.view.addGestureRecognizer(tapOutside)
             self.teamCollectionView.reloadData()
         }
 
@@ -32,16 +35,68 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     }
 
     @IBAction func logoutTapped(_ sender: UIButton) {
+        // Remove previous dropdown if visible
+        logoutDropdownView?.removeFromSuperview()
+
+        // Get the button’s position in the view's coordinate space
+        guard let buttonSuperview = sender.superview else { return }
+        let buttonFrameInView = buttonSuperview.convert(sender.frame, to: self.view)
+
+        // Define size of logout overlay
+        let overlayWidth = 100.0
+        let overlayHeight: CGFloat = 40
+
+        // Place overlay **exactly over the button**
+        let overlayFrame = CGRect(x: buttonFrameInView.origin.x - 60,
+                                  y: buttonFrameInView.origin.y - 10,
+                                  width: overlayWidth,
+                                  height: overlayHeight)
+
+        // Create view
+        let dropdownView = UIView(frame: overlayFrame)
+        dropdownView.backgroundColor = .white
+        dropdownView.layer.cornerRadius = 8
+        dropdownView.layer.borderWidth = 1
+        dropdownView.layer.borderColor = UIColor.lightGray.cgColor
+        dropdownView.clipsToBounds = true
+
+        // Add "Logout" label or button
+        let label = UILabel(frame: dropdownView.bounds)
+        label.text = "Logout"
+        label.textAlignment = .center
+        label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.isUserInteractionEnabled = true
+        dropdownView.addSubview(label)
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleLogoutTap))
+        label.addGestureRecognizer(tap)
+
+        // Add to main view
+        self.view.addSubview(dropdownView)
+        self.logoutDropdownView = dropdownView
+    }
+    
+    @objc func handleLogoutTap() {
+        logoutDropdownView?.removeFromSuperview()
+
+        // Perform logout
         UserDefaults.standard.removeObject(forKey: "isLoggedIn")
         UserDefaults.standard.removeObject(forKey: "loggedInPhone")
 
-        if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate {
+        if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
             sceneDelegate.window?.rootViewController = UINavigationController(rootViewController: loginVC)
         }
     }
 
+
+    @objc func dismissLogoutDropdown(_ sender: UITapGestureRecognizer) {
+        logoutDropdownView?.removeFromSuperview()
+    }
+
+    
     // MARK: - Collection View Data Source
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return schools.count

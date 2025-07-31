@@ -9,7 +9,7 @@ import UIKit
 import MobileCoreServices
 import AVKit
 import UniformTypeIdentifiers
-import Photos
+import PhotosUI
 
 enum fileType : String {
     case image      = "image"
@@ -27,7 +27,8 @@ protocol AddFeedInfoCellDelegate: AnyObject {
 }
 
 
-class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, UITextFieldDelegate, UITextViewDelegate {
+class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, UITextFieldDelegate, UITextViewDelegate, PHPickerViewControllerDelegate {
+    
     
     @IBOutlet weak var postNAme: UITextField!
     @IBOutlet weak var textView: UITextView!
@@ -92,24 +93,56 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     }
 
     func submitFeedInfo() {
-        print("Image is present: \(image != nil)")
-        print("Document URL: \(documentURL?.absoluteString ?? "None")")
+        print("➡️ submitFeedInfo() called")
+        print("📸 Image: \(image != nil ? "Available" : "nil")")
+        print("📄 Document URL: \(documentURL?.absoluteString ?? "nil")")
+        print("📹 Video URL: \(vidUrl?.absoluteString ?? "nil")")
+        print("🔗 YouTube URL: \(pdfNameLabel.text ?? "nil")")
         
-        if let image = image, pdfNameLabel.isHidden {
+        finalURL = nil // Clear previous
+        filetype = fileType.none.rawValue
+
+        // 1️⃣ Priority: YouTube Link
+        if let youtubeURL = pdfNameLabel.text, !youtubeURL.isEmpty, isValidYouTubeURL(youtubeURL) {
+            print("✅ Using YouTube URL")
+            finalURL = URL(string: youtubeURL)
+            filetype = fileType.youtube.rawValue
+
+        // 2️⃣ Priority: Video
+        } else if let videoUrl = self.vidUrl {
+            print("✅ Using Video URL")
+            finalURL = videoUrl
+            image = contentImage.image // Also assign thumbnail image
+            filetype = fileType.video.rawValue
+
+        // 3️⃣ Priority: Image
+        } else if let image = image {
+            print("✅ Using Image")
             if let imageURL = saveImageToDocumentsDirectory(image: image) {
                 finalURL = imageURL
+                filetype = fileType.image.rawValue
             }
-        } else if let youtubeURL = pdfNameLabel.text, !youtubeURL.isEmpty, isValidYouTubeURL(youtubeURL) {
-            finalURL = URL(string: youtubeURL) ?? URL(fileURLWithPath: "")
-        } else if let videoUrl = self.vidUrl{
-            finalURL = videoUrl
-            image = contentImage.image
-        }else if let documentURL = documentURL {
+
+        // 4️⃣ Priority: Document (PDF or others)
+        } else if let documentURL = documentURL {
+            print("✅ Using Document URL")
             finalURL = documentURL
+            filetype = fileType.pdf.rawValue
         }
-        
-        delegate?.assignFinalUrl(finalUrl: finalURL ?? URL(fileURLWithPath: ""))
+
+        // Fallback
+        if finalURL == nil {
+            print("⚠️ No valid content selected.")
+            finalURL = URL(fileURLWithPath: "")
+            filetype = fileType.none.rawValue
+        }
+
+        delegate?.assignFinalUrl(finalUrl: finalURL!)
+        print("📦 Final URL: \(finalURL!.absoluteString)")
+        print("📝 Filetype: \(filetype)")
     }
+
+
     
     // Function to save image to documents directory and return its URL
     private func saveImageToDocumentsDirectory(image: UIImage) -> URL? {
@@ -129,24 +162,16 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     
     
     private func openMediaPicker(for type: String) {
-        guard let parentVC = parentViewController else {
-            print("Parent view controller is not set")
-            return
-        }
-        
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        
-        if type == "image" {
-            imagePicker.mediaTypes = [kUTTypeImage as String]
-            // Only images
-        } else if type == "video" {
-            imagePicker.mediaTypes = [kUTTypeMovie as String, kUTTypeVideo as String] // Only videos
-        }
-        parentVC.present(imagePicker, animated: true, completion: nil)
-        submitFeedInfo()
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 1
+        config.filter = type == "video" ? .videos : .images
+
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = self
+        parentViewController?.present(picker, animated: true)
     }
+
+
     
     private func openDocumentPicker() {
         // Allow access to all file types
@@ -460,37 +485,122 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
         
-        //        dataViewHeightCn.constant = 150
-        //        mainViewHtCn.constant = 448
-        
         if let selectedImage = info[.originalImage] as? UIImage {
-            // Set the selected image into contentImage
+            print("Picked an image")
             contentImage.image = selectedImage
-            image = contentImage.image
+            image = selectedImage
+            vidUrl = nil
+            documentURL = nil
+            pdfNameLabel.text = nil
+
             submitFeedInfo()
-            contentCancel.isHidden = false // Show the cancel button
-            
-            // Hide document name
+            contentCancel.isHidden = false
             pdfNameLabel.isHidden = true
-            
-            parentViewController?.view.layoutIfNeeded()
-        } else if let videoURL = info[.mediaURL] as? URL {
-            
-            //            dataViewHeightCn.constant = 150
-            //            mainViewHtCn.constant = 448
-            //
-            // Generate thumbnail and set it into contentImage
-            contentImage.image = generateThumbnail(for: videoURL)
-            self.vidUrl = videoURL
-            submitFeedInfo()
-            contentCancel.isHidden = false // Show the cancel button
-            
-            // Hide document name
-            pdfNameLabel.isHidden = true
-            
-            parentViewController?.view.layoutIfNeeded()
+
+        } else if let mediaType = info[.mediaType] as? String, mediaType == "public.movie" {
+            print("Media type is video")
+
+            if let mediaURL = info[.mediaURL] as? URL {
+                // Video picked from Files or recorded
+                print("Picked video URL: \(mediaURL)")
+                contentImage.image = generateThumbnail(for: mediaURL)
+                vidUrl = mediaURL
+                image = contentImage.image
+                documentURL = nil
+                pdfNameLabel.text = nil
+
+                submitFeedInfo()
+                contentCancel.isHidden = false
+                pdfNameLabel.isHidden = true
+
+            } else if let refURL = info[.referenceURL] as? URL {
+                // Video picked from Photos library (asset URL)
+                print("Picked reference URL: \(refURL)")
+                fetchVideoURLFromPhotoLibrary(refURL: refURL)
+            }
+
+        } else {
+            print("⚠️ Neither image nor video was selected.")
+        }
+
+        parentViewController?.view.layoutIfNeeded()
+    }
+
+    private func fetchVideoURLFromPhotoLibrary(refURL: URL) {
+        let options = PHFetchOptions()
+        options.fetchLimit = 1
+        let assets = PHAsset.fetchAssets(withALAssetURLs: [refURL], options: options)
+
+        guard let asset = assets.firstObject else {
+            print("❌ Failed to fetch asset for reference URL")
+            return
+        }
+
+        let manager = PHImageManager.default()
+        let videoOptions = PHVideoRequestOptions()
+        videoOptions.deliveryMode = .highQualityFormat
+
+        PHImageManager.default().requestAVAsset(forVideo: asset, options: videoOptions) { avAsset, audioMix, info in
+            if let urlAsset = avAsset as? AVURLAsset {
+                let localVideoUrl = urlAsset.url
+                print("✅ Got local video URL from library: \(localVideoUrl)")
+
+                DispatchQueue.main.async {
+                    self.contentImage.image = self.generateThumbnail(for: localVideoUrl)
+                    self.vidUrl = localVideoUrl
+                    self.image = self.contentImage.image
+                    self.documentURL = nil
+                    self.pdfNameLabel.text = nil
+                    self.submitFeedInfo()
+                    self.contentCancel.isHidden = false
+                    self.pdfNameLabel.isHidden = true
+                }
+            } else {
+                print("❌ Failed to get AVURLAsset from PHAsset")
+            }
         }
     }
+
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+          picker.dismiss(animated: true)
+
+          guard let itemProvider = results.first?.itemProvider else { return }
+
+          if itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+              itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { url, error in
+                  guard let url = url else { return }
+                  let fileName = UUID().uuidString + ".mov"
+                  let destURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+
+                  do {
+                      try FileManager.default.copyItem(at: url, to: destURL)
+                      DispatchQueue.main.async {
+                          self.vidUrl = destURL
+                          self.contentImage.image = self.generateThumbnail(for: destURL)
+                          self.image = self.contentImage.image
+                          self.submitFeedInfo()
+                          self.contentCancel.isHidden = false
+                          self.pdfNameLabel.isHidden = true
+                      }
+                  } catch {
+                      print("❌ Failed to copy video file: \(error)")
+                  }
+              }
+          } else if itemProvider.canLoadObject(ofClass: UIImage.self) {
+              itemProvider.loadObject(ofClass: UIImage.self) { image, error in
+                  DispatchQueue.main.async {
+                      if let selectedImage = image as? UIImage {
+                          self.image = selectedImage
+                          self.contentImage.image = selectedImage
+                          self.vidUrl = nil
+                          self.submitFeedInfo()
+                          self.contentCancel.isHidden = false
+                          self.pdfNameLabel.isHidden = true
+                      }
+                  }
+              }
+          }
+      }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)

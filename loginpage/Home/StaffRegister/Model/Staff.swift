@@ -54,38 +54,46 @@ struct Staff: Decodable {
 
 
 struct StaffDetailsResponse: Codable {
-    let status: String?
-    let data: StaffDetailsData
+    var status: String?
+    var data: StaffDetailsData
 }
 
 struct StaffDetailsData: Codable {
-    let staffId: String
-    let aadharNumber: String
-    let address: String
-    let bankAccountNumber: String
-    let bankIfscCode: String
-    let bloodGroup: String
-    let caste: String
-    let designation: String
-    let disability: String
-    let dob: String
-    let doj: String
-    let email: String
-//    let emergencyContactNumber: String
-//    let fatherName: String
-    let gender: String
-    let image: String?
-//    let motherName: String
-    let name: String
-    let panNumber: String
-    let phone: String
-//    let profession: String
-    let qualification: String
-    let religion: String
-    let staffCategory: String
-    let type: String
-    let uanNumber: String
-    let classType: String?
+    var staffId: String?
+    var aadharNumber: String?
+    var address: String?
+    var bankAccountNumber: String?
+    var bankIfscCode: String?
+    var bloodGroup: String?
+    var caste: String?
+    var designation: String?
+    var disability: String?
+    var dob: String?
+    var doj: String?
+    var email: String?
+//    var emergencyContactNumber: String
+//    var fatherName: String
+    var gender: String?
+    var image: String?
+//    var motherName: String
+    var name: String?
+    var panNumber: String?
+    var phone: String?
+//    var profession: String
+    var qualification: String?
+    var religion: String?
+    var staffCategory: String?
+    var type: String?
+    var uanNumber: String?
+    var classType: String?
+    var country: String?
+    
+    var className: String?
+    var emailId: String?
+    var aadharNo: String?
+    
+    var bankAccount: String?
+    var bankIfsc: String?
 }
 
 struct StaffBasicInfoModel {
