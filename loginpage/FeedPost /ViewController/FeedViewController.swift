@@ -79,12 +79,12 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     private func setupKeyboardDismiss() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardd))
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
     
-    @objc private func dismissKeyboard() {
+    @objc private func dismissKeyboardd() {
         view.endEditing(true)
     }
     

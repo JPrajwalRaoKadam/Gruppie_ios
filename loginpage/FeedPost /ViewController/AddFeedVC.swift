@@ -6,45 +6,141 @@
 //
 
 import UIKit
+import AVFoundation
+import PDFKit
 
 class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AddFeedInfoCellDelegate {
     
     @IBOutlet weak var addFeedTableView: UITableView!
     @IBOutlet weak var submitButton: UIButton!
     
-    
-    var postName : String = ""
+    var postName: String = ""
     var postDescription: String?
     var contentImage: UIImage?
     var documentURL: URL?
+    var localVideofilePath: [URL] = []
+    var localThumbfilePath: [URL] = []
     
-    var selectedIndexPath: IndexPath? // Keeps track of the selected index
+    var selectedIndexPath: IndexPath?
     var groupID: String?
     var teamPosts: [TeamPost] = []
     var currentPage: Int = 1
-    var isLoading: Bool = false // To prevent multiple API calls at the same time
+    var isLoading: Bool = false
     var response: PostResponse?
     
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        // Register table view cells
         addFeedTableView.register(UINib(nibName: "AddFeedInfoTableViewCell", bundle: nil), forCellReuseIdentifier: "AddFeedInfoTableViewCell")
         addFeedTableView.register(UINib(nibName: "ClassTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassTableViewCell")
         
-        // Fetch initial team data
         loadTeams()
         
         submitButton.layer.cornerRadius = 10
-        // Set delegate and data source
         addFeedTableView.delegate = self
         addFeedTableView.dataSource = self
         
-        // Enable dynamic row height
         addFeedTableView.estimatedRowHeight = 100
         addFeedTableView.rowHeight = UITableView.automaticDimension
         enableKeyboardDismissOnTap()
     }
+    
+    // MARK: - Video Compression and Thumbnail Generation
+    
+    fileprivate func compressWithSessionStatusFunc(_ videoUrl: NSURL) {
+        let compressedURL = NSURL.fileURL(withPath: NSTemporaryDirectory() + NSUUID().uuidString + ".mp4")
+       
+        compressVideo(inputURL: videoUrl as URL, outputURL: compressedURL) { (exportSession) in
+            guard let session = exportSession else {
+                return
+            }
+            
+            switch session.status {
+            case .completed:
+                guard let compressedData = NSData(contentsOf: compressedURL) else {
+                    return
+                }
+                
+                print("File size after compression: \(Double(compressedData.length / 1048576)) mb")
+                self.localVideofilePath.append(compressedURL)
+                self.saveImageFromVideo(url: compressedURL, at: 0)
+                
+            case .failed, .cancelled:
+                print("Video compression failed or was cancelled")
+            default:
+                break
+            }
+        }
+    }
+    
+    func compressVideo(inputURL: URL, outputURL: URL, handler:@escaping (_ exportSession: AVAssetExportSession?)-> Void) {
+        let urlAsset = AVURLAsset(url: inputURL, options: nil)
+        guard let exportSession = AVAssetExportSession(asset: urlAsset, presetName: AVAssetExportPreset1280x720) else {
+            handler(nil)
+            return
+        }
+        
+        exportSession.outputURL = outputURL
+        exportSession.outputFileType = AVFileType.mov
+        exportSession.shouldOptimizeForNetworkUse = true
+        exportSession.exportAsynchronously { () -> Void in
+            handler(exportSession)
+        }
+    }
+    
+    func saveImageFromVideo(url: URL, at time: TimeInterval) {
+        let asset = AVURLAsset(url: url)
+        let assetIG = AVAssetImageGenerator(asset: asset)
+        assetIG.appliesPreferredTrackTransform = true
+        assetIG.apertureMode = AVAssetImageGenerator.ApertureMode.encodedPixels
+
+        let cmTime = CMTime(seconds: time, preferredTimescale: 60)
+        let thumbnailImageRef: CGImage
+        do {
+            thumbnailImageRef = try assetIG.copyCGImage(at: cmTime, actualTime: nil)
+            var documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let uniqueId = NSUUID().uuidString.lowercased()
+            let fileName = uniqueId + ".jpg"
+            let fileURL = documentsDirectory.appendingPathComponent(fileName)
+            
+            if let data = UIImage(cgImage: thumbnailImageRef).jpegData(compressionQuality: 0.3),
+                !FileManager.default.fileExists(atPath: fileURL.path) {
+                try data.write(to: fileURL)
+                self.localThumbfilePath.append(fileURL)
+                print("THUMBNAIL_file saved", fileURL)
+            }
+        } catch let error {
+            print("Error generating thumbnail: \(error)")
+        }
+    }
+    
+    func imageFromPdf(url: URL) -> UIImage? {
+        let pdfDocument = PDFDocument(url: url)
+        let pdfDocumentPage = pdfDocument?.page(at: 0)
+        let pdfThumbNailImage = pdfDocumentPage?.thumbnail(of: CGSize(width: 200, height: 350), for: PDFDisplayBox.trimBox)
+        
+        do {
+            var documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let uniqueId = NSUUID().uuidString.lowercased()
+            let fileName = uniqueId + ".jpg"
+            documentsDirectory = documentsDirectory.appendingPathComponent("thumbImages")
+            let fileURL = documentsDirectory.appendingPathComponent(fileName)
+            
+            if let data = pdfThumbNailImage!.jpegData(compressionQuality: 0.4),
+                !FileManager.default.fileExists(atPath: fileURL.path) {
+                try data.write(to: fileURL)
+                self.localThumbfilePath.append(fileURL)
+                print("PDF thumbnail saved", fileURL)
+            }
+        } catch let error {
+            print("Error saving PDF thumbnail: \(error)")
+            return nil
+        }
+        
+        return pdfThumbNailImage
+    }
+    
+    // MARK: - IBActions
     
     @IBAction func backButtonAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
@@ -52,16 +148,15 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
     
     @IBAction func submitAction(_ sender: Any) {
         let postName = self.postName
-        // Validate if the necessary data is present
+        
         guard let postDescription = self.postDescription else {
             print("Post Name or Post Description is missing")
             return
         }
         
-        // Determine the file type based on the document URL
         var fileType: String = ""
         var fileNameArray: [String] = []
-        var youTube : URL = URL(fileURLWithPath: "")
+        var youTube: URL = URL(fileURLWithPath: "")
         
         if let documentURL = self.documentURL {
             let absoluteString = documentURL.absoluteString.lowercased()
@@ -76,8 +171,11 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                     fileType = "image"
                 case "mp4", "mov", "avi":
                     fileType = "video"
+                    // Compress video if needed
+                    compressWithSessionStatusFunc(documentURL as NSURL)
                 case "pdf":
                     fileType = "pdf"
+                    _ = imageFromPdf(url: documentURL)
                 case "mp3", "aac", "wav":
                     fileType = "audio"
                 default:
@@ -85,15 +183,12 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                 }
             }
 
-            // Convert URL to Base64
             if let base64URL = documentURL.absoluteString.data(using: .utf8)?.base64EncodedString() {
                 youTube = documentURL
                 fileNameArray.append(base64URL)
             }
         }
 
-
-        // Get selected items from the team post (assuming `teamPosts` has selected item)
         var selectedArray: [SelectedItem] = []
         if let selectedIndexPath = self.selectedIndexPath {
             let selectedTeamPost = teamPosts[selectedIndexPath.row]
@@ -105,18 +200,24 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
             selectedArray.append(selectedItem)
         }
 
-        // Construct the AddPostRequest
+        // Prepare thumbnail URLs if available
+        var thumbnailImageArray: [String] = []
+        for thumbURL in localThumbfilePath {
+            if let base64Thumb = thumbURL.absoluteString.data(using: .utf8)?.base64EncodedString() {
+                thumbnailImageArray.append(base64Thumb)
+            }
+        }
+
         let postRequest = AddPostRequest(
-            fileName: fileNameArray,         // Assign the fileName (document URL)
-            fileType: fileType,             // Assign the file type based on the document URL
-            selectedArray: selectedArray,   // Selected items from team posts
-            text: postDescription,                 // Post Name as text
-            thumbnailImage: [],             // Can be populated with actual thumbnail if required
-            title: postName,         // Post Description as title
-            video: ("\(youTube)")                      // Video URL or identifier (if available)
+            fileName: fileNameArray,
+            fileType: fileType,
+            selectedArray: selectedArray,
+            text: postDescription,
+            thumbnailImage: thumbnailImageArray,
+            title: postName,
+            video: "\(youTube)"
         )
 
-        // Proceed with the API call to add the post
         if let bearerToken = TokenManager.shared.getToken() {
             addPost(token: bearerToken, groupId: self.groupID ?? "", postRequest: postRequest) { result in
                 DispatchQueue.main.async {
@@ -124,7 +225,6 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                     case .success(let responseData):
                         print("✅ Post Added Successfully")
                         
-                        // Construct a new Post object from postRequest
                         let newPost = Post(
                             updatedAt: Date().iso8601String,
                             type: postRequest.selectedArray.first?.type ?? "",
@@ -149,13 +249,10 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                             canEdit: true,
                             video: postRequest.video,
                             thumbnail: postRequest.thumbnailImage.first,
-                            thumbnailImage: postRequest.thumbnailImage.isEmpty ? nil : postRequest.thumbnailImage // Fix here
+                            thumbnailImage: postRequest.thumbnailImage.isEmpty ? nil : postRequest.thumbnailImage
                         )
                         
-                        // Append new post to local response data
-                        self.response?.data.insert(newPost, at: 0) // Adds at the top
-                        
-                        print("🆕 Updated Feed: \(self.response?.data.count ?? 0) posts")
+                        self.response?.data.insert(newPost, at: 0)
                         self.navigationController?.popViewController(animated: true)
 
                     case .failure(let error):
@@ -164,8 +261,9 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
                 }
             }
         }
-
     }
+    
+    // MARK: - AddFeedInfoCellDelegate
     
     func assignFinalUrl(finalUrl: URL) {
         self.documentURL = finalUrl
@@ -182,16 +280,15 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
     // MARK: - UITableViewDataSource
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2 // Two sections
+        return 2
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return section == 0 ? 1 : teamPosts.count // First section: 1 row, Second section: 15 rows
+        return section == 0 ? 1 : teamPosts.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            // First section: AddFeedInfoTableViewCell
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "AddFeedInfoTableViewCell", for: indexPath) as? AddFeedInfoTableViewCell else {
                 return UITableViewCell()
             }
@@ -199,7 +296,6 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
             cell.delegate = self
             return cell
         } else {
-            // Second section: ClassTableViewCell
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "ClassTableViewCell", for: indexPath) as? ClassTableViewCell else {
                 return UITableViewCell()
             }
@@ -207,12 +303,10 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
             cell.configure(teamPost: teamPost)
             cell.setFirstLetterAsImage()
             
-            // Configure checkbox state
             let isSelected = selectedIndexPath == indexPath
             let imageName = isSelected ? "checkmark.rectangle.fill" : "rectangle"
             cell.checkBox.setImage(UIImage(systemName: imageName), for: .normal)
             
-            // Add target for the button
             cell.checkBox.tag = indexPath.row
             cell.checkBox.addTarget(self, action: #selector(checkboxTapped(_:)), for: .touchUpInside)
             
@@ -226,14 +320,12 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
         let buttonRow = sender.tag
         let indexPath = IndexPath(row: buttonRow, section: 1)
         
-        // Toggle selection state
         if selectedIndexPath == indexPath {
-            selectedIndexPath = nil // Deselect if already selected
+            selectedIndexPath = nil
         } else {
-            let previousIndexPath = selectedIndexPath // Save the previously selected index
-            selectedIndexPath = indexPath // Update to the new selection
+            let previousIndexPath = selectedIndexPath
+            selectedIndexPath = indexPath
             
-            // Reload the previously selected row (if any) and the new selected row
             var indexPathsToReload: [IndexPath] = [indexPath]
             if let previousIndexPath = previousIndexPath {
                 indexPathsToReload.append(previousIndexPath)
@@ -242,17 +334,17 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
         }
     }
     
+    // MARK: - API Calls
     
     func loadTeams() {
-        guard !isLoading else { return } // Prevent multiple API calls
+        guard !isLoading else { return }
         isLoading = true
         getTeams(groupId: groupID ?? "", page: currentPage) { result in
             switch result {
             case .success(let responseData):
-                self.teamPosts.append(contentsOf: responseData.data) // Append the new data
-                self.currentPage += 1 // Increment the page number for next request
+                self.teamPosts.append(contentsOf: responseData.data)
+                self.currentPage += 1
                 
-                // Update the UI
                 DispatchQueue.main.async {
                     self.addFeedTableView.reloadData()
                 }
@@ -263,42 +355,33 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
         }
     }
     
-    // MARK: - Pagination
-    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let contentHeight = scrollView.contentSize.height
         let offsetY = scrollView.contentOffset.y
         let height = scrollView.frame.size.height
         
-        // Check if the user has scrolled to the bottom of the table view
-        if offsetY > contentHeight - height - 100 { // 100 is a buffer to trigger the load
-            loadTeams() // Load more data
+        if offsetY > contentHeight - height - 100 {
+            loadTeams()
         }
     }
-    
-    // MARK: - API Request
     
     func getTeams(groupId: String, page: Int, completion: @escaping (Result<ResponseData, Error>) -> Void) {
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/feeder/teams/get?page=\(page)"
         
-        // Create URL from the string
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
             return
         }
         
-        // Retrieve the authentication token (replace with your token management method)
         guard let authToken = TokenManager.shared.getToken() else {
             completion(.failure(NSError(domain: "Missing Auth Token", code: 401, userInfo: nil)))
             return
         }
         
-        // Create a URLRequest and set the Authorization header
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.addValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
         
-        // Create the URLSession data task
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
@@ -333,12 +416,10 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
         do {
             let jsonData = try JSONEncoder().encode(postRequest)
             request.httpBody = jsonData
-            // Debugging: Print JSON Body Before Sending
+            
             if let jsonString = String(data: jsonData, encoding: .utf8) {
                 print("📤 Final JSON Body Sent:\n\(jsonString)")
             }
-            
-            request.httpBody = jsonData
         } catch {
             print("❌ JSON Encoding Error: \(error.localizedDescription)")
             completion(.failure(error))
@@ -379,9 +460,7 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
         
         task.resume()
     }
-
 }
-
 
 extension Date {
     var iso8601String: String {
