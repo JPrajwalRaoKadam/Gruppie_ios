@@ -41,6 +41,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         tableView.contentInset = .zero
         tableView.sectionHeaderHeight = 0
         tableView.tableHeaderView = nil
+        tableView.sectionHeaderTopPadding = 10
         
         CustomTabManager.shared.delegate = self
         CustomTabManager.shared.hDelegate = self
@@ -147,11 +148,11 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             let itemsPerRow = 4 // 🔄 Moved outside
 
             if count <= itemsPerRow {
-                return 125
+                return 140
             } else if count <= itemsPerRow * 2 {
-                return 220
+                return 225
             } else if count <= itemsPerRow * 3 {
-                return 315
+                return 320
             }else {
                 // For more than 8 items, calculate rows and return dynamic height
                 let rows = ceil(Double(count) / Double(itemsPerRow))
@@ -237,10 +238,22 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchSubjectDataAndNavigate()
         case "Notes & Videos":
             fetchSubjectDataAndNavigate()
+        case "Gate Management":
+            navigateToGateManagement()
         default:
             print("No navigation configured for type: \(featureIcon.name)")
         }
     }
+    
+    func navigateToGateManagement() {
+                let storyboard = UIStoryboard(name: "GateManagement", bundle: nil)
+                if let GateManagement = storyboard.instantiateViewController(withIdentifier: "GateManagementVC") as? GateManagementVC {
+                    GateManagement.groupId = school?.id ?? ""
+                    GateManagement.currentRole = self.currentRole ?? ""
+                    print("groupId : \(GateManagement.groupId)")
+                    navigationController?.pushViewController(GateManagement, animated: true)
+                }
+            }
     
     func navigateToNotes_Videos(subjects: [SubjectData], teamIds: [String]) {
                 let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
