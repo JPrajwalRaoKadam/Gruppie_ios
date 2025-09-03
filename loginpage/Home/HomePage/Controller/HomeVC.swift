@@ -240,10 +240,21 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchSubjectDataAndNavigate()
         case "Gate Management":
             navigateToGateManagement()
+        case "Gate Pass":
+            navigateToGatePass()
         default:
             print("No navigation configured for type: \(featureIcon.name)")
         }
     }
+    func navigateToGatePass() {
+                let storyboard = UIStoryboard(name: "GatePass", bundle: nil)
+                if let GatePassViewController = storyboard.instantiateViewController(withIdentifier: "GatePass") as? GatePassVC {
+                    GatePassViewController.groupId = school?.id ?? ""
+                    GatePassViewController.currentRole = self.currentRole ?? ""
+                    print("groupId : \(GatePassViewController.groupId)")
+                    navigationController?.pushViewController(GatePassViewController, animated: true)
+                }
+            }
     
     func navigateToGateManagement() {
                 let storyboard = UIStoryboard(name: "GateManagement", bundle: nil)

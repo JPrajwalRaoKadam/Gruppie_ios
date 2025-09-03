@@ -15,7 +15,6 @@ class SyllabusTrackerVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         print("grpid ST: \(groupId)")
         print("TEAMid TT: \(teamId)")
         print("sy class:\(className)")
@@ -26,7 +25,6 @@ class SyllabusTrackerVC: UIViewController {
         enableKeyboardDismissOnTap()
     }
     
-
     @IBAction func segmentControl(_ sender: Any) {
         tableView.reloadData() 
     }
