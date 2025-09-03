@@ -40,7 +40,7 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
     var localAudiofilePath = [URL]()
     // Kanika
     var localThumbfilePath = [URL]()
-    var filetype = fileType.none.rawValue
+//    var filetype = fileType.none.rawValue
     
     var postNameText: String = ""
     var postDescriptionText: String = ""
