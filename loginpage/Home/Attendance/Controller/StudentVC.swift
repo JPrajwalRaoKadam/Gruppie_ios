@@ -251,7 +251,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         }
 
         // Construct the URL
-        let urlString = "\(APIManager.shared.baseURL)groups/\(groupId)/team/\(teamId)/attendance/\(attendanceId)/delete"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/attendance/\(attendanceId)/delete"
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")
             return

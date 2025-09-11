@@ -83,7 +83,7 @@ protocol StudentCellDelegate: AnyObject {
             images.image = nil
             let firstLetter = name.prefix(1).uppercased()
             fallback.text = firstLetter
-            fallback.font = UIFont.boldSystemFont(ofSize: 18)
+            fallback.font = UIFont.boldSystemFont(ofSize: 20)
             fallback.textAlignment = .center
             fallback.textColor = .white
             images.backgroundColor = UIColor.systemIndigo

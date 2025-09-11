@@ -35,7 +35,7 @@ class AttenSettingTableViewCell: UITableViewCell, UITextFieldDelegate {
 
         // Set fallback label text
         fallbackLabel.text = firstLetter
-        fallbackLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        fallbackLabel.font = UIFont.boldSystemFont(ofSize: 20)
         fallbackLabel.textAlignment = .center
         fallbackLabel.textColor = .white
         classimg.backgroundColor = UIColor.systemIndigo

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Exam_listVCTableViewCell" rowHeight="70" id="KGk-i7-Jjw" customClass="Exam_listVCTableViewCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="323" height="70"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="323" height="70"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lew-G6-OPV">
+                        <rect key="frame" x="0.0" y="0.0" width="323" height="70"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="ClassName" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ffi-U1-JFl">
+                                <rect key="frame" x="29.999999999999993" y="25" width="88.333333333333314" height="20.333333333333329"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <accessibility key="accessibilityConfiguration" identifier="ClassNameExamCell"/>
+                        <constraints>
+                            <constraint firstItem="Ffi-U1-JFl" firstAttribute="centerY" secondItem="lew-G6-OPV" secondAttribute="centerY" id="2aD-lk-uJB"/>
+                            <constraint firstItem="Ffi-U1-JFl" firstAttribute="leading" secondItem="lew-G6-OPV" secondAttribute="leading" constant="30" id="sw2-QR-Cwg"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="lew-G6-OPV" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="8MW-n2-Iit"/>
+                    <constraint firstItem="lew-G6-OPV" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="MBQ-Kz-Fg0"/>
+                    <constraint firstAttribute="trailing" secondItem="lew-G6-OPV" secondAttribute="trailing" id="f2H-I2-N5K"/>
+                    <constraint firstAttribute="bottom" secondItem="lew-G6-OPV" secondAttribute="bottom" id="k39-Pu-U11"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <accessibility key="accessibilityConfiguration" identifier="Exam_listVCTableViewCell"/>
+            <connections>
+                <outlet property="classLabel" destination="Ffi-U1-JFl" id="4an-vt-9R1"/>
+            </connections>
+            <point key="canvasLocation" x="132.06106870229007" y="-2.1126760563380285"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

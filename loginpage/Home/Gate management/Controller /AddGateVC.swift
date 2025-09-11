@@ -76,7 +76,7 @@ class AddGateVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             "longitude": "77.58789841085672"
         ]
         
-        guard let url = URL(string: "https://api.gruppie.in/api/v1/groups/\(groupId)/add/gates") else {
+        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/add/gates") else {
             print("❌ Invalid URL")
             return
         }

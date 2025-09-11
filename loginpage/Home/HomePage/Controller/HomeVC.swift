@@ -237,15 +237,33 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         case "Fee Payment New":
             fetchSubjectDataAndNavigate()
         case "Notes & Videos":
+                   fetchSubjectDataAndNavigate()
+        case "Marks Card New":
             fetchSubjectDataAndNavigate()
+        case "Notice Board":
+            navigateToBusRegister()
         case "Gate Management":
             navigateToGateManagement()
         case "Gate Pass":
-            navigateToGatePass()
+            if currentRole == "admin" {
+                navigateToGatePass()
+            } else if currentRole == "parent" {
+                navigateToStatusApprove()
+            } else {
+                print("No navigation configured for role: \(currentRole ?? "nil")")
+            }
         default:
             print("No navigation configured for type: \(featureIcon.name)")
         }
     }
+    func navigateToBusRegister() {
+                let storyboard = UIStoryboard(name: "BusRegister", bundle: nil)
+                if let GatePassViewController = storyboard.instantiateViewController(withIdentifier: "BuslistVC") as? BuslistVC {
+                    GatePassViewController.groupId = school?.id ?? ""
+                    GatePassViewController.currentRole = self.currentRole ?? ""
+                    navigationController?.pushViewController(GatePassViewController, animated: true)
+                }
+            }
     func navigateToGatePass() {
                 let storyboard = UIStoryboard(name: "GatePass", bundle: nil)
                 if let GatePassViewController = storyboard.instantiateViewController(withIdentifier: "GatePass") as? GatePassVC {
@@ -255,6 +273,15 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                     navigationController?.pushViewController(GatePassViewController, animated: true)
                 }
             }
+    func navigateToStatusApprove() {
+        let storyboard = UIStoryboard(name: "GatePass", bundle: nil)
+        if let statusApproveVC = storyboard.instantiateViewController(withIdentifier: "StatusApproveVC") as? StatusApproveVC {
+            statusApproveVC.groupId = school?.id ?? ""
+            print("groupId : \(statusApproveVC.groupId)")
+            navigationController?.pushViewController(statusApproveVC, animated: true)
+        }
+    }
+    
     
     func navigateToGateManagement() {
                 let storyboard = UIStoryboard(name: "GateManagement", bundle: nil)
@@ -276,6 +303,20 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 Notes_VideosVC.teamId = teamIds[indexPath?.row ?? 0]
                     print("groupId of Notes_Videos: \(Notes_VideosVC.groupId)")
                     navigationController?.pushViewController(Notes_VideosVC, animated: true)
+                } else {
+                    print("Failed to instantiate SyllabusTrackerVC")
+                }
+            }
+    func navigateToExamination_ActivityVC(subjects: [SubjectData], teamIds: [String],  userIds: [String]) {
+                let storyboard = UIStoryboard(name: "Examination Activity", bundle: nil)
+            if let examinationActivity = storyboard.instantiateViewController(withIdentifier: "Examination_ActivityVC") as? Examination_ActivityVC {
+                examinationActivity.groupId = school?.id ?? ""
+                examinationActivity.subjects = subjects
+                examinationActivity.currentRole = self.currentRole
+                examinationActivity.token = TokenManager.shared.getToken() ?? ""
+                examinationActivity.teamId = teamIds[indexPath?.row ?? 0]
+                examinationActivity.userId = userIds[indexPath?.row ?? 0]
+                navigationController?.pushViewController(examinationActivity, animated: true)
                 } else {
                     print("Failed to instantiate SyllabusTrackerVC")
                 }
@@ -508,6 +549,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
                         case "Attendance":
                             self.navigateToAttendanceViewControllerWithClass(subjects: subjects, teamIds: teamIds)
+                        case "Marks Card New":
+                            self.navigateToExamination_ActivityVC(subjects: subjects, teamIds: teamIds, userIds: self.userIds)
                         default:
                             print("No navigation configured for type: \(self.featureIcon?.name)")
                             

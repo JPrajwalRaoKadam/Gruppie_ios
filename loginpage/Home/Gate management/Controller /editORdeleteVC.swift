@@ -83,7 +83,7 @@ import UIKit
             return
         }
 
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/gate/\(gateId)/edit?type=delete"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/gate/\(gateId)/edit?type=delete"
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
             return
@@ -132,7 +132,7 @@ import UIKit
             return
         }
         
-        let urlString = "https://api.gruppie.in/api/v1/groups/\(groupId)/gate/\(gateId)/edit?type=edit"
+        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/gate/\(gateId)/edit?type=edit"
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
             return

@@ -5,23 +5,21 @@
 //  Created by apple on 02/09/25.
 //
 
-
     import UIKit
     import AVFoundation
 
-    class GatePassVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    class GatePassVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GatePassReloadDelegate{
        
         @IBOutlet weak var segments: UISegmentedControl!
         @IBOutlet weak var date: UIButton!
         @IBOutlet weak var gatetableview: UITableView!
-        @IBOutlet weak var moreButton: UIButton!
+        @IBOutlet weak var addButton: UIButton!
         
         var groupId: String?
         var currentRole: String?
         var currentDate: String?
         var currentDatePicker: UIDatePicker?
-        var visitorList: [VisitorResponseModel] = []
-        var visitor: VisitorResponseModel?
+        var gatePassList: [GatePassData] = []
         var capturedVisitorImage: UIImage?
         var capturedIDCardImage: UIImage?
         
@@ -40,13 +38,27 @@
             }
             gatetableview.delegate = self
             gatetableview.dataSource = self
-            gatetableview.register(UINib(nibName: "GateManagementCell", bundle: nil), forCellReuseIdentifier: "GateManagementCell")
+            gatetableview.register(UINib(nibName: "GatePassCell", bundle: nil), forCellReuseIdentifier: "GatePassCell")
            // print("role:\(currentRole)")
             print("currentRole in gatemng::::\(currentRole)")
             segment(segments)
             setCurrentDate()
-            fetchVisitorDetails(for: currentDateValue)
+            fetchGatePassData()
+            fetchGatePassList()
         }
+        
+        // MARK: - Delegate Method
+           func reloadGatePassData() {
+               print("🔄 Reloading GatePassVC data")
+               fetchGatePassList()
+           }
+           
+           func fetchGatePassList() {
+               // 👉 Your existing API call code to refresh the table
+               print("📡 Fetching gate pass list...")
+               gatetableview.reloadData()
+           }
+        
         private func getDateForCurrentSegment() -> Date {
             return segments.selectedSegmentIndex == 0 ? Date() : (selectedDate ?? currentDateValue)
         }
@@ -72,7 +84,7 @@
                         self.capturedIDCardImage = image
                         dismiss(animated: true) {
                             // Now navigate to VisitorDetailsVC
-                            self.moveToVisitorDetails()
+                            //self.moveToVisitorDetails()
                         }
                     }
                 } else {
@@ -80,20 +92,6 @@
                 }
             }
 
-            func moveToVisitorDetails() {
-                guard let visitorImage = capturedVisitorImage,
-                      let idCardImage = capturedIDCardImage else {
-                    print("Missing visitor or ID card image")
-                    return
-                }
-
-                if let detailsVC = storyboard?.instantiateViewController(withIdentifier: "VisitorDetailsVC") as? VisitorDetailsVC {
-                    detailsVC.visitorUIImage = visitorImage
-                    detailsVC.idCardUIImage = idCardImage
-                    detailsVC.currentRole = currentRole
-                    navigationController?.pushViewController(detailsVC, animated: true)
-                }
-            }
         
         func showAlert(message: String) {
             DispatchQueue.main.async {
@@ -103,65 +101,49 @@
             }
         }
       
-            func fetchVisitorDetails(for date: Date) {
-                guard let groupId = groupId else {
-                    print("❌ groupId is nil")
-                    return
-                }
-
-                guard let token = TokenManager.shared.getToken() else {
-                    print("❌ Token not found")
-                    return
-                }
-
-                let calendar = Calendar.current
-                let day = calendar.component(.day, from: date)
-                let month = calendar.component(.month, from: date)
-                let year = calendar.component(.year, from: date)
-
-                let urlString = APIManager.shared.baseURL + "groups/\(groupId)/visitor/details/get?day=\(day)&month=\(month)&year=\(year)"
-                print("🔗 Fetching visitor details from: \(urlString)")
-
-                guard let url = URL(string: urlString) else {
-                    print("❌ Invalid URL")
-                    return
-                }
-
-                var request = URLRequest(url: url, timeoutInterval: 15)
-                request.httpMethod = "GET"
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-                URLSession.shared.dataTask(with: request) { data, response, error in
-                    if let error = error {
-                        print("❌ Error: \(error.localizedDescription)")
-                        return
-                    }
-
-                    guard let data = data else {
-                        print("❌ No data received")
-                        return
-                    }
-
-                    // Optional: Debug print
-                    if let rawString = String(data: data, encoding: .utf8) {
-                        print("✅ Raw Response:\n\(rawString)")
-                    }
-
-                    // Decode
-                    do {
-                        let decodedResponse = try JSONDecoder().decode(VisitorListResponse.self, from: data)
-                        self.visitorList = decodedResponse.data
-                        print("✅ Total Visitors: \(self.visitorList.count)")
-
-                        DispatchQueue.main.async {
-                            self.gatetableview.reloadData()
-                        }
-                    } catch {
-                        print("❌ Decoding error: \(error)")
-                    }
-
-                }.resume()
+            // MARK: - API Call
+        func fetchGatePassData(for date: Date? = nil) {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd-MM-yyyy"
+            
+            // If no date provided, use today
+            let dateToUse = date != nil ? dateFormatter.string(from: date!) : dateFormatter.string(from: Date())
+            
+            guard let groupId = groupId else { return }
+            
+            let urlString = APIManager.shared.baseURL + "groups/\(groupId)/gatepass/management?date=\(dateToUse)"
+            
+            guard let url = URL(string: urlString) else { return }
+            guard let token = TokenManager.shared.getToken() else {
+                print("❌ Token not found")
+                return
             }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("❌ API Error:", error)
+                    return
+                }
+                
+                guard let data = data else { return }
+                do {
+                    let decoded = try JSONDecoder().decode(GatePassResponse.self, from: data)
+                    DispatchQueue.main.async {
+                        self.gatePassList = decoded.data
+                        self.gatetableview.reloadData()
+                    }
+                } catch {
+                    print("❌ Decoding error:", error)
+                }
+            }.resume()
+        }
+
+
 
         func setCurrentDate() {
             let formatter = DateFormatter()
@@ -172,21 +154,17 @@
         }
 
         // MARK: - Segments
-    //    @IBAction func segment(_ sender: UISegmentedControl) {
-    //        if segments.selectedSegmentIndex == 0 {
-    //            date.isHidden = true
-    //            fetchVisitorDetails(for: Date()) // current date
-    //        } else if sender.selectedSegmentIndex == 1 {
-    //            date.isHidden = false
-    //
-    //            let dateToUse = selectedDate ?? currentDateValue
-    //            fetchVisitorDetails(for: dateToUse)
-    //        }
-    //    }
         @IBAction func segment(_ sender: UISegmentedControl) {
-            date.isHidden = sender.selectedSegmentIndex == 0
-            fetchVisitorDetails(for: getDateForCurrentSegment())
+            if sender.selectedSegmentIndex == 0 {
+                date.isHidden = true   // Hide date button
+                fetchGatePassData(for: Date()) // ✅ always current date
+            } else if sender.selectedSegmentIndex == 1 {
+                date.isHidden = false  // Show date button
+                let dateToUse = selectedDate ?? currentDateValue
+                fetchGatePassData(for: dateToUse) // ✅ user-selected date
+            }
         }
+
         
         // MARK: - Date Picker
         @IBAction func datepicker(_ sender: Any) {
@@ -262,7 +240,7 @@
                 print("Selected Date: \(selectedDateString)")
 
                 if segments.selectedSegmentIndex == 1 {
-                    fetchVisitorDetails(for: datePicker.date)
+                    fetchGatePassData(for: datePicker.date)
                 }
 
                 if let backgroundView = sender.superview?.superview {
@@ -284,173 +262,39 @@
         }
 
         // MARK: - Side Menu
-        @IBAction func moreButton(_ sender: Any) {
-            showSideMenu()
-        }
-        func showSideMenu() {
-            // Remove existing views if already showing
-            dimmedView?.removeFromSuperview()
-            sideMenuView?.removeFromSuperview()
-            
-            dimmedView = UIView(frame: self.view.bounds)
-            dimmedView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
-            dimmedView.alpha = 0
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissSideMenu))
-            dimmedView.addGestureRecognizer(tapGesture)
-            self.view.addSubview(dimmedView)
+        @IBAction func addButton(_ sender: Any) {
+            let storyboard = UIStoryboard(name: "GatePass", bundle: nil)
+            if let vc = storyboard.instantiateViewController(withIdentifier: "AddGatePassVC") as? AddGatePassVC {
+                vc.groupId = self.groupId
+                vc.delegate = self
 
-            let menuWidth: CGFloat = 200
-            let menuHeight: CGFloat = 50
-            let yPosition: CGFloat = 100
-
-            sideMenuView = UIView(frame: CGRect(x: self.view.frame.width, y: yPosition, width: menuWidth, height: menuHeight))
-            sideMenuView.backgroundColor = .white
-            sideMenuView.layer.cornerRadius = 8
-
-            let menuButton = UIButton(frame: CGRect(x: 0, y: 0, width: menuWidth, height: menuHeight))
-            
-            // Configure menu based on role & segment
-            if currentRole == "teacher" {
-                // Always show only "Add Visitors" for teachers
-                menuButton.setTitle("Add Visitors", for: .normal)
-                menuButton.addTarget(self, action: #selector(addVisitorTapped), for: .touchUpInside)
-            } else if currentRole == "admin" {
-                // Admins: show Gate or Add Visitors based on segment
-                if segments.selectedSegmentIndex == 0 {
-                    menuButton.setTitle("Gate", for: .normal)
-                    menuButton.addTarget(self, action: #selector(gateButtonTapped), for: .touchUpInside)
-                } else {
-                    menuButton.setTitle("Add Visitors", for: .normal)
-                    menuButton.addTarget(self, action: #selector(addVisitorTapped), for: .touchUpInside)
-                }
-            }
-
-
-            menuButton.setTitleColor(.black, for: .normal)
-            menuButton.backgroundColor = UIColor.systemGray6
-
-            sideMenuView.addSubview(menuButton)
-            self.view.addSubview(sideMenuView)
-
-            UIView.animate(withDuration: 0.3) {
-                self.dimmedView.alpha = 1
-                self.sideMenuView.frame.origin.x = self.view.frame.width - menuWidth - 16
+                //vc.delegate = self
+                self.navigationController?.pushViewController(vc, animated: true)
+            } else {
+                print("❌ Could not instantiate AddGateVC")
             }
         }
-        @objc func addVisitorTapped() {
-            dismissSideMenu()
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                if let visitorDetailsVC = self.storyboard?.instantiateViewController(withIdentifier: "VisitorDetailsVC") as? VisitorDetailsVC {
-                    visitorDetailsVC.currentRole = self.currentRole
-                    visitorDetailsVC.isFromAddFlow = true
-                    visitorDetailsVC.groupId = self.groupId
-                    visitorDetailsVC.delegate = self
-                    self.navigationController?.pushViewController(visitorDetailsVC, animated: true)
-                }
-            }
-        }
-
-        @objc func gateButtonTapped() {
-            print("Gate option selected")
-            dismissSideMenu()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                if let gateDetailsVC = self.storyboard?.instantiateViewController(withIdentifier: "GateDetailsVC") as? GateDetailsVC {
-                    gateDetailsVC.groupId = self.groupId
-                    self.navigationController?.pushViewController(gateDetailsVC, animated: true)
-                }
-            }
-        }
-        
-        @objc func dismissSideMenu() {
-            UIView.animate(withDuration: 0.3, animations: {
-                self.dimmedView.alpha = 0
-                self.sideMenuView.frame.origin.x = self.view.frame.width
-            }) { _ in
-                self.sideMenuView.removeFromSuperview()
-                self.dimmedView.removeFromSuperview()
-            }
-        }
-
+    
         @IBAction func backButton(_ sender: Any) {
             self.navigationController?.popViewController(animated: true)
         }
     }
+
     extension GatePassVC: UITableViewDataSource, UITableViewDelegate {
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return visitorList.count
+            return gatePassList.count
         }
 
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "GateManagementCell", for: indexPath) as! GateManagementCell
-
-            let visitor = visitorList[indexPath.row]
-            cell.visitorName.text = visitor.visitorName
-            cell.personToVisit.text = visitor.personToVisit ?? "N/A"
-
-            // Load visitorIdCardImage with fallback
-            if let imageArr = visitor.visitorIdCardImage, let firstImage = imageArr.first {
-                let cleanedImageString = firstImage.cleanedBase64String()
-                
-                // Try as direct base64 image
-                if let imageData = Data(base64Encoded: cleanedImageString), let image = UIImage(data: imageData) {
-                    cell.iconImageView.image = image
-                }
-                // Try as base64 encoded URL
-                else if let urlData = Data(base64Encoded: cleanedImageString),
-                        let urlString = String(data: urlData, encoding: .utf8),
-                        let url = URL(string: urlString) {
-                    cell.loadImage(from: url)
-                }
-                // Try as direct URL
-                else if let url = URL(string: cleanedImageString) {
-                    cell.loadImage(from: url)
-                }
-                // Fallback
-                else {
-                    cell.iconImageView.image = cell.generateImage(from: visitor.visitorName)
-                }
-            } else {
-                cell.iconImageView.image = cell.generateImage(from: visitor.visitorName)
-            }
-
-            cell.fallbackLabel.isHidden = true
-            cell.iconImageView.isHidden = false
-            
-            return cell
-        }
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            let selectedVisitor = visitorList[indexPath.row]
-            
-            if let detailsVC = storyboard?.instantiateViewController(withIdentifier: "VisitorDetailsVC") as? VisitorDetailsVC {
-                detailsVC.visitor = selectedVisitor
-                detailsVC.currentRole = self.currentRole
-    //            detailsVC.gate.setTitle(selectedVisitor?.gateName, for: .normal)
-                detailsVC.isFromAddFlow = false
-                detailsVC.groupId = self.groupId
-                detailsVC.delegate = self
-                navigationController?.pushViewController(detailsVC, animated: true)
-            }
-        }
+             let cell = tableView.dequeueReusableCell(withIdentifier: "GatePassCell", for: indexPath) as! GatePassCell
+             let item = gatePassList[indexPath.row]
+             cell.studentName.text = item.name
+             cell.status.text = item.status.capitalized
+             return cell
+         }
         
         func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
             return 70
         }
     }
-    extension GatePassVC: VisitorDetailsDelegate {
-        func didUpdateVisitorData() {
-            fetchVisitorDetails(for: getDateForCurrentSegment())
-        }
-    }
-    //extension GateManagementVC: VisitorDetailsDelegate {
-    //    func didUpdateVisitorData() {
-    //        if segments.selectedSegmentIndex == 0 {
-    //            // Reload current date data
-    //            fetchVisitorDetails(for: Date())
-    //        } else {
-    //            // Reload selected date data
-    //            let dateToUse = selectedDate ?? currentDateValue
-    //            fetchVisitorDetails(for: dateToUse)
-    //        }
-    //    }
-    //}
+

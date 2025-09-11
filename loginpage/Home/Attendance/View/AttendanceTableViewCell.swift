@@ -22,7 +22,7 @@ class AttendanceTableViewCell: UITableViewCell {
         fallbackLabel.layer.cornerRadius = fallbackLabel.frame.width / 2
         fallbackLabel.layer.masksToBounds = true
         fallbackLabel.clipsToBounds = true
-        fallbackLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        fallbackLabel.font = UIFont.boldSystemFont(ofSize: 20)
         fallbackLabel.textAlignment = .center
         fallbackLabel.textColor = .white
         
