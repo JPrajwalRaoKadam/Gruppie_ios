@@ -8,7 +8,8 @@
 import UIKit
 
 class DetailViewController2: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
-        
+    
+        @IBOutlet weak var bcbutton: UIButton!
         @IBOutlet weak var TableView: UITableView!
         @IBOutlet weak var name: UILabel!
         @IBOutlet weak var searchButton: UIButton!
@@ -28,11 +29,14 @@ class DetailViewController2: UIViewController, UITableViewDataSource, UITableVie
 
         override func viewDidLoad() {
             super.viewDidLoad()
+            TableView.layer.cornerRadius = 10
 
             if let studentName = studentName {
                 name.text = studentName
             }
             heightConstraintOfSearchView.constant = 0
+            bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+            bcbutton.clipsToBounds = true
 
             searchView.isHidden = true
             print("DetailViewController loaded")

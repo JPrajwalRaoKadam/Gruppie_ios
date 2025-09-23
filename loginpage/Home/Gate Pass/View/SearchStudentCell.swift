@@ -14,8 +14,8 @@ class SearchStudentCell: UITableViewCell {
         fallbackLabel.layer.cornerRadius = fallbackLabel.frame.size.width / 2
         fallbackLabel.clipsToBounds = true
         fallbackLabel.textAlignment = .center
-        fallbackLabel.backgroundColor = .link
-        fallbackLabel.textColor = .white
+        fallbackLabel.textColor = .black
+        fallbackLabel.font = UIFont.systemFont(ofSize: 17)
         print("cell")
     }
 

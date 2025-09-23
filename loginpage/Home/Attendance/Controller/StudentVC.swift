@@ -1,6 +1,9 @@
 import UIKit
 
 class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, StudentCellDelegate, EditAttendanceDelegate {
+    
+    @IBOutlet weak var midView: UIView!
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var name: UILabel!
     @IBOutlet weak var studentTBL: UITableView!
     @IBOutlet weak var currDate: UIButton!
@@ -34,7 +37,11 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         studentTBL.delegate = self
         self.navigationItem.hidesBackButton = true
 
+        studentTBL.layer.cornerRadius =  10
         DoneButton.layer.cornerRadius =  10
+        midView.layer.cornerRadius =  10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         DoneButton.layer.masksToBounds = true
         DoneButton.clipsToBounds = true
         print("curDate: \(currentDate)")
@@ -464,7 +471,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             popup.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             popup.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             popup.widthAnchor.constraint(equalToConstant: 293),
-            popup.heightAnchor.constraint(equalToConstant: 147)
+            popup.heightAnchor.constraint(equalToConstant: 171)
         ])
 
         // 4️⃣ Add tap‐to‐dismiss (outside the popup)
@@ -494,7 +501,6 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         }
     }
 
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return students.count
     }

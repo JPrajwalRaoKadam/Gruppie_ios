@@ -9,6 +9,7 @@ import UIKit
 
 class SubDetailsVC: UIViewController {
 
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var classsubjName: UILabel!
     @IBOutlet weak var subTableView: UITableView!
     @IBOutlet weak var plusButton: UIButton!
@@ -24,6 +25,9 @@ class SubDetailsVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        subTableView.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         subTableView.delegate = self
         subTableView.dataSource = self
 //        if let role = currentRole?.lowercased(), role == "parent" || role == "teacher" {

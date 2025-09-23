@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24127" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -40,7 +40,7 @@
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Roll Number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HNP-9g-Qb4">
                                 <rect key="frame" x="65" y="32" width="195" height="22"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -57,15 +57,9 @@
                                     <action selector="checkButtonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="g0b-Qq-cVb"/>
                                 </connections>
                             </button>
-                            <stackView opaque="NO" contentMode="left" semanticContentAttribute="forceLeftToRight" distribution="fillEqually" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="YHq-x8-Pmb">
-                                <rect key="frame" x="63" y="60" width="20" height="16"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="20" id="QhD-nX-g7P"/>
-                                    <constraint firstAttribute="height" constant="16" id="ZWQ-VX-t2K"/>
-                                </constraints>
-                            </stackView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5UV-jF-gZL">
                                 <rect key="frame" x="15" y="19" width="38" height="38"/>
+                                <color key="backgroundColor" red="0.94491487740000002" green="0.93759083750000005" blue="0.92156618830000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="38" id="0gJ-g2-Ysw"/>
                                     <constraint firstAttribute="width" constant="38" id="c1I-HD-1xZ"/>
@@ -74,25 +68,32 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <stackView opaque="NO" contentMode="left" semanticContentAttribute="forceLeftToRight" ambiguous="YES" misplaced="YES" distribution="fillEqually" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="YHq-x8-Pmb">
+                                <rect key="frame" x="65" y="56" width="58" height="16"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="QhD-nX-g7P"/>
+                                    <constraint firstAttribute="height" constant="16" id="ZWQ-VX-t2K"/>
+                                </constraints>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <accessibility key="accessibilityConfiguration" identifier="AttendanceTableViewCell"/>
                         <constraints>
                             <constraint firstItem="O0W-HD-PbP" firstAttribute="top" secondItem="qNR-R2-JPu" secondAttribute="top" constant="19" id="0d2-5Q-Z3N"/>
                             <constraint firstAttribute="bottom" secondItem="5UV-jF-gZL" secondAttribute="bottom" constant="19" id="A4M-W5-ftr"/>
+                            <constraint firstItem="YHq-x8-Pmb" firstAttribute="leading" secondItem="qNR-R2-JPu" secondAttribute="leading" constant="63" id="FyP-xB-scX"/>
                             <constraint firstItem="nfK-it-KAy" firstAttribute="centerY" secondItem="qNR-R2-JPu" secondAttribute="centerY" id="HwQ-Lu-vek"/>
                             <constraint firstItem="HNP-9g-Qb4" firstAttribute="top" secondItem="TZs-Rs-KFL" secondAttribute="bottom" constant="1" id="JKT-5p-9uE"/>
                             <constraint firstItem="5UV-jF-gZL" firstAttribute="leading" secondItem="qNR-R2-JPu" secondAttribute="leading" constant="15" id="MOJ-rS-ha0"/>
                             <constraint firstItem="TZs-Rs-KFL" firstAttribute="top" secondItem="qNR-R2-JPu" secondAttribute="top" constant="9" id="OiO-od-WKJ"/>
                             <constraint firstItem="YHq-x8-Pmb" firstAttribute="top" secondItem="HNP-9g-Qb4" secondAttribute="bottom" constant="6" id="QHR-MB-csd"/>
                             <constraint firstItem="HNP-9g-Qb4" firstAttribute="leading" secondItem="TZs-Rs-KFL" secondAttribute="leading" id="Zta-aj-feL"/>
+                            <constraint firstAttribute="bottom" secondItem="YHq-x8-Pmb" secondAttribute="bottom" id="a0b-Di-brn"/>
                             <constraint firstItem="nfK-it-KAy" firstAttribute="leading" secondItem="HNP-9g-Qb4" secondAttribute="trailing" constant="49" id="ber-Kf-3Ji"/>
                             <constraint firstItem="O0W-HD-PbP" firstAttribute="leading" secondItem="qNR-R2-JPu" secondAttribute="leading" constant="15" id="dQu-Xq-gMm"/>
                             <constraint firstAttribute="bottom" secondItem="YHq-x8-Pmb" secondAttribute="bottom" id="duf-OI-q27"/>
                             <constraint firstItem="TZs-Rs-KFL" firstAttribute="leading" secondItem="O0W-HD-PbP" secondAttribute="trailing" constant="12" id="hzp-cn-E41"/>
                             <constraint firstAttribute="trailing" secondItem="nfK-it-KAy" secondAttribute="trailing" constant="8" id="jm7-vQ-5wy"/>
-                            <constraint firstItem="YHq-x8-Pmb" firstAttribute="leading" secondItem="qNR-R2-JPu" secondAttribute="leading" constant="63" id="kHo-fJ-I6F"/>
-                            <constraint firstAttribute="trailing" secondItem="YHq-x8-Pmb" secondAttribute="trailing" constant="272" id="x3d-8C-dsv"/>
                             <constraint firstAttribute="height" constant="76" id="xiZ-HK-63N"/>
                             <constraint firstItem="5UV-jF-gZL" firstAttribute="top" secondItem="qNR-R2-JPu" secondAttribute="top" constant="19" id="yo7-xW-oKR"/>
                             <constraint firstAttribute="bottom" secondItem="O0W-HD-PbP" secondAttribute="bottom" constant="19" id="ze4-dY-Zji"/>
@@ -109,6 +110,7 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
                 <outlet property="attenStatusStackView" destination="YHq-x8-Pmb" id="CdI-QX-dDX"/>
+                <outlet property="attenStatusStackViewWidth" destination="QhD-nX-g7P" id="Xop-tg-mfW"/>
                 <outlet property="checkButton" destination="nfK-it-KAy" id="Aag-MB-ncP"/>
                 <outlet property="fallback" destination="5UV-jF-gZL" id="Fjl-hK-a5N"/>
                 <outlet property="images" destination="O0W-HD-PbP" id="oTe-Bt-n6M"/>

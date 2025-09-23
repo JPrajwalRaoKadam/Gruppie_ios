@@ -16,6 +16,7 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
     var subjects: [SubjectData] = [] // Store fetched subjects
     var currentRole: String?
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var Notes_Video: UILabel!
     @IBOutlet weak var Notes_videosTV: UITableView!
     
@@ -26,6 +27,9 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
         Notes_videosTV.register(UINib(nibName: "classNameTableViewCell", bundle: nil), forCellReuseIdentifier: "classNameTableViewCell")
         //print("gid NV: \(groupId) tid NV: \(subjects.teamId)")
         enableKeyboardDismissOnTap()
+        Notes_videosTV.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

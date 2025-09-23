@@ -194,6 +194,7 @@ class SubjectNotes_VideosVC: UIViewController, AddSubNotesDelegate {
         fetchSubjectStaffDetails()
     }
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var plusButton: UIButton!
     @IBOutlet weak var className: UILabel!
     @IBOutlet weak var subTableView: UITableView!
@@ -210,6 +211,9 @@ class SubjectNotes_VideosVC: UIViewController, AddSubNotesDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        subTableView.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         fetchSubjectStaffDetails()
         subTableView.delegate = self
         subTableView.dataSource = self

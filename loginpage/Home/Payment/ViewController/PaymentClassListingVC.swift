@@ -16,6 +16,7 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var balenceAmount: UILabel!
     @IBOutlet weak var overdueAmount: UILabel!
     @IBOutlet weak var fineAmount: UILabel!
+    @IBOutlet weak var bcbutton: UIButton!
     
     var groupId: String?
     var feeReport: PaymentResponse?
@@ -28,6 +29,9 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        classTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
         classTableView.delegate = self
         classTableView.dataSource = self

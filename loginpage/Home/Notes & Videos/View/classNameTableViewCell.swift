@@ -25,26 +25,31 @@ override func awakeFromNib() {
     fallbackLabel.layer.cornerRadius = fallbackLabel.frame.size.width / 2
     fallbackLabel.clipsToBounds = true
     fallbackLabel.textAlignment = .center
-    fallbackLabel.backgroundColor = .link  // Set background color
-    fallbackLabel.textColor = .white
+   // fallbackLabel.backgroundColor = .link  // Set background color
+    fallbackLabel.textColor = .black
 }
 
 override func setSelected(_ selected: Bool, animated: Bool) {
     super.setSelected(selected, animated: animated)
 }
-    func configure(with subject: SubjectData) {
+ func configure(with subject: SubjectData) {
         classLabel.text = subject.name
 
-        if let imageURL = subject.image, let url = URL(string: imageURL) {
-            loadImage(from: url)
-            fallbackLabel.isHidden = true
-            iconImageView.isHidden = false
-        } else {
-            iconImageView.image = generateImage(from: subject.name)  // This triggers the fallback image
-            iconImageView.isHidden = false
-            fallbackLabel.isHidden = true  // Optionally, hide the label
-        }
+//        if let imageURL = subject.image, let url = URL(string: imageURL) {
+//            loadImage(from: url)
+//            fallbackLabel.isHidden = true
+//            iconImageView.isHidden = false
+//        } else {
+            // Use label fallback
+            fallbackLabel.text = String(subject.name.prefix(1)).uppercased()
+            fallbackLabel.isHidden = false
+            iconImageView.isHidden = true
+
+           // fallbackLabel.backgroundColor = .link
+            fallbackLabel.textColor = .black   // 👈 set any color you want here
+//        }
     }
+
 
     // Method to load image from URL (you can use libraries like SDWebImage or use URLSession for this)
     private func loadImage(from url: URL) {
@@ -55,7 +60,7 @@ override func setSelected(_ selected: Bool, animated: Bool) {
                 }
             } else {
                 DispatchQueue.main.async {
-                    self.iconImageView.image = self.generateImage(from: self.classLabel.text ?? "")
+//                    self.iconImageView.image = self.generateImage(from: self.classLabel.text ?? "")
                 }
             }
         }.resume()
@@ -74,7 +79,7 @@ override func setSelected(_ selected: Bool, animated: Bool) {
         context?.fillEllipse(in: CGRect(origin: .zero, size: size))
         
         let textAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: 30),
+            .font: UIFont.systemFont(ofSize: 23),
             .foregroundColor: UIColor.white // Set text color to white
         ]
         

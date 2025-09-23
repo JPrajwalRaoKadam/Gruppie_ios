@@ -35,6 +35,12 @@ class AddEventVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        venue.layer.cornerRadius = 10
+        venue.layer.masksToBounds = true
+        reminder.layer.cornerRadius = 10
+        reminder.layer.masksToBounds = true
+        eventTitleTextField.layer.cornerRadius = 10
+        eventTitleTextField.layer.masksToBounds = true
         EventHEading.text = "Add Event"
         
         // Add gesture recognizer to the reminder text field
@@ -43,6 +49,7 @@ class AddEventVC: UIViewController {
         reminder.isUserInteractionEnabled = true
         reminder.inputView = UIView() // prevents keyboard from showing
         submit.layer.cornerRadius = 10
+        submit  .layer.masksToBounds = true
         
         print("eventTitleTextField: \(eventTitleTextField != nil)")
         print("venue: \(venue != nil)")

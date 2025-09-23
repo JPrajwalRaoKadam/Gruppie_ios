@@ -13,7 +13,8 @@ class AddGatePassVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     var groupId: String?
     var currentRole: String?
     var searchResults: [SearchStudentList] = []
-   
+    
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var studentName: UITableView!
     @IBOutlet weak var searchbox: UITextField!
     @IBOutlet weak var searchButton: UIButton!
@@ -24,10 +25,12 @@ class AddGatePassVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         studentName.delegate = self
         studentName.dataSource = self
         studentName.register(UINib(nibName: "SearchStudentCell", bundle: nil), forCellReuseIdentifier: "SearchStudentCell")
-        
+        studentName.layer.cornerRadius = 10
         searchbox.layer.cornerRadius = 10
         searchButton.layer.cornerRadius = 10
         addButton.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
 
     }
     func reloadGatePassData() {

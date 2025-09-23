@@ -8,7 +8,7 @@
 import UIKit
 
 class SubjectStaffVC: UIViewController {
-    
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var className: UILabel!
     @IBOutlet weak var subTableView: UITableView!
     var SubjectStaff: [SubjectStaffSyllabus] = []
@@ -20,7 +20,9 @@ class SubjectStaffVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        subTableView.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         subTableView.delegate = self
         subTableView.dataSource = self
         subTableView.register(UINib(nibName: "SubjectStaffTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectStaffTableViewCell")

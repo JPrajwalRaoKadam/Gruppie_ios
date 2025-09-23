@@ -3,12 +3,16 @@ import UIKit
 class GateDetailsVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AddGateDelegate {
     
     var groupId: String?
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var tablevw: UITableView!
     var gates: [GateData] = []
     let loadingIndicator = UIActivityIndicatorView(style: .large)
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        tablevw.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         
         print("GateDetailsVC groupId: \(groupId ?? "nil")")
         setupTableView()

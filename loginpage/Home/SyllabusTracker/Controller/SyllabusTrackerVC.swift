@@ -2,6 +2,7 @@
 import UIKit
 class SyllabusTrackerVC: UIViewController {
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var name: UILabel!
@@ -15,6 +16,9 @@ class SyllabusTrackerVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         print("grpid ST: \(groupId)")
         print("TEAMid TT: \(teamId)")
         print("sy class:\(className)")

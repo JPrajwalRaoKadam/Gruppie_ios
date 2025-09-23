@@ -32,7 +32,7 @@
 import UIKit
 
 class DailySyllabusTrackerVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var tableView: UITableView!
     
     var syllabusData: [DailySyllabus] = [] // Store decoded data
@@ -41,6 +41,9 @@ class DailySyllabusTrackerVC: UIViewController, UITableViewDelegate, UITableView
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         print("TEAMid DT: \(teamId)")
         tableView.delegate = self
         tableView.dataSource = self

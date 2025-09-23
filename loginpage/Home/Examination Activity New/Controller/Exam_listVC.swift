@@ -4,6 +4,7 @@ import SafariServices
 class Exam_listVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var examListTableView: UITableView!
+    @IBOutlet weak var bcbutton: UIButton!
     
     var groupId: String = ""
     var teamId: String = ""
@@ -17,6 +18,9 @@ class Exam_listVC: UIViewController, UITableViewDelegate, UITableViewDataSource 
         examListTableView.register(UINib(nibName: "Exam_listVCTableViewCell", bundle: nil), forCellReuseIdentifier: "Exam_listVCTableViewCell")
         examListTableView.delegate = self
         examListTableView.dataSource = self
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        examListTableView.layer.cornerRadius = 10
         print("Extracted teamId in examll: \(teamId)")
         
         fetchExamList()

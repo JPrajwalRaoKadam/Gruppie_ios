@@ -29,6 +29,7 @@ class OTPViewController: UIViewController {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
         butttonStyles()
+        [box1, box2, box3, box4, box5, box6].forEach { $0?.applyRoundedStyle2() }
         enableKeyboardDismissOnTap()
         
         otpBoxes.forEach { tf in
@@ -281,5 +282,15 @@ private extension OTPViewController {
         guard let index = otpBoxes.firstIndex(of: textField),
               index > 0 else { return nil }
         return otpBoxes[index - 1]
+    }
+}
+
+extension UITextField {
+    func applyRoundedStyle2(radius: CGFloat = 10) {
+        self.layer.cornerRadius = radius
+        self.layer.masksToBounds = true
+        self.layer.borderWidth = 1        // optional
+        self.layer.borderColor = UIColor.lightGray.cgColor
+        self.backgroundColor = .white
     }
 }

@@ -9,12 +9,12 @@
     import AVFoundation
 
     class GatePassVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GatePassReloadDelegate{
-       
+        @IBOutlet weak var bcbutton: UIButton!
         @IBOutlet weak var segments: UISegmentedControl!
         @IBOutlet weak var date: UIButton!
         @IBOutlet weak var gatetableview: UITableView!
         @IBOutlet weak var addButton: UIButton!
-        
+       
         var groupId: String?
         var currentRole: String?
         var currentDate: String?
@@ -33,6 +33,10 @@
         // MARK: - View Lifecycle
         override func viewDidLoad() {
             super.viewDidLoad()
+            date.layer.cornerRadius = 10
+            gatetableview.layer.cornerRadius = 10
+            bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+            bcbutton.clipsToBounds = true
             if currentRole == "admin" {
           
             }

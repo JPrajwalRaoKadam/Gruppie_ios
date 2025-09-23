@@ -9,6 +9,8 @@ import UIKit
 
 class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
+    @IBOutlet weak var bcbutton: UIButton!
+    @IBOutlet weak var midview: UIView!
     @IBOutlet weak var TableView: UITableView!
     @IBOutlet weak var name: UILabel!
     @IBOutlet weak var setting: UIButton!
@@ -25,6 +27,10 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        midview.layer.cornerRadius = 10
+        TableView.layer.cornerRadius = 10
         self.navigationItem.hidesBackButton = true
        // print("grpid atten:\(currentDate) ")
         print("grpid atten:\(String(describing: groupId)) ")
@@ -230,8 +236,8 @@ class AttendanceVC: UIViewController, UITableViewDataSource, UITableViewDelegate
                         DispatchQueue.main.async {
                             // Only update if cell is still visible for this index path
                             if tableView.indexPath(for: cell) == indexPath {
-                                cell.img.image = image
-                                cell.fallbackLabel.isHidden = true
+//                                cell.img.image = image
+                                cell.fallbackLabel.isHidden = false
                             }
                         }
                     }

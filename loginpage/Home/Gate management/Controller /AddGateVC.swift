@@ -9,6 +9,7 @@ class AddGateVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     weak var delegate: AddGateDelegate?
     var base64ImageString: String?
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var addImage: UIImageView!
     @IBOutlet weak var gateLocation: UITextField!
     @IBOutlet weak var gateName: UITextField!
@@ -16,9 +17,14 @@ class AddGateVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
  
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        gateName.layer.cornerRadius = 10
+        gateName.layer.masksToBounds = true
+        gateLocation.layer.cornerRadius = 10
+        gateLocation.layer.masksToBounds = true
         submitButton.layer.cornerRadius = 10
         submitButton.clipsToBounds = true
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         
         addImage.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectImage))

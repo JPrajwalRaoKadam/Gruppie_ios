@@ -25,9 +25,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func styleUI() {
         ContinueButton.layer.cornerRadius = 10
+        ContinueButton.layer.masksToBounds = true
         phoneNumberTextField.layer.cornerRadius = 10
         phoneNumberTextField.clipsToBounds = true
         ind.layer.cornerRadius = 10
+        ind.layer.masksToBounds = true
     }
     
     @IBAction func submitButtonPressed(_ sender: Any) {

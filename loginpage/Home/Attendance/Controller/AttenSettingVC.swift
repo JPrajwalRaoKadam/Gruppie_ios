@@ -2,6 +2,7 @@ import UIKit
 
 class AttenSettingVC: UIViewController, UITableViewDataSource, UITableViewDelegate, AttenSettingCellDelegate {
 
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var settingTableview: UITableView!
     @IBOutlet weak var DoneButton: UIButton!
 
@@ -17,7 +18,10 @@ class AttenSettingVC: UIViewController, UITableViewDataSource, UITableViewDelega
         settingTableview.dataSource = self
         
         // Styling the Done button
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         DoneButton.layer.cornerRadius = 10
+        settingTableview.layer.cornerRadius = 10
         DoneButton.layer.masksToBounds = true
         DoneButton.clipsToBounds = true
         

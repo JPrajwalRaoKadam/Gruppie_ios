@@ -17,6 +17,7 @@ protocol StudentCellDelegate: AnyObject {
         @IBOutlet weak var rollNo: UILabel!
         @IBOutlet weak var images: UIImageView!
         @IBOutlet weak var fallback: UILabel!
+        @IBOutlet weak var attenStatusStackViewWidth: NSLayoutConstraint!
         var userId: String?
         
         // MARK: - Data
@@ -36,6 +37,11 @@ protocol StudentCellDelegate: AnyObject {
             attenStatusStackView.spacing = 8
             attenStatusStackView.axis = .horizontal
             attenStatusStackView.alignment = .center
+            if attenStatusStackView.arrangedSubviews.count == 0 {
+                attenStatusStackViewWidth.constant = 50
+            } else {
+                attenStatusStackViewWidth.constant = 100
+            }
         }
         
         func setAttendanceVisibility(isHidden: Bool) {
@@ -83,9 +89,9 @@ protocol StudentCellDelegate: AnyObject {
             images.image = nil
             let firstLetter = name.prefix(1).uppercased()
             fallback.text = firstLetter
-            fallback.font = UIFont.boldSystemFont(ofSize: 20)
+            fallback.font = UIFont.systemFont(ofSize: 17)
             fallback.textAlignment = .center
-            fallback.textColor = .white
+            fallback.textColor = .black
             images.backgroundColor = UIColor.systemIndigo
             fallback.frame = images.bounds
             images.addSubview(fallback)
@@ -96,7 +102,6 @@ protocol StudentCellDelegate: AnyObject {
                 $0?.layer.cornerRadius = $0!.frame.width / 2
                 $0?.layer.masksToBounds = true
             }
-            fallback.backgroundColor = .link
 //            attenStatus.layer.cornerRadius = attenStatus.frame.width / 2
 //            attenStatus.layer.masksToBounds = true
             checkButton.backgroundColor = .white

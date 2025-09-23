@@ -15,8 +15,8 @@ class GateDetailsVCCell: UITableViewCell {
         fallbackLabel.layer.cornerRadius = fallbackLabel.frame.size.width / 2
         fallbackLabel.clipsToBounds = true
         fallbackLabel.textAlignment = .center
-        fallbackLabel.backgroundColor = .link
-        fallbackLabel.textColor = .white
+        //fallbackLabel.backgroundColor = .link
+        fallbackLabel.textColor = .black
         print("cell")
     }
 

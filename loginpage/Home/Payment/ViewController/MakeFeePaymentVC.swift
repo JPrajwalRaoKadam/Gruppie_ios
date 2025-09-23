@@ -8,7 +8,7 @@
 import UIKit
 
 class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var paymentTableView: UITableView!
     @IBOutlet weak var paymentTypeSegmentControl: UISegmentedControl!
     @IBOutlet weak var receiptLabel: UILabel!
@@ -27,6 +27,9 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        paymentTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
         // Register table view cells
         paymentTableView.register(UINib(nibName: "AmoutTableViewCell", bundle: nil), forCellReuseIdentifier: "AmoutTableViewCell")

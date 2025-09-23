@@ -18,7 +18,7 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     @IBOutlet weak var overdueAmount: UILabel!
     @IBOutlet weak var fineAmount: UILabel!
     @IBOutlet weak var overAllAmountView: UIView!
-    
+    @IBOutlet weak var bcbutton: UIButton!
     
     var groupId: String?
     var teamId: String?
@@ -29,6 +29,9 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        studentTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
         studentTableView.register(UINib(nibName: "ClassesTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassesTableViewCell")
         

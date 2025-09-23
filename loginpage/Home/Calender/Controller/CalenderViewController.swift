@@ -3,7 +3,7 @@ import FSCalendar
 
 class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewDelegate, UITableViewDataSource,AddEventDelegate, CallEditEventApi
 {
-    
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var calendarViewHieght: NSLayoutConstraint!
     var groupId: String = ""
     var events: [Event] = []
@@ -30,6 +30,9 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        calendarTableView.layer.cornerRadius = 10
         self.preferredContentSize = CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height / 2)
         for event in events {
             print("🧩 Event title: \(event.title), eventid: \(event.eventid ?? "nil"), selectedEventId\(selectedEventId)")

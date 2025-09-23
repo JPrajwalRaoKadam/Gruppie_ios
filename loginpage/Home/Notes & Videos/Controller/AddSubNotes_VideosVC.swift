@@ -3,6 +3,8 @@ protocol AddSubNotesDelegate: AnyObject {
     func didAddSubject()
 }
 class AddSubNotes_VideosVC: UIViewController {
+    
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var checkButton: UIButton!
     @IBOutlet weak var subject: UILabel!
     @IBOutlet weak var searchBar: UISearchBar!
@@ -27,6 +29,9 @@ class AddSubNotes_VideosVC: UIViewController {
         tableview.dataSource = self
         tableview.register(UINib(nibName: "teacherNameTableViewCell", bundle: nil), forCellReuseIdentifier: "teacherNameTableViewCell")
         addButton.layer.cornerRadius = 10
+        tableview.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         setupCheckButton(initiallySelected: false)
         fetchTeachingStaff(groupId: groupId)
         print("adsbgid: \(groupId) adsbtid: \(teamId)")

@@ -2,6 +2,7 @@ import UIKit
 
 class AddHolidaysCallenderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AddNewHolidayDelegate {
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var holidaysList: UILabel!
     @IBOutlet weak var addTitle: UILabel!
     @IBOutlet weak var addDate: UILabel!
@@ -23,6 +24,8 @@ class AddHolidaysCallenderViewController: UIViewController, UITableViewDelegate,
         holiday.dataSource = self
         submit.layer.cornerRadius = 10
         submit.clipsToBounds = true
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         
         holiday.register(UINib(nibName: "AddNewHoliday", bundle: nil), forCellReuseIdentifier: "AddNewHoliday")
         if currentRole != "admin" {

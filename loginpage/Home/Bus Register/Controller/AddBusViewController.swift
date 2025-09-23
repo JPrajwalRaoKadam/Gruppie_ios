@@ -10,13 +10,18 @@ import UIKit
 class AddBusViewController: UIViewController {
 
     @IBOutlet weak var add: UIButton!
+    @IBOutlet weak var bcbutton: UIButton!
     
     var groupId: String?
     var currentRole: String?
     
+    @IBOutlet weak var busView: UIView!
     override func viewDidLoad() {
         super.viewDidLoad()
         add.layer.cornerRadius = 10
+        busView.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
 
         // Do any additional setup after loading the view.
     }

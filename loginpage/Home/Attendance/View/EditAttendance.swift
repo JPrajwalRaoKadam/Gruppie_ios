@@ -10,7 +10,7 @@ class EditAttendance: UIView {
     @IBOutlet weak var attendanceStatus: UITextField!
     @IBOutlet weak var studentNameLabel: UILabel!
     @IBOutlet weak var editButtonOutlet: UIButton!
-    
+    @IBOutlet weak var cancelButtonOutlet: UIButton!
   //  @IBOutlet weak var studentName: UILabel!
 
     // MARK: - Delegate & Data
@@ -29,7 +29,10 @@ class EditAttendance: UIView {
         layer.cornerRadius = 10
         layer.masksToBounds = true
         setupDropdownTap() // Dismiss dropdown on outside tap
+        cancelButtonOutlet.layer.cornerRadius =  10
         editButtonOutlet.layer.cornerRadius =  10
+        attendanceStatus.layer.cornerRadius =  10
+        attendanceStatus.layer.masksToBounds = true
         editButtonOutlet.layer.masksToBounds = true
         editButtonOutlet.clipsToBounds = true
     }
@@ -49,6 +52,10 @@ class EditAttendance: UIView {
             editButtonOutlet.isHidden = false
         }
     }
+    @IBAction func cancelButtonTapped(_ sender: UIButton) {
+        self.removeFromSuperview()
+    }
+
     
    @IBAction func deleteButton(_ sender: Any) {
         guard let id = attendanceId else { return }

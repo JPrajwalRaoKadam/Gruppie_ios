@@ -48,9 +48,10 @@ class BuslistCell: UITableViewCell {
         fallBack.layer.cornerRadius = fallBack.frame.size.width / 2
         fallBack.clipsToBounds = true
         fallBack.textAlignment = .center
-        fallBack.font = UIFont.boldSystemFont(ofSize: 20)
-        fallBack.textColor = .white
-        fallBack.backgroundColor = .link
+        fallBack.font = UIFont.systemFont(ofSize: 17)
+
+        fallBack.textColor = .black
+       // fallBack.backgroundColor = .link
     }
     
     /// Configure cell with bus data

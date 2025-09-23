@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24127" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -21,25 +21,27 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XsB-yh-G5n">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="73"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="person.circle" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="YlE-yg-tGP">
-                                <rect key="frame" x="15" y="21.666666666666664" width="30" height="30"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YlE-yg-tGP">
+                                <rect key="frame" x="15" y="21" width="38" height="38"/>
                                 <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="31.329999999999998" id="5bI-v0-rF3"/>
-                                    <constraint firstAttribute="width" constant="30" id="S5Q-zG-3AV"/>
+                                    <constraint firstAttribute="height" constant="38" id="5bI-v0-rF3"/>
+                                    <constraint firstAttribute="width" constant="38" id="S5Q-zG-3AV"/>
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="N2x-8H-j2l">
-                                <rect key="frame" x="19" y="21" width="30" height="31.333333333333329"/>
+                                <rect key="frame" x="15" y="21" width="38" height="38"/>
+                                <color key="backgroundColor" red="0.94491487740000002" green="0.93759083750000005" blue="0.92156618830000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="30" id="53Y-Zf-Ij8"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="38" id="q4k-Wd-Llc"/>
+                                    <constraint firstAttribute="height" constant="38" id="tIF-Wu-tIC"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Class Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hbX-XJ-iGZ">
-                                <rect key="frame" x="57" y="26" width="245" height="21"/>
+                                <rect key="frame" x="68" y="26" width="245" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="245" id="SqW-h4-xSQ"/>
                                     <constraint firstAttribute="height" constant="21" id="k06-cI-AZV"/>
@@ -56,9 +58,9 @@
                             <constraint firstItem="N2x-8H-j2l" firstAttribute="centerY" secondItem="YlE-yg-tGP" secondAttribute="centerY" id="cJV-25-rCt"/>
                             <constraint firstAttribute="bottom" secondItem="hbX-XJ-iGZ" secondAttribute="bottom" constant="26" id="dtF-Oe-EL5"/>
                             <constraint firstItem="YlE-yg-tGP" firstAttribute="top" secondItem="XsB-yh-G5n" secondAttribute="top" constant="21" id="i1q-7J-qNQ"/>
-                            <constraint firstItem="N2x-8H-j2l" firstAttribute="leading" secondItem="XsB-yh-G5n" secondAttribute="leading" constant="19" id="j21-Dg-l8R"/>
+                            <constraint firstItem="N2x-8H-j2l" firstAttribute="leading" secondItem="XsB-yh-G5n" secondAttribute="leading" constant="15" id="j21-Dg-l8R"/>
                             <constraint firstItem="N2x-8H-j2l" firstAttribute="top" secondItem="YlE-yg-tGP" secondAttribute="top" id="ocG-Zz-rcf"/>
-                            <constraint firstItem="hbX-XJ-iGZ" firstAttribute="leading" secondItem="N2x-8H-j2l" secondAttribute="trailing" constant="8" symbolic="YES" id="tnr-Ax-rcv"/>
+                            <constraint firstItem="hbX-XJ-iGZ" firstAttribute="leading" secondItem="N2x-8H-j2l" secondAttribute="trailing" constant="15" id="tnr-Ax-rcv"/>
                             <constraint firstItem="YlE-yg-tGP" firstAttribute="leading" secondItem="XsB-yh-G5n" secondAttribute="leading" constant="15" id="u1J-ph-ed4"/>
                         </constraints>
                     </view>
@@ -80,7 +82,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="person.circle" catalog="system" width="128" height="123"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -9,6 +9,7 @@ import UIKit
 
  class editORdeleteVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
      
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var addImage: UIImageView!
     @IBOutlet weak var gateLocation: UITextField!
     @IBOutlet weak var gateName: UITextField!
@@ -24,8 +25,14 @@ import UIKit
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        gateName.layer.cornerRadius = 10
+        gateName.layer.masksToBounds = true
+        gateLocation.layer.cornerRadius = 10
+        gateLocation.layer.masksToBounds = true
         editButton.layer.cornerRadius = 10
         editButton.clipsToBounds = true
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         //addImage.image = gate?.image
         gateName.text = gate?.gateNumber
         gateLocation.text = gate?.location

@@ -4,6 +4,7 @@ import AVFoundation
 
 class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
    
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var segments: UISegmentedControl!
     @IBOutlet weak var date: UIButton!
     @IBOutlet weak var gatetableview: UITableView!
@@ -28,6 +29,10 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        date.layer.cornerRadius = 10
+        gatetableview.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         if currentRole == "admin" {
       
         }

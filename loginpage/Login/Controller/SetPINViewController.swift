@@ -22,9 +22,13 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setupTextFields()
         butttonStyles()
         enableKeyboardDismissOnTap()
+        
+        [spinBox1, spinBox2, spinBox3, spinBox4,
+         cpinBox1, cpinBox2, cpinBox3, cpinBox4].forEach { $0?.applyRoundedStyle() }
         
         let underlineAttribute = [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
         let underlineAttributedString = NSAttributedString(string: "skip", attributes: underlineAttribute)
@@ -518,4 +522,13 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+}
+extension UITextField {
+    func applyRoundedStyle(radius: CGFloat = 10) {
+        self.layer.cornerRadius = radius
+        self.layer.masksToBounds = true
+        self.layer.borderWidth = 1        // optional
+        self.layer.borderColor = UIColor.lightGray.cgColor
+        self.backgroundColor = .white
+    }
 }

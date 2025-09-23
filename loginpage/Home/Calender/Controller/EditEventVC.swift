@@ -62,6 +62,12 @@ class EditEventVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        venue.layer.cornerRadius = 10
+        venue.layer.masksToBounds = true
+        reminder.layer.cornerRadius = 10
+        reminder.layer.masksToBounds = true
+        eventTitleTextField.layer.cornerRadius = 10
+        eventTitleTextField.layer.masksToBounds = true
         populateFields()
     // Add gesture recognizer to the reminder text field
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(reminderTapped))

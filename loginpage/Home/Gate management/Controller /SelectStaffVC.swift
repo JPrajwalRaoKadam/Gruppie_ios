@@ -3,6 +3,7 @@ import UIKit
 
 class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
 
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var staffRegister: UITableView!
     @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var searchButton: UIButton!
@@ -14,16 +15,19 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     var isSearching = false
     var teachingStaffData: [Staff] = []
     var nonTeachingStaffData: [Staff] = []
-    var token: String?
+//    var token: String?
     var groupId: String?
 
     var searchTextField: UITextField?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        staffRegister.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
 
         print("Received groupId: \(groupId ?? "nil")")
-        print("token staff register: \(token ?? "nil")")
+         // print("token staff register: \(token ?? "nil")")
 
         heightConstraintOfSearchView.constant = 0
         searchView.isHidden = true
@@ -196,20 +200,67 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
     
+//    private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
+//        guard let groupId = groupId else { return }
+//        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/user/\(staffId)/profile/get?type=staff"
+//        print("Fetching staff details from: \(urlString)")
+//
+//        guard let url = URL(string: urlString) else {
+//            print("Invalid URL: \(urlString)")
+//            completion(nil)
+//            return
+//        }
+//
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "GET"
+//        request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+//
+//        URLSession.shared.dataTask(with: request) { data, response, error in
+//            if let httpResponse = response as? HTTPURLResponse {
+//                print("HTTP Status Code: \(httpResponse.statusCode)")
+//            }
+//
+//            guard let data = data, error == nil else {
+//                print("Error fetching staff details:", error?.localizedDescription ?? "Unknown error")
+//                completion(nil)
+//                return
+//            }
+//
+//            do {
+//                let response = try JSONDecoder().decode(StaffDetailsResponse.self, from: data)
+//                completion(response.data)
+//            } catch {
+//                print("Decoding error:", error)
+//                completion(nil)
+//            }
+//        }.resume()
+//    }
     private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
-        guard let groupId = groupId else { return }
+        guard let groupId = groupId else {
+            print("❌ groupId is nil")
+            completion(nil)
+            return
+        }
+
+        // ✅ Safely get token
+        guard let token = TokenManager.shared.getToken() else {
+            print("❌ Token not found in TokenManager")
+            completion(nil)
+            return
+        }
+
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/user/\(staffId)/profile/get?type=staff"
         print("Fetching staff details from: \(urlString)")
 
         guard let url = URL(string: urlString) else {
-            print("Invalid URL: \(urlString)")
+            print("❌ Invalid URL: \(urlString)")
             completion(nil)
             return
         }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // ✅ use token here
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let httpResponse = response as? HTTPURLResponse {
@@ -217,7 +268,7 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
             }
 
             guard let data = data, error == nil else {
-                print("Error fetching staff details:", error?.localizedDescription ?? "Unknown error")
+                print("❌ Error fetching staff details:", error?.localizedDescription ?? "Unknown error")
                 completion(nil)
                 return
             }
@@ -226,11 +277,12 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
                 let response = try JSONDecoder().decode(StaffDetailsResponse.self, from: data)
                 completion(response.data)
             } catch {
-                print("Decoding error:", error)
+                print("❌ Decoding error:", error)
                 completion(nil)
             }
         }.resume()
     }
+
 
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden

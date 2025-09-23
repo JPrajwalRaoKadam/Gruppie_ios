@@ -28,6 +28,7 @@ class GateListVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        gatetableview.layer.cornerRadius = 10
         gatetableview.delegate = self
         gatetableview.dataSource = self
         setupUI()

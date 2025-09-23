@@ -2,7 +2,7 @@
 import UIKit
 
 class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, ChapterTableViewCellDelegate {
-    
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var sessions: UITextField!
     @IBOutlet weak var lecture: UITextField!
     @IBOutlet weak var seminar: UITextField!
@@ -37,7 +37,8 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         dailogboxView.isHidden = true
         Chaptertableview.delegate = self
         Chaptertableview.dataSource = self

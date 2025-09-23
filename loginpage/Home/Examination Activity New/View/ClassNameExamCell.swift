@@ -25,26 +25,30 @@ override func awakeFromNib() {
     fallbackLabel.layer.cornerRadius = fallbackLabel.frame.size.width / 2
     fallbackLabel.clipsToBounds = true
     fallbackLabel.textAlignment = .center
-    fallbackLabel.backgroundColor = .link  // Set background color
-    fallbackLabel.textColor = .white
+    //fallbackLabel.backgroundColor = .systemGray5 // Set background color
+    fallbackLabel.textColor = .black
 }
 
 override func setSelected(_ selected: Bool, animated: Bool) {
     super.setSelected(selected, animated: animated)
 }
+
     func configure(with subject: SubjectData) {
         classLabel.text = subject.name
 
-        if let imageURL = subject.image, let url = URL(string: imageURL) {
-            loadImage(from: url)
-            fallbackLabel.isHidden = true
-            iconImageView.isHidden = false
-        } else {
-            iconImageView.image = generateImage(from: subject.name)  // This triggers the fallback image
-            iconImageView.isHidden = false
-            fallbackLabel.isHidden = true  // Optionally, hide the label
-        }
+//        if let imageURL = subject.image, let url = URL(string: imageURL) {
+//            // Load actual image
+//            loadImage(from: url)
+//            fallbackLabel.isHidden = true
+//            iconImageView.isHidden = false
+//        } else {
+            // Show fallbackLabel instead of iconImageView
+            fallbackLabel.text = String(subject.name.prefix(1)).uppercased()
+            fallbackLabel.isHidden = false
+            iconImageView.isHidden = true
+//        }
     }
+
 
     // Method to load image from URL (you can use libraries like SDWebImage or use URLSession for this)
     private func loadImage(from url: URL) {
@@ -55,7 +59,7 @@ override func setSelected(_ selected: Bool, animated: Bool) {
                 }
             } else {
                 DispatchQueue.main.async {
-                    self.iconImageView.image = self.generateImage(from: self.classLabel.text ?? "")
+                   // self.iconImageView.image = self.generateImage(from: self.classLabel.text ?? "")
                 }
             }
         }.resume()

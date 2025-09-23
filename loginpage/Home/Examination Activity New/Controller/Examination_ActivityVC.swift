@@ -9,6 +9,7 @@ import UIKit
 
 class Examination_ActivityVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
+    @IBOutlet weak var bcbutton: UIButton!
     var token: String = "" // Authentication token
     var groupId: String = "" // Group ID
     var teamId: String = ""
@@ -22,10 +23,14 @@ class Examination_ActivityVC: UIViewController, UITableViewDelegate, UITableView
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         marks_card.delegate = self
         marks_card.dataSource = self
         marks_card.register(UINib(nibName: "ClassNameExamCell", bundle: nil), forCellReuseIdentifier: "ClassNameExamCell")
         //print("gid NV: \(groupId) tid NV: \(subjects.teamId)")
+        marks_card.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         enableKeyboardDismissOnTap()
         print("userid in Examination_ActivityVC :\(userId)")
     }

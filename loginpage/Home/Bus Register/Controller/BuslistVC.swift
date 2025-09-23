@@ -6,6 +6,7 @@ class BuslistVC: UIViewController {
     @IBOutlet weak var buslistTable: UITableView!
     @IBOutlet weak var textToSearch: UITextField!
     @IBOutlet weak var searchButton: UIButton!
+    @IBOutlet weak var bcbutton: UIButton!
     
     var buses: [Bus] = []   // store API buses
     var groupId: String? // pass dynamically in your real app
@@ -18,6 +19,10 @@ class BuslistVC: UIViewController {
         buslistTable.delegate = self
         buslistTable.register(UINib(nibName: "BuslistCell", bundle: nil), forCellReuseIdentifier: "BuslistCell")
         add.layer.cornerRadius = 10
+        buslistTable.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+    
         print("groupId:\(groupId)")
         print("currentRole:\(currentRole)")
         fetchBusList()

@@ -14,6 +14,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     @IBOutlet weak var payableTableView: UITableView!
     @IBOutlet weak var gpayButton: UIButton!
     @IBOutlet weak var payableAmount: UILabel!
+    @IBOutlet weak var bcbutton: UIButton!
     
     var demandTotalAmount: String?
     var dueAmpount: String?
@@ -34,6 +35,9 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        payableTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
         // Register the cell
         payableTableView.register(UINib(nibName: "PayablesTableViewCell", bundle: nil), forCellReuseIdentifier: "PayablesTableViewCell")

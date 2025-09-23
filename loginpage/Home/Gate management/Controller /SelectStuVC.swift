@@ -9,6 +9,7 @@ import UIKit
 
 class SelectStuVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
 
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var StudentList: UITableView!
     @IBOutlet weak var SegmentController: UISegmentedControl!
     @IBOutlet weak var searchButton: UIButton!
@@ -27,6 +28,9 @@ class SelectStuVC: UIViewController, UITableViewDelegate, UITableViewDataSource,
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        StudentList.layer.cornerRadius = 10
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         print("groupId in SelectStuVC:::\(groupId)")
         
         let regularNib = UINib(nibName: "RegularTableViewCell", bundle: nil)

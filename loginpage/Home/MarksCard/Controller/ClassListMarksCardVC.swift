@@ -3,6 +3,7 @@ import UIKit
 class ClassListMarksCardVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var classListTableView: UITableView!
+    @IBOutlet weak var bcbutton: UIButton!
     
     var subjects: [SubjectData] = []
     var examDataResponse: [ExamData] = []
@@ -14,6 +15,9 @@ class ClassListMarksCardVC: UIViewController, UITableViewDelegate, UITableViewDa
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        classListTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
         classListTableView.delegate = self
         classListTableView.dataSource = self

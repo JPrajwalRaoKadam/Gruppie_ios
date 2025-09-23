@@ -11,6 +11,7 @@ import UniformTypeIdentifiers
 
 class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate, UIDocumentPickerDelegate {
 
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var ChapterName: UITextField!
     @IBOutlet weak var topicName: UITextField!
     @IBOutlet weak var imageButton: UIButton!
@@ -60,6 +61,9 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
         pdfNameLabel.isHidden = true
         
         submitButton.layer.cornerRadius = 10
+    
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
 
         addDropDownIcon(to: ChapterName, action: #selector(showChapterPicker))
         addDropDownIcon(to: topicName, action: #selector(showTopicPicker))

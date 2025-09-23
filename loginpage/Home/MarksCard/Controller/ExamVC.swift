@@ -10,6 +10,7 @@ import UIKit
 class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource, StudentMarksDetailDelegate {
     
     @IBOutlet weak var examListTableView: UITableView!
+    @IBOutlet weak var bcbutton: UIButton!
     
     var examDataResponse: [ExamData] = []
     var token: String = ""
@@ -21,6 +22,9 @@ class ExamVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Stud
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        examListTableView.layer.cornerRadius = 10
         examListTableView.delegate = self
         examListTableView.dataSource = self
         enableKeyboardDismissOnTap()

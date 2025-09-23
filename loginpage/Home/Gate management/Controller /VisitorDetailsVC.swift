@@ -15,6 +15,9 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
     
     weak var delegate: VisitorDetailsDelegate?
     
+    @IBOutlet weak var visit: UILabel!
+    @IBOutlet weak var idImage: UILabel!
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var name: UITextField!
     @IBOutlet weak var phone: UITextField!
     @IBOutlet weak var address: UITextField!
@@ -46,7 +49,29 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        name.layer.cornerRadius = 10
+        name.layer.masksToBounds = true
+        phone.layer.cornerRadius = 10
+        phone.layer.masksToBounds = true
+        address.layer.cornerRadius = 10
+        address.layer.masksToBounds = true
+        vehicleNo.layer.cornerRadius = 10
+        vehicleNo.layer.masksToBounds = true
+        whoomToMe.layer.cornerRadius = 10
+        whoomToMe.layer.masksToBounds = true
+        roomNo.layer.cornerRadius = 10
+        roomNo.layer.masksToBounds = true
+        building.layer.cornerRadius = 10
+        building.layer.masksToBounds = true
+        reason.layer.cornerRadius = 10
+        reason.layer.masksToBounds = true
         
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        visit.layer.cornerRadius = 10
+        visit.layer.masksToBounds = true
+        idImage.layer.cornerRadius = 10
+        idImage.layer.masksToBounds = true
+        bcbutton.clipsToBounds = true
         NotificationCenter.default.addObserver(self, selector: #selector(receiveStudentInfo(_:)), name: Notification.Name("SelectedStudentNotification"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(receiveStaffInfo(_:)), name: Notification.Name("StaffSelected"), object: nil)
 

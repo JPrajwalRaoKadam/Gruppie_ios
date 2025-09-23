@@ -68,12 +68,14 @@ class ClassesTableViewCell: UITableViewCell {
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         let context = UIGraphicsGetCurrentContext()
         
-        context?.setFillColor(UIColor.gray.cgColor)
+        // Use hex color #FFFFFF
+        let hexColor = UIColor(hex: "#F1EFEB")
+        context?.setFillColor(hexColor.cgColor)
         context?.fillEllipse(in: CGRect(origin: .zero, size: size))
         
         let textAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: 30),
-            .foregroundColor: UIColor.white
+            .font: UIFont.systemFont(ofSize: 23),
+            .foregroundColor: UIColor.black
         ]
         
         let textSize = letter.size(withAttributes: textAttributes)
@@ -91,6 +93,21 @@ class ClassesTableViewCell: UITableViewCell {
         
         return image
     }
-    
+
 }
 
+extension UIColor {
+    convenience init(hex: String) {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+        
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+        
+        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255
+        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255
+        let b = CGFloat(rgb & 0x0000FF) / 255
+        
+        self.init(red: r, green: g, blue: b, alpha: 1.0)
+    }
+}

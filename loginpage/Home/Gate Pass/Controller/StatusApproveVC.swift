@@ -12,12 +12,16 @@ class StatusApproveVC : UIViewController{
     var kids: [KidProfile] = []
     var gatePassList: [GatePassStatus] = []
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var statustableview: UITableView!
     override func viewDidLoad() {
         super.viewDidLoad()
         statustableview.register(UINib(nibName: "GatePassStatusCell", bundle: nil), forCellReuseIdentifier: "GatePassStatusCell")
         statustableview.delegate = self
         statustableview.dataSource = self
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        statustableview.layer.cornerRadius = 10
         
         guard let groupId = groupId else {
             print("❌ groupId is nil, cannot fetch kids")

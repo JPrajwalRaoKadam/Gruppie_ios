@@ -332,6 +332,7 @@ protocol StudentMarksDetailDelegate: AnyObject {
 
 class StudentMarksDetailVC: UIViewController {
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var subjectsTableView: UITableView!
     @IBOutlet weak var subjectsLabel: UILabel!
     @IBOutlet weak var studentMarksTableView: UITableView!
@@ -353,6 +354,9 @@ class StudentMarksDetailVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
+        subjectsTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
         subjectsView.isHidden = true
         let nib = UINib(nibName: "ExamAndSubjectTitleTableViewCell", bundle: nil)
