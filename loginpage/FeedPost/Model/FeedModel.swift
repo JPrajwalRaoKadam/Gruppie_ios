@@ -129,7 +129,7 @@ struct SelectedItem: Codable {
 struct AddPostRequest: Codable {
     let fileName: [String]
     let fileType: String
-    let selectedArray: [SelectedItem]
+    let selectedArray: [AddFeedVC.SelectedItem]
     let text: String
     let thumbnailImage: [String]
     let title: String
@@ -137,7 +137,18 @@ struct AddPostRequest: Codable {
 }
 
 // Response Model
+// Add these structs before your AddFeedVC class
 struct AddPostResponse: Codable {
     let success: Bool
-    let message: String
+    let message: String?
+    
+    init(success: Bool, message: String? = nil) {
+        self.success = success
+        self.message = message
+    }
+}
+
+struct ErrorResponse: Codable {
+    let message: String?
+    let success: Bool?
 }
