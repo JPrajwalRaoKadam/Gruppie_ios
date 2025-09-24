@@ -6,7 +6,8 @@ class DetailTimeTableViewController: UIViewController {
     @IBOutlet weak var className: UILabel!
     @IBOutlet weak var AddButton: UIButton!
     @IBOutlet weak var DeleteButton: UIButton!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var token: String = ""
     var groupId: String = ""
     var teamId: String = ""
@@ -47,6 +48,12 @@ class DetailTimeTableViewController: UIViewController {
         print("🟢 Received Subject IDs: \(subjectIds)")
         print("🟢 Received Staff IDs: \(staffIds)")
         
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         tableView.register(UINib(nibName: "DetailTimeTableTableViewCell", bundle: nil), forCellReuseIdentifier: "DetailTimeTableTableViewCell")
         
         tableView.delegate = self
@@ -58,6 +65,13 @@ class DetailTimeTableViewController: UIViewController {
         fetchDetailTimeTable()
         addTimeTable()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+    
     func setupTableHeaderView() {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 50))
         headerView.backgroundColor = UIColor.systemGray5

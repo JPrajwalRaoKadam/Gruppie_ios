@@ -11,14 +11,25 @@ class CombineTableViewCell1: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        iconImageView.layer.cornerRadius = iconImageView.frame.size.width / 2
+        // Basic setup
         iconImageView.clipsToBounds = true
-        iconImageView.backgroundColor = .link 
+        iconImageView.backgroundColor = .link
+        iconImageView.contentMode = .scaleAspectFill
 
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
-        imageLabel.textColor = .white
-        imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
+        imageLabel.textColor = .black
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
+        imageLabel.clipsToBounds = true
+//        imageLabel.backgroundColor = .link // Add background color to match
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        // Update corner radius after layout is complete
+        iconImageView.layer.cornerRadius = iconImageView.frame.size.width / 2
+        imageLabel.layer.cornerRadius = imageLabel.frame.size.width / 2
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -31,18 +42,22 @@ class CombineTableViewCell1: UITableViewCell {
         
         if let image = icon {
             iconImageView.image = image
+            iconImageView.backgroundColor = .clear
             imageLabel.isHidden = true
         } else {
             iconImageView.image = nil
             iconImageView.backgroundColor = .link
             
             imageLabel.text = String(name.prefix(1)).uppercased()
-            imageLabel.textColor = .white
-            imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
+            imageLabel.textColor = .black // Changed to white for better contrast
+            imageLabel.font = UIFont.boldSystemFont(ofSize: 17) // Keep consistent size
             imageLabel.textAlignment = .center
             imageLabel.isHidden = false
+//            imageLabel.backgroundColor = .link // Ensure background matches
         }
+        
+        // Ensure corner radius is updated
+        iconImageView.layer.cornerRadius = iconImageView.frame.size.width / 2
+        imageLabel.layer.cornerRadius = imageLabel.frame.size.width / 2
     }
 }
-
-

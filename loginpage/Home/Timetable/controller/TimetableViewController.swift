@@ -4,6 +4,7 @@ class TimetableViewController: UIViewController {
 
     @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var backButton: UIButton!
 
     var selectedClassName: String = ""
     var subjects: [SubjectData] = []
@@ -31,6 +32,12 @@ class TimetableViewController: UIViewController {
         tableView.register(UINib(nibName: "TimetableTableViewCell", bundle: nil), forCellReuseIdentifier: "TimetableTableViewCell")
         tableView.estimatedRowHeight = 80
         tableView.rowHeight = UITableView.automaticDimension
+        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         segmentController.isUserInteractionEnabled = true
         handleSegments()
@@ -43,6 +50,12 @@ class TimetableViewController: UIViewController {
         print("✅ Staff Details:", staffDetails)
 
         tableView.reloadData()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
     override func viewWillAppear(_ animated: Bool) {

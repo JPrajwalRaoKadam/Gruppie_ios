@@ -3,7 +3,8 @@ import UIKit
 class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSource, AddRegularClassLabelCellDelegate {
 
     @IBOutlet weak var TableView: UITableView!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var classData: [ClassType] = []
     var classTypeId: String = ""
     var className: String = ""
@@ -22,10 +23,23 @@ class AddRegularClass: UIViewController, UITableViewDelegate, UITableViewDataSou
 
         let nib = UINib(nibName: "AddRegularClassCell", bundle: nil)
         TableView.register(nib, forCellReuseIdentifier: "AddRegularClassCell")
+        
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
 
         TableView.delegate = self
         TableView.dataSource = self
         enableKeyboardDismissOnTap()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
     

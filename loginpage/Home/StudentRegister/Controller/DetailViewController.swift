@@ -7,7 +7,8 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var studentDbId: String?
     var token: String = ""
     var groupIds: String = ""
@@ -42,9 +43,23 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         searchView.isHidden = true
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
         filteredStudentDetails = studentDetails
+        
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
 
         print("Student details count: \(studentDetails.count)")
+        
         enableKeyboardDismissOnTap()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     @objc func searchButtonTappedAction() {

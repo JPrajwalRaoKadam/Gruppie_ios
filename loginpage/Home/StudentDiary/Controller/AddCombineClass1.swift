@@ -4,6 +4,8 @@ class AddCombineClass1: UIViewController {
     @IBOutlet weak var teamName: UITextField!
     @IBOutlet weak var AddButton: UIButton!
     @IBOutlet weak var MainView: UIView!
+    @IBOutlet weak var backButton: UIButton!
+
     var token: String = ""
     var groupIds: String = ""
     var studentTeams: [StudentTeam] = []
@@ -27,11 +29,23 @@ class AddCombineClass1: UIViewController {
         MainView.layer.shadowOffset = CGSize(width: 0, height: 5)
         MainView.layer.shadowOpacity = 0.5
         MainView.layer.shadowRadius = 10
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
 
         MainView.backgroundColor = UIColor.white
 
         AddButton.addTarget(self, action: #selector(addClassTapped), for: .touchUpInside)
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
 
     @objc func addClassTapped() {
         guard let teamNameText = teamName.text, !teamNameText.isEmpty else {

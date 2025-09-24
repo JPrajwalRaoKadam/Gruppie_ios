@@ -3,7 +3,8 @@ import UIKit
 class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var studentsTableView: UITableView!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var token: String = ""
     var groupId: String = ""
     var teamIds: [String] = []
@@ -18,6 +19,12 @@ class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         studentsTableView.delegate = self
         studentsTableView.dataSource = self
         
+        studentsTableView.layer.cornerRadius = 10
+        studentsTableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         studentsTableView.register(UINib(nibName: "listOfStudentsVCCell", bundle: nil), forCellReuseIdentifier: "listOfStudentsVCCell")
         
         print("------ Received Data in listOfStudentsVC ------")
@@ -31,6 +38,13 @@ class listOfStudentsVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         print("Subjects Count: \(subjects.count)")
         print("------------------------------------------------")
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

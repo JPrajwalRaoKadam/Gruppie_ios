@@ -15,7 +15,7 @@ class TimetableTableViewCell: UITableViewCell {
         imageLabel.clipsToBounds = true
         
         imageLabel.textAlignment = .center
-        imageLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        imageLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -32,8 +32,8 @@ class TimetableTableViewCell: UITableViewCell {
             self.icon.image = nil
             imageLabel.isHidden = false
             imageLabel.text = String(name.prefix(1)).uppercased()
-            imageLabel.backgroundColor = .link
-            imageLabel.textColor = .white  // Set text color to white
+//            imageLabel.backgroundColor = .link
+            imageLabel.textColor = .black  // Set text color to white
 
         }
     }

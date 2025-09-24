@@ -8,7 +8,8 @@ class StaffDiaryVc: UIViewController, UITableViewDataSource, UITableViewDelegate
     @IBOutlet weak var searchView: UIView!
     
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var filteredTeachingStaff: [Staff] = []
     var filteredNonTeachingStaff: [Staff] = []
     var isSearching = false
@@ -44,11 +45,23 @@ class StaffDiaryVc: UIViewController, UITableViewDataSource, UITableViewDelegate
         staffRegister.rowHeight = UITableView.automaticDimension
 
         searchView.isHidden = true
+        
+        staffRegister.layer.cornerRadius = 10
+        staffRegister.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         if segmentController.selectedSegmentIndex == 1 {
             fetchNonTeachingStaffData()
         }
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     @objc func searchButtonTappedAction() {

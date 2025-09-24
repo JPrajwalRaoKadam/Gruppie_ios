@@ -3,7 +3,8 @@ import UIKit
 
 class AllSubjectViewController: UIViewController, AllSubjectDetailTableViewCellDelegate {
     @IBOutlet weak var TableView: UITableView!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var staffList: [Staff] = []
 
     var token: String = TokenManager.shared.getToken() ?? ""
@@ -20,8 +21,22 @@ class AllSubjectViewController: UIViewController, AllSubjectDetailTableViewCellD
         enableKeyboardDismissOnTap()
         TableView.delegate = self
         TableView.dataSource = self
+        
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         TableView.register(UINib(nibName: "AllSubjectDetailTableViewCell", bundle: nil), forCellReuseIdentifier: "AllSubjectDetailTableViewCell")
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
     
     override func viewWillAppear(_: Bool) {
            super.viewWillAppear(true)

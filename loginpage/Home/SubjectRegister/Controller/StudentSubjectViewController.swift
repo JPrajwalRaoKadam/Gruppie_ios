@@ -8,7 +8,9 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
     @IBOutlet weak var SubjectName: UITextField!
     @IBOutlet weak var save: UIButton!
     @IBOutlet weak var searchLabel: UILabel!
+    @IBOutlet weak var backButton: UIButton!
 
+    
     var token: String = ""
     var groupId: String = ""
     var teamId: String = ""
@@ -37,6 +39,12 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
             SubjectPriority.text = "N/A"
         }
 
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         TableView.delegate = self
         TableView.dataSource = self
         TableView.register(UINib(nibName: "StudentSubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "StudentSubjectTableViewCell")
@@ -49,6 +57,12 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
 
         configureUI()
         fetchStudentSubjects()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
     func configureUI() {

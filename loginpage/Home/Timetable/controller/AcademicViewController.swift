@@ -4,7 +4,8 @@ class AcademicViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var className: UILabel!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var timeTableData: [DaySchedule] = []
     var token: String = TokenManager.shared.getToken() ?? ""
     var subjects: [SubjectData] = []
@@ -33,11 +34,22 @@ class AcademicViewController: UIViewController {
         className.text = classTitle
         print("🎯 Class Title: \(classTitle)")
         
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         
         tableView.register(UINib(nibName: "AcademicTableViewCell", bundle: nil), forCellReuseIdentifier: "AcademicTableViewCell")
         
         expandCurrentDaySection()
         fetchTimeTableAPI()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     @IBAction func BackButton(_ sender: UIButton) {
@@ -49,8 +61,6 @@ class AcademicViewController: UIViewController {
         let currentIndex = (currentDay == 1) ? 6 : currentDay - 2
         expandedSections.insert(currentIndex)
     }
-    
-
     
     func fetchTimeTableAPI() {
         self.selectedTeamId = teamIds.first ?? ""

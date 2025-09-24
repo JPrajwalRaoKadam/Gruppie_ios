@@ -7,6 +7,8 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
     @IBOutlet weak var editButton: UIButton!
     @IBOutlet weak var designation: UILabel!
     @IBOutlet weak var moreDetailsTableView: UITableView!
+    @IBOutlet weak var customView: UIView!
+
     var groupIds = ""
     var token: String = ""
     var member: Member?
@@ -37,12 +39,29 @@ class MoreDetailViewController: UIViewController, UITableViewDelegate, UITableVi
         moreDetailsTableView.separatorStyle = .none
         moreDetailsTableView.estimatedRowHeight = UITableView.automaticDimension
         moreDetailsTableView.rowHeight = UITableView.automaticDimension
+        
+        moreDetailsTableView.layer.cornerRadius = 10
+        moreDetailsTableView.layer.masksToBounds = true
+        
+        customView.layer.cornerRadius = 10
+        customView.layer.masksToBounds = true
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
 
         if let member = member {
             name.text = member.name
             designation.text = member.designation
         }
         enableKeyboardDismissOnTap()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     @IBAction func backButtonTapped(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)

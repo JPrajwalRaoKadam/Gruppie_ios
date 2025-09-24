@@ -32,11 +32,10 @@ class DetailTableViewCell: UITableViewCell {
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
         iconImageView.contentMode = .scaleAspectFill
-        iconImageView.backgroundColor = UIColor.systemBlue
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
-        imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
-        imageLabel.textColor = .white
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
+        imageLabel.textColor = .black
         imageLabel.backgroundColor = .clear
     }
 

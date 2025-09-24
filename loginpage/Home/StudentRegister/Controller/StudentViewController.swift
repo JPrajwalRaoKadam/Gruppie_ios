@@ -7,7 +7,8 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var studentTeams: [StudentTeam] = []
     var filteredStudentTeams: [StudentTeam] = []
     var combinedStudentTeams: [CombinedStudentTeam] = []
@@ -37,8 +38,21 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         SegmentController.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         
+        StudentList.layer.cornerRadius = 10
+        StudentList.layer.masksToBounds = true
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
+        
         segmentChanged()
         enableKeyboardDismissOnTap()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     @objc func searchButtonTappedAction() {

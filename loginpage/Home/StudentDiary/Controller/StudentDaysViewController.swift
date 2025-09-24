@@ -7,6 +7,8 @@ class StudentDaysViewController: UIViewController, UITableViewDataSource, UITabl
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var messageTextView: UITextView!
     @IBOutlet weak var submitButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
+
     var teamId: String = ""
     var currentDatePicker: UIDatePicker?
     var currentDate : String?
@@ -40,6 +42,12 @@ class StudentDaysViewController: UIViewController, UITableViewDataSource, UITabl
         messageTextView.layer.borderColor = UIColor.lightGray.cgColor
         messageTextView.clipsToBounds = true
         
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
@@ -51,6 +59,13 @@ class StudentDaysViewController: UIViewController, UITableViewDataSource, UITabl
                 submitButton.isHidden = false
             }
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

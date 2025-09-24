@@ -7,7 +7,8 @@ class StaffDaysViewController: UIViewController, UITableViewDataSource, UITableV
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var messageTextView: UITextView!
     @IBOutlet weak var submitButton: UIButton!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var currentDatePicker: UIDatePicker?
     var currentDate : String?
     var currentRole: String?
@@ -35,7 +36,11 @@ class StaffDaysViewController: UIViewController, UITableViewDataSource, UITableV
         messageTextView.text = "    Enter a message"
         messageTextView.textColor = .lightGray
         
-        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
         
         messageTextView.delegate = self
         messageTextView.layer.cornerRadius = 10
@@ -53,6 +58,12 @@ class StaffDaysViewController: UIViewController, UITableViewDataSource, UITableV
                         messageTextView.isHidden = false
                         submitButton.isHidden = false
                     }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     override func viewWillAppear(_ animated: Bool) {

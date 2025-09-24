@@ -3,6 +3,8 @@ import UIKit
 class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var TableView: UITableView!
+    @IBOutlet weak var backButton: UIButton!
+
     var school: School?
 
     var subjects: [SubjectData] = []
@@ -17,6 +19,12 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
         TableView.delegate = self
         TableView.dataSource = self
         
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         self.token = TokenManager.shared.getToken() ?? ""
 
         print("✅ SubjectViewController Loaded with:")
@@ -26,6 +34,12 @@ class SubjectViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         fetchSubjectData()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
     
     override func viewWillAppear(_: Bool) {
            super.viewWillAppear(true)

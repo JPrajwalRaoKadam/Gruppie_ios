@@ -11,67 +11,82 @@ class Member_TableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        setupUI()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Ensure circular corners after layout is complete
         icon.layer.cornerRadius = icon.frame.size.width / 2
-        icon.clipsToBounds = true
+        imageLabel.layer.cornerRadius = imageLabel.frame.size.width / 2
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
     }
     
+    private func setupUI() {
+        // Configure icon image view
+        icon.layer.cornerRadius = icon.frame.size.width / 2
+        icon.clipsToBounds = true
+        
+        // Configure image label for fallback
+        imageLabel.layer.cornerRadius = imageLabel.frame.size.width / 2
+        imageLabel.clipsToBounds = true
+        imageLabel.isHidden = true
+        imageLabel.textAlignment = .center
+        imageLabel.textColor = .black
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
+//        imageLabel.backgroundColor = .link
+        imageLabel.adjustsFontSizeToFitWidth = true
+        imageLabel.minimumScaleFactor = 0.5
+    }
+    
     func configureCell(with member: Member) {
         name.text = member.name
         designation.text = member.designation
         
+        // Reset both views
+        icon.image = nil
+        icon.backgroundColor = nil
+        imageLabel.isHidden = true
+        
         if let imageURL = member.image, let url = URL(string: imageURL) {
+            // Load image from URL
             loadImage(from: url)
         } else {
-            icon.image = generateImage(from: member.name ?? "")
+            // Show fallback with first letter in imageLabel
+            showFallbackImage(with: member.name ?? "")
         }
     }
     
     private func loadImage(from url: URL) {
         URLSession.shared.dataTask(with: url) { data, _, error in
-            if let data = data, error == nil {
-                DispatchQueue.main.async {
-                    self.icon.image = UIImage(data: data)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.icon.image = self.generateImage(from: self.name.text ?? "")
+            DispatchQueue.main.async {
+                if let data = data, error == nil, let image = UIImage(data: data) {
+                    // Successfully loaded image
+                    self.icon.image = image
+                    self.icon.backgroundColor = nil
+                    self.imageLabel.isHidden = true
+                } else {
+                    // Failed to load image, show fallback
+                    self.showFallbackImage(with: self.name.text ?? "")
                 }
             }
         }.resume()
     }
     
-    private func generateImage(from name: String) -> UIImage? {
+    private func showFallbackImage(with name: String) {
         let letter = name.prefix(1).uppercased()
         
-        let size = CGSize(width: 50, height: 50)
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        let context = UIGraphicsGetCurrentContext()
+        // Hide icon and show imageLabel with the letter
+        icon.image = nil
+        icon.backgroundColor = .link
+        imageLabel.text = letter
+        imageLabel.isHidden = false
         
-        context?.setFillColor(UIColor.link.cgColor)
-        context?.fillEllipse(in: CGRect(origin: .zero, size: size))
-        
-        let textAttributes: [NSAttributedString.Key: Any] = [
-               .font: UIFont.boldSystemFont(ofSize: 30),
-               .foregroundColor: UIColor.white 
-           ]
-        
-        let textSize = letter.size(withAttributes: textAttributes)
-        let textRect = CGRect(
-            x: (size.width - textSize.width) / 2,
-            y: (size.height - textSize.height) / 2,
-            width: textSize.width,
-            height: textSize.height
-        )
-        
-        letter.draw(in: textRect, withAttributes: textAttributes)
-        
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return image
+        // Ensure circular layout
+        setNeedsLayout()
+        layoutIfNeeded()
     }
 }

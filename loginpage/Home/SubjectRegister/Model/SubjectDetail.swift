@@ -165,8 +165,8 @@ struct Staffs: Codable {
         category = try container.decodeIfPresent(String.self, forKey: .category)
         motherName = try container.decodeIfPresent(String.self, forKey: .motherName)
         aadharNumber = try container.decodeIfPresent(String.self, forKey: .aadharNumber)
-        StudentName = try container.decodeIfPresent(String.self, forKey: .StudentName)  // ✅ Fix the issue
-        subjectName = try container.decodeIfPresent(String.self, forKey: .subjectName)  // ✅ Fix the issue
+        StudentName = try container.decodeIfPresent(String.self, forKey: .StudentName)
+        subjectName = try container.decodeIfPresent(String.self, forKey: .subjectName)
     }
 
     private static func decodeBool(from container: KeyedDecodingContainer<CodingKeys>, forKey key: CodingKeys) -> Bool? {

@@ -35,9 +35,23 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
+        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
         enableKeyboardDismissOnTap()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     override func viewWillAppear(_ animated: Bool) {

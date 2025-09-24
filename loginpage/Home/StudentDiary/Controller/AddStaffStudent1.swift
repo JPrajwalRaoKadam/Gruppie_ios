@@ -4,6 +4,8 @@ class AddStaffStudent1: UIViewController, UITableViewDelegate, UITableViewDataSo
 
     @IBOutlet weak var TableView: UITableView!
     @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
+
 
     var token: String = ""
     var groupId: String = ""
@@ -51,7 +53,10 @@ class AddStaffStudent1: UIViewController, UITableViewDelegate, UITableViewDataSo
         TableView.estimatedRowHeight = 100
         TableView.rowHeight = UITableView.automaticDimension
 
-        // TableView border and corner styling
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
         TableView.layer.cornerRadius = 15
         TableView.layer.masksToBounds = true
         TableView.layer.borderWidth = 1.0
@@ -61,6 +66,12 @@ class AddStaffStudent1: UIViewController, UITableViewDelegate, UITableViewDataSo
             addButton.layer.cornerRadius = addButton.frame.height / 2
             addButton.clipsToBounds = true
         }
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
 

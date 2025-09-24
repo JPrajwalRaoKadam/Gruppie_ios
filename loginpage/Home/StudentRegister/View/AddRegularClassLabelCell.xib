@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -11,49 +12,54 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="AddRegularClassLabelCell" customModule="loginpage" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <rect key="frame" x="0.0" y="0.0" width="359" height="44"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                <rect key="frame" x="0.0" y="0.0" width="359" height="44"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Jy-15-NQ3">
-                        <rect key="frame" x="220" y="7" width="30" height="30"/>
+                        <rect key="frame" x="259" y="7" width="30" height="31"/>
                         <constraints>
-                            <constraint firstAttribute="width" constant="30" id="g3b-eC-123"/>
+                            <constraint firstAttribute="width" constant="30" id="8ms-dr-l1L"/>
+                            <constraint firstAttribute="height" constant="31" id="ZN0-wF-ddr"/>
                         </constraints>
-                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="czC-6v-DWI">
-                        <rect key="frame" x="258" y="7" width="30" height="30"/>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="czC-6v-DWI">
+                        <rect key="frame" x="297" y="7" width="30" height="31"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="30" id="kkP-wn-0Ia"/>
+                        </constraints>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <state key="normal" title="Button"/>
-                        <buttonConfiguration key="configuration" style="plain" image="icon_plus"/>
+                        <buttonConfiguration key="configuration" style="plain">
+                            <imageReference key="image" image="plus.circle" catalog="system" symbolScale="medium"/>
+                        </buttonConfiguration>
                     </button>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YXZ-NX-cGb">
-                        <rect key="frame" x="16" y="7" width="90" height="30"/>
+                        <rect key="frame" x="16" y="7" width="90" height="31"/>
                         <constraints>
-                            <constraint firstAttribute="height" constant="30" id="T6b-jO-FO8"/>
-                            <constraint firstAttribute="width" constant="90" id="xqH-2R-Ey8"/>
+                            <constraint firstAttribute="width" constant="90" id="0tR-RL-j5B"/>
+                            <constraint firstAttribute="height" constant="31" id="9Eu-o6-Dor"/>
                         </constraints>
-                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="YXZ-NX-cGb" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="5Nd-ek-NJZ"/>
-                    <constraint firstItem="czC-6v-DWI" firstAttribute="bottom" secondItem="4Jy-15-NQ3" secondAttribute="bottom" id="5e0-bq-ZDA"/>
-                    <constraint firstItem="czC-6v-DWI" firstAttribute="top" secondItem="4Jy-15-NQ3" secondAttribute="top" id="72c-WY-9xG"/>
-                    <constraint firstItem="YXZ-NX-cGb" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="COR-OW-NGU"/>
-                    <constraint firstItem="4Jy-15-NQ3" firstAttribute="baseline" secondItem="YXZ-NX-cGb" secondAttribute="baseline" id="EZh-A5-v64"/>
-                    <constraint firstItem="czC-6v-DWI" firstAttribute="leading" secondItem="4Jy-15-NQ3" secondAttribute="trailing" constant="8" symbolic="YES" id="Mo2-Q2-jh4"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="czC-6v-DWI" secondAttribute="trailing" constant="16" id="av6-lV-Pp6"/>
-                    <constraint firstItem="czC-6v-DWI" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" constant="-63" id="bc6-FN-mxW"/>
-                    <constraint firstAttribute="trailing" secondItem="4Jy-15-NQ3" secondAttribute="trailing" constant="70" id="qdD-i1-E3l"/>
-                    <constraint firstItem="4Jy-15-NQ3" firstAttribute="firstBaseline" secondItem="YXZ-NX-cGb" secondAttribute="firstBaseline" id="z1r-PB-Uvc"/>
+                    <constraint firstItem="4Jy-15-NQ3" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="7" id="4pM-5r-lw5"/>
+                    <constraint firstAttribute="bottom" secondItem="4Jy-15-NQ3" secondAttribute="bottom" constant="6" id="7gZ-tE-v4j"/>
+                    <constraint firstItem="czC-6v-DWI" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="7" id="FEe-kz-eVz"/>
+                    <constraint firstAttribute="bottom" secondItem="YXZ-NX-cGb" secondAttribute="bottom" constant="6" id="FOb-mF-ZRy"/>
+                    <constraint firstItem="YXZ-NX-cGb" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="7" id="MFo-u1-Vnx"/>
+                    <constraint firstAttribute="trailing" secondItem="czC-6v-DWI" secondAttribute="trailing" constant="32" id="N5s-b3-Rje"/>
+                    <constraint firstAttribute="bottom" secondItem="czC-6v-DWI" secondAttribute="bottom" constant="6" id="dJs-OD-ptY"/>
+                    <constraint firstItem="YXZ-NX-cGb" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="16" id="hHV-gy-7Vt"/>
+                    <constraint firstItem="czC-6v-DWI" firstAttribute="leading" secondItem="4Jy-15-NQ3" secondAttribute="trailing" constant="8" symbolic="YES" id="mF1-h5-AaG"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -62,10 +68,10 @@
                 <outlet property="incrementButton" destination="czC-6v-DWI" id="5Op-Np-QLa"/>
                 <outlet property="noOfSections" destination="4Jy-15-NQ3" id="JYf-xO-QEA"/>
             </connections>
-            <point key="canvasLocation" x="139" y="20"/>
+            <point key="canvasLocation" x="138.93129770992365" y="19.718309859154932"/>
         </tableViewCell>
     </objects>
     <resources>
-        <image name="icon_plus" width="25" height="25"/>
+        <image name="plus.circle" catalog="system" width="128" height="123"/>
     </resources>
 </document>

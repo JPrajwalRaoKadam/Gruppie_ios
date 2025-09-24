@@ -19,11 +19,23 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         
          print("grpid atten:\(currentDate) ")
         
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UINib(nibName: "daysTableViewCell", bundle: nil), forCellReuseIdentifier: "daysTableViewCell")
         setCurrentDate()
         fetchData()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     override func viewWillAppear(_ animated: Bool) {

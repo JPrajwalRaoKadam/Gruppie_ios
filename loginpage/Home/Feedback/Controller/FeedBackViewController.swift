@@ -13,12 +13,19 @@ class FeedBackViewController: UIViewController {
 
     @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var backButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.delegate = self
         tableView.dataSource = self
+        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         print("Received Group ID: \(groupId ?? "No Group ID")")
         print("Received Token: \(token ?? "No Token")")
@@ -43,6 +50,13 @@ class FeedBackViewController: UIViewController {
             addButton.isHidden = true  // Optional: hide by default for unhandled roles
         }
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+    
 
     func fetchFeedbackData() {
         guard let groupId = groupId else {

@@ -3,6 +3,7 @@ import UIKit
 class PeriodDetailViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var backButton: UIButton!
 
     var token: String = ""
     var groupId: String = ""
@@ -19,11 +20,23 @@ class PeriodDetailViewController: UIViewController {
         print("Group ID: \(groupId)")
         print("Day: \(day)")
         print("Selected Period: \(periodData?.period ?? "N/A")")
+        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "PeriodDetailTableViewCell", bundle: nil), forCellReuseIdentifier: "PeriodDetailTableViewCell")
         fetchPeriodDetails()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
     @IBAction func BackButton(_ sender: UIButton) {
@@ -87,7 +100,7 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
             let headerCell = UITableViewCell(style: .default, reuseIdentifier: "HeaderCell")
 
             let classLabel = UILabel()
-            classLabel.text = "      Class Name"
+            classLabel.text = "Class Name"
             classLabel.font = UIFont.boldSystemFont(ofSize: 16)
             classLabel.textAlignment = .left
 
@@ -98,20 +111,18 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
 
             let stackView = UIStackView(arrangedSubviews: [classLabel, subjectLabel])
             stackView.axis = .horizontal
-            stackView.distribution = .fill
-            stackView.spacing = 150
+            stackView.distribution = .fillEqually
+            stackView.spacing = 55
             stackView.alignment = .leading
 
             headerCell.contentView.addSubview(stackView)
             stackView.translatesAutoresizingMaskIntoConstraints = false
 
             NSLayoutConstraint.activate([
-                stackView.leadingAnchor.constraint(equalTo: headerCell.contentView.leadingAnchor, constant: 10),
-                stackView.trailingAnchor.constraint(equalTo: headerCell.contentView.trailingAnchor, constant: -10),
+                stackView.leadingAnchor.constraint(equalTo: headerCell.contentView.leadingAnchor, constant: 20),
+                stackView.trailingAnchor.constraint(equalTo: headerCell.contentView.trailingAnchor, constant: -20),
                 stackView.topAnchor.constraint(equalTo: headerCell.contentView.topAnchor, constant: 8),
-                stackView.bottomAnchor.constraint(equalTo: headerCell.contentView.bottomAnchor, constant: -8),
-                
-                classLabel.widthAnchor.constraint(equalToConstant: 120)
+                stackView.bottomAnchor.constraint(equalTo: headerCell.contentView.bottomAnchor, constant: -8)
             ])
 
             headerCell.backgroundColor = UIColor.systemGray5
@@ -129,6 +140,9 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
         let subjectData = subjects[subjectIndex]
         cell.subject.text = subjectData.subjectName ?? ""
         cell.className.text = subjectData.className ?? ""
+
+        // Ensure subject text is aligned to the left in your custom cell
+        cell.subject.textAlignment = .left
 
         return cell
     }
@@ -163,7 +177,7 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.row == 0 {
-            return 40 
+            return 40
         }
         return UITableView.automaticDimension
     }

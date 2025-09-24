@@ -11,7 +11,8 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     @IBOutlet weak var CollectionView: UICollectionView!
     @IBOutlet weak var albumName: UILabel!
     @IBOutlet weak var addButton: UIButton!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var processedMediaItems: [MediaType] = []
     var currentRole: String = ""
     var groupId: String = ""
@@ -48,11 +49,23 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         layout.minimumInteritemSpacing = 10
         layout.minimumLineSpacing = 10
         CollectionView.collectionViewLayout = layout
+        
+        CollectionView.layer.cornerRadius = 10
+        CollectionView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         albumName.text = albumNameString
         loadImages()
         loadVideos()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
     
     func generateThumbnail(url: URL) -> UIImage? {
         let asset = AVAsset(url: url)

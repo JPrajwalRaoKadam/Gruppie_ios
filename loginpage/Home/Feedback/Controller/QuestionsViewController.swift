@@ -10,7 +10,8 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var backward: UIButton!
     @IBOutlet weak var forward: UIButton!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var token: String?
     var groupId: String?
     var allFeedbackItems: [FeedBackItem] = []
@@ -52,6 +53,10 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         print("studentName: \(studentName ?? "No studentName")")
         print("isSubmitted: \(isSubmitted ?? false)")
         print("feedbackData: \(feedbackData)")
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         tableView.delegate = self
         tableView.dataSource = self
@@ -80,6 +85,13 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             feedbackItem = allFeedbackItems[currentQuestionIndex]
         }
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+    
     func setupParentFeedback() {
         guard let feedbackData = feedbackData else {
             print("No feedback data for parent")
@@ -268,6 +280,7 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             navigationController?.popViewController(animated: true)
         }
     }
+    
     @IBAction func BackwardButton(_ sender: UIButton) {
         if currentQuestionIndex > 0 {
             currentQuestionIndex -= 1

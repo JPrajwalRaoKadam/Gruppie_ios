@@ -2,7 +2,8 @@ import UIKit
 
 class PeriodViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var groupId: String = ""
     var token: String = ""
     var teamIds: [String] = []
@@ -18,12 +19,24 @@ class PeriodViewController: UIViewController {
         let nib = UINib(nibName: "PeriodTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "PeriodTableViewCell")
         
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         print("✅ Received Data in PeriodViewController:")
         print("Group ID: \(groupId)")
         print("Day: \(day)")
         print("Token: \(token)")
         
         fetchPeriodData()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     @IBAction func BackButton(_ sender: UIButton) {

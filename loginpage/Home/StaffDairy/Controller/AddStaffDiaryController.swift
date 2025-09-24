@@ -8,6 +8,7 @@ class AddStaffDiaryController: UIViewController, UITableViewDelegate, UITableVie
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +36,13 @@ class AddStaffDiaryController: UIViewController, UITableViewDelegate, UITableVie
         addButton.layer.shadowOpacity = 0.3
         addButton.layer.shadowRadius = 5
         addButton.layer.masksToBounds = false
+        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         print("Token: \(TokenManager.shared.getToken() ?? "No Token")")
         print("Group ID: \(groupId ?? "No Group ID")")
 
@@ -54,6 +62,12 @@ class AddStaffDiaryController: UIViewController, UITableViewDelegate, UITableVie
 //        addButton.clipsToBounds = true
     }
 
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1

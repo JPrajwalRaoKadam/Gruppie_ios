@@ -6,6 +6,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var titleName: UILabel!
     @IBOutlet weak var editButton: UIButton!
     @IBOutlet weak var submitButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
 
     var token: String?
     var groupId: String?
@@ -22,6 +23,12 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         setupTableView()
         bindTitle()
         setupButtons()
@@ -34,6 +41,12 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+    
     
     func setupTableView() {
         tableView.delegate = self

@@ -7,6 +7,8 @@ class StudentViewController1: UIViewController, UITableViewDelegate, UITableView
     @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
+    @IBOutlet weak var backButton: UIButton!
+
     var currentRole: String?
     var studentTeams: [StudentTeam] = []
     var filteredStudentTeams: [StudentTeam] = []
@@ -33,12 +35,25 @@ class StudentViewController1: UIViewController, UITableViewDelegate, UITableView
         
         searchView.isHidden = true
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
+        
+        StudentList.layer.cornerRadius = 10
+        StudentList.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
         filteredStudentTeams = studentTeams
         
         SegmentController.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         
         segmentChanged()
     }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
     
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden

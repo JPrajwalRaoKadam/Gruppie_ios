@@ -3,7 +3,8 @@ import UIKit
 class AddSubject: UIViewController {
     @IBOutlet weak var TableView: UITableView!
     @IBOutlet weak var Save: UIButton!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var token: String?
     var groupId: String?
     var teamId: String?
@@ -14,6 +15,9 @@ class AddSubject: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        
         print("Token: \(token ?? "N/A")")
         print("Group ID: \(groupId ?? "N/A")")
         print("Team ID: \(teamId ?? "N/A")")
@@ -22,10 +26,22 @@ class AddSubject: UIViewController {
         enableKeyboardDismissOnTap()
         TableView.delegate = self
         TableView.dataSource = self
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         TableView.register(UINib(nibName: "AddSubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "AddSubjectTableViewCell")
         
         fetchSubjects()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
     
     func styleButton(_ button: UIButton) {
         button.layer.cornerRadius = 10

@@ -8,6 +8,7 @@ class AddSingleManagement: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var number: UITextField!
     @IBOutlet weak var addUserButton: UIButton!
     @IBOutlet weak var addMoreButton: UIButton!
+    @IBOutlet weak var customView: UIView!
 
     @IBOutlet weak var backButton: UIButton!
     var token: String?
@@ -26,7 +27,20 @@ class AddSingleManagement: UIViewController, UITextFieldDelegate {
         addMoreButton.layer.cornerRadius = 10
         addUserButton.clipsToBounds = true
         addMoreButton.clipsToBounds = true
+        customView.layer.cornerRadius = 10
+        customView.layer.masksToBounds = true
         
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
+        
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
     @objc func validateForm() {

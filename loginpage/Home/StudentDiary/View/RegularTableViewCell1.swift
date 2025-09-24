@@ -15,19 +15,28 @@ class RegularTableViewCell1: UITableViewCell {
         setupGestureRecognizers()
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Update corner radius after layout is complete
+        iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
+        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
+    }
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
     }
 
     private func setupUI() {
-        iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
+        // Configure iconImageView
         iconImageView.clipsToBounds = true
-
         iconImageView.backgroundColor = UIColor.link
-
+        
+        // Configure imageLabel
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
-        imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
+        imageLabel.clipsToBounds = true
+//        imageLabel.backgroundColor = UIColor.link // Or any color you prefer
     }
 
     private func setupGestureRecognizers() {
@@ -47,16 +56,22 @@ class RegularTableViewCell1: UITableViewCell {
         if let image = icon {
             iconImageView.image = image
             imageLabel.isHidden = true
+            iconImageView.backgroundColor = UIColor.clear
         } else {
             iconImageView.image = nil
             iconImageView.backgroundColor = UIColor.link
 
             imageLabel.text = String(name.prefix(1)).uppercased()
-            imageLabel.textColor = .white
-            imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
+            imageLabel.textColor = .black // Changed to white for better contrast
+            imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
             imageLabel.textAlignment = .center
             imageLabel.isHidden = false
+//            imageLabel.backgroundColor = UIColor.link
         }
+        
+        // Ensure corner radius is updated
+        iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
+        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
     }
 
     @objc private func callTapped() {

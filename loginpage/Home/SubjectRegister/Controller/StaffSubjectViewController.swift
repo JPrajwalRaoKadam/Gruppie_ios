@@ -8,6 +8,9 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
     @IBOutlet weak var SubjectName: UITextField!
     @IBOutlet weak var save: UIButton!
     @IBOutlet weak var searchLabel: UILabel!
+    @IBOutlet weak var backButton: UIButton!
+
+    
     var subjectId: String?
     var selectedSubject: SubjectDetail?
     var staffList: [Staffs] = []
@@ -25,6 +28,11 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
             } else {
                 SubjectPriority.text = "No Priority Assigned"
             }
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         TableView.delegate = self
         TableView.dataSource = self
@@ -33,6 +41,11 @@ class StaffSujectViewController: UIViewController, UITableViewDelegate, UITableV
         configureUI()
         
         fetchTeachingStaff()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     func configureUI() {

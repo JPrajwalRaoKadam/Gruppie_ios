@@ -11,7 +11,8 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var NoOfOptons: UITextField!
     @IBOutlet weak var NoOfQuestins: UITextField!
     @IBOutlet weak var enterTitle: UITextField!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var questions: [String] = []
     var groupId: String?
     var token: String?
@@ -35,6 +36,10 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         OptionsButton.clipsToBounds = true
         SaveButton.clipsToBounds = true
         
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         if let text = NoOfOptons.text, let count = Int(text) {
             for i in 1...count {
                 let newOption = FeedbackOption(optionNo: "\(i)", option: "", marks: "", answer: false)
@@ -57,12 +62,12 @@ class AddFeedBackViewController: UIViewController, UITextFieldDelegate {
         setupTextFields()
     }
     
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-        addShadow(to: OptionsButton)
-        addShadow(to: SaveButton)
-    }
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+
+        }
     
     func setupDatePickers() {
         startDatePicker.datePickerMode = .date

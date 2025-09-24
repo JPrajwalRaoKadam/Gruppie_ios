@@ -10,6 +10,7 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
     var teamId: String = ""
     var newStudent: Student?
     var newStudentDetails: [StudentData] = []
+    @IBOutlet weak var backButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +24,7 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
         TableView.delegate = self
         TableView.dataSource = self
 
-        TableView.layer.cornerRadius = 15
+        TableView.layer.cornerRadius = 10
         TableView.layer.masksToBounds = true
         TableView.layer.borderWidth = 1
         TableView.layer.borderColor = UIColor.lightGray.cgColor
@@ -31,8 +32,17 @@ class AddStudentViewController: UIViewController, UITableViewDataSource, UITable
         TableView.layer.shadowOffset = CGSize(width: 0, height: 2)
         TableView.layer.shadowOpacity = 0.3
         TableView.layer.shadowRadius = 4
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
         TableView.layer.masksToBounds = false
         enableKeyboardDismissOnTap()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

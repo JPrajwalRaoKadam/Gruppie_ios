@@ -18,11 +18,9 @@ class DetailTableViewCell1: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
+        // Make both views circular
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
-        iconImageView.clipsToBounds = true
-        
-        imageLabel.layer.cornerRadius = iconImageView.frame.width / 2
-        imageLabel.clipsToBounds = true
+        imageLabel.layer.cornerRadius = imageLabel.frame.width / 2
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -30,16 +28,21 @@ class DetailTableViewCell1: UITableViewCell {
     }
 
     private func setupUI() {
-        iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
+        // Configure iconImageView
         iconImageView.clipsToBounds = true
         iconImageView.contentMode = .scaleAspectFill
         iconImageView.backgroundColor = UIColor.systemBlue
 
+        // Configure imageLabel
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
-        imageLabel.font = UIFont.boldSystemFont(ofSize: 24)
-        imageLabel.textColor = .white
-        imageLabel.backgroundColor = .clear
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
+        imageLabel.textColor = .black  // Changed to white for better contrast
+//        imageLabel.backgroundColor = .systemBlue
+        imageLabel.clipsToBounds = true
+        
+        // Position the imageLabel over the iconImageView in storyboard
+        // or set constraints programmatically here (only once)
     }
 
     private func setupGestureRecognizers() {
@@ -69,14 +72,6 @@ class DetailTableViewCell1: UITableViewCell {
 
             imageLabel.text = firstLetter
             imageLabel.isHidden = false
-
-            imageLabel.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                imageLabel.centerXAnchor.constraint(equalTo: iconImageView.centerXAnchor),
-                imageLabel.centerYAnchor.constraint(equalTo: iconImageView.centerYAnchor),
-                imageLabel.widthAnchor.constraint(equalTo: iconImageView.widthAnchor),
-                imageLabel.heightAnchor.constraint(equalTo: iconImageView.heightAnchor)
-            ])
         }
     }
 

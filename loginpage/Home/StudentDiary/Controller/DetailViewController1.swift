@@ -7,6 +7,8 @@ class DetailViewController1: UIViewController, UITableViewDataSource, UITableVie
     @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
+    @IBOutlet weak var backButton: UIButton!
+
     var currentRole: String?
     var studentDbId: String?
     var token: String = ""
@@ -36,15 +38,28 @@ class DetailViewController1: UIViewController, UITableViewDataSource, UITableVie
         TableView.dataSource = self
         TableView.delegate = self
         
-        TableView.layer.cornerRadius = 15
-        TableView.layer.masksToBounds = true
         
+        
+        
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
         searchView.isHidden = true
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
         filteredStudentDetails = studentDetails
 
         print("Student details count: \(studentDetails.count)")
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden
         searchView.isHidden = !shouldShow

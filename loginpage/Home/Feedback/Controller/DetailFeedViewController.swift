@@ -5,7 +5,8 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
     @IBOutlet weak var Question: UIButton!
     @IBOutlet weak var TableView: UITableView!
     @IBOutlet weak var titleName: UILabel!
-    
+    @IBOutlet weak var backButton: UIButton!
+
     var groupId: String?
     var token: String?
     var feedbackItem: FeedBackItem?
@@ -32,6 +33,12 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
         TableView.delegate = self
         TableView.dataSource = self
         
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         TableView.register(UINib(nibName: "DetailFeedTableViewCell", bundle: nil), forCellReuseIdentifier: "DetailFeedCell")
         
         titleName.text = feedbackItem?.title
@@ -45,9 +52,14 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
         
         setupFeedbackQuestionLabel()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+    
 
-    func setupFeedbackQuestionLabel() {
-        view.addSubview(feedbackQuestionLabel)
+    func setupFeedbackQuestionLabel() {        view.addSubview(feedbackQuestionLabel)
         feedbackQuestionLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             feedbackQuestionLabel.topAnchor.constraint(equalTo: Question.bottomAnchor, constant: 10),
@@ -58,6 +70,7 @@ class DetailFeedViewController: UIViewController, UITableViewDataSource, UITable
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(navigateToQuestions))
         feedbackQuestionLabel.addGestureRecognizer(tapGesture)
+
     }
 
     @IBAction func showFeedbackQuestion(_ sender: UIButton) {

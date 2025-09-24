@@ -3,7 +3,9 @@ import UIKit
 class AddStudentViewController1: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var TableView: UITableView!
-    @IBOutlet weak var addButton: UIButton! 
+    @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
+
 
     var token: String = ""
     var groupId: String = ""
@@ -22,6 +24,10 @@ class AddStudentViewController1: UIViewController, UITableViewDataSource, UITabl
         TableView.register(UINib(nibName: "AddStudentTableViewCell", bundle: nil), forCellReuseIdentifier: "AddStudentTableViewCell")
         TableView.delegate = self
         TableView.dataSource = self
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         TableView.layer.cornerRadius = 15
         TableView.layer.masksToBounds = true
@@ -33,6 +39,13 @@ class AddStudentViewController1: UIViewController, UITableViewDataSource, UITabl
         TableView.layer.shadowRadius = 4
         TableView.layer.masksToBounds = false
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1

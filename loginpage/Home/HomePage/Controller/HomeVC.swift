@@ -200,6 +200,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             navigateToMangementViewController()
         case "Staff Register":
             fetchStaffDataAndNavigate()
+        case "Staff Attendance":
+                navigateToStaffAttendance()
         case "Feed Back":
             switch currentRole?.lowercased() {
             case "parent":
@@ -256,6 +258,25 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("No navigation configured for type: \(featureIcon.name)")
         }
     }
+    
+    private func navigateToStaffAttendance() {
+        let storyboard = UIStoryboard(name: "StaffAttendence", bundle: nil) // Replace with your actual storyboard name
+        guard let staffAttendanceVC = storyboard.instantiateViewController(withIdentifier: "StaffAttendenceVc") as? StaffAttendenceVc else {
+            print("Failed to instantiate StaffAttendanceVC")
+            return
+        }
+        
+        // Pass required parameters
+        staffAttendanceVC.token = TokenManager.shared.getToken() ?? ""
+        staffAttendanceVC.groupId = school?.id ?? ""
+        staffAttendanceVC.currentRole = self.currentRole ?? ""
+        
+        // You can pass other parameters if needed
+        // staffAttendanceVC.someOtherProperty = someValue
+        
+        navigationController?.pushViewController(staffAttendanceVC, animated: true)
+    }
+    
     func navigateToBusRegister() {
                 let storyboard = UIStoryboard(name: "BusRegister", bundle: nil)
                 if let GatePassViewController = storyboard.instantiateViewController(withIdentifier: "BuslistVC") as? BuslistVC {

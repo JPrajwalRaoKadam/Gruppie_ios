@@ -3,6 +3,8 @@ import UIKit
 class AddRegularClass1: UIViewController, UITableViewDelegate, UITableViewDataSource, AddRegularClassLabelCellDelegate {
 
     @IBOutlet weak var TableView: UITableView!
+    @IBOutlet weak var backButton: UIButton!
+
     
     var classData: [ClassType] = []
     var classTypeId: String = ""
@@ -22,10 +24,24 @@ class AddRegularClass1: UIViewController, UITableViewDelegate, UITableViewDataSo
 
         let nib = UINib(nibName: "AddRegularClassCell", bundle: nil)
         TableView.register(nib, forCellReuseIdentifier: "AddRegularClassCell")
+        
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
 
         TableView.delegate = self
         TableView.dataSource = self
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
 
     
     func numberOfSections(in tableView: UITableView) -> Int {

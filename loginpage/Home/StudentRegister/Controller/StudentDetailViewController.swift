@@ -6,7 +6,9 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     @IBOutlet weak var EditButton: UIButton!
     @IBOutlet weak var designation: UILabel!
     @IBOutlet weak var name: UILabel!
-    
+    @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var customView: UIView!
+
     var student: StudentData?
     var isEditingEnabled = false
     var token: String = ""
@@ -35,7 +37,23 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         TableView.dataSource = self
         TableView.reloadData()
         
+        TableView.layer.cornerRadius = 10
+        TableView.layer.masksToBounds = true
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
+        customView.layer.cornerRadius = 10
+        customView.layer.masksToBounds = true
+        
         enableKeyboardDismissOnTap()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
     @IBAction func whatsappButtonTapped(_ sender: UIButton) {

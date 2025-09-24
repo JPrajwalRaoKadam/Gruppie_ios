@@ -52,8 +52,8 @@ class NonTeachingStaff: UITableViewCell {
         // Create a label inside the icon to show the first letter
         imageLabel.text = firstLetter
         imageLabel.textAlignment = .center
-        imageLabel.textColor = .white
-        imageLabel.font = UIFont.boldSystemFont(ofSize: 20) // Increased font size
+        imageLabel.textColor = .black
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 17) // Increased font size
         icon.backgroundColor = UIColor.link
         
         // Ensure label's text is centered within the circle

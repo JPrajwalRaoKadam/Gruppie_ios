@@ -10,6 +10,7 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
     var userId: String = ""
     var staffList: [StaffMember] = []
     var selectedStaff: [String: Bool] = [:]
+    @IBOutlet weak var backButton: UIButton!
 
     @IBAction func AddButton(_ sender: Any) {
         let selectedMembers = staffList.filter { selectedStaff[$0.userId ?? ""] == true }
@@ -48,10 +49,14 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
         TableView.dataSource = self
         TableView.estimatedRowHeight = 100
         TableView.rowHeight = UITableView.automaticDimension
-        TableView.layer.cornerRadius = 15
+        TableView.layer.cornerRadius = 10
         TableView.layer.masksToBounds = true
         TableView.layer.borderWidth = 1.0
         TableView.layer.borderColor = UIColor.lightGray.cgColor
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         if let addButton = self.view.viewWithTag(1) as? UIButton {
             addButton.layer.cornerRadius = addButton.frame.height / 2
@@ -60,6 +65,11 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
         enableKeyboardDismissOnTap()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
 
     func assignStaffToClass(userId: String, completion: @escaping (Bool) -> Void) {
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/62b4265f97d24b15e8123158/assign/class/teacher"

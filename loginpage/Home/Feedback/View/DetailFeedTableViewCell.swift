@@ -12,9 +12,9 @@ class DetailFeedTableViewCell: UITableViewCell {
         imageLabel.layer.cornerRadius = imageLabel.frame.size.width / 2
         imageLabel.clipsToBounds = true
         imageLabel.textAlignment = .center
-        imageLabel.backgroundColor = UIColor.lightGray
-        imageLabel.textColor = UIColor.white
-        imageLabel.font = UIFont.boldSystemFont(ofSize: 20)
+//        imageLabel.backgroundColor = UIColor.lightGray
+        imageLabel.textColor = UIColor.black
+        imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -26,8 +26,8 @@ class DetailFeedTableViewCell: UITableViewCell {
         imageLabel.isHidden = false
         imageLabel.text = String(classData.name.prefix(1)).uppercased()
 
-        imageLabel.backgroundColor = .link
-        imageLabel.textColor = .white
+//        imageLabel.backgroundColor = .link
+        imageLabel.textColor = .black
         imageLabel.clipsToBounds = true
         imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
 

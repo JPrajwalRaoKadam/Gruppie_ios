@@ -6,26 +6,26 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var searchView: UIView!
-    
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
+    
+    // Add this outlet - make sure to connect it in your storyboard
+    @IBOutlet weak var backButton: UIButton!
     
     var filteredTeachingStaff: [Staff] = []
     var filteredNonTeachingStaff: [Staff] = []
     var isSearching = false
-
     var staffDetails: StaffDetailsData?
-    
     var searchTextField: UITextField?
     var searchButtonTapped = false
-    
     var teachingStaffData: [Staff] = []
     var nonTeachingStaffData: [Staff] = []
     var token: String?
     var groupIds = ""
+    
     @IBAction func BackButton(_ sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
-
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("Received groupId: \(groupIds)")
@@ -38,6 +38,13 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
 
         staffRegister.delegate = self
         staffRegister.dataSource = self
+        
+        
+        segmentController.layer.cornerRadius = 0
+        segmentController.layer.masksToBounds = false
+           
+        staffRegister.layer.cornerRadius = 10
+        staffRegister.layer.masksToBounds = true
 
         staffRegister.estimatedRowHeight = 100
         staffRegister.rowHeight = UITableView.automaticDimension
@@ -47,9 +54,20 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         if segmentController.selectedSegmentIndex == 1 {
             fetchNonTeachingStaffData()
         }
+        
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Configure backButton to have circular corners
+        backButton.layer.cornerRadius = backButton.frame.size.width / 2
+        backButton.layer.masksToBounds = true
+        backButton.clipsToBounds = true
+        
+    }
+    
+
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden
         searchView.isHidden = !shouldShow

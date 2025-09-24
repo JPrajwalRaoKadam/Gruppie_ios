@@ -11,6 +11,7 @@ class GalleryViewController: UIViewController {
     @IBOutlet weak var view2: UIView!
     @IBOutlet weak var date: UITextField!
     @IBOutlet weak var addDescription: UITextField!
+    @IBOutlet weak var backButton: UIButton!
 
     var currentRole: String = ""
     var groupId: String = ""
@@ -32,6 +33,13 @@ class GalleryViewController: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
+        
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+
 
         tableView.delegate = self
         tableView.dataSource = self
@@ -56,6 +64,13 @@ class GalleryViewController: UIViewController {
         setupLoadingSpinner()
         fetchGalleryData(page: currentPage)
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update back button corner radius after layout is complete
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+
 
     func setupLoadingSpinner() {
         spinner.center = view.center
