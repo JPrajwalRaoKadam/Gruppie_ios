@@ -50,21 +50,20 @@ struct School {
         self.name = schoolData.name ?? "Unnamed School" // Default to "Unnamed School" if nil
     }
 }
-struct FeatureIcon: Codable {
-    let name: String
-    let image: String
-    let role: String
-//    let details: [UserDetails]?
-//    let count: Int?
-}
-
-struct GroupData: Codable {
-    let activity: String?
-    let featureIcons: [FeatureIcon]
-}
 
 struct HomeResponse: Codable {
     let data: [GroupData]
+}
+
+struct GroupData: Codable {
+    let activity: String
+    let featureIcons: [FeatureIcon]
+}
+
+struct FeatureIcon: Codable {
+    let name: String
+    let image: String
+    let role: String?
 }
 
 struct Event: Codable {

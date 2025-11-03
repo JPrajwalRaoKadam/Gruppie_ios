@@ -41,6 +41,7 @@ class AllIconsTableViewCell: UITableViewCell {
     func configure(with activity: GroupData) {
         activityHeader.text = activity.activity
         featureIcons = activity.featureIcons
+        print("........1234....\(featureIcons)")
         iconCollectionView.reloadData()
         DispatchQueue.main.async {
             self.updateCollectionViewHeight()

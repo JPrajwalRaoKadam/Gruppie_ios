@@ -19,6 +19,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var userId:String = ""
     var featureIcons: [FeatureIcon] = []
     
+    @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var tableView: UITableView! // TableView outlet
     @IBOutlet weak var shortNameLabel: UILabel! // Label to display short name
     @IBOutlet weak var bottomTableViewConstraint: NSLayoutConstraint!
@@ -30,6 +31,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+        bcbutton.clipsToBounds = true
         self.navigationController?.isNavigationBarHidden = true
         tableView.dataSource = self
         tableView.delegate = self

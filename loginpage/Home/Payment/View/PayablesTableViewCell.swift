@@ -18,17 +18,19 @@ class PayablesTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        configureCell(isChecked: false)
+        configureCell(isChecked: true) // Always checked initially
     }
 
-    func configureCell(isChecked: Bool, payAmount: String = "", dueAmount: String = "") {
-        let imageName = isChecked ? "checkmark.square.fill" : "square"
-        let image = UIImage(systemName: imageName)?.withTintColor(.black, renderingMode: .alwaysOriginal)
+    func configureCell(isChecked: Bool = true, payAmount: String = "", dueAmount: String = "") {
+        // Always show checked image
+        let image = UIImage(systemName: "checkmark.square.fill")?.withTintColor(.black, renderingMode: .alwaysOriginal)
         checkBoxButton.setImage(image, for: .normal)
+
         PayLabel.text = payAmount
         dueLabel.text = dueAmount
     }
+
     @IBAction func checkBoxActionButton(_ sender: UIButton) {
-        checkBoxAction?() // Call action in ViewController
+        checkBoxAction?() // You can still call action if needed
     }
 }

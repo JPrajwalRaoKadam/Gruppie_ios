@@ -20,7 +20,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     var dueAmpount: String?
     
     var feePaymentData: FeePaymentData?
-    let feeTypes = ["Tuition Fee", "Management Fee"]
+    let feeTypes = ["Tution Fee", "Management Fee"]
     
     var groupID : String?
     var teamID : String?
@@ -87,7 +87,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
                     "amount": payableAmount.text ?? "0.00",
                     "studentName": self.studentName ?? "Unknown",
                     "customerMobileNo": self.customerMobileNo ?? "Unknown",
-                    "returnURL": "https://demo.gruppie.in/api/v1/groups/661643d90dde2b4c5da9fbe5/team/661643d90dde2b4c5da9fbe6/user/661cbd6d84e842a6034715a9/atom/response?type=easebuzz",
+                    "returnURL": APIManager.shared.baseURL + "groups/661643d90dde2b4c5da9fbe5/team/661643d90dde2b4c5da9fbe6/user/661cbd6d84e842a6034715a9/atom/response?type=easebuzz",
                     "frontendUrl": "http://localhost:4200/activity/easebuzz/661643d90dde2b4c5da9fbe5"
                 ]
 
@@ -161,23 +161,62 @@ extension AmountPaymentVC: UITableViewDelegate, UITableViewDataSource {
         return feeTypes.count
     }
 
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PayablesTableViewCell", for: indexPath) as? PayablesTableViewCell else {
+//            return UITableViewCell()
+//        }
+//
+//        let isChecked = indexPath.row == selectedIndex
+//        cell.feeType.text = feeTypes[indexPath.row]
+//        cell.configureCell(isChecked: isChecked, payAmount: demandTotalAmount ?? "", dueAmount: dueAmpount ?? "")
+//
+//        cell.checkBoxAction = { [weak self] in
+//            guard let self = self else { return }
+//
+//            self.selectedIndex = indexPath.row
+//            self.payableAmount.text = (dueAmpount ?? "0") + ".0001"
+//            tableView.reloadData() // Reload table to update UI
+//        }
+//
+//        return cell
+//    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PayablesTableViewCell", for: indexPath) as? PayablesTableViewCell else {
+        guard feeTypes.indices.contains(indexPath.row),
+              let cell = tableView.dequeueReusableCell(withIdentifier: "PayablesTableViewCell", for: indexPath) as? PayablesTableViewCell else {
             return UITableViewCell()
         }
 
-        let isChecked = indexPath.row == selectedIndex
+        let isChecked = true
         cell.feeType.text = feeTypes[indexPath.row]
-        cell.configureCell(isChecked: isChecked, payAmount: demandTotalAmount ?? "", dueAmount: dueAmpount ?? "")
 
-        cell.checkBoxAction = { [weak self] in
-            guard let self = self else { return }
+        var payAmount = "0"
+        var dueAmount = "0"
 
-            self.selectedIndex = indexPath.row
-            self.payableAmount.text = (dueAmpount ?? "0") + ".0001"
-            tableView.reloadData() // Reload table to update UI
+        // First cell → 0 values, others → real values
+        if indexPath.row != 0 {
+            payAmount = demandTotalAmount ?? "0"
+            dueAmount = dueAmpount ?? "0"
+        }
+
+        // Configure the cell (always checked)
+        cell.configureCell(isChecked: isChecked, payAmount: payAmount, dueAmount: dueAmount)
+
+        // ✅ After all cells are loaded, calculate total due + 0.0001
+        DispatchQueue.main.async {
+            var totalDue: Double = 0.0
+
+            // If you only have 2 cells (first 0 + second actual)
+            totalDue += Double("0") ?? 0.0
+            totalDue += Double(self.dueAmpount ?? "0") ?? 0.0
+
+            // Add ₹0.0001 to total
+            totalDue += 0.0001
+
+            self.payableAmount.text = String(format: "%.4f", totalDue)
         }
 
         return cell
     }
+
 }

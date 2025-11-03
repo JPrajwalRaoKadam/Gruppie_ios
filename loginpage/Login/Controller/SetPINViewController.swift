@@ -201,21 +201,18 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
             }
             
             dispatchGroup.enter()
-            fetchHomeData(groupId: schoolData.id) { groupData in
-                if let groupData = groupData {
-                    DispatchQueue.main.async {
-                        homeVC.groupDatas = groupData
-                    }
-                    
-                    for group in groupData {
-                        print("Fetched Activity: \(group.activity)")
-                        for icon in group.featureIcons {
-                            print("Feature Type: \(icon.name), Image: \(icon.image)")
-                        }
-                    }
-                }
-                dispatchGroup.leave()
-            }
+                       fetchHomeData(groupId: schoolData.id) { groupData in
+                           DispatchQueue.main.async {
+                               if let groupData = groupData {
+                                   homeVC.groupDatas = groupData
+                                   homeVC.currentRole = self.currentRole
+                                   print("✅ Loaded \(groupData.count) groups")
+                               } else {
+                                   print("⚠️ No group data received")
+                               }
+                               dispatchGroup.leave()
+                           }
+                       }
             
             dispatchGroup.notify(queue: .main) {
                 if let imageUrls = imageUrls {
@@ -366,14 +363,14 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     }
     private func fetchHomeData(groupId: String, completion: @escaping ([GroupData]?) -> Void) {
         guard let token = TokenManager.shared.getToken() else {
-            print("Token not found")
+            print("❌ Token not found")
             completion(nil)
             return
         }
         
         let urlString = APIManager.shared.baseURL + "groups/\(groupId)/home"
         guard let url = URL(string: urlString) else {
-            print("Invalid URL")
+            print("❌ Invalid URL")
             completion(nil)
             return
         }
@@ -384,69 +381,47 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Error: \(error.localizedDescription)")
+                print("❌ Network error: \(error.localizedDescription)")
                 completion(nil)
                 return
             }
             
             guard let data = data else {
-                print("No data received")
+                print("❌ No data received")
                 completion(nil)
                 return
             }
             
-            // Print raw response for debugging
-            if let rawResponse = String(data: data, encoding: .utf8) {
-                print("Raw Response of Home API: \(rawResponse)")
+            // 🪶 Print raw response for verification
+            if let raw = String(data: data, encoding: .utf8) {
+                print("\n🔹 Raw Response of Home API:\n\(raw)\n")
             }
             
             do {
-                // Parse JSON using JSONSerialization
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let dataArray = jsonResponse["data"] as? [[String: Any]] {
-                    // Map data array to GroupData model
-                    let groups = dataArray.compactMap { groupDict -> GroupData? in
-                        guard let activity = groupDict["activity"] as? String,
-                              let featureIconsArray = groupDict["featureIcons"] as? [[String: Any]] else {
-                            return nil
-                        }
-                        
-                        // Map featureIcons to FeatureIcon model
-                        let featureIcons = featureIconsArray.compactMap { iconDict -> FeatureIcon? in
-                            guard let name = iconDict["name"] as? String,
-                                  let image = iconDict["image"] as? String,
-                                  let role = iconDict["role"] as? String else {
-                                return nil
-                            }
-                            self.currentRole = role
-                            print(".....rolee.......\(self.currentRole)")
-                            return FeatureIcon(name: name, image: image, role: role)
-                        }
-                        
-                        return GroupData(activity: activity, featureIcons: featureIcons)
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                
+                // ✅ Decode using wrapper object
+                let response = try decoder.decode(HomeResponse.self, from: data)
+                let groups = response.data
+                
+                // ✅ Debug print
+                print("✅ Successfully decoded groups:")
+                for group in groups {
+                    print("→ Activity: \(group.activity)")
+                    for icon in group.featureIcons {
+                        print("   - \(icon.name) (\(icon.role ?? "no role"))")
+                        self.currentRole = icon.role
                     }
-                    // Print fetched data for debugging
-                    print("Fetched Group Data:")
-                    for group in groups {
-                        print("Activity: \(group.activity)")
-                        for icon in group.featureIcons {
-                            print("Type H: \(icon.name), Image H: \(icon.image)")
-                        }
-                    }
-                    
-                    // Pass the parsed data to completion
-                    completion(groups)
-                } else {
-                    print("Unexpected response format or missing data key")
-                    completion(nil)
                 }
+                
+                completion(groups)
             } catch {
-                print("Error parsing API response: \(error.localizedDescription)")
+                print("❌ Decoding error: \(error)")
                 completion(nil)
             }
         }.resume()
     }
-    
     private func callAPIAndNavigate(completion: @escaping () -> Void) {
         guard let token = TokenManager.shared.getToken() else {
             print("Token is nil. Cannot proceed with API call.")
