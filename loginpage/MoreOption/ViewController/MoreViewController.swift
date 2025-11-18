@@ -12,10 +12,14 @@ class MoreViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     @IBOutlet weak var moreTableView: UITableView!
     @IBOutlet weak var moreTableViewBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var backButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        moreTableView.layer.cornerRadius = 10
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
         moreTableView.register(UINib(nibName: "MoreTableViewCell", bundle: nil), forCellReuseIdentifier: "MoreTableViewCell")
         CustomTabManager.addTabBar(self, isRemoveLast: false, selectIndex: 2, bottomConstraint: &self.moreTableViewBottomConstraint)
         enableKeyboardDismissOnTap()

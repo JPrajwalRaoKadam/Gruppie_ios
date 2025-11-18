@@ -10,7 +10,7 @@ import UIKit
 class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var commentTv: UITableView!
-    
+    @IBOutlet weak var backButton: UIButton!
     @IBOutlet weak var commentTextFeild: UITextField!
     
     var response: CommentResponse?
@@ -24,6 +24,10 @@ class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
+        commentTv.layer.cornerRadius = 10
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
         if let response = response {
                     print("Total Pages: \(response.totalNumberOfPages)")
                     print("Comments: \(response.data)")

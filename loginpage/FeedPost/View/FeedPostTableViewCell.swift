@@ -107,8 +107,8 @@ class FeedPostTableViewCell: UITableViewCell {
         cardView.layer.shadowRadius = 8
         cardView.backgroundColor = .white
         
-        cardView.layer.borderColor = UIColor.black.cgColor
-        cardView.layer.borderWidth = 0.5
+//        cardView.layer.borderColor = UIColor.black.cgColor
+//        cardView.layer.borderWidth = 0.5
         
         mainImageView.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))

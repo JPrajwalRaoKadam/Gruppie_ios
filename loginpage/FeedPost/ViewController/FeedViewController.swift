@@ -12,7 +12,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     // MARK: - Outlets
     @IBOutlet weak var feedTableView: UITableView!
     @IBOutlet weak var bottomLeftButton: UIButton!
-    @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var viewBottomConstraint: NSLayoutConstraint!
     
     // MARK: - Properties
     var likeUnlikeResponse: LikeStatus?
@@ -46,7 +46,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     // MARK: - UI Setup
     private func setupUI() {
         self.navigationController?.isNavigationBarHidden = true
-        
+        feedTableView.layer.cornerRadius = 10
         // Role-based UI setup
         bottomLeftButton.isHidden = (currentRole == "parent" || currentRole == "teacher")
         
@@ -75,7 +75,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         CustomTabManager.addTabBar(self,
                                  isRemoveLast: false,
                                  selectIndex: 1,
-                                 bottomConstraint: &self.tableViewBottomConstraint)
+                                 bottomConstraint: &self.viewBottomConstraint)
     }
     
     private func setupKeyboardDismiss() {

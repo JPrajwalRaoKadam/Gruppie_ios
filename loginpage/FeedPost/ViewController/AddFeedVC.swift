@@ -19,6 +19,7 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
     
     @IBOutlet weak var addFeedTableView: UITableView!
     @IBOutlet weak var submitButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
     
     var postName: String = ""
     var postDescription: String?
@@ -42,7 +43,10 @@ class AddFeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, A
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        addFeedTableView.layer.cornerRadius = 10
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
         addFeedTableView.register(UINib(nibName: "AddFeedInfoTableViewCell", bundle: nil), forCellReuseIdentifier: "AddFeedInfoTableViewCell")
         addFeedTableView.register(UINib(nibName: "ClassTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassTableViewCell")
         

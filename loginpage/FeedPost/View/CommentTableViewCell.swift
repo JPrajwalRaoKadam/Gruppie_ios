@@ -56,7 +56,8 @@ class CommentTableViewCell: UITableViewCell {
         letterLabel.font = UIFont.boldSystemFont(ofSize: 30)  // Adjust size based on your needs
         letterLabel.textColor = .white
         letterLabel.textAlignment = .center
-        letterLabel.backgroundColor = .gray  // Adjust the color
+        let customColor = UIColor(hex: "#F5F3EF")
+        letterLabel.backgroundColor = customColor // Adjust the color
         letterLabel.layer.cornerRadius = 25  // Adjust for circle size
         letterLabel.layer.masksToBounds = true
         letterLabel.frame = CGRect(x: 0, y: 0, width: 50, height: 50)  // Size of the circle

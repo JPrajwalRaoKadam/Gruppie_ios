@@ -44,7 +44,8 @@ class ClassTableViewCell: UITableViewCell {
         let renderer = UIGraphicsImageRenderer(size: size)
         let image = renderer.image { context in
             // Set the background color
-            UIColor.lightGray.setFill()
+            let customColor = UIColor(hex: "#F5F3EF")
+            classImageView.backgroundColor = customColor
             context.fill(CGRect(origin: .zero, size: size))
             
             // Configure text attributes

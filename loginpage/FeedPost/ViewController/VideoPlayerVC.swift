@@ -14,6 +14,7 @@ class VideoPlayerVC: UIViewController {
     
     @IBOutlet weak var playerView: UIView!
     @IBOutlet weak var playPauseButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
     
     var videoPlayerURL: String?
     var player: AVPlayer?
@@ -23,6 +24,10 @@ class VideoPlayerVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        playerView.layer.cornerRadius = 10
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
 
         playPauseButton.isHidden = true
         playPauseButton.addTarget(self, action: #selector(playPauseAction(_:)), for: .touchUpInside)
