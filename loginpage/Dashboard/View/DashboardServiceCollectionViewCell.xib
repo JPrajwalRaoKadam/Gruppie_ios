@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="Tq8-9C-b6y" customClass="DashboardServiceCollectionViewCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="160" height="115"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Wb5-za-03y" userLabel="containerView" customClass="GroupCollectionViewCell" customModule="loginpage" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="0.0" width="160" height="115"/>
+                    <subviews>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.94999998807907104" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Lgg-KV-Zkm">
+                            <rect key="frame" x="10" y="8" width="40" height="40"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="40" id="ctn-ea-AUw"/>
+                                <constraint firstAttribute="height" constant="40" id="uta-cJ-ljV"/>
+                            </constraints>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VmZ-U0-bdX">
+                            <rect key="frame" x="10" y="56" width="140" height="21"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="21" id="BpG-fA-FSK"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZYs-13-Oo1">
+                            <rect key="frame" x="10" y="83" width="140" height="21"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="21" id="2LR-bV-8zP"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <accessibility key="accessibilityConfiguration" identifier="GroupCollectionViewCell"/>
+                    <constraints>
+                        <constraint firstItem="ZYs-13-Oo1" firstAttribute="leading" secondItem="Wb5-za-03y" secondAttribute="leading" constant="10" id="Gm3-CZ-ElG"/>
+                        <constraint firstAttribute="trailing" secondItem="ZYs-13-Oo1" secondAttribute="trailing" constant="10" id="J5a-ch-bWp"/>
+                        <constraint firstItem="Lgg-KV-Zkm" firstAttribute="leading" secondItem="Wb5-za-03y" secondAttribute="leading" constant="10" id="Zp6-zI-xhM"/>
+                        <constraint firstItem="ZYs-13-Oo1" firstAttribute="top" secondItem="VmZ-U0-bdX" secondAttribute="bottom" constant="6" id="ghS-5C-ZB1"/>
+                        <constraint firstItem="Lgg-KV-Zkm" firstAttribute="top" secondItem="Wb5-za-03y" secondAttribute="top" constant="8" id="mHH-0z-WuP"/>
+                        <constraint firstAttribute="trailing" secondItem="VmZ-U0-bdX" secondAttribute="trailing" constant="10" id="rEF-NG-jYV"/>
+                        <constraint firstItem="VmZ-U0-bdX" firstAttribute="leading" secondItem="Wb5-za-03y" secondAttribute="leading" constant="10" id="tha-HH-zy8"/>
+                        <constraint firstItem="VmZ-U0-bdX" firstAttribute="top" secondItem="Lgg-KV-Zkm" secondAttribute="bottom" constant="8" symbolic="YES" id="uau-4s-BOf"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="pre-VK-NPh"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="Wb5-za-03y" firstAttribute="top" secondItem="Tq8-9C-b6y" secondAttribute="top" id="1a4-EO-e74"/>
+                <constraint firstAttribute="bottom" secondItem="Wb5-za-03y" secondAttribute="bottom" id="dFN-9N-qaq"/>
+                <constraint firstItem="Wb5-za-03y" firstAttribute="leading" secondItem="pre-VK-NPh" secondAttribute="leading" id="vh6-d5-PA4"/>
+                <constraint firstItem="Wb5-za-03y" firstAttribute="trailing" secondItem="pre-VK-NPh" secondAttribute="trailing" id="yEH-4u-DOK"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="containerView" destination="Wb5-za-03y" id="2Lz-av-D7v"/>
+                <outlet property="serviceDescription" destination="ZYs-13-Oo1" id="Sdv-hX-g0q"/>
+                <outlet property="serviceImageView" destination="Lgg-KV-Zkm" id="SR3-2K-ZQX"/>
+                <outlet property="serviceName" destination="VmZ-U0-bdX" id="XiG-h9-CfC"/>
+            </connections>
+            <point key="canvasLocation" x="-184.73282442748092" y="-94.718309859154928"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

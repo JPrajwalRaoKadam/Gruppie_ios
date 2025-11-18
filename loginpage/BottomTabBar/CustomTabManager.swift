@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol DashboardNavigationDelegate: AnyObject {
+    func tapforDashboard()
+}
+
 protocol FeedPageNavigationDelegate: AnyObject {
     func tapforFeeds()
 }
@@ -27,6 +31,7 @@ class CustomTabManager: NSObject {
     var delegate: FeedPageNavigationDelegate?
     var hDelegate: HomePageNavigationDelegate?
     var mDelegate: MoreNavigationDelegate?
+    var dbDelegate: DashboardNavigationDelegate?
     
     private var curVController = UIViewController()
     var customTabbar = CustomTabBarViewController()
@@ -62,6 +67,7 @@ class CustomTabManager: NSObject {
             myobject.view.clipsToBounds = true
             
             // Button actions
+            myobject.buttons[3].addTarget(CustomTabManager.shared, action: #selector(tapforDashboard(_:)), for: .touchUpInside)
             myobject.buttons[0].addTarget(CustomTabManager.shared, action: #selector(tapOnHome(_:)), for: .touchUpInside)
             myobject.buttons[1].addTarget(CustomTabManager.shared, action: #selector(tapOnService(_:)), for: .touchUpInside)
             myobject.buttons[2].addTarget(CustomTabManager.shared, action: #selector(tapOnMore(_:)), for: .touchUpInside)
@@ -74,6 +80,12 @@ class CustomTabManager: NSObject {
             CustomTabManager.shared.customTabbar = myobject
             controller.view.addSubview(myobject.view)
         }
+    }
+    
+    @objc func tapforDashboard(_ sender: UIButton) {
+        customTabbar.selectedIndex = 3
+        customTabbar.setSelectedTabBar()
+        dbDelegate?.tapforDashboard()
     }
     
     @objc func tapOnHome(_ sender: UIButton) {

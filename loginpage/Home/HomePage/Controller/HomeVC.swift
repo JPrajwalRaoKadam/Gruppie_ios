@@ -1,8 +1,8 @@
 import UIKit
 import SDWebImage
 
-class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllIconsTableViewCellDelegate,FeedPageNavigationDelegate, HomePageNavigationDelegate, MoreNavigationDelegate {
-  
+class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllIconsTableViewCellDelegate,FeedPageNavigationDelegate, HomePageNavigationDelegate, MoreNavigationDelegate, DashboardNavigationDelegate {
+    
     var indexPath: IndexPath?
     var name: String?
     var groupId: String?
@@ -49,6 +49,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         CustomTabManager.shared.delegate = self
         CustomTabManager.shared.hDelegate = self
         CustomTabManager.shared.mDelegate = self
+        CustomTabManager.shared.dbDelegate = self
         // Print the image URLs to verify their content
         print("Image URLs: \(imageUrls)")
         
@@ -103,6 +104,16 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             } else {
                 print("HomeVC not found in the navigation stack.")
             }
+    }
+    
+    func tapforDashboard() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let dashboardVC = storyboard.instantiateViewController(withIdentifier: "DashBoardVC") as? DashBoardVC else {
+            print("ViewController with identifier 'dashboardVC' not found.")
+            return
+        }
+        
+        self.navigationController?.pushViewController(dashboardVC, animated: true)
     }
     
     func tapOnMore() {
