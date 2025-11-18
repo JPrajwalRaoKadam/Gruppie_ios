@@ -179,6 +179,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         buttonStack.alignment = .center
         buttonStack.distribution = .equalSpacing
         buttonStack.spacing = 40
+        
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.addSubview(buttonStack)
 
@@ -236,6 +237,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
             print("Image saved to Photos.")
         }
+        
     }
 
     @objc func shareImageTapped() {

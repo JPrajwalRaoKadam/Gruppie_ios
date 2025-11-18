@@ -67,7 +67,6 @@ class AddStaffStudent: UIViewController, UITableViewDelegate, UITableViewDataSou
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Update back button corner radius after layout is complete
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 

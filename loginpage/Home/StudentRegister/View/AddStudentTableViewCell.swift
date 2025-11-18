@@ -1,6 +1,6 @@
 import UIKit
 
-class AddStudentTableViewCell: UITableViewCell {
+class AddStudentTableViewCell: UITableViewCell, UITextFieldDelegate {
     
     @IBOutlet weak var name: UITextField!
     @IBOutlet weak var country: UITextField!
@@ -12,6 +12,8 @@ class AddStudentTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        phone.delegate = self
+        phone.keyboardType = .numberPad  
         updateNewAdmissionButton()
     }
 
@@ -24,7 +26,23 @@ class AddStudentTableViewCell: UITableViewCell {
         if isNewAdmission {
             newAdmissionButton.setImage(UIImage(systemName: "checkmark.square.fill"), for: .normal)
         } else {
-            newAdmissionButton.setImage(UIImage(systemName: "square"), for: .normal) 
+            newAdmissionButton.setImage(UIImage(systemName: "square"), for: .normal)
         }
+    }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard textField == phone else { return true }
+
+        let allowedCharacterSet = CharacterSet.decimalDigits
+        let characterSet = CharacterSet(charactersIn: string)
+        if !allowedCharacterSet.isSuperset(of: characterSet) {
+            return false
+        }
+
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else { return false }
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+
+        return updatedText.count <= 10
     }
 }

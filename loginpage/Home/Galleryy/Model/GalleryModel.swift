@@ -33,7 +33,6 @@ struct AlbumData: Codable {
         albumId = try container.decode(String.self, forKey: .albumId)
         fileType = try container.decodeIfPresent(String.self, forKey: .fileType)
         
-        // Handle fileName being either a single String or an array of Strings
         if let singleFileName = try? container.decode(String.self, forKey: .fileName) {
             fileName = [singleFileName]
         } else {

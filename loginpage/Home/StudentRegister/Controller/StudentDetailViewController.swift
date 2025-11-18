@@ -52,7 +52,6 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Update back button corner radius after layout is complete
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 

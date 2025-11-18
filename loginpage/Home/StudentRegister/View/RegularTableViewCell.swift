@@ -17,11 +17,9 @@ class RegularTableViewCell: UITableViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        // Apply circular corner radius to both views
         iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
         imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
         
-        // Optional: Also make WhatsApp and call icons circular
         whatsAppImageView.layer.cornerRadius = whatsAppImageView.frame.height / 2
         callImageView.layer.cornerRadius = callImageView.frame.height / 2
     }
@@ -31,27 +29,20 @@ class RegularTableViewCell: UITableViewCell {
     }
 
     private func setupUI() {
-        // Enable clipping to bounds for both views
         iconImageView.clipsToBounds = true
         imageLabel.clipsToBounds = true
         whatsAppImageView.clipsToBounds = true
         callImageView.clipsToBounds = true
         
-        // Set initial corner radius
         iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
         imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
         whatsAppImageView.layer.cornerRadius = whatsAppImageView.frame.height / 2
         callImageView.layer.cornerRadius = callImageView.frame.height / 2
 
-//        iconImageView.backgroundColor = UIColor.link
-        
-        // Configure imageLabel appearance
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
         imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
-//        imageLabel.backgroundColor = UIColor.link // Match the background color
-        imageLabel.textColor = .black // Better contrast with link color
-        
+        imageLabel.textColor = .black
         
     }
 
@@ -74,18 +65,13 @@ class RegularTableViewCell: UITableViewCell {
             imageLabel.isHidden = true
         } else {
             iconImageView.image = nil
-//            iconImageView.backgroundColor = UIColor.link
-
             imageLabel.text = String(name.prefix(1)).uppercased()
             imageLabel.textColor = .black // Better contrast
             imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
             imageLabel.textAlignment = .center
-//            imageLabel.backgroundColor = UIColor.link // Ensure background matches
             imageLabel.isHidden = false
         }
-        
-        // Ensure layout updates after configuration
-        setNeedsLayout()
+                setNeedsLayout()
     }
 
     @objc private func callTapped() {

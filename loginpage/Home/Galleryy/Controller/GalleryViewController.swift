@@ -3,7 +3,7 @@ import SDWebImage
 
 class GalleryViewController: UIViewController {
 
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var AlbumName: UITextField!
     @IBOutlet weak var CreateAlbum: UIButton!
@@ -23,6 +23,7 @@ class GalleryViewController: UIViewController {
     var totalPages = 1
 
     let spinner = UIActivityIndicatorView(style: .large)
+    private var datePicker: UIDatePicker?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,17 +35,23 @@ class GalleryViewController: UIViewController {
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
         
-        tableView.layer.cornerRadius = 10
-        tableView.layer.masksToBounds = true
+        collectionView.layer.cornerRadius = 10
+        collectionView.layer.masksToBounds = true
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
 
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.prefetchDataSource = self
+        collectionView.register(UINib(nibName: "GalleryCollectionCell", bundle: nil), forCellWithReuseIdentifier: "GalleryCollectionCell")
 
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.prefetchDataSource = self
-        tableView.register(UINib(nibName: "GalleryTableViewCell", bundle: nil), forCellReuseIdentifier: "GalleryCell")
+        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.scrollDirection = .vertical
+            layout.minimumLineSpacing = 6
+            layout.minimumInteritemSpacing = 6
+            layout.sectionInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        }
 
         CreateAlbum.layer.cornerRadius = 10
         view1.isHidden = true
@@ -58,7 +65,7 @@ class GalleryViewController: UIViewController {
         view2.layer.masksToBounds = false
 
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
-        tableView.addGestureRecognizer(longPressGesture)
+        collectionView.addGestureRecognizer(longPressGesture)
 
         setupDatePicker()
         setupLoadingSpinner()
@@ -67,10 +74,8 @@ class GalleryViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Update back button corner radius after layout is complete
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
-
 
     func setupLoadingSpinner() {
         spinner.center = view.center
@@ -86,27 +91,43 @@ class GalleryViewController: UIViewController {
         }
     }
 
+    // MARK: - Date Picker Setup
     func setupDatePicker() {
-        let datePicker = UIDatePicker()
-        datePicker.datePickerMode = .date
-        datePicker.preferredDatePickerStyle = .wheels
-        datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
+        let picker = UIDatePicker()
+        picker.datePickerMode = .date
+        picker.preferredDatePickerStyle = .wheels
+        picker.maximumDate = Date() // optional: prevents future dates
+        picker.locale = Locale(identifier: "en_IN")
+        picker.timeZone = .current
+        picker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
+        datePicker = picker
 
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
-        toolbar.setItems([.flexibleSpace(), UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(dismissDatePicker))], animated: false)
+        let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(dismissDatePicker))
+        let space = UIBarButtonItem.flexibleSpace()
+        toolbar.setItems([space, doneButton], animated: false)
 
-        date.inputView = datePicker
+        date.inputView = picker
         date.inputAccessoryView = toolbar
     }
 
     @objc func dateChanged(_ sender: UIDatePicker) {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
+        formatter.locale = Locale(identifier: "en_IN")
+        formatter.timeZone = .current
         date.text = formatter.string(from: sender.date)
     }
 
     @objc func dismissDatePicker() {
+        if let picker = datePicker {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd/MM/yyyy"
+            formatter.locale = Locale(identifier: "en_IN")
+            formatter.timeZone = .current
+            date.text = formatter.string(from: picker.date)
+        }
         view.endEditing(true)
     }
 
@@ -146,15 +167,28 @@ class GalleryViewController: UIViewController {
                 self.totalPages = decodedResponse.totalNumberOfPages
 
                 DispatchQueue.main.async {
-                    let startIndex = self.albums.count
-                    self.albums += decodedResponse.data
+                    let newAlbums = decodedResponse.data
 
-                    var indexPaths: [IndexPath] = []
-                    for i in 0..<decodedResponse.data.count {
-                        indexPaths.append(IndexPath(row: startIndex + i, section: 0))
+                    if self.currentPage == 1 {
+                        self.albums = newAlbums
+                        self.collectionView.reloadData()
+                        return
                     }
 
-                    self.tableView.insertRows(at: indexPaths, with: .fade)
+                    let startIndex = self.albums.count
+                    self.albums += newAlbums
+
+                    let newIndexPaths = (startIndex..<self.albums.count).map {
+                        IndexPath(item: $0, section: 0)
+                    }
+
+                    if self.collectionView.window != nil && !newIndexPaths.isEmpty {
+                        self.collectionView.performBatchUpdates({
+                            self.collectionView.insertItems(at: newIndexPaths)
+                        }, completion: nil)
+                    } else {
+                        self.collectionView.reloadData()
+                    }
                 }
             } catch {
                 print("Error decoding JSON: \(error.localizedDescription)")
@@ -162,11 +196,13 @@ class GalleryViewController: UIViewController {
         }.resume()
     }
 
+
+    // MARK: - Delete Album
     @objc func handleLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
         if gestureRecognizer.state == .began {
-            let point = gestureRecognizer.location(in: tableView)
-            if let indexPath = tableView.indexPathForRow(at: point) {
-                showDeleteConfirmation(album: albums[indexPath.row], indexPath: indexPath)
+            let point = gestureRecognizer.location(in: collectionView)
+            if let indexPath = collectionView.indexPathForItem(at: point) {
+                showDeleteConfirmation(album: albums[indexPath.item], indexPath: indexPath)
             }
         }
     }
@@ -199,12 +235,13 @@ class GalleryViewController: UIViewController {
             }
 
             DispatchQueue.main.async {
-                self.albums.remove(at: indexPath.row)
-                self.tableView.deleteRows(at: [indexPath], with: .fade)
+                self.albums.remove(at: indexPath.item)
+                self.collectionView.deleteItems(at: [indexPath])
             }
         }.resume()
     }
 
+    // MARK: - Buttons
     @IBAction func BackButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
@@ -213,6 +250,13 @@ class GalleryViewController: UIViewController {
         let show = view1.isHidden
         view1.isHidden = !show
         view2.isHidden = !show
+        
+        // set current date when view2 opens
+        if !view2.isHidden {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd/MM/yyyy"
+            date.text = formatter.string(from: Date())
+        }
     }
 
     @IBAction func createAlbumTapped(_ sender: UIButton) {
@@ -262,36 +306,39 @@ class GalleryViewController: UIViewController {
     }
 }
 
-extension GalleryViewController: UITableViewDelegate, UITableViewDataSource, UITableViewDataSourcePrefetching {
+// MARK: - Collection View Delegates
+extension GalleryViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDataSourcePrefetching {
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return albums.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "GalleryCell", for: indexPath) as? GalleryTableViewCell else {
-            return UITableViewCell()
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GalleryCollectionCell", for: indexPath) as? GalleryCollectionCell else {
+            return UICollectionViewCell()
         }
 
-        let album = albums[indexPath.row]
+        let album = albums[indexPath.item]
         cell.albumName.text = album.albumName
-        cell.Date.text = album.updatedAt
+        
+        let imageCount = album.fileName?.count ?? 0
+        cell.imageCountLabel.text = "\(imageCount)"
 
         if let urlStr = album.fileName?.first, let url = URL(string: urlStr) {
-            cell.ImageUrl.sd_setImage(
+            cell.albumImage.sd_setImage(
                 with: url,
                 placeholderImage: UIImage(named: "placeholder"),
                 options: [.scaleDownLargeImages, .continueInBackground, .highPriority]
             )
         } else {
-            cell.ImageUrl.image = UIImage(named: "placeholder")
+            cell.albumImage.image = UIImage(named: "placeholder")
         }
 
         return cell
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let album = albums[indexPath.row]
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let album = albums[indexPath.item]
         let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
         if let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailGalleryViewController") as? DetailGalleryViewController {
             detailVC.groupId = groupId
@@ -304,9 +351,19 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource, UIT
         }
     }
 
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        for indexPath in indexPaths {
+            if indexPath.item < albums.count,
+               let urlStr = albums[indexPath.item].fileName?.first,
+               let url = URL(string: urlStr) {
+                SDWebImagePrefetcher.shared.prefetchURLs([url])
+            }
+        }
+    }
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let position = scrollView.contentOffset.y
-        let contentHeight = tableView.contentSize.height
+        let contentHeight = collectionView.contentSize.height
         if position > contentHeight - scrollView.frame.size.height * 1.5 {
             if currentPage < totalPages {
                 currentPage += 1
@@ -315,15 +372,11 @@ extension GalleryViewController: UITableViewDelegate, UITableViewDataSource, UIT
         }
     }
 
-    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        for indexPath in indexPaths {
-            if indexPath.row < albums.count,
-               let urlStr = albums[indexPath.row].fileName?.first,
-               let url = URL(string: urlStr) {
-                SDWebImagePrefetcher.shared.prefetchURLs([url])
-            }
-        }
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let padding: CGFloat = 6 * 3
+        let width = (collectionView.frame.width - padding) / 2
+        return CGSize(width: width, height: width * 1.05)
     }
 }
-
-

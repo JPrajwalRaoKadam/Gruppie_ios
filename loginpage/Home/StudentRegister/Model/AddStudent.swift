@@ -65,7 +65,7 @@ struct StudentData: Codable {
     var motherPhone: String?
     var motherNumber: String?
     var motherEmail: String?
-    var motherAadhar: String?                // ✅ Added
+    var motherAadhar: String?
     var motherAadharNumber: String?
     var motherOccupation: String?
     var motherEducation: String?
@@ -109,7 +109,7 @@ extension StudentData {
              doj, dateOfJoining, aadharNumber, panNumber, email, address, district,
              taluk, familyIncome, fatherName, fatherPhone, fatherNumber, fatherEmail,
              fatherAadhar, fatherAadharNumber, fatherOccupation, fatherEducation,
-             motherName, motherPhone, motherNumber, motherEmail, motherAadhar,        // ✅ Added key
+             motherName, motherPhone, motherNumber, motherEmail, motherAadhar,        
              motherAadharNumber, motherOccupation, motherEducation,
              isMotherDownloaded, isFatherDownloaded,
              designation, numberOfKids, feeIds, marksCard, rte, image, isSelected,

@@ -14,10 +14,10 @@ class CollectionViewCell: UICollectionViewCell {
     let playIcon: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = UIImage(systemName: "play.circle.fill") // system or custom icon
+        imageView.image = UIImage(systemName: "play.circle.fill")
         imageView.tintColor = .white
         imageView.contentMode = .scaleAspectFit
-        imageView.isHidden = true // hidden by default
+        imageView.isHidden = true
         return imageView
     }()
 
