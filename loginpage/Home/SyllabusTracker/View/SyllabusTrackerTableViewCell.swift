@@ -155,7 +155,7 @@ class SyllabusTrackerTableViewCell: UITableViewCell {
     }
 
     private func showFallback(for name: String) {
-        let initials = !name.isEmpty ? String(name.prefix(2)).uppercased() : "?"
+        let initials = !name.isEmpty ? String(name.prefix(1)).uppercased() : "?"
         fallbackLabel.text = initials
         fallbackLabel.isHidden = false
         iconImageView.isHidden = true

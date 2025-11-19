@@ -19,6 +19,8 @@ class BuslistVC: UIViewController {
         buslistTable.delegate = self
         buslistTable.register(UINib(nibName: "BuslistCell", bundle: nil), forCellReuseIdentifier: "BuslistCell")
         add.layer.cornerRadius = 10
+        textToSearch.layer.cornerRadius = 10
+        textToSearch.clipsToBounds = true
         buslistTable.layer.cornerRadius = 10
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true

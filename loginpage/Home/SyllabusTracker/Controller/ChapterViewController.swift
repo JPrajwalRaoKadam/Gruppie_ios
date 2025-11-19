@@ -37,6 +37,7 @@ class ChapterViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        Chaptertableview.layer.cornerRadius = 10
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
         dailogboxView.isHidden = true

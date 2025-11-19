@@ -40,6 +40,12 @@
             if currentRole == "admin" {
           
             }
+            date.translatesAutoresizingMaskIntoConstraints = false
+              NSLayoutConstraint.activate([
+                  date.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                  // Keep your existing top constraint or set a new one
+                  date.topAnchor.constraint(equalTo: segments.bottomAnchor, constant: 20)
+              ])
             gatetableview.delegate = self
             gatetableview.dataSource = self
             gatetableview.register(UINib(nibName: "GatePassCell", bundle: nil), forCellReuseIdentifier: "GatePassCell")

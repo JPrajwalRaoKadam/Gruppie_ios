@@ -27,7 +27,9 @@ class AddGatePassVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         studentName.register(UINib(nibName: "SearchStudentCell", bundle: nil), forCellReuseIdentifier: "SearchStudentCell")
         studentName.layer.cornerRadius = 10
         searchbox.layer.cornerRadius = 10
+        searchbox.clipsToBounds = true
         searchButton.layer.cornerRadius = 10
+        searchbox.clipsToBounds = true
         addButton.layer.cornerRadius = 10
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
