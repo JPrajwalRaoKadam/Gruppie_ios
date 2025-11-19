@@ -230,7 +230,7 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
         heightConstraintOfSearchView.constant = shouldShow ? 47 : 0
         if shouldShow {
             searchTextField = UITextField(frame: CGRect(x: 10, y: 10, width: searchView.frame.width - 20, height: 40))
-            searchTextField?.placeholder = "Search..."
+            searchTextField?.placeholder = "Search"
             searchTextField?.delegate = self
             searchTextField?.borderStyle = .roundedRect
             searchTextField?.backgroundColor = .white

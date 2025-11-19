@@ -8,6 +8,7 @@ class StaffDaysViewController: UIViewController, UITableViewDataSource, UITableV
     @IBOutlet weak var messageTextView: UITextView!
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var dateView: UIView!
 
     var currentDatePicker: UIDatePicker?
     var currentDate : String?
@@ -41,6 +42,9 @@ class StaffDaysViewController: UIViewController, UITableViewDataSource, UITableV
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
+        
+        dateView.layer.cornerRadius = 10
+        dateView.clipsToBounds = true
         
         messageTextView.delegate = self
         messageTextView.layer.cornerRadius = 10

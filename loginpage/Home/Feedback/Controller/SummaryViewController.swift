@@ -7,6 +7,7 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var editButton: UIButton!
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var questionView: UIView!
 
     var token: String?
     var groupId: String?
@@ -22,6 +23,10 @@ class SummaryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        questionView.layer.cornerRadius = 10
+        questionView.clipsToBounds = true
+
         
         tableView.layer.cornerRadius = 10
         tableView.layer.masksToBounds = true

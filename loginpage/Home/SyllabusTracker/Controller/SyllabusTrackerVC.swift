@@ -112,14 +112,12 @@ extension SyllabusTrackerVC {
                 return
             }
 
-            // Print raw API response for debugging
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("API Response of sub staff: \(jsonString)")
             } else {
                 print("Unable to decode API response into a string")
             }
 
-            // Decode using JSONSerialization
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let dataArray = json["data"] as? [[String: Any]] {

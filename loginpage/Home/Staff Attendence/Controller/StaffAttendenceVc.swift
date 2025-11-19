@@ -10,6 +10,7 @@ class StaffAttendenceVc: UIViewController, UITableViewDelegate, UITableViewDataS
     @IBOutlet weak var morningButton: UIButton!
     @IBOutlet weak var AllPresent: UIButton!
     @IBOutlet weak var deleteButton: UIButton!
+    @IBOutlet weak var midView: UIView!
 
     
     var currentDatePicker: UIDatePicker?
@@ -35,7 +36,9 @@ class StaffAttendenceVc: UIViewController, UITableViewDelegate, UITableViewDataS
         morningButton.setTitle("", for: .normal)
         afternoonButton.setTitle("", for: .normal)
     
-        
+        midView.layer.cornerRadius = 10
+        midView.clipsToBounds = true
+
         submitButton.layer.cornerRadius = 10
         submitButton.clipsToBounds = true
         

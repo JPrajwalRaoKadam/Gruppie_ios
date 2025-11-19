@@ -6,6 +6,7 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var curDate: UIButton!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var dateView: UIView!
 
     
     var currentDatePicker: UIDatePicker?
@@ -34,7 +35,8 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Update back button corner radius after layout is complete
+        dateView.layer.cornerRadius = 10
+        dateView.layer.masksToBounds = true
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     

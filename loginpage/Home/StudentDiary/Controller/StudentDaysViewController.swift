@@ -8,7 +8,7 @@ class StudentDaysViewController: UIViewController, UITableViewDataSource, UITabl
     @IBOutlet weak var messageTextView: UITextView!
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
-
+    @IBOutlet weak var dateView: UIView!
     var teamId: String = ""
     var currentDatePicker: UIDatePicker?
     var currentDate : String?
@@ -41,6 +41,9 @@ class StudentDaysViewController: UIViewController, UITableViewDataSource, UITabl
         messageTextView.layer.borderWidth = 1
         messageTextView.layer.borderColor = UIColor.lightGray.cgColor
         messageTextView.clipsToBounds = true
+        
+        dateView.layer.cornerRadius = 10
+        dateView.clipsToBounds = true
         
         tableView.layer.cornerRadius = 10
         tableView.layer.masksToBounds = true

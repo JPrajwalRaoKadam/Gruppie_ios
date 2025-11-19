@@ -1,10 +1,3 @@
-//
-//  SubjectStaffVC.swift
-//  loginpage
-//
-//  Created by apple on 12/03/25.
-//
-
 import UIKit
 
 class SubjectStaffVC: UIViewController {
@@ -36,7 +29,6 @@ class SubjectStaffVC: UIViewController {
     
 }
 
-// MARK: - TableView Delegate & DataSource
 extension SubjectStaffVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

@@ -3,6 +3,8 @@ import UIKit
 class QuestionsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextViewDelegate {
     
     @IBOutlet weak var mainView: UIView!
+    @IBOutlet weak var questionView: UIView!
+
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var titleName: UILabel!
     @IBOutlet weak var QuestionNo: UILabel!
@@ -151,6 +153,10 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         
         tableView.layer.cornerRadius = 10
         tableView.layer.masksToBounds = true
+        
+        questionView.layer.cornerRadius = 10
+        questionView.layer.masksToBounds = true
+
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
