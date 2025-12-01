@@ -64,45 +64,45 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     
     @IBAction func logoutTapped(_ sender: UIButton) {
         // Remove previous dropdown if visible
-        logoutDropdownView?.removeFromSuperview()
-        
-        // Get the button's position in the view's coordinate space
-        guard let buttonSuperview = sender.superview else { return }
-        let buttonFrameInView = buttonSuperview.convert(sender.frame, to: self.view)
-        
-        // Define size of logout overlay
-        let overlayWidth = 100.0
-        let overlayHeight: CGFloat = 40
-        
-        // Place overlay **exactly over the button**
-        let overlayFrame = CGRect(x: buttonFrameInView.origin.x - 60,
-                                  y: buttonFrameInView.origin.y - 10,
-                                  width: overlayWidth,
-                                  height: overlayHeight)
-        
-        // Create view
-        let dropdownView = UIView(frame: overlayFrame)
-        dropdownView.backgroundColor = .white
-        dropdownView.layer.cornerRadius = 8
-        dropdownView.layer.borderWidth = 1
-        dropdownView.layer.borderColor = UIColor.lightGray.cgColor
-        dropdownView.clipsToBounds = true
-        
-        // Add "Logout" label or button
-        let label = UILabel(frame: dropdownView.bounds)
-        label.text = "Logout"
-        label.textAlignment = .center
-        label.textColor = .red
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.isUserInteractionEnabled = true
-        dropdownView.addSubview(label)
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleLogoutTap))
-        label.addGestureRecognizer(tap)
-        
-        // Add to main view
-        self.view.addSubview(dropdownView)
-        self.logoutDropdownView = dropdownView
+//        logoutDropdownView?.removeFromSuperview()
+//        
+//        // Get the button's position in the view's coordinate space
+//        guard let buttonSuperview = sender.superview else { return }
+//        let buttonFrameInView = buttonSuperview.convert(sender.frame, to: self.view)
+//        
+//        // Define size of logout overlay
+//        let overlayWidth = 100.0
+//        let overlayHeight: CGFloat = 40
+//        
+//        // Place overlay **exactly over the button**
+//        let overlayFrame = CGRect(x: buttonFrameInView.origin.x - 60,
+//                                  y: buttonFrameInView.origin.y - 10,
+//                                  width: overlayWidth,
+//                                  height: overlayHeight)
+//        
+//        // Create view
+//        let dropdownView = UIView(frame: overlayFrame)
+//        dropdownView.backgroundColor = .white
+//        dropdownView.layer.cornerRadius = 8
+//        dropdownView.layer.borderWidth = 1
+//        dropdownView.layer.borderColor = UIColor.lightGray.cgColor
+//        dropdownView.clipsToBounds = true
+//        
+//        // Add "Logout" label or button
+//        let label = UILabel(frame: dropdownView.bounds)
+//        label.text = "Logout"
+//        label.textAlignment = .center
+//        label.textColor = .red
+//        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+//        label.isUserInteractionEnabled = true
+//        dropdownView.addSubview(label)
+//        
+//        let tap = UITapGestureRecognizer(target: self, action: #selector(handleLogoutTap))
+//        label.addGestureRecognizer(tap)
+//        
+//        // Add to main view
+//        self.view.addSubview(dropdownView)
+//        self.logoutDropdownView = dropdownView
     }
     
     func setupSearchTextField() {

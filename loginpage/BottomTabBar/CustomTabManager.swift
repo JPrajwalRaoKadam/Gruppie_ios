@@ -83,9 +83,9 @@ class CustomTabManager: NSObject {
     }
     
     @objc func tapforDashboard(_ sender: UIButton) {
-        customTabbar.selectedIndex = 3
-        customTabbar.setSelectedTabBar()
-        dbDelegate?.tapforDashboard()
+//        customTabbar.selectedIndex = 3
+//        customTabbar.setSelectedTabBar()
+//        dbDelegate?.tapforDashboard()
     }
     
     @objc func tapOnHome(_ sender: UIButton) {

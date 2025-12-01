@@ -18,6 +18,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="backImg" translatesAutoresizingMaskIntoConstraints="NO" id="1Dc-Rk-gz1">
+                                <rect key="frame" x="0.0" y="39" width="390" height="771"/>
+                            </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cIR-X5-U0f">
                                 <rect key="frame" x="31" y="738" width="328" height="48"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -68,13 +71,6 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="new_banner" translatesAutoresizingMaskIntoConstraints="NO" id="dsn-aD-Heu">
-                                <rect key="frame" x="151" y="163" width="88" height="88"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="88" id="Ntd-o8-rNt"/>
-                                    <constraint firstAttribute="width" constant="88" id="gYh-tW-BA8"/>
-                                </constraints>
-                            </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Powered by gruppie" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5RX-qR-OO9">
                                 <rect key="frame" x="128" y="706" width="135" height="14.333333333333371"/>
                                 <color key="backgroundColor" red="0.94491487740000002" green="0.93759083750000005" blue="0.92156618830000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -86,40 +82,38 @@
                                 <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="bottom" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="welcome To Gruppie Campus Premium" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="MqX-Ih-CCq">
-                                <rect key="frame" x="74" y="259" width="243" height="43"/>
-                                <color key="backgroundColor" red="0.94491487740000002" green="0.93759083750000005" blue="0.92156618830000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GCimg" translatesAutoresizingMaskIntoConstraints="NO" id="9sg-JC-C0C">
+                                <rect key="frame" x="105" y="203" width="180" height="64"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="43" id="ypU-it-KjQ"/>
+                                    <constraint firstAttribute="height" constant="64" id="4q6-yq-PlA"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" name="HelveticaNeue-Medium" family="Helvetica Neue" pointSize="36"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Hei-fu-7Us"/>
                         <color key="backgroundColor" red="0.94491487740000002" green="0.93759083750000005" blue="0.92156618830000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
                             <constraint firstItem="Hei-fu-7Us" firstAttribute="bottom" secondItem="cIR-X5-U0f" secondAttribute="bottom" constant="24" id="2Zq-hG-XMY"/>
+                            <constraint firstItem="1Dc-Rk-gz1" firstAttribute="trailing" secondItem="Hei-fu-7Us" secondAttribute="trailing" id="2sd-3e-Yet"/>
                             <constraint firstItem="Hei-fu-7Us" firstAttribute="trailing" secondItem="5RX-qR-OO9" secondAttribute="trailing" constant="127" id="47D-f0-VbJ"/>
                             <constraint firstItem="cIR-X5-U0f" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" constant="31" id="84M-eC-RqX"/>
-                            <constraint firstItem="Hei-fu-7Us" firstAttribute="trailing" secondItem="MqX-Ih-CCq" secondAttribute="trailing" constant="73" id="AZp-vV-oFH"/>
+                            <constraint firstItem="1Dc-Rk-gz1" firstAttribute="top" secondItem="hc5-k3-hqr" secondAttribute="top" constant="39" id="Abz-mi-6jK"/>
                             <constraint firstItem="Hei-fu-7Us" firstAttribute="trailing" secondItem="cIR-X5-U0f" secondAttribute="trailing" constant="31" id="DMM-Q8-jUb"/>
+                            <constraint firstItem="Hei-fu-7Us" firstAttribute="trailing" secondItem="9sg-JC-C0C" secondAttribute="trailing" constant="105" id="DOE-Y8-P1j"/>
                             <constraint firstItem="cIR-X5-U0f" firstAttribute="centerX" secondItem="hc5-k3-hqr" secondAttribute="centerX" id="IRc-7S-l88"/>
                             <constraint firstItem="iwH-OF-Lab" firstAttribute="leading" secondItem="3jl-P4-vZH" secondAttribute="trailing" constant="8.6699999999999999" id="LUt-lZ-4WT"/>
                             <constraint firstItem="Hei-fu-7Us" firstAttribute="trailing" secondItem="Mvl-BB-bdL" secondAttribute="trailing" constant="129.33000000000001" id="NkF-We-UyA"/>
                             <constraint firstItem="5RX-qR-OO9" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" constant="128" id="RQX-L7-Z2w"/>
                             <constraint firstItem="iwH-OF-Lab" firstAttribute="top" secondItem="Mvl-BB-bdL" secondAttribute="bottom" constant="5" id="Syj-h0-IWP"/>
-                            <constraint firstItem="Mvl-BB-bdL" firstAttribute="top" secondItem="MqX-Ih-CCq" secondAttribute="bottom" constant="94" id="XP2-ku-pNj"/>
                             <constraint firstItem="Mvl-BB-bdL" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" constant="18" id="YkY-0Y-zcx"/>
-                            <constraint firstItem="dsn-aD-Heu" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" constant="151" id="ZxQ-CG-fcx"/>
                             <constraint firstItem="3jl-P4-vZH" firstAttribute="top" secondItem="Mvl-BB-bdL" secondAttribute="bottom" constant="5" id="bv1-Lg-ATE"/>
-                            <constraint firstItem="MqX-Ih-CCq" firstAttribute="top" secondItem="dsn-aD-Heu" secondAttribute="bottom" constant="8" symbolic="YES" id="cMy-Mq-iwt"/>
                             <constraint firstItem="cIR-X5-U0f" firstAttribute="top" secondItem="5RX-qR-OO9" secondAttribute="bottom" constant="17.666666666666629" id="dg4-hW-OkP"/>
-                            <constraint firstItem="Hei-fu-7Us" firstAttribute="trailing" secondItem="dsn-aD-Heu" secondAttribute="trailing" constant="151" id="iGw-tI-doU"/>
                             <constraint firstItem="Hei-fu-7Us" firstAttribute="trailing" secondItem="iwH-OF-Lab" secondAttribute="trailing" constant="31" id="k8K-zj-PGa"/>
                             <constraint firstItem="3jl-P4-vZH" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" constant="18" id="obw-LA-Z4R"/>
-                            <constraint firstItem="MqX-Ih-CCq" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" constant="74" id="vF5-Ep-awA"/>
-                            <constraint firstItem="dsn-aD-Heu" firstAttribute="top" secondItem="Hei-fu-7Us" secondAttribute="top" constant="72" id="zgJ-9I-Rlb"/>
+                            <constraint firstItem="Mvl-BB-bdL" firstAttribute="top" secondItem="9sg-JC-C0C" secondAttribute="bottom" constant="129" id="pDG-FR-1Ti"/>
+                            <constraint firstItem="1Dc-Rk-gz1" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" id="sPD-yw-ubV"/>
+                            <constraint firstItem="9sg-JC-C0C" firstAttribute="leading" secondItem="Hei-fu-7Us" secondAttribute="leading" constant="105" id="t2w-Va-o08"/>
+                            <constraint firstItem="1Dc-Rk-gz1" firstAttribute="bottom" secondItem="Hei-fu-7Us" secondAttribute="bottom" id="wSp-4D-H28"/>
+                            <constraint firstItem="9sg-JC-C0C" firstAttribute="top" secondItem="Hei-fu-7Us" secondAttribute="top" constant="112" id="zAl-2e-Hyo"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="eEB-vQ-xNF"/>
@@ -1238,10 +1232,11 @@ for (987) 654-3210</string>
         </scene>
     </scenes>
     <resources>
+        <image name="GCimg" width="180" height="64"/>
         <image name="arrow.left" catalog="system" width="128" height="95"/>
+        <image name="backImg" width="360" height="720"/>
         <image name="bell" catalog="system" width="125" height="128"/>
         <image name="groupImg" width="40" height="40"/>
-        <image name="new_banner" width="384" height="384"/>
         <image name="person" catalog="system" width="128" height="121"/>
         <image name="school" width="341.33334350585938" height="341.33334350585938"/>
         <systemColor name="systemBackgroundColor">

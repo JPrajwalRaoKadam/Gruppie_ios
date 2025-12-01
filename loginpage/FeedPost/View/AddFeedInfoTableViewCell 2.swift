@@ -35,6 +35,7 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var contentStackView: UIStackView!
     @IBOutlet weak var contentSelectionView: UIView!
+    @IBOutlet weak var dataViewHeightCn: NSLayoutConstraint!
     @IBOutlet weak var dataView: UIView!
     @IBOutlet weak var imageButton: UIButton!
     @IBOutlet weak var videoButton: UIButton!
@@ -43,9 +44,9 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     @IBOutlet weak var shareClassLabelHeightcn: NSLayoutConstraint!
     @IBOutlet weak var contentImage: UIImageView!
     @IBOutlet weak var contentCancel: UIButton!
+    @IBOutlet weak var mediaSelctionView: UIView!
     @IBOutlet weak var pdfNameLabel: UILabel!
     @IBOutlet weak var mediaContainerHedightCons: NSLayoutConstraint!
-    @IBOutlet weak var shareLabelCont: NSLayoutConstraint!
     
     // MARK: - Properties
     weak var delegate: AddFeedInfoCellDelegate?
@@ -71,37 +72,16 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
     // MARK: - Lifecycle
     override func awakeFromNib() {
         super.awakeFromNib()
-       
+        
         postNAme.delegate = self
         textView.delegate = self
         
         setupUI()
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        updateMediaContainer()
-    }
-
-    func updateMediaContainer() {
-        if !contentCancel.isHidden {
-            mediaContainerHedightCons.constant = 127
-            mainViewHtCn.constant = 389
-            shareLabelCont.constant = 154
-        } else {
-            mediaContainerHedightCons.constant = 0
-            mainViewHtCn.constant = 262
-            shareLabelCont.constant = 12
-        }
-
-        refresh()
-    }
-
-    
     private func setupUI() {
         self.selectionStyle = .none
-        textView.placeholder = "Description"
-        contentImage.layer.cornerRadius = 10
+        
         contentSelectionView.layer.cornerRadius = 10
 //        contentStackView.layer.cornerRadius = 10
         dataView.layer.cornerRadius = 10
@@ -110,14 +90,6 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
         
         contentCancel.isHidden = true
         pdfNameLabel.isHidden = true
-    }
-    
-    func refresh() {
-        if let tableView = self.superview as? UITableView,
-           let indexPath = tableView.indexPath(for: self) {
-            tableView.beginUpdates()
-            tableView.endUpdates()  // recalculates height
-        }
     }
     
     
@@ -365,7 +337,6 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
             self.pdfNameLabel.isHidden = false
             self.contentCancel.isHidden = false
             self.submitFeedInfo()
-            updateMediaContainer()
         } else {
             showAlert(title: "Invalid URL", message: "Please enter valid YouTube URL")
         }
@@ -707,7 +678,6 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
                     self.submitFeedInfo()
                     self.contentCancel.isHidden = false
                     self.pdfNameLabel.isHidden = true
-                    self.updateMediaContainer()
                 }
             }
         }
@@ -750,7 +720,6 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
                         self.contentCancel.isHidden = false
                         self.pdfNameLabel.isHidden = true
                         self.submitFeedInfo()
-                        self.updateMediaContainer()
                     }
                     
                 } catch {
@@ -782,7 +751,6 @@ class AddFeedInfoTableViewCell: UITableViewCell, UIImagePickerControllerDelegate
         self.contentCancel.isHidden = false
         self.pdfNameLabel.isHidden = true
         self.submitFeedInfo()
-        updateMediaContainer()
     }
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
@@ -844,51 +812,5 @@ extension String {
             return nsLink.substring(with: firstMatch.range)
         }
         return ""
-    }
-}
-
-private var placeholderLabelKey: UInt8 = 0
-
-extension UITextView {
-    
-    var placeholder: String? {
-        get {
-            return objc_getAssociatedObject(self, &placeholderLabelKey) as? String
-        }
-        set {
-            if let label = objc_getAssociatedObject(self, &placeholderLabelKey) as? UILabel {
-                label.text = newValue
-                return
-            }
-            
-            let label = UILabel()
-            label.text = newValue
-            label.textColor = .systemGray3
-            label.font = self.font
-            label.numberOfLines = 0
-            label.translatesAutoresizingMaskIntoConstraints = false
-            
-            self.addSubview(label)
-            self.setValue(label, forKey: "placeholderLabel")
-            
-            label.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
-            label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 5).isActive = true
-            label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -5).isActive = true
-            
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(textDidChange),
-                name: UITextView.textDidChangeNotification,
-                object: self
-            )
-            
-            objc_setAssociatedObject(self, &placeholderLabelKey, label, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
-
-    @objc private func textDidChange() {
-        if let label = objc_getAssociatedObject(self, &placeholderLabelKey) as? UILabel {
-            label.isHidden = !self.text.isEmpty
-        }
     }
 }
