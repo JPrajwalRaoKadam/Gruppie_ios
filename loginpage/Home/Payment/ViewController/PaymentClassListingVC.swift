@@ -17,10 +17,10 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var overdueAmount: UILabel!
     @IBOutlet weak var fineAmount: UILabel!
     @IBOutlet weak var bcbutton: UIButton!
-    
+    @IBOutlet weak var customContainerView: UIView!
+
     var groupId: String?
     var feeReport: PaymentResponse?
-    // Update type to store team data instead of the entire PaymentResponse
     let totalFee: Double? = nil
     var studentData: [StudentDataa]? = nil
     var teamData: [TeamData]? = nil
@@ -35,6 +35,7 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         enableKeyboardDismissOnTap()
         classTableView.delegate = self
         classTableView.dataSource = self
+        customContainerView.layer.cornerRadius = 10
 
         classTableView.register(UINib(nibName: "ClassesTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassesTableViewCell")
 
@@ -120,11 +121,9 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             studentListingVC.currentRole = self.currentRole
             studentListingVC.teamId = selectedTeam.teamId
 
-            // 👇 Force view load before setting label
             _ = studentListingVC.view
             studentListingVC.className.text = selectedTeam.name
 
-            // Replace current VC
             var viewControllers = self.navigationController?.viewControllers ?? []
             viewControllers.removeLast()
             viewControllers.append(studentListingVC)
@@ -133,9 +132,7 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     
-    // MARK: - API Call
     func fetchFeeReport(withToken token: String, completion: @escaping (Result<PaymentResponse, Error>) -> Void) {
-        // Safely unwrap groupId and create the URL string with interpolation.
         guard let groupId = groupId,
               let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/fee/report/get") else {
             completion(.failure(URLError(.badURL)))
@@ -144,10 +141,8 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        // Add the token to the request header.
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        // Create a URLSession data task.
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("API Error:", error.localizedDescription)

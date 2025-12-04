@@ -1,10 +1,3 @@
-//
-//  AmountPaymentVC.swift
-//  loginpage
-//
-//  Created by apple on 24/02/25.
-//
-
 import UIKit
 import Easebuzz
 
@@ -15,7 +8,9 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     @IBOutlet weak var gpayButton: UIButton!
     @IBOutlet weak var payableAmount: UILabel!
     @IBOutlet weak var bcbutton: UIButton!
-    
+    @IBOutlet weak var myStackView: UIStackView!
+    @IBOutlet weak var customContainerView: UIView!
+
     var demandTotalAmount: String?
     var dueAmpount: String?
     
@@ -31,7 +26,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     var customerMobileNo: String?
     
     var redirectionUrl: String?
-    var selectedIndex: Int? // Store selected index
+    var selectedIndex: Int?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,21 +34,20 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
         bcbutton.clipsToBounds = true
         payableTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
-        // Register the cell
+        myStackView.layer.cornerRadius = 10
         payableTableView.register(UINib(nibName: "PayablesTableViewCell", bundle: nil), forCellReuseIdentifier: "PayablesTableViewCell")
         
-        // Set the table view delegate and data source
+        customContainerView.layer.cornerRadius = 10
         payableTableView.delegate = self
         payableTableView.dataSource = self
         
         studentNameLabel.text = feePaymentData?.name
-        gpayButton.layer.borderWidth = 1 // Thin border
+        gpayButton.layer.borderWidth = 1
         gpayButton.layer.borderColor = UIColor.black.cgColor
-        gpayButton.layer.cornerRadius = 8 // Adjust as needed
+        gpayButton.layer.cornerRadius = 8
         gpayButton.clipsToBounds = true
     }
 
-    // MARK: - Easebuzz Callback
     func PEBCallback(data: [String : AnyObject]) {
         let paymentResponse = data["payment_response"]
 
@@ -70,7 +64,6 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
         }
     }
     
-    // MARK: - Payment API Call
     func makePaymentRequest(groupID: String, teamID: String, userID: String, bearerToken: String) {
         let urlString = APIManager.shared.baseURL + "groups/\(groupID)/team/\(teamID)/user/\(userID)/easebuzz/pay"
         guard let url = URL(string: urlString) else {
@@ -87,7 +80,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
                     "amount": payableAmount.text ?? "0.00",
                     "studentName": self.studentName ?? "Unknown",
                     "customerMobileNo": self.customerMobileNo ?? "Unknown",
-                    "returnURL": APIManager.shared.baseURL + "groups/661643d90dde2b4c5da9fbe5/team/661643d90dde2b4c5da9fbe6/user/661cbd6d84e842a6034715a9/atom/response?type=easebuzz",
+                    "returnURL": APIManager.shared.baseURL + "groups/\(groupID)/team/\(teamID)/user/\(userID)/atom/response?type=easebuzz",
                     "frontendUrl": "http://localhost:4200/activity/easebuzz/661643d90dde2b4c5da9fbe5"
                 ]
 

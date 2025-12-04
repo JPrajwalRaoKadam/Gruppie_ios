@@ -13,7 +13,10 @@ class ClassesTableViewCell: UITableViewCell {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var imageLabel: UILabel!
-    
+    @IBOutlet weak var Demand: UILabel!
+    @IBOutlet weak var Collected: UILabel!
+    @IBOutlet weak var Balance: UILabel!
+
     override func awakeFromNib() {
         super.awakeFromNib()
 

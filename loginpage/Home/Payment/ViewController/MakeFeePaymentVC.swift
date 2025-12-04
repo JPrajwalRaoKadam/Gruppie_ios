@@ -19,6 +19,9 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     @IBOutlet weak var balenceAmount: UILabel!
     @IBOutlet weak var overdueAmount: UILabel!
     @IBOutlet weak var fineAmount: UILabel!
+    @IBOutlet weak var customContainerView: UIView!
+    @IBOutlet weak var myStackView: UIStackView!
+
     var groupId: String?
     var teamId: String?
     var userId: String?
@@ -34,7 +37,9 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         // Register table view cells
         paymentTableView.register(UINib(nibName: "AmoutTableViewCell", bundle: nil), forCellReuseIdentifier: "AmoutTableViewCell")
         paymentTableView.register(UINib(nibName: "InstallmentTableViewCell", bundle: nil), forCellReuseIdentifier: "InstallmentTableViewCell")
-        
+        customContainerView.layer.cornerRadius = 10
+        myStackView.layer.cornerRadius = 10
+
         paymentTableView.delegate = self
         paymentTableView.dataSource = self
         

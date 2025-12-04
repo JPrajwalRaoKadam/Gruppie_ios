@@ -12,6 +12,8 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     @IBOutlet weak var albumName: UILabel!
     @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var plusButton: UIButton!
+
 
     var processedMediaItems: [MediaType] = []
     var currentRole: String = ""
@@ -60,6 +62,20 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         loadImages()
         loadVideos()
     }
+    @IBAction func plusButtonTapped(_ sender: UIButton) {
+        let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
+        if let addVC = storyboard.instantiateViewController(withIdentifier: "AddViewController") as? AddViewController {
+            addVC.groupId = self.groupId
+            addVC.token = self.token
+            
+            self.navigationController?.pushViewController(addVC, animated: true)
+            
+           
+        } else {
+            print("❌ Could not instantiate AddViewController")
+        }
+    }
+
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()

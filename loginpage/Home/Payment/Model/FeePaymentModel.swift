@@ -152,14 +152,12 @@ struct StudentDataa: Codable {
     }
 }
 
-// MARK: - FeeId
 struct FeeIds: Codable {
     let feeId: String?
     let categoryId: String?
     let categoryFeeDetails: CategoryFeeDetails?
 }
 
-// MARK: - CategoryFeeDetails
 struct CategoryFeeDetails: Codable {
     let totalFee: Double?
     let studentFeeDetails: [StudentFeeDetail]?

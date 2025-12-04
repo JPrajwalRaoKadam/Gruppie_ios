@@ -1,10 +1,3 @@
-//
-//  StudentListing.swift
-//  loginpage
-//
-//  Created by apple on 19/02/25.
-//
-
 import UIKit
 
 class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -19,7 +12,8 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     @IBOutlet weak var fineAmount: UILabel!
     @IBOutlet weak var overAllAmountView: UIView!
     @IBOutlet weak var bcbutton: UIButton!
-    
+    @IBOutlet weak var customContainerView: UIView!
+
     var groupId: String?
     var teamId: String?
     var studentFees: [StudentFinancialData] = []
@@ -34,7 +28,8 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         studentTableView.layer.cornerRadius = 10
         enableKeyboardDismissOnTap()
         studentTableView.register(UINib(nibName: "ClassesTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassesTableViewCell")
-        
+        customContainerView.layer.cornerRadius = 10
+
         fetchStudentFeeList(token: TokenManager.shared.getToken() ?? "", groupId: groupId ?? "", teamId: teamId ?? "") { result in
             switch result {
             case .success(let data):
@@ -47,7 +42,6 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
                             let trimmedName = subject.name.components(separatedBy: " (").first ?? subject.name
                             print("🔍 Looking for exact match for: \(trimmedName)")
                             
-                            // Look for exact name match in student data
                             if let matchingStudent = data.first(where: { $0.name == trimmedName }) {
                                 print("✅ Found match: \(matchingStudent.name)")
                                 return matchingStudent
@@ -107,8 +101,7 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         if currentRole?.lowercased() == "parent" {
             let subject = filteredStudentFees[indexPath.row]
-            cell.nameLabel.text = subject.name // Customize display for subject
-            // Optionally configure more fields if needed
+            cell.nameLabel.text = subject.name
         } else {
             let student = studentFees[indexPath.row]
             cell.configure(with: student)
