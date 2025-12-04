@@ -33,6 +33,7 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
         calendarTableView.layer.cornerRadius = 10
+        calenderView.layer.cornerRadius = 10
         self.preferredContentSize = CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height / 2)
         for event in events {
             print("🧩 Event title: \(event.title), eventid: \(event.eventid ?? "nil"), selectedEventId\(selectedEventId)")
@@ -56,10 +57,11 @@ class CalenderViewController: UIViewController, FSCalendarDelegate, UITableViewD
         
         NSLayoutConstraint.activate([
             calendar.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 40),
-            calendar.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            calendar.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            calendar.leadingAnchor.constraint(equalTo: calenderView.leadingAnchor),
+            calendar.trailingAnchor.constraint(equalTo: calenderView.trailingAnchor),
             calendar.heightAnchor.constraint(equalToConstant: 280)
         ])
+        calendar.layer.cornerRadius = 10
         calendar.backgroundColor = .white
         calendar.appearance.headerDateFormat = "MMMM yyyy"
         calendar.appearance.weekdayTextColor = .black

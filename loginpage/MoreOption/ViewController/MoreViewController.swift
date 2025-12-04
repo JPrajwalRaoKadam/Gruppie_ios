@@ -26,7 +26,9 @@ class MoreViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     @IBAction func backButtonAction(_ sender: Any) {
-        self.navigationController?.popViewController(animated: true)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as! GrpViewController
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
