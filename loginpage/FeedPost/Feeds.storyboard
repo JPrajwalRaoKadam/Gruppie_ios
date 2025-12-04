@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -49,38 +50,38 @@
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="person" catalog="system"/>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KgM-cC-6v5">
-                                        <rect key="frame" x="0.0" y="16" width="64" height="24"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="24" id="YSn-S2-6Wq"/>
-                                        </constraints>
-                                        <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" image="groupImg"/>
-                                        <connections>
-                                            <action selector="backButtonAction:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="ckq-29-Ed4"/>
-                                        </connections>
-                                    </button>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Campus connect" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lc0-hc-4oL">
-                                        <rect key="frame" x="60" y="19" width="209" height="17"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Campus connect" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lc0-hc-4oL">
+                                        <rect key="frame" x="64" y="19" width="145" height="17"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Obv-f1-OuN">
+                                        <rect key="frame" x="16" y="7" width="40" height="40"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="40" id="FzZ-Ph-NfJ"/>
+                                            <constraint firstAttribute="height" constant="40" id="LvS-60-LWp"/>
+                                        </constraints>
+                                        <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <state key="normal">
+                                            <imageReference key="image" image="GC2" symbolScale="medium"/>
+                                        </state>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.94491487740000002" green="0.93759083750000005" blue="0.92156618830000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <constraints>
                                     <constraint firstItem="lc0-hc-4oL" firstAttribute="top" secondItem="XiB-TW-LHO" secondAttribute="top" constant="19" id="4Az-gv-Ngb"/>
                                     <constraint firstItem="tM4-jJ-kB0" firstAttribute="leading" secondItem="SIG-Us-EAC" secondAttribute="trailing" constant="-1" id="7Se-ka-Q7E"/>
+                                    <constraint firstItem="Obv-f1-OuN" firstAttribute="top" secondItem="XiB-TW-LHO" secondAttribute="top" constant="7" id="BA9-OG-MJu"/>
                                     <constraint firstAttribute="trailing" secondItem="tM4-jJ-kB0" secondAttribute="trailing" constant="8" id="GJt-Ts-ncF"/>
-                                    <constraint firstItem="KgM-cC-6v5" firstAttribute="leading" secondItem="XiB-TW-LHO" secondAttribute="leading" id="Ohz-tJ-QRR"/>
+                                    <constraint firstAttribute="bottom" secondItem="Obv-f1-OuN" secondAttribute="bottom" constant="13" id="T60-lr-Cz3"/>
                                     <constraint firstItem="tM4-jJ-kB0" firstAttribute="top" secondItem="XiB-TW-LHO" secondAttribute="top" constant="12" id="WCh-Hq-xTj"/>
                                     <constraint firstAttribute="bottom" secondItem="lc0-hc-4oL" secondAttribute="bottom" constant="24" id="WzX-6B-Nnc"/>
-                                    <constraint firstAttribute="bottom" secondItem="KgM-cC-6v5" secondAttribute="bottom" constant="20" id="eAf-E4-V2T"/>
-                                    <constraint firstItem="KgM-cC-6v5" firstAttribute="top" secondItem="XiB-TW-LHO" secondAttribute="top" constant="16" id="gCw-Ff-aI1"/>
+                                    <constraint firstItem="Obv-f1-OuN" firstAttribute="leading" secondItem="XiB-TW-LHO" secondAttribute="leading" constant="16" id="dF8-A1-k9g"/>
                                     <constraint firstAttribute="height" constant="60" id="gTu-sa-0X8"/>
                                     <constraint firstItem="qkW-eh-9TO" firstAttribute="top" secondItem="XiB-TW-LHO" secondAttribute="top" constant="15" id="h4B-LA-VOw"/>
-                                    <constraint firstItem="lc0-hc-4oL" firstAttribute="leading" secondItem="KgM-cC-6v5" secondAttribute="trailing" constant="-4" id="tYE-QH-5cq"/>
+                                    <constraint firstItem="lc0-hc-4oL" firstAttribute="leading" secondItem="Obv-f1-OuN" secondAttribute="trailing" constant="8" symbolic="YES" id="mCD-Oz-tOx"/>
                                     <constraint firstItem="lc0-hc-4oL" firstAttribute="centerY" secondItem="SIG-Us-EAC" secondAttribute="centerY" constant="0.33333333333333215" id="tZC-Uc-OWM"/>
                                     <constraint firstItem="SIG-Us-EAC" firstAttribute="leading" secondItem="qkW-eh-9TO" secondAttribute="trailing" constant="1" id="uxd-OH-FFL"/>
                                 </constraints>
@@ -578,12 +579,12 @@
         </scene>
     </scenes>
     <resources>
+        <image name="GC2" width="512" height="512"/>
         <image name="VideoMedia" width="48" height="48"/>
         <image name="arrow.backward" catalog="system" width="128" height="95"/>
         <image name="audioMedia" width="48" height="48"/>
         <image name="bell" catalog="system" width="125" height="128"/>
         <image name="docMedia" width="48" height="48"/>
-        <image name="groupImg" width="40" height="40"/>
         <image name="imageMedia" width="48" height="48"/>
         <image name="person" catalog="system" width="128" height="121"/>
         <image name="play-button" width="42.666667938232422" height="42.666667938232422"/>

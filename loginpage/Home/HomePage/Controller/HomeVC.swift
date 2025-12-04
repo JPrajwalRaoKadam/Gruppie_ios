@@ -256,7 +256,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                    fetchSubjectDataAndNavigate()
         case "Marks Card New":
             fetchSubjectDataAndNavigate()
-        case "Notice Board":
+        case "Bus Register":
             navigateToBusRegister()
         case "Gate Management":
             navigateToGateManagement()

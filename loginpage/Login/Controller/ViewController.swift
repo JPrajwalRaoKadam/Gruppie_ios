@@ -32,6 +32,16 @@ class ViewController: UIViewController, UITextFieldDelegate {
         ind.layer.masksToBounds = true
     }
     
+    
+    @IBAction func termsConditionAction(_ sender: Any) {
+        openURL("https://gruppie.in/terms.html")
+    }
+    
+    
+    @IBAction func privacyPolicyAction(_ sender: Any) {
+        openURL("https://gruppie.in/privacy.html")
+    }
+    
     @IBAction func submitButtonPressed(_ sender: Any) {
         guard let phoneNumber = phoneNumberTextField.text, phoneNumber.count == 10 else {
             showAlert(message: "Please enter a valid 10-digit phone number.")
@@ -58,6 +68,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
             }
         }
     }
+    
+    func openURL(_ urlString: String) {
+           if let url = URL(string: urlString) {
+               UIApplication.shared.open(url)
+           }
+       }
 
     func handleResponseData(_ responseData: [String: Any], phoneNumber: String, countryCode: String) {
         print("📦 Response Data: \(responseData)")
