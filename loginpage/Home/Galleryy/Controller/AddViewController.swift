@@ -11,7 +11,7 @@ class AddViewController: UIViewController, UICollectionViewDelegate, UICollectio
     var selectedMedia: [UIImage] = []
 
     // MARK: - IBOutlets
-    @IBOutlet weak var albumNameLabel: UILabel!
+    @IBOutlet weak var albumTextField: UITextField!
     @IBOutlet weak var imagesButton: UIButton!
     @IBOutlet weak var videosButton: UIButton!
     @IBOutlet weak var youtubeLinkButton: UIButton!
@@ -28,10 +28,6 @@ class AddViewController: UIViewController, UICollectionViewDelegate, UICollectio
         stackView.layer.cornerRadius = 10
         stackView.layer.masksToBounds = true
 
-        albumNameLabel.layer.cornerRadius = 10
-        albumNameLabel.layer.masksToBounds = true
-
-        
         collectionView.register(UINib(nibName: "CollectionViewCell", bundle: nil),
                                 forCellWithReuseIdentifier: "CollectionViewCell")
         collectionView.layer.cornerRadius = 10
