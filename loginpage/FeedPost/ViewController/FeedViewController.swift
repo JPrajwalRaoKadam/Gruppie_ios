@@ -356,14 +356,19 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     // MARK: - Helper Methods
     private func navigateToComments(groupId: String?, postId: String?) {
         let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+
         guard let commentsVC = storyboard.instantiateViewController(withIdentifier: "CommentsVC") as? CommentsVC,
               let groupId = groupId,
               let postId = postId else {
             return
         }
+
         commentsVC.grpID = groupId
         commentsVC.postID = postId
-        navigationController?.pushViewController(commentsVC, animated: true)
+
+        // PRESENT instead of push
+        commentsVC.modalPresentationStyle = .pageSheet
+        present(commentsVC, animated: true)
     }
     
     private func createEmptyStateView() -> UIView {

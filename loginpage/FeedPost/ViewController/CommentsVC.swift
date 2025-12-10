@@ -9,8 +9,8 @@ import UIKit
 
 class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    @IBOutlet weak var holderView: UIView!
     @IBOutlet weak var commentTv: UITableView!
-    @IBOutlet weak var backButton: UIButton!
     @IBOutlet weak var commentTextFeild: UITextField!
     
     var response: CommentResponse?
@@ -25,9 +25,7 @@ class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
         commentTv.layer.cornerRadius = 10
-        backButton.layer.cornerRadius = backButton.frame.size.height / 2
-        backButton.clipsToBounds = true
-        backButton.layer.masksToBounds = true
+        holderView.layer.cornerRadius = 5
         if let response = response {
                     print("Total Pages: \(response.totalNumberOfPages)")
                     print("Comments: \(response.data)")
@@ -46,11 +44,6 @@ class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         fetchComments(groupId: groupId, postId: postId)
 
     }
-    
-    @IBAction func backButtonAction(_ sender: Any) {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
     
     @IBAction func addComment(_ sender: Any) {
         
