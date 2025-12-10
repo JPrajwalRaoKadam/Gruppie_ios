@@ -205,10 +205,6 @@ extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
 
         return cell
     }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 605
-    }
     
     func decodeBase64String(_ base64String: String) -> String? {
         guard let decodedData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),

@@ -20,6 +20,7 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
     @IBOutlet weak var contentImage: UIImageView!
     @IBOutlet weak var contentCancel: UIButton!
     @IBOutlet weak var pdfNameLabel: UILabel!
+    @IBOutlet weak var mediaContainer: UIView!
     @IBOutlet weak var submitButton: UIButton!
     
     var groupId: String?
@@ -54,6 +55,9 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        ChapterName.layer.cornerRadius = 10
+        topicName.layer.cornerRadius = 10
+        mediaContainer.layer.cornerRadius = 10
         ChapterName.delegate = self
         topicName.delegate = self
         
