@@ -37,7 +37,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         openURL("https://gruppie.in/terms.html")
     }
     
-    
     @IBAction func privacyPolicyAction(_ sender: Any) {
         openURL("https://gruppie.in/privacy.html")
     }
