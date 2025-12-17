@@ -7,17 +7,33 @@
 
 import Foundation
 
+enum APIError: Error {
+    case networkError(String)
+    case decodingError(String)
+    case unknown
+}
+
+
+enum HTTPMethod: String {
+    case get     = "GET"
+    case post    = "POST"
+    case put     = "PUT"
+    case delete  = "DELETE"
+}
+
 class APIManager {
     static let shared = APIManager()
     
     enum Server: String, CaseIterable {
-        case gcc = "https://gcc.gruppie.in/api/v1/"
-        case gcc6 = "https://gcc6.gruppie.in/api/v1/"
+//        case gcc = "https://gcc.gruppie.in/api/v1/"
+//        case gcc6 = "https://gcc6.gruppie.in/api/v1/"
+        case newServer = "https://dev.gruppie.in/api/v1/"
         
         var priority: Int {
             switch self {
-            case .gcc: return 0
-            case .gcc6: return 1
+//            case .gcc: return 0
+//            case .gcc6: return 1
+            case .newServer: return 0
             }
         }
     }
@@ -39,9 +55,70 @@ class APIManager {
     var teacherEndPoint: String { Endpoints.teacher }
     var adminEndPoint: String { Endpoints.admin }
     
-    private(set) var activeServer: Server = .gcc
+    private(set) var activeServer: Server = .newServer
     
     // MARK: - Server Checking Methods
+    
+    func request<T: Decodable>(
+        endpoint: String,
+        method: HTTPMethod,
+        queryParams: [String: String]? = nil,
+        body: Encodable? = nil,
+        headers: [String: String]? = nil,
+        completion: @escaping (Result<T, APIError>) -> Void
+    ) {
+        guard var urlComponents = URLComponents(string: baseURL + endpoint) else {
+            completion(.failure(.invalidURL))
+            return
+        }
+
+        if let queryParams = queryParams {
+            urlComponents.queryItems = queryParams.map { URLQueryItem(name: $0.key, value: $0.value) }
+        }
+
+        guard let url = urlComponents.url else {
+            completion(.failure(.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method.rawValue
+
+        // Headers
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+
+        // Only add body for POST/PUT
+        if let body = body, method != .get {
+            do {
+                request.httpBody = try JSONEncoder().encode(AnyEncodable(body))
+            } catch {
+                completion(.failure(.encodingError))
+                return
+            }
+        }
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                DispatchQueue.main.async { completion(.failure(.unknown(error))) }
+                return
+            }
+
+            guard let data = data else {
+                DispatchQueue.main.async { completion(.failure(.noData)) }
+                return
+            }
+
+            do {
+                let decoded = try JSONDecoder().decode(T.self, from: data)
+                DispatchQueue.main.async { completion(.success(decoded)) }
+            } catch {
+                DispatchQueue.main.async { completion(.failure(.decodingError)) }
+            }
+        }.resume()
+    }
+
+
     
     func checkUserAcrossServers(phoneData: PhoneData, completion: @escaping (Result<(response: [String: Any], server: Server), Error>) -> Void) {
         let servers = Server.allCases.sorted { $0.priority < $1.priority }
@@ -126,7 +203,26 @@ class APIManager {
         }
     }
 
+    struct AnyEncodable: Encodable {
+        private let encodeFunc: (Encoder) throws -> Void
 
+        init<T: Encodable>(_ value: T) {
+            self.encodeFunc = value.encode
+        }
+
+        func encode(to encoder: Encoder) throws {
+            try encodeFunc(encoder)
+        }
+    }
+    
+    enum APIError: Error {
+        case invalidURL
+        case noData
+        case decodingError
+        case encodingError
+        case serverError(Int)
+        case unknown(Error?)
+    }
     
     // MARK: - Existing Methods
     

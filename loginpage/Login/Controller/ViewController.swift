@@ -50,23 +50,52 @@ class ViewController: UIViewController, UITextFieldDelegate {
         let phoneData = PhoneData(phone: phoneNumber, countryCode: "IN")
         savePhoneNumberToCoreData(phoneData: phoneData)
 
+        
+        
         // ✅ Use central API manager
-        APIManager.shared.checkUserAcrossServers(phoneData: phoneData) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-
-                switch result {
-                case .success(let (response, server)):
-                    print("✅ Using server: \(server.rawValue)")
-                    self.handleResponseData(response, phoneNumber: phoneData.phone, countryCode: phoneData.countryCode)
-
-                case .failure(let error):
-                    print("❌ All servers failed: \(error.localizedDescription)")
-                    self.showAlert(message: "Unable to connect to any server. Please try again later.")
+        checkUserExist(phoneNumber: phoneNumber) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+                
+                if response.isUserExist {
+                    
+                    // User exists → check isValid
+                    if response.isUserExist == true && response.isValid == true {
+                        // 👉 Navigate to Set Password
+                        navigateToOtpViewController(with: PhoneData(phone: phoneNumber, countryCode: phoneData.countryCode))
+                    } else {
+                        // 👉 Send OTP & Navigate to OTP screen
+                        navigateToCreateAccountScreen(with: phoneNumber)
+                    }
+                    
+                } else {
+                    // User does not exist
+                    self.showAlert(message: response.message)
                 }
+                
+            case .failure(let error):
+                self.showAlert(message: "Something went wrong: \(error)")
             }
         }
     }
+    
+    func checkUserExist(phoneNumber: String,
+                        completion: @escaping (Result<UserExistResponse, APIManager.APIError>) -> Void) {
+        
+        let params = ["phoneNumber": phoneNumber] // Query param
+        
+        APIManager.shared.request(
+            endpoint: "user-exist?",
+            method: .get,
+            queryParams: params,
+            headers: nil,
+            completion: completion
+        )
+    }
+
+
     
     func openURL(_ urlString: String) {
            if let url = URL(string: urlString) {
@@ -74,27 +103,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
            }
        }
 
-    func handleResponseData(_ responseData: [String: Any], phoneNumber: String, countryCode: String) {
-        print("📦 Response Data: \(responseData)")
-        guard let isUserExist = responseData["isUserExist"] as? Bool,
-              let isAllowedToAccessApp = responseData["isAllowedToAccessApp"] as? Bool else {
-            showAlert(message: "Invalid response data.")
-            return
-        }
-
-        if isUserExist && isAllowedToAccessApp {
-            navigateToPasswordViewController(with: PhoneData(phone: phoneNumber, countryCode: countryCode))
-        } else if !isUserExist && isAllowedToAccessApp {
-            navigateToCreateAccountScreen(with: phoneNumber)
-        } else {
-            showAlert(message: "User not allowed to access this app.")
-        }
-    }
-
-    func navigateToPasswordViewController(with phoneData: PhoneData) {
+    func navigateToOtpViewController(with phoneData: PhoneData) {
         print("➡️ Navigating to PasswordViewController")
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let vc = storyboard.instantiateViewController(withIdentifier: "passwordViewController") as? passwordViewController else {
+        guard let vc = storyboard.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController else {
             print("❌ ViewController with identifier 'passwordViewController' not found.")
             return
         }

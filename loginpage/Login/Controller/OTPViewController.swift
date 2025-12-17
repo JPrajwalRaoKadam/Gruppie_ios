@@ -14,6 +14,7 @@ class OTPViewController: UIViewController {
     @IBOutlet weak var nextOutlet: UIButton!
     @IBOutlet weak var cancelOutlet: UIButton!
     
+    var phoneData: PhoneData?
     var phoneNumber: String?
     var countryCode: String?
     var loadingIndicator: UIActivityIndicatorView!
