@@ -9,7 +9,6 @@ import UIKit
 
 class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    @IBOutlet weak var holderView: UIView!
     @IBOutlet weak var commentTv: UITableView!
     @IBOutlet weak var commentTextFeild: UITextField!
     
@@ -25,7 +24,6 @@ class CommentsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
         commentTv.layer.cornerRadius = 10
-        holderView.layer.cornerRadius = 5
         if let response = response {
                     print("Total Pages: \(response.totalNumberOfPages)")
                     print("Comments: \(response.data)")

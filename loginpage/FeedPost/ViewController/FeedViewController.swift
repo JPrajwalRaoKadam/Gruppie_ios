@@ -366,8 +366,14 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         commentsVC.grpID = groupId
         commentsVC.postID = postId
 
-        // PRESENT instead of push
         commentsVC.modalPresentationStyle = .pageSheet
+
+        if let sheet = commentsVC.sheetPresentationController {
+            sheet.detents = [.large()]          // ⬅️ almost full screen
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = true
+        }
+
         present(commentsVC, animated: true)
     }
     
