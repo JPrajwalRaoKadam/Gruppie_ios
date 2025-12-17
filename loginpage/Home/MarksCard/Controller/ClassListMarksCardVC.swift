@@ -84,7 +84,7 @@ class ClassListMarksCardVC: UIViewController, UITableViewDelegate, UITableViewDa
                 let decodedResponse = try decoder.decode(ExamDataResponse.self, from: data)
                 DispatchQueue.main.async {
                     self.examDataResponse = decodedResponse.data
-                    self.navigateToExamVC()
+                    //self.navigateToExamVC()
                 }
             } catch {
                 print("Failed to decode JSON: \(error)")
@@ -96,19 +96,19 @@ class ClassListMarksCardVC: UIViewController, UITableViewDelegate, UITableViewDa
         task.resume()
     }
     
-    func navigateToExamVC() {
-        let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
-        guard let examVC = storyboard.instantiateViewController(withIdentifier: "ExamVC") as? ExamVC else {
-            print("❌ Failed to instantiate SubjectViewController")
-            return
-        }
-        
-        examVC.examDataResponse = self.examDataResponse
-        examVC.token = TokenManager.shared.getToken() ?? ""
-        examVC.groupId = groupId
-        examVC.teamId = self.teamId
-        
-        
-        self.navigationController?.pushViewController(examVC, animated: true)
-    }
+//    func navigateToExamVC() {
+//        let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
+//        guard let examVC = storyboard.instantiateViewController(withIdentifier: "ExamVC") as? ExamVC else {
+//            print("❌ Failed to instantiate SubjectViewController")
+//            return
+//        }
+//        
+//        examVC.examDataResponse = self.examDataResponse
+//        examVC.token = TokenManager.shared.getToken() ?? ""
+//        examVC.groupId = groupId
+//        examVC.teamId = self.teamId
+//        
+//        
+//        self.navigationController?.pushViewController(examVC, animated: true)
+//    }
 }
