@@ -1,10 +1,3 @@
-//
-//  gateMngtModel.swift
-//  
-//
-//  Created by apple on 09/06/25.
-//
-
 import Foundation
 
 struct GateResponse: Codable {
@@ -44,7 +37,7 @@ struct VisitorResponseModel: Codable {
     let personToVisitUserId: String?
     let visitorMobileNo: String?
     let groupId: String
-    let visitorAccepted: Bool? // ✅ Make optional
+    let visitorAccepted: Bool? 
     let personToVisitImage: String?
     let year: Int
     let onDutyName: String?

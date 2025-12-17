@@ -1,12 +1,5 @@
-//
-//  GateListVC.swift
-//  loginpage
-//
-//  Created by apple on 24/07/25.
-//
-
 protocol GateListVCDelegate: AnyObject {
-    func didSelectGate(gateId: String, gateNumber: String) // Note parameter names
+    func didSelectGate(gateId: String, gateNumber: String)
 }
 
 import UIKit
@@ -41,7 +34,6 @@ class GateListVC: UIViewController {
         gatetableview.delegate = self
         gatetableview.dataSource = self
         
-        // Setup loading indicator
         loadingIndicator.center = view.center
         loadingIndicator.hidesWhenStopped = true
         view.addSubview(loadingIndicator)
@@ -141,7 +133,7 @@ extension GateListVC: UITableViewDelegate, UITableViewDataSource {
         cell.gateName.text = gate.gateNumber
         cell.gateId = gate.gateId
         cell.delegate = self
-        cell.isChecked = (selectedIndex == indexPath.row) // ✅ use this instead of accessoryType
+        cell.isChecked = (selectedIndex == indexPath.row)
         return cell
     }
 
@@ -162,10 +154,8 @@ extension GateListVC: GateListVCCellDelegate {
         selectedGateId = gateId
         selectedGateNumber = gateName
 
-        // Reload to clear other checkmarks
         gatetableview.reloadData()
 
-        // Optional: Pass it immediately back to VisitorDetailsVC
         delegate?.didSelectGate(gateId: gateId, gateNumber: gateName)
         self.dismiss(animated: true, completion: nil)
     }

@@ -21,31 +21,34 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
     
     private var dimmedView: UIView!
     private var sideMenuView: UIView!
+    private var dateTopConstraint: NSLayoutConstraint!
 
-    // MARK: - Date Handling
     var currentDateValue: Date = Date()
-    var selectedDate: Date? // if user picks a date
-
-    // MARK: - View Lifecycle
+    var selectedDate: Date?
     override func viewDidLoad() {
         super.viewDidLoad()
         date.layer.cornerRadius = 10
         gatetableview.layer.cornerRadius = 10
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
+        date.translatesAutoresizingMaskIntoConstraints = false
+        dateTopConstraint = date.topAnchor.constraint(equalTo: segments.bottomAnchor, constant: 20)
+        NSLayoutConstraint.activate([
+            date.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            dateTopConstraint
+        ])
+
         if currentRole == "admin" {
       
         }
         date.translatesAutoresizingMaskIntoConstraints = false
           NSLayoutConstraint.activate([
               date.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-              // Keep your existing top constraint or set a new one
               date.topAnchor.constraint(equalTo: segments.bottomAnchor, constant: 20)
           ])
         gatetableview.delegate = self
         gatetableview.dataSource = self
         gatetableview.register(UINib(nibName: "GateManagementCell", bundle: nil), forCellReuseIdentifier: "GateManagementCell")
-       // print("role:\(currentRole)")
         print("currentRole in gatemng::::\(currentRole)")
         segment(segments)
         setCurrentDate()
@@ -58,24 +61,21 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
     func openCamera(for purpose: String) {
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary  // ✅ Changed from .camera to .photoLibrary
+        imagePicker.sourceType = .photoLibrary
         imagePicker.allowsEditing = true
-        imagePicker.view.tag = (purpose == "visitor") ? 1 : 2 // Tag to identify purpose
+        imagePicker.view.tag = (purpose == "visitor") ? 1 : 2
         present(imagePicker, animated: true, completion: nil)
     }
-        // Camera result
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage {
                 if picker.view.tag == 1 {
                     self.capturedVisitorImage = image
                     dismiss(animated: true) {
-                        // Now open for ID card
                         self.openCamera(for: "idCard")
                     }
                 } else {
                     self.capturedIDCardImage = image
                     dismiss(animated: true) {
-                        // Now navigate to VisitorDetailsVC
                         self.moveToVisitorDetails()
                     }
                 }
@@ -146,12 +146,10 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
                     return
                 }
 
-                // Optional: Debug print
                 if let rawString = String(data: data, encoding: .utf8) {
                     print("✅ Raw Response:\n\(rawString)")
                 }
 
-                // Decode
                 do {
                     let decodedResponse = try JSONDecoder().decode(VisitorListResponse.self, from: data)
                     self.visitorList = decodedResponse.data
@@ -175,24 +173,7 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
         print("Current Date: \(currentDateString)")
     }
 
-    // MARK: - Segments
-//    @IBAction func segment(_ sender: UISegmentedControl) {
-//        if segments.selectedSegmentIndex == 0 {
-//            date.isHidden = true
-//            fetchVisitorDetails(for: Date()) // current date
-//        } else if sender.selectedSegmentIndex == 1 {
-//            date.isHidden = false
-//
-//            let dateToUse = selectedDate ?? currentDateValue
-//            fetchVisitorDetails(for: dateToUse)
-//        }
-//    }
-    @IBAction func segment(_ sender: UISegmentedControl) {
-        date.isHidden = sender.selectedSegmentIndex == 0
-        fetchVisitorDetails(for: getDateForCurrentSegment())
-    }
-    
-    // MARK: - Date Picker
+
     @IBAction func datepicker(_ sender: Any) {
         showDatePickerPopup(for: sender as! UIButton)
     }
@@ -261,7 +242,7 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
             
             date.setTitle(selectedDateString, for: .normal)
             currentDate = selectedDateString
-            selectedDate = datePicker.date // Store the Date object
+            selectedDate = datePicker.date
             
             print("Selected Date: \(selectedDateString)")
 
@@ -287,12 +268,10 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
         }
     }
 
-    // MARK: - Side Menu
     @IBAction func moreButton(_ sender: Any) {
         showSideMenu()
     }
     func showSideMenu() {
-        // Remove existing views if already showing
         dimmedView?.removeFromSuperview()
         sideMenuView?.removeFromSuperview()
         
@@ -313,13 +292,10 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
 
         let menuButton = UIButton(frame: CGRect(x: 0, y: 0, width: menuWidth, height: menuHeight))
         
-        // Configure menu based on role & segment
         if currentRole == "teacher" {
-            // Always show only "Add Visitors" for teachers
             menuButton.setTitle("Add Visitors", for: .normal)
             menuButton.addTarget(self, action: #selector(addVisitorTapped), for: .touchUpInside)
         } else if currentRole == "admin" {
-            // Admins: show Gate or Add Visitors based on segment
             if segments.selectedSegmentIndex == 0 {
                 menuButton.setTitle("Gate", for: .normal)
                 menuButton.addTarget(self, action: #selector(gateButtonTapped), for: .touchUpInside)
@@ -328,7 +304,6 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
                 menuButton.addTarget(self, action: #selector(addVisitorTapped), for: .touchUpInside)
             }
         }
-
 
         menuButton.setTitleColor(.black, for: .normal)
         menuButton.backgroundColor = UIColor.systemGray6
@@ -341,6 +316,7 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
             self.sideMenuView.frame.origin.x = self.view.frame.width - menuWidth - 16
         }
     }
+    
     @objc func addVisitorTapped() {
         dismissSideMenu()
 
@@ -379,6 +355,23 @@ class GateManagementVC: UIViewController, UIImagePickerControllerDelegate, UINav
     @IBAction func backButton(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
+    
+    @IBAction func segment(_ sender: UISegmentedControl) {
+        if sender.selectedSegmentIndex == 0 {
+            date.isHidden = true
+            dateTopConstraint.constant = 0
+        } else {
+            date.isHidden = false
+            dateTopConstraint.constant = 20
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+        
+        fetchVisitorDetails(for: getDateForCurrentSegment())
+    }
+
 }
 extension GateManagementVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -392,25 +385,20 @@ extension GateManagementVC: UITableViewDataSource, UITableViewDelegate {
         cell.visitorName.text = visitor.visitorName
         cell.personToVisit.text = visitor.personToVisit ?? "N/A"
 
-        // Load visitorIdCardImage with fallback
         if let imageArr = visitor.visitorIdCardImage, let firstImage = imageArr.first {
             let cleanedImageString = firstImage.cleanedBase64String()
             
-            // Try as direct base64 image
             if let imageData = Data(base64Encoded: cleanedImageString), let image = UIImage(data: imageData) {
                 cell.iconImageView.image = image
             }
-            // Try as base64 encoded URL
             else if let urlData = Data(base64Encoded: cleanedImageString),
                     let urlString = String(data: urlData, encoding: .utf8),
                     let url = URL(string: urlString) {
                 cell.loadImage(from: url)
             }
-            // Try as direct URL
             else if let url = URL(string: cleanedImageString) {
                 cell.loadImage(from: url)
             }
-            // Fallback
             else {
                 cell.iconImageView.image = cell.generateImage(from: visitor.visitorName)
             }
@@ -429,7 +417,6 @@ extension GateManagementVC: UITableViewDataSource, UITableViewDelegate {
         if let detailsVC = storyboard?.instantiateViewController(withIdentifier: "VisitorDetailsVC") as? VisitorDetailsVC {
             detailsVC.visitor = selectedVisitor
             detailsVC.currentRole = self.currentRole
-//            detailsVC.gate.setTitle(selectedVisitor?.gateName, for: .normal)
             detailsVC.isFromAddFlow = false
             detailsVC.groupId = self.groupId
             detailsVC.delegate = self

@@ -1,10 +1,3 @@
-//
-//  SelectStuVC.swift
-//  loginpage
-//
-//  Created by apple on 31/07/25.
-//
-
 import UIKit
 
 class SelectStuVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
@@ -218,21 +211,18 @@ class SelectStuVC: UIViewController, UITableViewDelegate, UITableViewDataSource,
 
 
     func fetchCombinedStudentTeams() {
-        // 🔐 Get token
         guard let token = TokenManager.shared.getToken() else {
             print("❌ Token not found")
             showAlert(message: "Authentication required")
             return
         }
         
-        // 📦 Get groupId
         guard let groupId = self.groupId else {
             print("❌ groupId not found")
             showAlert(message: "Group ID is missing")
             return
         }
 
-        // 🌐 Create URL
         guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/class/get?type=combined") else {
             print("❌ Invalid URL")
             return
@@ -240,12 +230,10 @@ class SelectStuVC: UIViewController, UITableViewDelegate, UITableViewDataSource,
 
         print("📡 API URL: \(url.absoluteString)")
 
-        // 📡 Prepare request
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        // 🚀 Start network task
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("❌ Error fetching data: \(error.localizedDescription)")
@@ -286,7 +274,6 @@ class SelectStuVC: UIViewController, UITableViewDelegate, UITableViewDataSource,
     }
 
  func navigateToDetailViewController(withTeamId teamId: String, name: String) {
-        // Safely unwrap token and groupId
         guard let token = TokenManager.shared.getToken() else {
             print("❌ Token not found")
             showAlert(message: "Authentication required")

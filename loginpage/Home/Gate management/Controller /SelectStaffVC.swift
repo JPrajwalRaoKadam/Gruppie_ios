@@ -15,7 +15,6 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     var isSearching = false
     var teachingStaffData: [Staff] = []
     var nonTeachingStaffData: [Staff] = []
-//    var token: String?
     var groupId: String?
 
     var searchTextField: UITextField?
@@ -27,7 +26,6 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         bcbutton.clipsToBounds = true
 
         print("Received groupId: \(groupId ?? "nil")")
-         // print("token staff register: \(token ?? "nil")")
 
         heightConstraintOfSearchView.constant = 0
         searchView.isHidden = true
@@ -66,7 +64,6 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     private func fetchTeachingStaffData() {
         guard let token = TokenManager.shared.getToken() else {
             print("❌ Token not found")
-           // showAlert(message: "Authentication required")
             return
         }
            guard let groupId = groupId else {
@@ -180,11 +177,9 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
             selectedStaff = isSearching ? filteredNonTeachingStaff[indexPath.row] : nonTeachingStaffData[indexPath.row]
         }
 
-        // Optional: fetch staff details if needed
         fetchStaffDetails(staffId: selectedStaff.userId) { [weak self] staffDetails in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                // ✅ Post notification with selected staff info
                 NotificationCenter.default.post(
                     name: Notification.Name("StaffSelected"),
                     object: nil,
@@ -194,7 +189,6 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
                     ]
                 )
 
-                // Optional: Go back if needed
                 self.navigationController?.popViewController(animated: true)
             }
         }
@@ -282,7 +276,6 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
             }
         }.resume()
     }
-
 
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden

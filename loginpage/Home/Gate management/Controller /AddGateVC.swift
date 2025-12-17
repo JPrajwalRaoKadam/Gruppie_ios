@@ -1,7 +1,7 @@
-
 protocol AddGateDelegate: AnyObject {
     func didAddNewGate()
 }
+
 import UIKit
 class AddGateVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -42,7 +42,6 @@ class AddGateVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         present(imagePicker, animated: true)
     }
     
-    // MARK: - UIImagePickerController Delegate
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
         
@@ -78,7 +77,7 @@ class AddGateVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let body: [String: Any] = [
             "gateNumber": gateNumber,
             "image": [base64Image],
-            "latitude": "12.932302621165105", // Replace with dynamic values if needed
+            "latitude": "12.932302621165105",
             "longitude": "77.58789841085672"
         ]
         
@@ -115,7 +114,7 @@ class AddGateVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             }
             
             DispatchQueue.main.async {
-                self.delegate?.didAddNewGate() // Notify GateDetailsVC
+                self.delegate?.didAddNewGate() 
                 self.navigationController?.popViewController(animated: true)
             }
 

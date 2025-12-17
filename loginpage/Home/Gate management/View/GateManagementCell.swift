@@ -44,19 +44,6 @@ class GateManagementCell: UITableViewCell {
         }
     }
 
-//     func loadImage(from url: URL) {
-//        URLSession.shared.dataTask(with: url) { data, _, error in
-//            if let data = data, error == nil {
-//                DispatchQueue.main.async {
-//                    self.iconImageView.image = UIImage(data: data)
-//                }
-//            } else {
-//                DispatchQueue.main.async {
-//                    self.iconImageView.image = self.generateImage(from: self.visitorName.text ?? "")
-//                }
-//            }
-//        }.resume()
-//    }extension GateManagementCell {
     func loadImage(from url: URL) {
         URLSession.shared.dataTask(with: url) { data, _, error in
             guard let data = data, error == nil, let image = UIImage(data: data) else {
@@ -70,7 +57,6 @@ class GateManagementCell: UITableViewCell {
             }
         }.resume()
     }
-
 
     func generateImage(from name: String) -> UIImage? {
         let letter = name.prefix(1).uppercased()

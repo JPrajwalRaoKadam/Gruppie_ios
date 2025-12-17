@@ -73,7 +73,7 @@ class GateDetailsVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
             return
         }
 
-        var request = URLRequest(url: url, timeoutInterval: 15) // set timeout
+        var request = URLRequest(url: url, timeoutInterval: 15)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
@@ -86,7 +86,7 @@ class GateDetailsVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
                 if error.code == NSURLErrorTimedOut {
                     print("⏱ Request timed out. Retrying...")
                     DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
-                        self.fetchGateData() // retry after 2s
+                        self.fetchGateData()
                     }
                 } else {
                     print("❌ API Error: \(error.localizedDescription)")
@@ -127,7 +127,6 @@ class GateDetailsVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         }.resume()
     }
 
-    // MARK: - Table View
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return gates.count
     }

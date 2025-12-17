@@ -1,10 +1,3 @@
-//
-//  editORdeleteVC.swift
-//  loginpage
-//
-//  Created by apple on 10/06/25.
-//
-
 import UIKit
 
  class editORdeleteVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -33,25 +26,21 @@ import UIKit
         editButton.clipsToBounds = true
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
-        //addImage.image = gate?.image
         gateName.text = gate?.gateNumber
         gateLocation.text = gate?.location
         addImage.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectImage))
         addImage.addGestureRecognizer(tapGesture)
-//        addImage.image = generateImage(from: (gate?.image ?? gate?.gateNumber)! as! String)
-        // Do any additional setup after loading the view.
         print("editgate :\(gate?.image),\(gate?.gateNumber),\(gate?.location)")
     }
      @objc func selectImage() {
          let imagePicker = UIImagePickerController()
          imagePicker.delegate = self
          imagePicker.sourceType = .photoLibrary
-         imagePicker.allowsEditing = true // Optional: allow image crop
+         imagePicker.allowsEditing = true
          present(imagePicker, animated: true)
      }
 
-     // MARK: - Image Picker Delegate Methods
      func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
          if let selectedImage = info[.editedImage] as? UIImage {
              addImage.image = selectedImage
@@ -97,7 +86,7 @@ import UIKit
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "PUT" // or "POST" if API expects POST
+        request.httpMethod = "PUT"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -116,7 +105,7 @@ import UIKit
                 DispatchQueue.main.async {
                     if let nav = self.navigationController {
                         if let gateDetailsVC = nav.viewControllers.first(where: { $0 is GateDetailsVC }) as? GateDetailsVC {
-                            gateDetailsVC.didAddNewGate() // ⬅️ reload list
+                            gateDetailsVC.didAddNewGate()
                             nav.popToViewController(gateDetailsVC, animated: true)
                         } else {
                             nav.popViewController(animated: true)
@@ -145,13 +134,12 @@ import UIKit
             return
         }
 
-        // Convert image to base64 string
         var imageBase64: String?
         if let image = addImage.image,
            let imageData = image.jpegData(compressionQuality: 0.8) {
             imageBase64 = imageData.base64EncodedString()
         } else if let existingImage = gate?.image?.first {
-            imageBase64 = existingImage // already base64 from API
+            imageBase64 = existingImage 
         }
 
         guard let base64Image = imageBase64 else {

@@ -1,10 +1,3 @@
-//
-//  DetailViewController2.swift
-//  loginpage
-//
-//  Created by apple on 31/07/25.
-//
-
 import UIKit
 
 class DetailViewController2: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
@@ -128,7 +121,6 @@ class DetailViewController2: UIViewController, UITableViewDataSource, UITableVie
 
         NotificationCenter.default.post(name: Notification.Name("SelectedStudentNotification"), object: nil, userInfo: studentInfo)
 
-        // Navigate back
         if let navController = self.navigationController {
             let viewControllers = navController.viewControllers
             if viewControllers.count >= 3 {
@@ -139,10 +131,7 @@ class DetailViewController2: UIViewController, UITableViewDataSource, UITableVie
         }
     }
 
-
-
-        
-        @IBAction func backButton(_ sender: UIButton) {
+    @IBAction func backButton(_ sender: UIButton) {
             navigationController?.popViewController(animated: true)
         }
 

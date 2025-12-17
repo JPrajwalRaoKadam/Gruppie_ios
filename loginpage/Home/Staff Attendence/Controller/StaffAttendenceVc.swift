@@ -11,6 +11,7 @@ class StaffAttendenceVc: UIViewController, UITableViewDelegate, UITableViewDataS
     @IBOutlet weak var AllPresent: UIButton!
     @IBOutlet weak var deleteButton: UIButton!
     @IBOutlet weak var midView: UIView!
+    @IBOutlet weak var search: UIButton!
 
     
     var currentDatePicker: UIDatePicker?

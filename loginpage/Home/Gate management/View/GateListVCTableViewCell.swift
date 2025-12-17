@@ -1,9 +1,3 @@
-//
-//  GateListVCTableViewCell.swift
-//  loginpage
-//
-//  Created by apple on 24/07/25.
-//
 import UIKit
 
 protocol GateListVCCellDelegate: AnyObject {
@@ -17,7 +11,7 @@ class GateListVCTableViewCell: UITableViewCell {
 
     weak var delegate: GateListVCCellDelegate?
 
-    var gateId: String = "" // add this to store gateId
+    var gateId: String = ""
     var isChecked: Bool = false {
         didSet {
             let imageName = isChecked ? "checkmark.square.fill" : "square"
@@ -28,7 +22,7 @@ class GateListVCTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         checkButton.isUserInteractionEnabled = false
-        checkButton.tintColor = .black  // ✅ set black color for the checkmark
+        checkButton.tintColor = .black 
         isChecked = false
     }
 

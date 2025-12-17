@@ -1,6 +1,3 @@
-//protocol StudentSelectionDelegate: AnyObject {
-//    func didSelectStudent(name: String, groupId: String)
-//}
 protocol VisitorDetailsDelegate: AnyObject {
     func didUpdateVisitorData()
 }
@@ -102,16 +99,12 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
         }
  
         if isFromAddFlow {
-             // Coming from "Add Visitors" menu - show Add button
              configureAddButton()
              setupImageTapGestures()
          } else {
-             // Coming from row selection
              if currentRole == "admin" {
-                 // Hide button for admin when coming from row selection
                  checkout.isHidden = true
              } else if currentRole == "teacher" {
-                 // Show Checkout button for teacher when coming from row selection
                  configureCheckoutButton()
              }
          }
@@ -126,27 +119,21 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
             reason.text = "Reason: \(v.reason ?? "")"
             selectGateButton.setTitle(v.gateName.isEmpty ?? true ? "Gate No." : v.gateName, for: .normal)
             
-            // Decode and display ID card image
             if let idImages = v.visitorIdCardImage, let firstImage = idImages.first {
                 setImage(from: firstImage, in: idCardImage)
             }
-            // Decode and display visitor face image
             if let visitorImageString = v.visitorImage {
                 setImage(from: visitorImageString, in: visitorImage)
             }
         }
-//        deinit {
-//              NotificationCenter.default.removeObserver(self)
-//          }
-   
     }
+    
     @objc func receiveStaffInfo(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
               let staffName = userInfo["name"] as? String,
               let staffId = userInfo["userId"] as? String else { return }
 
         whoomToMe.text = "Whoom to meet: \(staffName)"
-        // You can also store the userId if needed
         print("✅ Received staff name: \(staffName), userId: \(staffId)")
     }
     
@@ -161,8 +148,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
 
         print("✅ Received student name: \(studentName), groupId: \(groupId)")
     }
-
-
 
     private func configureAddButton() {
         checkout.isHidden = false
@@ -188,7 +173,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
         idCardImage.addGestureRecognizer(idCardTap)
     }
     
-    // MARK: - Image Tap Handlers
     @objc private func handleVisitorImageTap() {
         currentImageType = .visitor
         checkCameraPermissionAndPresentPicker()
@@ -199,7 +183,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
         checkCameraPermissionAndPresentPicker()
     }
     
-    // MARK: - Camera Permission & Image Picker
     private func checkCameraPermissionAndPresentPicker() {
         let authStatus = AVCaptureDevice.authorizationStatus(for: .video)
         
@@ -247,7 +230,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
         present(alert, animated: true)
     }
     
-    // MARK: - UIImagePickerControllerDelegate
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
         
@@ -287,7 +269,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
         alert.addAction(studentAction)
         alert.addAction(cancelAction)
         
-        // For iPad support
         if let popoverController = alert.popoverPresentationController {
             popoverController.sourceView = self.view
             popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
@@ -302,7 +283,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
         if let homeVC = storyboard.instantiateViewController(withIdentifier: "SelectStuVC") as? SelectStuVC {
             print("VisitorDetailsVC groupId: \(groupId ?? "nil")")
             homeVC.groupId = self.groupId
-//          homeVC.delegate = self
             self.navigationController?.pushViewController(homeVC, animated: true)
         }
     }
@@ -312,7 +292,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
         if let homeVC = storyboard.instantiateViewController(withIdentifier: "SelectStaffVC") as? SelectStaffVC {
             print("VisitorDetailsVC groupId: \(groupId ?? "nil")")
             homeVC.groupId = self.groupId
-//            homeVC.delegate = self
             self.navigationController?.pushViewController(homeVC, animated: true)
         }
     }
@@ -344,7 +323,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
             gateListVC.modalPresentationStyle = .pageSheet
             
             if let sheet = gateListVC.sheetPresentationController {
-                // Custom detent to cover 75% of the screen
                 sheet.detents = [
                     .custom(resolver: { context in
                         return context.maximumDetentValue * 0.75
@@ -363,15 +341,12 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
             return
         }
         
-        // Convert visitor and ID card images to Base64
         let visitorImageBase64 = visitorImage.image?.jpegData(compressionQuality: 0.7)?.base64EncodedString() ?? ""
         let idCardImageBase64 = idCardImage.image?.jpegData(compressionQuality: 0.7)?.base64EncodedString() ?? ""
-        
-        // Prepare request body with proper types
         let body: [String: Any] = [
             "visitorImage": visitorImageBase64,
             "visitorName": name.text ?? "",
-            "gateName": selectGateButton.title(for: .normal) ?? "", // Fixed this line
+            "gateName": selectGateButton.title(for: .normal) ?? "",
             "visitorMobileNo": phone.text ?? "",
             "visitorAddress": address.text ?? "",
             "visitorVehicleNo": vehicleNo.text ?? "",
@@ -435,7 +410,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
     func setImage(from encodedString: String, in imageView: UIImageView) {
         let cleanedString = encodedString.cleanedBase64String()
         
-        // First try to decode as direct base64 image
         if let imageData = Data(base64Encoded: cleanedString), let image = UIImage(data: imageData) {
             DispatchQueue.main.async {
                 imageView.image = image
@@ -443,7 +417,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
             return
         }
         
-        // Then try to decode as base64 encoded URL
         if let urlData = Data(base64Encoded: cleanedString),
            let urlString = String(data: urlData, encoding: .utf8),
            let url = URL(string: urlString) {
@@ -463,7 +436,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
             return
         }
         
-        // Finally try as direct URL
         if let url = URL(string: cleanedString) {
             URLSession.shared.dataTask(with: url) { data, _, error in
                 guard let data = data, error == nil, let image = UIImage(data: data) else {
@@ -480,14 +452,12 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
             return
         }
         
-        // If all fails
         print("❌ Could not decode image string: \(encodedString)")
         DispatchQueue.main.async {
             imageView.image = UIImage(systemName: "person.crop.circle.fill")
         }
     }
 
-    // MARK: - API Call (Updated with your existing code)
      @objc func addVisitorFromTeacher() {
          guard let token = TokenManager.shared.getToken() else {
              print("❌ Token not found")
@@ -501,7 +471,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
              return
          }
          
-         // Validate required images if in add flow
          if isFromAddFlow {
              guard visitorImage.image != nil else {
                  showAlert(message: "Please capture visitor image")
@@ -514,19 +483,16 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
              }
          }
          
-         // Convert images to Base64 strings
          let visitorImageBase64 = visitorImage.image?.jpegData(compressionQuality: 0.7)?.base64EncodedString() ?? ""
          let idCardImageBase64 = idCardImage.image?.jpegData(compressionQuality: 0.7)?.base64EncodedString() ?? ""
-         
-         // Prepare the request body
          let body: [String: Any] = [
              "building": building.text ?? "",
-             "buildingNumber": "", // Add if you have this field
+             "buildingNumber": "",
              "gateId": selectedGateId ?? "",
              "gateName": selectGateButton.title(for: .normal) ?? "",
              "personToVisit": whoomToMe.text ?? "",
-             "personToVisitImage": "", // Add if available
-             "personToVisitUserId": "", // Add if available
+             "personToVisitImage": "",
+             "personToVisitUserId": "",
              "purposeOfVisit": reason.text ?? "",
              "reason": reason.text ?? "",
              "roomNo": roomNo.text ?? "",
@@ -538,7 +504,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
              "visitorVehicleNo": vehicleNo.text ?? ""
          ]
          
-         // Print the payload for debugging
          if let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted),
             let jsonString = String(data: jsonData, encoding: .utf8) {
              print("📦 Request Payload:")
@@ -567,7 +532,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
              return
          }
          
-         // Show loading indicator
          let loadingIndicator = UIActivityIndicatorView(style: .large)
          loadingIndicator.center = view.center
          loadingIndicator.startAnimating()
@@ -597,7 +561,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
              
              print("📩 Response Status Code: \(httpResponse.statusCode)")
              
-             // Print response body for debugging
              if let data = data, let responseString = String(data: data, encoding: .utf8) {
                  print("📄 Response Body:")
                  print(responseString)
@@ -622,7 +585,6 @@ class VisitorDetailsVC: UIViewController, UIImagePickerControllerDelegate, UINav
          task.resume()
      }
      
-     // Helper method to show alerts
      private func showAlert(message: String, completion: (() -> Void)? = nil) {
          let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
          alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
