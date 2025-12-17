@@ -569,7 +569,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                         case "Subject Register":
                             self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
                         case "Marks Card":
-                            self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
+                            break
+//                            self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
                         case "Syllabus Tracker":
                             self.navigateToSyllabusTracker(subjects: subjects, teamIds: teamIds)
                         case "Time Table":
@@ -685,24 +686,24 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
     }
     
-    func navigateToMarksCard(subjects: [SubjectData], teamIds: [String]) {
-        let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
-        guard let MarksCardVC = storyboard.instantiateViewController(withIdentifier: "ClassListMarksCardVC") as? ClassListMarksCardVC else {
-            print("❌ Failed to instantiate SubjectViewController")
-            return
-        }
-        
-        MarksCardVC.subjects = subjects
-        MarksCardVC.token = TokenManager.shared.getToken() ?? ""
-        MarksCardVC.groupId = school?.id ?? ""
-        MarksCardVC.teamIds = teamIds
-        MarksCardVC.currentRole = self.currentRole
-        
-        print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
-        print("✅ Passing Group ID to SubjectViewController: \(MarksCardVC.groupId)") // Fix: Use subjectRegisterVC.groupId
-        
-        self.navigationController?.pushViewController(MarksCardVC, animated: true)
-    }
+//    func navigateToMarksCard(subjects: [SubjectData], teamIds: [String]) {
+//        let storyboard = UIStoryboard(name: "MarksCard", bundle: nil)
+//        guard let MarksCardVC = storyboard.instantiateViewController(withIdentifier: "ClassListMarksCardVC") as? ClassListMarksCardVC else {
+//            print("❌ Failed to instantiate SubjectViewController")
+//            return
+//        }
+//
+//        MarksCardVC.subjects = subjects
+//        MarksCardVC.token = TokenManager.shared.getToken() ?? ""
+//        MarksCardVC.groupId = school?.id ?? ""
+//        MarksCardVC.teamIds = teamIds
+//        MarksCardVC.currentRole = self.currentRole
+//
+//        print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
+//        print("✅ Passing Group ID to SubjectViewController: \(MarksCardVC.groupId)") // Fix: Use subjectRegisterVC.groupId
+//
+//        self.navigationController?.pushViewController(MarksCardVC, animated: true)
+//    }
     
     func navigateToCalendarViewController() {
             let storyboard = UIStoryboard(name: "calender", bundle: nil)

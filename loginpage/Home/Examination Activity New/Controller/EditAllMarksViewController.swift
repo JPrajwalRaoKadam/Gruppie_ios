@@ -72,8 +72,10 @@ class EditAllMarksViewController  : UIViewController {
                  let response = try JSONDecoder().decode(EditAllMarksResponse.self, from: data)
                  DispatchQueue.main.async {
                      self.students = response.data
+                     self.configureMinMaxLabel()
                      self.studentMarksTableView.reloadData()
                  }
+
 
             } catch {
                 print("❌ Decode error:", error)
@@ -81,7 +83,18 @@ class EditAllMarksViewController  : UIViewController {
         }.resume()
     }
     
-    
+    func configureMinMaxLabel() {
+        guard let firstStudent = students.first else {
+            minMaxLabel.text = "Min: 0   Max: 0"
+            return
+        }
+
+        let minMarks = firstStudent.minMarks ?? "0"
+        let maxMarks = firstStudent.maxMarks ?? "0"
+
+        minMaxLabel.text = "Min: \(minMarks)   Max: \(maxMarks)"
+    }
+
     
     func buildUpdateRequestBody() -> EditAllMarksUpdateRequest {
 
