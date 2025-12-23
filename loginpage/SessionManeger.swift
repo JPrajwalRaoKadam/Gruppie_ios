@@ -20,5 +20,7 @@ struct SessionManager {
     static func logout() {
         UserDefaults.standard.removeObject(forKey: "login_token")
         UserDefaults.standard.removeObject(forKey: "loggedInPhone")
+        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+        
     }
 }
