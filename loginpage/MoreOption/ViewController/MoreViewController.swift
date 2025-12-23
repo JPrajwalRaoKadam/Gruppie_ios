@@ -47,12 +47,7 @@ class MoreViewController: UIViewController, UITableViewDelegate, UITableViewData
         //            UserDefaults.standard.removeObject(forKey: "loggedInPhone")
         //            let loginVC = storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
         //        navigationController?.setViewControllers([loginVC], animated: true)
-        UserDefaults.standard.removeObject(forKey: "login_token")
-        UserDefaults.standard.removeObject(forKey: "loggedInPhone")
-        UserDefaults.standard.set(false, forKey: "isLoggedIn")
-        
-        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
-        UserDefaults.standard.removeObject(forKey: "loggedInPhone")
+        SessionManager.logout()
         
         // Return to login screen
         if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate {
