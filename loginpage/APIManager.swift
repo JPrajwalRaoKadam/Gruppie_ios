@@ -7,13 +7,6 @@
 
 import Foundation
 
-enum APIError: Error {
-    case networkError(String)
-    case decodingError(String)
-    case unknown
-}
-
-
 enum HTTPMethod: String {
     case get     = "GET"
     case post    = "POST"

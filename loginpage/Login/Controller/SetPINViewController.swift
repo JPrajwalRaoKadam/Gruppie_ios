@@ -82,23 +82,32 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     @IBAction func next(_ sender: UIButton) {
         if validatePIN() && validatePIN2() {
             //        callAPIAndNavigate()
-            if schools.count > 1 {
-                self.navigateToGroupViewController()
-            } else {
-                handleSchoolSelection(schoolDataArray: schools)
-            }
+//            if schools.count > 1 {
+//                self.navigateToGroupViewController()
+//            } else {
+//                handleSchoolSelection(schoolDataArray: schools)
+//            }
+            navigateToHomeVC()
         }
     }
     
     @IBAction func skip(_ sender: UIButton) {
         //        callAPIAndNavigate()
-        if schools.count > 1 {
-            self.navigateToGroupViewController()
-        } else {
-            handleSchoolSelection(schoolDataArray: schools)
-        }
-        
+//        if schools.count > 1 {
+//            self.navigateToGroupViewController()
+//        } else {
+//            handleSchoolSelection(schoolDataArray: schools)
+//        }
+        navigateToHomeVC()
     }
+    
+    
+    func navigateToHomeVC() {
+        if let homeVC = storyboard?.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC {
+            navigationController?.pushViewController(homeVC, animated: true)
+        }
+    }
+    
     
     private func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
         guard let url = URL(string: urlString) else {

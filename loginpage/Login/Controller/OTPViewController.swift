@@ -1,8 +1,7 @@
 import UIKit
 
 class OTPViewController: UIViewController {
-    
-  
+
     @IBOutlet weak var box1: UITextField!
     @IBOutlet weak var box2: UITextField!
     @IBOutlet weak var box3: UITextField!
@@ -28,6 +27,7 @@ class OTPViewController: UIViewController {
   
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("phoneNumber\(phoneNumber)")
         self.navigationItem.hidesBackButton = true
         butttonStyles()
         [box1, box2, box3, box4, box5, box6].forEach { $0?.applyRoundedStyle2() }
@@ -75,7 +75,7 @@ class OTPViewController: UIViewController {
       }
     
     @IBAction func resetOTP(_ sender: UIButton) {
-        resendOTP()
+       resendOTP()
     }
     
     @IBAction func cancelButton(_ sender: UIButton) {
@@ -87,128 +87,89 @@ class OTPViewController: UIViewController {
         verifyOTP(otp: currentOTP)
     }
     
-    func verifyOTP(otp: String) {
-        guard let url = URL(string: APIManager.shared.baseURL + "verify/otp/category/app?category=school&appName=GC2") else {
-            showAlert(message: "Invalid API URL.")
+ func verifyOTP(otp: String) {
+       
+       guard let phone = phoneNumber else {
+           showAlert(message: "Phone number missing")
+           return
+       }
+
+       let requestBody = VerifyOTPRequest(
+           phone: phone,
+           otp: otp
+       )
+
+       loadingIndicator.startAnimating()
+
+       APIManager.shared.request(
+           endpoint: "verify-otp",
+           method: .post,
+           body: requestBody
+       ) { [weak self] (result: Result<VerifyOTPResponse, APIManager.APIError>) in
+
+           guard let self = self else { return }
+
+           self.loadingIndicator.stopAnimating()
+
+           switch result {
+
+           case .success(let response):
+               print("📥 Verify OTP API Response:", response)
+
+               if response.isValid {
+                   // ✅ OTP Valid → Navigate
+                   self.navigateToCreatePassword(otp: otp)
+               } else {
+                   // ❌ Invalid OTP → API Message
+                   self.showAlert(message: response.message)
+               }
+
+           case .failure(let error):
+               print("❌ Verify OTP API Error:", error)
+               self.showAlert(message: "Failed to verify OTP")
+           }
+       }
+   }
+
+
+   func resendOTP() {
+        
+        guard let phone = phoneNumber, !phone.isEmpty else {
+            showAlert(message: "Phone number missing")
             return
         }
-        
-        let otpData: [String: Any] = [
-            "phone": phoneNumber ?? "",
-            "countryCode": countryCode ?? "IN",
-            "otp": currentOTP
-        ]
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: otpData, options: .prettyPrinted)
-            request.httpBody = jsonData
-        } catch {
-            showAlert(message: "Failed to prepare request. Please try again.")
-            return
-        }
-        
+
         loadingIndicator.startAnimating()
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
+
+        APIManager.shared.request(
+            endpoint: "resend-otp",
+            method: .get,
+            queryParams: ["phone": phone],
+            completion: { [weak self] (result: Result<ResendOTPResponse, APIManager.APIError>) in
+
+                guard let self = self else { return }
                 self.loadingIndicator.stopAnimating()
-            }
-            
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Network error: \(error.localizedDescription)")
-                }
-                return
-            }
-            
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "No data received.")
-                }
-                return
-            }
-            
-            print("Response data: \(String(data: data, encoding: .utf8) ?? "No response data")")
-            
-            do {
-                let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                print("Parsed JSON Response: \(jsonResponse ?? [:])")
-                
-                if let dataResponse = jsonResponse?["data"] as? [String: Any],
-                   let otpVerified = dataResponse["otpVerified"] as? Int, otpVerified == 1 {
-                    DispatchQueue.main.async {
-                        self.navigateToCreatePassword(otp: otp)
+
+                switch result {
+
+                case .success(let response):
+                    print("📥 Resend OTP Response:", response)
+
+                    if response.success {
+                        self.showAlert(message: response.message)
+                    } else {
+                        self.showAlert(message: "Failed to resend OTP")
                     }
-                } else {
-                    DispatchQueue.main.async {
-                        self.showAlert(message: "Incorrect OTP. Please try again.")
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Error processing response. Please try again.")
+
+                case .failure(let error):
+                    print("❌ Resend OTP Error:", error)
+                    self.showAlert(message: "Something went wrong")
                 }
             }
-        }
-        task.resume()
+        )
     }
-    
-    func resendOTP() {
-        guard let url = URL(string: APIManager.shared.baseURL + "forgot/password/category/app?category=school&appName=GC2") else {
-            showAlert(message: "Invalid API URL.")
-            return
-        }
-        
-        let otpData: [String: Any] = [
-            "phone": phoneNumber ?? "",
-            "countryCode": countryCode ?? "IN"
-        ]
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: otpData, options: .prettyPrinted)
-            request.httpBody = jsonData
-        } catch {
-            showAlert(message: "Failed to prepare request. Please try again.")
-            return
-        }
-        
-        loadingIndicator.startAnimating()
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                self.loadingIndicator.stopAnimating()
-            }
-            
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Network error: \(error.localizedDescription)")
-                }
-                return
-            }
-            
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "No data received.")
-                }
-                return
-            }
-            
-            print("Response data: \(String(data: data, encoding: .utf8) ?? "No response data")")
-            
-            DispatchQueue.main.async {
-                self.showAlert(message: "OTP resent successfully.")
-            }
-        }
-        task.resume()
-    }
+
+
     
     func navigateToCreatePassword(otp: String) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -218,7 +179,7 @@ class OTPViewController: UIViewController {
         }
         
         createPasswordVC.phoneNumber = phoneNumber
-        createPasswordVC.countryCode = countryCode
+       // createPasswordVC.countryCode = countryCode
         createPasswordVC.otp = otp
         
         self.navigationController?.pushViewController(createPasswordVC, animated: true)
@@ -295,3 +256,4 @@ extension UITextField {
         self.backgroundColor = .white
     }
 }
+

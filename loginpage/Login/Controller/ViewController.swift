@@ -58,26 +58,28 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
             switch result {
             case .success(let response):
-                
-                if response.isUserExist {
-                    
-                    // User exists → check isValid
-                    if response.isUserExist == true && response.isValid == true {
-                        // 👉 Navigate to Set Password
-                        navigateToOtpViewController(with: PhoneData(phone: phoneNumber, countryCode: phoneData.countryCode))
-                    } else {
-                        // 👉 Send OTP & Navigate to OTP screen
-                        navigateToCreateAccountScreen(with: phoneNumber)
-                    }
-                    
-                } else {
-                    // User does not exist
-                    self.showAlert(message: response.message)
+
+                if response.isUserExist && response.isValid {
+                    // ✅ Case 1: Registered & Active
+                    navigateToPasswordViewController(
+                        with: PhoneData(phone: phoneNumber, countryCode: phoneData.countryCode)
+                    )
+
+                } else if !response.isUserExist {
+                    // ❌ Case 2: User not registered
+                    self.showAlert(message: "This user is not registered. Not allowed to access this app.")
+
+                } else if response.isUserExist && !response.isValid {
+                    // 🔐 Case 3: User exists but not valid → OTP
+                    navigateToOtpViewController(
+                        with: PhoneData(phone: phoneNumber, countryCode: phoneData.countryCode)
+                    )
                 }
-                
+
             case .failure(let error):
-                self.showAlert(message: "Something went wrong: \(error)")
+                self.showAlert(message: "Something went wrong: \(error.localizedDescription)")
             }
+
         }
     }
     
@@ -94,8 +96,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
             completion: completion
         )
     }
-
-
     
     func openURL(_ urlString: String) {
            if let url = URL(string: urlString) {
@@ -111,6 +111,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
             return
         }
         vc.phoneData = phoneData
+        vc.phoneNumber = phoneData.phone
+        vc.countryCode = phoneData.countryCode
+
         self.navigationController?.pushViewController(vc, animated: true)
     }
 
@@ -122,6 +125,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
             return
         }
         vc.phoneNumber = phoneNumber
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+
+    func navigateToPasswordViewController(with phoneData: PhoneData) {
+        print("➡️ Navigating to PasswordViewController")
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let vc = storyboard.instantiateViewController(withIdentifier: "passwordViewController") as? passwordViewController else {
+            print("❌ PasswordViewController not found")
+            return
+        }
+        vc.phoneData = phoneData
         self.navigationController?.pushViewController(vc, animated: true)
     }
 

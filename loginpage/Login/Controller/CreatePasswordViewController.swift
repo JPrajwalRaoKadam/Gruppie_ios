@@ -6,147 +6,167 @@ class CreatePasswordViewController: UIViewController {
     @IBOutlet weak var enterConfirmPassword: UITextField!
     @IBOutlet weak var nextOutlet: UIButton!
     @IBOutlet weak var cancelOutlet: UIButton!
-    var phoneNumber: String?
+
+    // MARK: - Data from previous VC
     var otp: String?
-    var countryCode: String?
-    var receivedToken: String? // Variable to hold the token
+    var phoneNumber: String?
+
+    // ✅ Fixed values
+    let countryCode: String = "IN"
+    let token: String = "fcm_token_123456789abcdef"
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.isNavigationBarHidden = true
-        butttonStyles()
+        navigationController?.isNavigationBarHidden = true
+        buttonStyles()
         enableKeyboardDismissOnTap()
-        if let number = phoneNumber {
-            print("Received phone number: \(number)")
-        }
+        
+        enterNewPassword.autocapitalizationType = .none
+        enterNewPassword.autocorrectionType = .no
+        enterNewPassword.isSecureTextEntry = true
+        enterConfirmPassword.autocapitalizationType = .none
+        enterConfirmPassword.autocorrectionType = .no
+        enterConfirmPassword.isSecureTextEntry = true
+           
+
+        print("========== CREATE PASSWORD VC LOADED ==========")
+        print("📲 Phone Number:", phoneNumber ?? "nil")
+        print("🌍 Country Code:", countryCode)
+        print("🔐 OTP:", otp ?? "nil")
+        print("🪙 Token:", token)
+        print("==============================================")
     }
-    func butttonStyles(){
+
+    func buttonStyles() {
         nextOutlet.layer.cornerRadius = 10
         cancelOutlet.layer.cornerRadius = 10
         enterNewPassword.layer.cornerRadius = 10
-        enterNewPassword.clipsToBounds = true
-        cancelOutlet.layer.cornerRadius = 10
-        cancelOutlet.clipsToBounds = true
+        enterConfirmPassword.layer.cornerRadius = 10
     }
 
+   
     @IBAction func nextButton(_ sender: UIButton) {
-        guard let password = enterNewPassword.text, !password.isEmpty,
-              let confirmPassword = enterConfirmPassword.text, !confirmPassword.isEmpty else {
-            showAlert(message: "Please enter both password fields.")
+
+        print("👉 NEXT BUTTON TAPPED")
+
+        guard var password = enterNewPassword.text,
+              var confirmPassword = enterConfirmPassword.text else {
+            print("❌ Password fields nil")
+            showAlert(message: "Please enter password")
             return
         }
+
+        // ✅ Force first letter to uppercase
+        if let firstChar = password.first {
+            password = String(firstChar).uppercased() + password.dropFirst()
+        }
+        if let firstCharConfirm = confirmPassword.first {
+            confirmPassword = String(firstCharConfirm).uppercased() + confirmPassword.dropFirst()
+        }
+
+        print("🔑 Entered Password (capitalized first letter):", password)
+        print("🔑 Confirm Password (capitalized first letter):", confirmPassword)
 
         if password != confirmPassword {
-            showAlert(message: "Passwords do not match.")
+            print("❌ Password mismatch")
+            showAlert(message: "Passwords do not match")
             return
         }
 
+        if !isValidPassword(password) {
+            print("❌ Password validation failed")
+            showAlert(message: "Password must include uppercase, lowercase, number & special character")
+            return
+        }
+
+        print("✅ Password validation passed")
         createPassword(password: password)
     }
-    
+
+
     @IBAction func cancelButton(_ sender: UIButton) {
-        self.navigationController?.popViewController(animated: true)
+        print("👈 Cancel tapped")
+        navigationController?.popViewController(animated: true)
     }
-    
+
     func createPassword(password: String) {
-        guard let url = URL(string:  APIManager.shared.baseURL + "create/password/category/app?category=school&appName=GC2") else {
-            showAlert(message: "Invalid API URL.")
+
+        guard let phone = phoneNumber,
+              let otp = otp else {
+            showAlert(message: "Required data missing")
             return
         }
 
-        let payload: [String: Any] = [
-            "userName": [
-                "phone": phoneNumber ?? "",
-                "countryCode": countryCode ?? "IN"
-            ],
-            "otp": otp ?? "",
-            "confirmPassword": password,
-            "password": password
+        let requestBody = CreatePasswordRequest(
+            phoneNumber: phone,
+            password: password,
+            otp: otp,
+            deviceToken: token,
+            countryCode: countryCode,
+            deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "",
+            deviceType: "ios",
+            deviceModel: UIDevice.current.model,
+            osVersion: UIDevice.current.systemVersion,
+            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
+            appName: Bundle.main.infoDictionary?["CFBundleName"] as? String ?? ""
+        )
+
+        let headers = [
+            "Authorization": "Bearer \(token)"
         ]
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        APIManager.shared.request(
+            endpoint: "set-password",
+            method: .put,
+            body: requestBody,
+            headers: headers
+        ) { (result: Result<CreatePasswordResponse, APIManager.APIError >) in
 
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: payload, options: .prettyPrinted)
-            request.httpBody = jsonData
-        } catch {
-            showAlert(message: "Failed to prepare request. Please try again.")
-            return
-        }
+            switch result {
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Network error: \(error.localizedDescription)")
-                }
-                return
-            }
-
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "No data received.")
-                }
-                return
-            }
-
-            do {
-                let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                print("Parsed JSON Response: \(jsonResponse ?? [:])")
-
-                if let token = jsonResponse?["token"] as? String {
-                    print("Storing token: \(token)")
-                    self.storeToken(token: token)
-                    self.receivedToken = token // Store the token
-
-                    DispatchQueue.main.async {
-                        self.navigateToSetPIN()
+            case .success(let response):
+                if response.success {
+                    if let newToken = response.token {
+                        self.saveLoginData(token: newToken)
                     }
+                    self.navigateToSetPIN()
                 } else {
-                    DispatchQueue.main.async {
-                        self.showAlert(message: "Failed to create password. No token received.")
-                    }
+                    self.showAlert(message: response.message ?? "Something went wrong")
                 }
-            } catch {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Error processing response. Please try again.")
-                }
+
+            case .failure(let error):
+                print("❌ API Error:", error)
+                self.showAlert(message: "Failed to create password")
             }
         }
-        task.resume()
     }
 
-    func storeToken(token: String) {
-        let keychainQuery: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "userToken",
-            kSecValueData as String: token.data(using: .utf8)!
-        ]
-        
-        SecItemDelete(keychainQuery as CFDictionary)
-        let status = SecItemAdd(keychainQuery as CFDictionary, nil)
-        if status != errSecSuccess {
-            print("Error storing token: \(status)")
-        }
+
+    // MARK: - Helpers
+    func saveLoginData(token: String) {
+        UserDefaults.standard.set(token, forKey: "login_token")
+        UserDefaults.standard.set(phoneNumber, forKey: "login_username")
+        print("💾 Saved login_token & login_username")
     }
 
     func navigateToSetPIN() {
+        print("➡️ Navigating to SetPINViewController")
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let setPINVC = storyboard.instantiateViewController(withIdentifier: "SetPINViewController") as? SetPINViewController else {
-            print("ViewController with identifier 'SetPINViewController' not found.")
-            return
-        }
-        
-        // Pass the token to SetPINViewController
-       // setPINVC.token = receivedToken
+        let vc = storyboard.instantiateViewController(withIdentifier: "SetPINViewController")
+        navigationController?.pushViewController(vc, animated: true)
+    }
 
-        self.navigationController?.pushViewController(setPINVC, animated: true)
+    func isValidPassword(_ password: String) -> Bool {
+        let isValid = password.count >= 6
+        print("🔎 Password length:", password.count)
+        print("🔎 Password validation result:", isValid)
+        return isValid
     }
 
     func showAlert(message: String) {
+        print("🚨 ALERT:", message)
         let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
