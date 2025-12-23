@@ -189,16 +189,17 @@ class passwordViewController: UIViewController {
             switch result {
                 
             case .success(let response):
-                // Safe optional handling
                 if response.success == true, let token = response.token {
-                    
-                    // Store token
+
                     UserDefaults.standard.set(token, forKey: "login_token")
-                    print("✅ Login Token:", token)
-                    
-                    // Navigate to OTP / next screen
-                    self.navigateToHomeVC()
-                    
+                    UserDefaults.standard.set(self.phoneData?.phone, forKey: "loggedInPhone")
+
+                    // ✅ THIS LINE FIXES YOUR ISSUE
+                    UserDefaults.standard.set(true, forKey: "isLoggedIn")
+
+                    UserDefaults.standard.synchronize()
+
+                    self.switchToHome()
                 } else {
                     print("⚠️ Login failed:", response.message ?? "Unknown error")
                 }
@@ -209,6 +210,22 @@ class passwordViewController: UIViewController {
             }
         }
     }
+    
+    func switchToHome() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let homeVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController")
+
+        let nav = UINavigationController(rootViewController: homeVC)
+        nav.navigationBar.isHidden = true
+
+        if let sceneDelegate = UIApplication.shared.connectedScenes
+            .first?.delegate as? SceneDelegate {
+
+            sceneDelegate.window?.rootViewController = nav
+            sceneDelegate.window?.makeKeyAndVisible()
+        }
+    }
+
 
     
     func navigateToSetPIN() {
@@ -218,71 +235,7 @@ class passwordViewController: UIViewController {
             print("Error: Unable to instantiate SetPINViewController.")
         }
     }
-
-//    func requestForgotPassword(for phoneData: PhoneData) {
-//        guard let url = URL(string: APIManager.shared.baseURL + "forgot/password/category/app?category=school&appName=GC2") else {
-//            print("Invalid URL")
-//            return
-//        }
-//
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "PUT"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//        let payload: [String: Any] = [
-//            "phone": phoneData.phone,
-//            "countryCode": phoneData.countryCode
-//        ]
-//
-//        do {
-//            request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
-//        } catch {
-//            print("Error serializing JSON: \(error)")
-//            return
-//        }
-//
-//        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//            if let error = error {
-//                print("Error making API call: \(error)")
-//                return
-//            }
-//
-//            if let httpResponse = response as? HTTPURLResponse {
-//                print("Status code: \(httpResponse.statusCode)")
-//
-//                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-//                    print("Response Data: \(responseString)")
-//                }
-//
-//                if httpResponse.statusCode == 200 {
-//                    DispatchQueue.main.async {
-//                        self.navigateToOTPViewController(with: phoneData)
-//                    }
-//                } else {
-//                    if let data = data, let responseString = String(data: data, encoding: .utf8) {
-//                        print("Error Response Data: \(responseString)")
-//                    }
-//                    print("Failed to request forgot password. Status code: \(httpResponse.statusCode)")
-//                }
-//            }
-//        }
-//
-//        task.resume()
-//    }
-
-//    func navigateToOTPViewController(with phoneData: PhoneData) {
-//        if let otpVC = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController {
-//            otpVC.phoneNumber = phoneData.phone
-//            otpVC.countryCode = phoneData.countryCode
-//            navigationController?.pushViewController(otpVC, animated: true)
-//        }
-//    }
     
-    func navigateToHomeVC() {
-        if let homeVC = storyboard?.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC {
-            navigationController?.pushViewController(homeVC, animated: true)
-        }
-    }
     
     // MARK: - Alert for invalid password or other API errors
     func showAlert(title: String, message: String) {

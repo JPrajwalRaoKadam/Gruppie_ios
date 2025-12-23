@@ -125,10 +125,16 @@ class CreatePasswordViewController: UIViewController {
             switch result {
 
             case .success(let response):
-                if response.success {
-                    if let newToken = response.token {
-                        self.saveLoginData(token: newToken)
-                    }
+                if response.success, let token = response.token {
+
+                    UserDefaults.standard.set(token, forKey: "login_token")
+                    UserDefaults.standard.set(self.phoneNumber, forKey: "loggedInPhone")
+
+                    // ✅ THIS WAS MISSING
+                    UserDefaults.standard.set(true, forKey: "isLoggedIn")
+
+                    UserDefaults.standard.synchronize()
+
                     self.navigateToSetPIN()
                 } else {
                     self.showAlert(message: response.message ?? "Something went wrong")

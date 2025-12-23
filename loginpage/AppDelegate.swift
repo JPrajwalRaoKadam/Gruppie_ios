@@ -25,14 +25,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
-        if let phone = UserDefaults.standard.string(forKey: "loggedInPhone"),
-           let _ = KeychainHelper.shared.retrieve(service: "app_password", account: phone) {
-            // User is already logged in — show GroupsVC
+        if let _ = UserDefaults.standard.string(forKey: "login_token") {
             let groupsVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as! GrpViewController
             let navController = UINavigationController(rootViewController: groupsVC)
             window?.rootViewController = navController
         } else {
-            // Show LoginVC as default
             let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
             let navController = UINavigationController(rootViewController: loginVC)
             window?.rootViewController = navController

@@ -21,29 +21,29 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        callAPIAndNavigate { [weak self] in
-            guard let self = self else { return }
-            print("API call finished, reloading collection view...")
-            
-            searchView.layer.cornerRadius = 10
-            teamCollectionView.layer.cornerRadius = 10
-            
-            // Initialize filtered schools with all schools
-            self.filteredSchools = self.schools
-            
-            // 🔹 Directly show search text field (no tap required)
-            setupSearchTextField()
-            
-            // Prefetch all images to cache
-            let urls = self.schools.compactMap { self.getImageURL(from: $0.image) }
-            SDWebImagePrefetcher.shared.prefetchURLs(urls)
-            
-            let tapOutside = UITapGestureRecognizer(target: self, action: #selector(dismissLogoutDropdown(_:)))
-            tapOutside.cancelsTouchesInView = false
-            self.view.addGestureRecognizer(tapOutside)
-            
-            self.teamCollectionView.reloadData()
-        }
+//        callAPIAndNavigate { [weak self] in
+//            guard let self = self else { return }
+//            print("API call finished, reloading collection view...")
+//            
+//            searchView.layer.cornerRadius = 10
+//            teamCollectionView.layer.cornerRadius = 10
+//            
+//            // Initialize filtered schools with all schools
+//            self.filteredSchools = self.schools
+//            
+//            // 🔹 Directly show search text field (no tap required)
+//            setupSearchTextField()
+//            
+//            // Prefetch all images to cache
+//            let urls = self.schools.compactMap { self.getImageURL(from: $0.image) }
+//            SDWebImagePrefetcher.shared.prefetchURLs(urls)
+//            
+//            let tapOutside = UITapGestureRecognizer(target: self, action: #selector(dismissLogoutDropdown(_:)))
+//            tapOutside.cancelsTouchesInView = false
+//            self.view.addGestureRecognizer(tapOutside)
+//            
+//            self.teamCollectionView.reloadData()
+//        }
         teamCollectionView.register(
             SchoolsHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
