@@ -12,10 +12,11 @@ struct SessionManager {
     static var authToken: String? {
         return UserDefaults.standard.string(forKey: "login_token")
     }
-    static var groupsToken: String? {
-        return UserDefaults.standard.string(forKey: "groups_token")
-    }
 
+    static var useRoleToken: String? {
+        return UserDefaults.standard.string(forKey: "user_role_Token")
+    }
+    
     static var isLoggedIn: Bool {
         return authToken != nil
     }
@@ -36,8 +37,8 @@ struct SessionManager {
 
         defaults.synchronize()
     }
-
-    static func refreshGroupsToken() {
-        UserDefaults.standard.removeObject(forKey: "groups_token")
+    
+    static func removeUserRoleToken() {
+        UserDefaults.standard.removeObject(forKey: "user_role_Token")
     }
 }

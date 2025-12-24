@@ -1277,6 +1277,72 @@ for (987) 654-3210</string>
             </objects>
             <point key="canvasLocation" x="3101.5384615384614" y="1648.5781990521327"/>
         </scene>
+        <!--Roles View Controller-->
+        <scene sceneID="8jm-kf-QEv">
+            <objects>
+                <viewController storyboardIdentifier="rolesViewController" id="v2l-NL-QEV" customClass="rolesViewController" customModule="loginpage" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="N3z-SA-pg1">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZJT-US-YBY">
+                                <rect key="frame" x="0.0" y="94" width="390" height="50"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="8" translatesAutoresizingMaskIntoConstraints="NO" id="GGP-vv-cBG">
+                                        <rect key="frame" x="16" y="8" width="358" height="34"/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="0.9606010318" green="0.95327717069999995" blue="0.9372524619" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <constraints>
+                                    <constraint firstItem="GGP-vv-cBG" firstAttribute="top" secondItem="ZJT-US-YBY" secondAttribute="top" constant="8" id="9J5-KE-WZ4"/>
+                                    <constraint firstAttribute="bottom" secondItem="GGP-vv-cBG" secondAttribute="bottom" constant="8" id="AdS-Wr-bIs"/>
+                                    <constraint firstItem="GGP-vv-cBG" firstAttribute="leading" secondItem="ZJT-US-YBY" secondAttribute="leading" constant="16" id="BMW-Ks-YyM"/>
+                                    <constraint firstAttribute="height" constant="50" id="kcV-9M-P6E"/>
+                                    <constraint firstAttribute="trailing" secondItem="GGP-vv-cBG" secondAttribute="trailing" constant="16" id="yIT-Zw-x2V"/>
+                                </constraints>
+                            </view>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="tUO-Du-MOT">
+                                <rect key="frame" x="16" y="144" width="358" height="632"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="0.0" id="GUu-a4-yP8">
+                                    <size key="itemSize" width="103" height="103"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells/>
+                                <connections>
+                                    <outlet property="dataSource" destination="v2l-NL-QEV" id="13V-JT-IAU"/>
+                                    <outlet property="delegate" destination="v2l-NL-QEV" id="s7l-Nl-sYy"/>
+                                </connections>
+                            </collectionView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="nJ6-sU-EAa"/>
+                        <color key="backgroundColor" red="0.94491487740000002" green="0.93759083750000005" blue="0.92156618830000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                        <constraints>
+                            <constraint firstItem="ZJT-US-YBY" firstAttribute="top" secondItem="nJ6-sU-EAa" secondAttribute="top" id="3w7-ED-F6i"/>
+                            <constraint firstItem="ZJT-US-YBY" firstAttribute="leading" secondItem="nJ6-sU-EAa" secondAttribute="leading" id="BL5-T8-lEJ"/>
+                            <constraint firstItem="nJ6-sU-EAa" firstAttribute="bottom" secondItem="tUO-Du-MOT" secondAttribute="bottom" id="BtC-os-0eg"/>
+                            <constraint firstItem="tUO-Du-MOT" firstAttribute="leading" secondItem="nJ6-sU-EAa" secondAttribute="leading" constant="16" id="KIR-eK-ujP"/>
+                            <constraint firstItem="tUO-Du-MOT" firstAttribute="top" secondItem="ZJT-US-YBY" secondAttribute="bottom" id="ZaW-ws-O4I"/>
+                            <constraint firstItem="nJ6-sU-EAa" firstAttribute="trailing" secondItem="tUO-Du-MOT" secondAttribute="trailing" constant="16" id="dGa-dr-xW2"/>
+                            <constraint firstItem="ZJT-US-YBY" firstAttribute="trailing" secondItem="nJ6-sU-EAa" secondAttribute="trailing" id="tme-C7-CBN"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="tNf-a9-l02"/>
+                    <nil key="simulatedTopBarMetrics"/>
+                    <connections>
+                        <outlet property="rolesCollectionView" destination="tUO-Du-MOT" id="nCq-uO-G8X"/>
+                        <outlet property="rolesLabel" destination="GGP-vv-cBG" id="mGs-9u-JIq"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ulu-u7-kVB" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="713.84615384615381" y="1654.9763033175354"/>
+        </scene>
     </scenes>
     <resources>
         <image name="Campus Connect" width="95.666664123535156" height="50"/>

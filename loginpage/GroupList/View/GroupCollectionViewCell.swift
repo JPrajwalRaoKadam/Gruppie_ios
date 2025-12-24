@@ -22,6 +22,15 @@ class GroupCollectionViewCell: UICollectionViewCell {
          configureSubviews()
     }
     
+    func configure(with role: UserRole) {
+        anImageIcon.image = nil
+        anImageIcon.isHidden = true
+        imgTeamNameIcon.isHidden = false
+        imgTeamNameIcon.text = String(role.roleName.prefix(1)).uppercased()
+        imgTeamNameIcon.textColor = .white
+        aLabelTeamNameIcon.text = role.roleName
+    }
+
     // Configure subviews (Image and labels)
     private func configureSubviews() {
         // Configuration for image, label, etc.
