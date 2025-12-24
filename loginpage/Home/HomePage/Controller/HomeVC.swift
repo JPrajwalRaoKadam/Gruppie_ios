@@ -3,6 +3,9 @@ import SDWebImage
 
 class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllIconsTableViewCellDelegate,FeedPageNavigationDelegate, HomePageNavigationDelegate, MoreNavigationDelegate, DashboardNavigationDelegate {
     
+    var groupName: String?
+    var Role: String?
+    
     var indexPath: IndexPath?
     var name: String?
     var groupId: String?

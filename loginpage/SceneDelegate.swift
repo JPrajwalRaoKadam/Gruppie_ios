@@ -21,15 +21,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
         let isLoggedIn = UserDefaults.standard.bool(forKey: "isLoggedIn")
+        let token = UserDefaults.standard.string(forKey: "login_token")
 
         let rootVC: UIViewController
 
-        if isLoggedIn {
-            rootVC = storyboard.instantiateViewController(withIdentifier: "HomeVC") 
+        if isLoggedIn, let token = token, !token.isEmpty {
+
             print("✅ User already logged in → Opening Groups")
+            print("🔐 Token found:", token)
+
+            // ✅ MUST open GrpViewController (groups screen)
+            rootVC = storyboard.instantiateViewController(
+                withIdentifier: "GrpViewController"
+            )
+
         } else {
-            rootVC = storyboard.instantiateViewController(withIdentifier: "ViewController")
-            print("❌ User not logged in → Opening Login")
+
+            print("❌ User not logged in or token missing → Opening Login")
+
+            // 🧹 Clean invalid session
+            UserDefaults.standard.removeObject(forKey: "login_token")
+            UserDefaults.standard.set(false, forKey: "isLoggedIn")
+
+            rootVC = storyboard.instantiateViewController(
+                withIdentifier: "ViewController"
+            )
         }
 
         let nav = UINavigationController(rootViewController: rootVC)
@@ -38,6 +54,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = nav
         window?.makeKeyAndVisible()
     }
+
 
     
 

@@ -78,30 +78,29 @@ class GroupCollectionViewCell: UICollectionViewCell {
             aLabelTeamNameIcon.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8)
         ])
     }
+    func configure(with group: GroupItem) {
 
-    // Configure cell with the school data
-    func configure(with school: School) {
-        aLabelTeamNameIcon.text = school.shortName
-                
-        // Ensure subviews do not block interactions
-        anImageIcon.isUserInteractionEnabled = false
-        aLabelTeamNameIcon.isUserInteractionEnabled = false
-        
-        if !school.image.isEmpty {
-            imgTeamNameIcon.isHidden = true // Hide the fallback label
-            anImageIcon.isHidden = false // Show the image
-            anImageIcon.image = UIImage(named: "placeholder") // Replace with image loading logic
-        } else {
-            displayFallback(for: school)
-        }
+        // Set group name
+        aLabelTeamNameIcon.text = group.groupName
+
+        // ❌ No image for now → hide image
+        anImageIcon.image = nil
+        anImageIcon.isHidden = true
+
+        // ✅ Show first letter of group name
+        imgTeamNameIcon.isHidden = false
+        imgTeamNameIcon.text = String(group.groupName.prefix(1)).uppercased()
+        imgTeamNameIcon.textColor = .white
     }
 
+
+
     // Display the first letter of `shortName` as a fallback
-    private func displayFallback(for school: School) {
+    private func displayFallback(for group: GroupItem) {
         anImageIcon.image = nil // Clear the image
         anImageIcon.isHidden = true // Hide the image view
         imgTeamNameIcon.isHidden = false // Show the fallback label
-        imgTeamNameIcon.text = String(school.shortName.prefix(1)).uppercased() // Set the first letter
+        imgTeamNameIcon.text = String(group.groupName.prefix(1)).uppercased() // Set the first letter
     }
 }
 extension UIView {

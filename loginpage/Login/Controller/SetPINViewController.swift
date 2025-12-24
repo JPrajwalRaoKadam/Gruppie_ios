@@ -81,33 +81,13 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func next(_ sender: UIButton) {
         if validatePIN() && validatePIN2() {
-            //        callAPIAndNavigate()
-//            if schools.count > 1 {
-//                self.navigateToGroupViewController()
-//            } else {
-//                handleSchoolSelection(schoolDataArray: schools)
-//            }
-            navigateToHomeVC()
+                self.navigateToGroupViewController()
         }
     }
     
     @IBAction func skip(_ sender: UIButton) {
-        //        callAPIAndNavigate()
-//        if schools.count > 1 {
-//            self.navigateToGroupViewController()
-//        } else {
-//            handleSchoolSelection(schoolDataArray: schools)
-//        }
-        navigateToHomeVC()
+            self.navigateToGroupViewController()
     }
-    
-    
-    func navigateToHomeVC() {
-        if let homeVC = storyboard?.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC {
-            navigationController?.pushViewController(homeVC, animated: true)
-        }
-    }
-    
     
     private func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
         guard let url = URL(string: urlString) else {
@@ -497,11 +477,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     private func navigateToGroupViewController() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let groupVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as? GrpViewController {
-            groupVC.schools = self.schools
-            groupVC.currentRole = currentRole
             groupVC.groupDatas = self.groupDatas
-            groupVC.images = self.images
-            groupVC.currentRole = self.currentRole
             self.navigationController?.pushViewController(groupVC, animated: true)
         }
     }

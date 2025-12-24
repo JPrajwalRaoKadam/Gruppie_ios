@@ -6,14 +6,16 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     @IBOutlet var teamCollectionView: UICollectionView!
     @IBOutlet weak var searchView: UIView!
     
-    var images: [ImageData] = []
-    var schools: [School] = [] // Received from SetPINViewController
-    var filteredSchools: [School] = [] // For search results
+//    var images: [ImageData] = []
+//    var schools: [School] = [] // Received from SetPINViewController
+//    var filteredSchools: [School] = [] // For search results
+    var filteredGroups: [GroupItem] = []
     var groupDatas: [GroupData] = []
     var currentRole: String?
     private var isProcessingSelection = false
     var logoutDropdownView: UIView?
     var searchTextField: UITextField?
+    var groupDataResponse: [GroupItem] = []
     
     // Track search state
     private var isSearching: Bool = false
@@ -21,36 +23,45 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        callAPIAndNavigate { [weak self] in
-//            guard let self = self else { return }
-//            print("API call finished, reloading collection view...")
-//            
-//            searchView.layer.cornerRadius = 10
-//            teamCollectionView.layer.cornerRadius = 10
-//            
-//            // Initialize filtered schools with all schools
-//            self.filteredSchools = self.schools
-//            
-//            // 🔹 Directly show search text field (no tap required)
-//            setupSearchTextField()
-//            
-//            // Prefetch all images to cache
-//            let urls = self.schools.compactMap { self.getImageURL(from: $0.image) }
-//            SDWebImagePrefetcher.shared.prefetchURLs(urls)
-//            
-//            let tapOutside = UITapGestureRecognizer(target: self, action: #selector(dismissLogoutDropdown(_:)))
-//            tapOutside.cancelsTouchesInView = false
-//            self.view.addGestureRecognizer(tapOutside)
-//            
-//            self.teamCollectionView.reloadData()
-//        }
+        
+        guard let token = UserDefaults.standard.string(forKey: "login_token") else {
+            print("❌ Login token missing, redirecting to login")
+            navigateToLogin()
+            return
+        }
+        
+        print("✅ Login token found:", token)
+        
+        callAPIAndNavigate { [weak self] data in
+            guard let self = self else { return }
+
+            self.groupDataResponse = data
+            self.filteredGroups = data   // initialize
+
+            DispatchQueue.main.async {
+                self.teamCollectionView.reloadData()
+            }
+        }
+
+        
+        func navigateToLogin() {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController")
+            
+            let nav = UINavigationController(rootViewController: loginVC)
+            nav.modalPresentationStyle = .fullScreen
+            present(nav, animated: true)
+        }
+      setupSearchTextField()
+      searchView.layer.cornerRadius = 10
+      teamCollectionView.layer.cornerRadius = 10
+
         teamCollectionView.register(
             SchoolsHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: SchoolsHeaderView.identifier
         )
         
-        print("Received schools data: \(schools)")
         teamCollectionView.register(UINib(nibName: "GroupCollectionViewCell", bundle: nil),
                                     forCellWithReuseIdentifier: "GroupCollectionViewCell")
         enableKeyboardDismissOnTap()
@@ -60,49 +71,49 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
-
+    
     
     @IBAction func logoutTapped(_ sender: UIButton) {
         // Remove previous dropdown if visible
-//        logoutDropdownView?.removeFromSuperview()
-//        
-//        // Get the button's position in the view's coordinate space
-//        guard let buttonSuperview = sender.superview else { return }
-//        let buttonFrameInView = buttonSuperview.convert(sender.frame, to: self.view)
-//        
-//        // Define size of logout overlay
-//        let overlayWidth = 100.0
-//        let overlayHeight: CGFloat = 40
-//        
-//        // Place overlay **exactly over the button**
-//        let overlayFrame = CGRect(x: buttonFrameInView.origin.x - 60,
-//                                  y: buttonFrameInView.origin.y - 10,
-//                                  width: overlayWidth,
-//                                  height: overlayHeight)
-//        
-//        // Create view
-//        let dropdownView = UIView(frame: overlayFrame)
-//        dropdownView.backgroundColor = .white
-//        dropdownView.layer.cornerRadius = 8
-//        dropdownView.layer.borderWidth = 1
-//        dropdownView.layer.borderColor = UIColor.lightGray.cgColor
-//        dropdownView.clipsToBounds = true
-//        
-//        // Add "Logout" label or button
-//        let label = UILabel(frame: dropdownView.bounds)
-//        label.text = "Logout"
-//        label.textAlignment = .center
-//        label.textColor = .red
-//        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-//        label.isUserInteractionEnabled = true
-//        dropdownView.addSubview(label)
-//        
-//        let tap = UITapGestureRecognizer(target: self, action: #selector(handleLogoutTap))
-//        label.addGestureRecognizer(tap)
-//        
-//        // Add to main view
-//        self.view.addSubview(dropdownView)
-//        self.logoutDropdownView = dropdownView
+        //        logoutDropdownView?.removeFromSuperview()
+        //
+        //        // Get the button's position in the view's coordinate space
+        //        guard let buttonSuperview = sender.superview else { return }
+        //        let buttonFrameInView = buttonSuperview.convert(sender.frame, to: self.view)
+        //
+        //        // Define size of logout overlay
+        //        let overlayWidth = 100.0
+        //        let overlayHeight: CGFloat = 40
+        //
+        //        // Place overlay **exactly over the button**
+        //        let overlayFrame = CGRect(x: buttonFrameInView.origin.x - 60,
+        //                                  y: buttonFrameInView.origin.y - 10,
+        //                                  width: overlayWidth,
+        //                                  height: overlayHeight)
+        //
+        //        // Create view
+        //        let dropdownView = UIView(frame: overlayFrame)
+        //        dropdownView.backgroundColor = .white
+        //        dropdownView.layer.cornerRadius = 8
+        //        dropdownView.layer.borderWidth = 1
+        //        dropdownView.layer.borderColor = UIColor.lightGray.cgColor
+        //        dropdownView.clipsToBounds = true
+        //
+        //        // Add "Logout" label or button
+        //        let label = UILabel(frame: dropdownView.bounds)
+        //        label.text = "Logout"
+        //        label.textAlignment = .center
+        //        label.textColor = .red
+        //        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        //        label.isUserInteractionEnabled = true
+        //        dropdownView.addSubview(label)
+        //
+        //        let tap = UITapGestureRecognizer(target: self, action: #selector(handleLogoutTap))
+        //        label.addGestureRecognizer(tap)
+        //
+        //        // Add to main view
+        //        self.view.addSubview(dropdownView)
+        //        self.logoutDropdownView = dropdownView
     }
     
     func setupSearchTextField() {
@@ -114,7 +125,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
         searchTextField?.delegate = self
         searchTextField?.backgroundColor = .white
         searchTextField?.borderStyle = .none
-        searchTextField?.layer.cornerRadius = searchView.layer.cornerRadius
+        searchTextField?.layer.cornerRadius = 10
         searchTextField?.clipsToBounds = true
         searchTextField?.font = UIFont.systemFont(ofSize: 16)
         searchTextField?.clearButtonMode = .whileEditing
@@ -165,30 +176,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     
     // MARK: - Search TextField Methods
     @objc func searchTextChanged(_ textField: UITextField) {
-        guard let searchText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) else {
-            return
-        }
-        
-        if searchText.isEmpty {
-            // Show all schools when search is empty
-            isSearching = false
-            filteredSchools = schools
-        } else {
-            // Filter schools based on search text
-            isSearching = true
-            filteredSchools = schools.filter { school in
-                // Search in multiple fields - adjust based on your School model properties
-                let nameMatch = school.name.range(of: searchText, options: .caseInsensitive) != nil
-                let shortNameMatch = school.shortName.range(of: searchText, options: .caseInsensitive) != nil
-                let descriptionMatch = school.name.range(of: searchText, options: .caseInsensitive) != nil
-                
-                // Add any other fields you want to search in
-                return nameMatch || shortNameMatch || descriptionMatch
-            }
-        }
-        
-        // Reload collection view with filtered results
-        teamCollectionView.reloadData()
+        filterGroups(with: textField.text ?? "")
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -197,52 +185,102 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     }
     
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
-        // Clear search and show all schools
         isSearching = false
-        filteredSchools = schools
+        filteredGroups = groupDataResponse
         teamCollectionView.reloadData()
-        
-        // Let the text field clear its text
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.teamCollectionView.reloadData()
-        }
-        
         return true
     }
+
+    
+    // MARK: - API Methods
+    private func callAPIAndNavigate(
+        completion: @escaping ([GroupItem]) -> Void
+    ) {
+        
+        guard let authToken = UserDefaults.standard.string(forKey: "login_token") else {
+            print("❌ groups_token not found")
+            completion([])
+            return
+        }
+        
+        let headers = [
+            "Authorization": "Bearer \(authToken)"
+        ]
+        
+        APIManager.shared.request(
+            endpoint: "groups",
+            method: .get,
+            headers: headers
+        ) { (result: Result<GroupsResponsee, APIManager.APIError>) in
+            
+            switch result {
+                
+            case .success(let response):
+                print("✅ API Status:", response.status)
+                print("Response123  \(response)")
+                
+                // ✅ Save token
+                if let firstGroup = response.data.first {
+                    UserDefaults.standard.set(firstGroup.token, forKey: "groups_token")
+                    print("✅ Group token stored")
+                }
+                
+                completion(response.data)
+                
+            case .failure(let error):
+                print("❌ API failed:", error)
+                completion([])
+            }
+        }
+    }
+    
+    
     
     // MARK: - Collection View Data Source
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredSchools.count
+    func collectionView(_ collectionView: UICollectionView,
+                        numberOfItemsInSection section: Int) -> Int {
+        return isSearching ? filteredGroups.count : groupDataResponse.count
     }
+
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GroupCollectionViewCell", for: indexPath) as? GroupCollectionViewCell else {
-            fatalError("Unable to dequeue GroupCollectionViewCell.")
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "GroupCollectionViewCell",
+            for: indexPath
+        ) as? GroupCollectionViewCell else {
+            fatalError("Cell not found")
         }
-        
-        let school = filteredSchools[indexPath.row]
-        configureCell(cell, with: school)
-        
+
+        let group = isSearching
+            ? filteredGroups[indexPath.item]
+            : groupDataResponse[indexPath.item]
+
+        cell.configure(with: group)
         return cell
     }
-    
-    private func configureCell(_ cell: GroupCollectionViewCell, with school: School) {
-        if let imageUrl = getImageURL(from: school.image), !imageUrl.absoluteString.isEmpty {
-            cell.anImageIcon.sd_setImage(
-                with: imageUrl,
-                placeholderImage: UIImage(named: "placeholder"),
-                options: [.retryFailed, .continueInBackground]
-            ) { image, error, _, _ in
-                if let error = error {
-                    print("Error loading image: \(error.localizedDescription)")
-                }
-            }
-        } else {
-            cell.anImageIcon.image = UIImage(named: "new_banner.png") // Default image if no URL
+    private func filterGroups(with searchText: String) {
+
+        let text = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !text.isEmpty else {
+            isSearching = false
+            filteredGroups = groupDataResponse
+            teamCollectionView.reloadData()
+            return
         }
-        
-        cell.configure(with: school)
+
+        isSearching = true
+
+        filteredGroups = groupDataResponse.filter {
+            $0.groupName.localizedCaseInsensitiveContains(text)
+        }
+
+        teamCollectionView.reloadData()
     }
+
     
     private func getImageURL(from imageString: String) -> URL? {
         if let url = URL(string: imageString), UIApplication.shared.canOpenURL(url) {
@@ -319,6 +357,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
         guard !isProcessingSelection else {
             print("Tap ignored – already processing.")
             return
@@ -326,312 +365,28 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
         
         isProcessingSelection = true
         
-        let schoolData = filteredSchools[indexPath.item]
-        print("Selected school: \(schoolData.shortName) with ID: \(schoolData.id)")
+        // ✅ Get selected group
+        let selectedGroup = groupDataResponse[indexPath.item]
         
+        print("✅ Selected Group:")
+        print("Group Name:", selectedGroup.groupName)
+        print("Role:", selectedGroup.roleName)
+        print("Category:", selectedGroup.gruppieCategory)
+        
+        // ✅ Store selected group token if needed
+        UserDefaults.standard.set(selectedGroup.token, forKey: "groups_token")
+        
+        // 👉 Navigate to next screen (example: HomeVC)
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let homeVC = storyboard.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC {
-            homeVC.school = schoolData
-            let dispatchGroup = DispatchGroup()
-            var imageUrls: [String]?
             
-            dispatchGroup.enter()
-            fetchBannerImage(groupId: schoolData.id) { urls in
-                imageUrls = urls
-                dispatchGroup.leave()
-            }
+            // Pass basic group info
+            homeVC.Role = selectedGroup.roleName
+            homeVC.groupName = selectedGroup.groupName   // create this var in HomeVC if needed
             
-            dispatchGroup.enter()
-            fetchUserProfile(groupId: schoolData.id) { profile in
-                homeVC.name = profile
-                dispatchGroup.leave()
-            }
-            
-            dispatchGroup.enter()
-            fetchHomeData(groupId: schoolData.id) { groupData in
-                DispatchQueue.main.async {
-                    if let groupData = groupData {
-                        homeVC.groupDatas = groupData
-                        homeVC.currentRole = self.currentRole
-                        print("✅ Loaded \(groupData.count) groups")
-                    } else {
-                        print("⚠️ No group data received")
-                    }
-                    dispatchGroup.leave()
-                }
-            }
-            
-            dispatchGroup.notify(queue: .main) {
-                homeVC.imageUrls = imageUrls ?? []
-                self.navigationController?.pushViewController(homeVC, animated: true)
-                self.isProcessingSelection = false
-            }
-            
-            DispatchQueue.main.async {
-                self.teamCollectionView.reloadData()
-            }
-        } else {
-            self.isProcessingSelection = false
-        }
-    }
-    
-    
-    private func filterSchools(with searchText: String) {
-        if searchText.isEmpty {
-            filteredSchools = schools
-        } else {
-            filteredSchools = schools.filter { school in
-                // Customize this based on what properties you want to search
-                let nameMatch = school.name.localizedCaseInsensitiveContains(searchText) ?? false
-                let shortNameMatch = school.shortName.localizedCaseInsensitiveContains(searchText)
-                let descriptionMatch = school.name.localizedCaseInsensitiveContains(searchText) ?? false
-                
-                return nameMatch || shortNameMatch || descriptionMatch
-            }
-        }
-        teamCollectionView.reloadData()
-    }
-    
-    // MARK: - API Methods
-    private func callAPIAndNavigate(completion: @escaping () -> Void) {
-        guard let token = TokenManager.shared.getToken() else {
-            print("Token is nil. Cannot proceed with API call.")
-            completion()
-            return
+            self.navigationController?.pushViewController(homeVC, animated: true)
         }
         
-        let urlString = APIManager.shared.baseURL + "groups?category=school"
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL.")
-            completion()
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("API call failed with error: \(error.localizedDescription)")
-                completion()
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                print("API call failed with response: \(response.debugDescription)")
-                completion()
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received.")
-                completion()
-                return
-            }
-            
-            do {
-                let decoder = JSONDecoder()
-                let schoolResponse = try decoder.decode(SchoolResponse.self, from: data)
-                
-                guard let schoolsData = schoolResponse.data else {
-                    print("No schools data found.")
-                    completion()
-                    return
-                }
-                
-                self.schools = schoolsData.compactMap { School(from: $0) }
-                self.filteredSchools = self.schools // Initialize filtered schools
-                print("Fetched Schools: \(self.schools.map { $0.shortName })")
-                
-                DispatchQueue.main.async {
-                    completion()
-                }
-                
-            } catch {
-                print("Failed to decode API response: \(error.localizedDescription)")
-                completion()
-            }
-        }
-        
-        task.resume()
-    }
-    
-    func fetchBannerImage(groupId: String, completion: @escaping ([String]?) -> Void) {
-        guard let token = TokenManager.shared.getToken() else {
-            print("Token not found")
-            completion(nil)
-            return
-        }
-        
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/banner/get/new"
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL")
-            completion(nil)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received")
-                completion(nil)
-                return
-            }
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let dataArray = json["data"] as? [[String: Any]] {
-                    var imageUrls: [String] = []
-                    
-                    if let item = dataArray.first, let fileNames = item["fileName"] as? [String?], fileNames.first == nil {
-                        imageUrls = ["new_banner.png"]
-                    } else {
-                        for item in dataArray {
-                            if let fileNames = item["fileName"] as? [[String: Any]] {
-                                for file in fileNames {
-                                    if let imageUrl = file["name"] as? String {
-                                        imageUrls.append(imageUrl)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    completion(imageUrls.isEmpty ? ["new_banner.png"] : imageUrls)
-                } else {
-                    completion(["new_banner.png"])
-                }
-            } catch {
-                print("Error parsing API response: \(error.localizedDescription)")
-                completion(["new_banner.png"])
-            }
-        }
-        
-        task.resume()
-    }
-    
-    func fetchUserProfile(groupId: String, completion: @escaping (String?) -> Void) {
-        guard let token = TokenManager.shared.getToken() else {
-            print("Token not found")
-            completion(nil)
-            return
-        }
-        
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/my/kids/profile"
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL")
-            completion(nil)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received")
-                completion(nil)
-                return
-            }
-            
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("Response Data of profile: \(responseString)")
-            }
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let dataArray = json["data"] as? [[String: Any]],
-                   let name = dataArray.first?["name"] as? String {
-                    completion(name)
-                } else {
-                    print("Name not found or data format invalid")
-                    completion(nil)
-                }
-            } catch {
-                print("Error parsing API response: \(error.localizedDescription)")
-                completion(nil)
-            }
-        }
-        
-        task.resume()
-    }
-    
-    private func fetchHomeData(groupId: String, completion: @escaping ([GroupData]?) -> Void) {
-        guard let token = TokenManager.shared.getToken() else {
-            print("❌ Token not found")
-            completion(nil)
-            return
-        }
-        
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/home"
-        guard let url = URL(string: urlString) else {
-            print("❌ Invalid URL")
-            completion(nil)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ Network error: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let data = data else {
-                print("❌ No data received")
-                completion(nil)
-                return
-            }
-            
-            // 🪶 Print raw response for verification
-            if let raw = String(data: data, encoding: .utf8) {
-                print("\n🔹 Raw Response of Home API:\n\(raw)\n")
-            }
-            
-            do {
-                let decoder = JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-                
-                // ✅ Decode using wrapper object
-                let response = try decoder.decode(HomeResponse.self, from: data)
-                let groups = response.data
-                
-                // ✅ Debug print
-                print("✅ Successfully decoded groups:")
-                for group in groups {
-                    print("→ Activity: \(group.activity)")
-                    for icon in group.featureIcons {
-                        print("   - \(icon.name) (\(icon.role ?? "no role"))")
-                        self.currentRole = icon.role
-                    }
-                }
-                
-                completion(groups)
-            } catch {
-                print("❌ Decoding error: \(error)")
-                completion(nil)
-            }
-        }.resume()
+        isProcessingSelection = false
     }
 }
