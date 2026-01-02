@@ -18,3 +18,12 @@ struct GroupItem: Decodable {
     let gruppieCategory: String
     let roleName: String
 }
+
+struct UserRoleResponse: Codable {
+    let data: [UserRole]
+}
+
+struct UserRole: Codable {
+    let token: String
+    let roleName: String
+}

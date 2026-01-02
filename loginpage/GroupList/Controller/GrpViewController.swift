@@ -72,7 +72,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
         self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
-    
+
     @IBAction func logoutTapped(_ sender: UIButton) {
         // Remove previous dropdown if visible
         //        logoutDropdownView?.removeFromSuperview()

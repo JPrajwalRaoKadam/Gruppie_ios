@@ -19,6 +19,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
         phoneNumberTextField.delegate = self
         phoneNumberTextField.keyboardType = .numberPad
         
+        ContinueButton.isEnabled = false
+        ContinueButton.alpha = 0.5   // visually looks disabled
+        
         // ✅ Use global extension if already defined
         enableKeyboardDismissOnTap()
     }
@@ -161,16 +164,52 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
     }
 
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//        let currentText = textField.text ?? ""
+//        guard let stringRange = Range(range, in: currentText) else { return false }
+//        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+//
+//        if textField == phoneNumberTextField {
+//            let allowedCharacters = CharacterSet.decimalDigits
+//            let characterSet = CharacterSet(charactersIn: string)
+//            return allowedCharacters.isSuperset(of: characterSet) && updatedText.count <= 10
+//        }
+//        return true
+//    }
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+
+        guard textField == phoneNumberTextField else { return true }
+
         let currentText = textField.text ?? ""
         guard let stringRange = Range(range, in: currentText) else { return false }
+
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
 
-        if textField == phoneNumberTextField {
-            let allowedCharacters = CharacterSet.decimalDigits
-            let characterSet = CharacterSet(charactersIn: string)
-            return allowedCharacters.isSuperset(of: characterSet) && updatedText.count <= 10
+        // Allow only digits
+        let allowedCharacters = CharacterSet.decimalDigits
+        let characterSet = CharacterSet(charactersIn: string)
+        if !allowedCharacters.isSuperset(of: characterSet) {
+            return false
         }
+
+        // ❌ Block more than 10 digits
+        if updatedText.count > 10 {
+            return false
+        }
+
+        // ✅ Button state depends ONLY on valid text
+        if updatedText.count == 10 {
+            ContinueButton.isEnabled = true
+            ContinueButton.alpha = 1.0
+        } else {
+            ContinueButton.isEnabled = false
+            ContinueButton.alpha = 0.5
+        }
+
         return true
     }
+
+
 }

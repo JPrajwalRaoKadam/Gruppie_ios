@@ -17,6 +17,7 @@ class OTPViewController: UIViewController {
     var phoneNumber: String?
     var countryCode: String?
     var loadingIndicator: UIActivityIndicatorView!
+    var shouldAutoResendOTP: Bool = false
     
     private lazy var otpBoxes: [UITextField] = [box1, box2, box3, box4, box5, box6]
 
@@ -54,25 +55,46 @@ class OTPViewController: UIViewController {
         loadingIndicator = UIActivityIndicatorView(style: .medium)
         loadingIndicator.center = self.view.center
         self.view.addSubview(loadingIndicator)
+        nextOutlet.isEnabled = false
+        nextOutlet.alpha = 0.5
+        
+        if shouldAutoResendOTP {
+                resendOTP()
+            }
+
     }
+    private func updateNextButtonState() {
+        if currentOTP.count == 6 {
+            nextOutlet.isEnabled = true
+            nextOutlet.alpha = 1.0
+        } else {
+            nextOutlet.isEnabled = false
+            nextOutlet.alpha = 0.5
+        }
+    }
+
     // MARK: - Delegate logic
-      @objc private func textFieldDidChange(_ textField: UITextField) {
+    @objc private func textFieldDidChange(_ textField: UITextField) {
           guard let text = textField.text else { return }
 
-          // 1. Ensure max 1 character per box
+          // Ensure max 1 character
           if text.count > 1 {
               textField.text = String(text.prefix(1))
           }
 
-          // 2. Move forward when a new character is typed
+          // Move forward
           if !text.isEmpty {
               if let nextBox = nextBox(from: textField) {
                   nextBox.becomeFirstResponder()
               } else {
-                  textField.resignFirstResponder() // all filled, close keyboard if you like
+                  textField.resignFirstResponder()
               }
           }
+
+          // ✅ Update button state
+          updateNextButtonState()
       }
+
     
     @IBAction func resetOTP(_ sender: UIButton) {
        resendOTP()
@@ -192,44 +214,51 @@ class OTPViewController: UIViewController {
     }
 }
 extension OTPViewController: UITextFieldDelegate {
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        
-        // Handle backspace/delete
+
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+
+        // Handle delete
         if string.isEmpty {
-            // If deleting and current field becomes empty, move to previous field
             if range.length == 1 && textField.text?.count == 1 {
                 textField.text = ""
                 if let previous = previousBox(from: textField) {
                     previous.becomeFirstResponder()
                 }
+
+                // ✅ Update button after delete
+                updateNextButtonState()
                 return false
             }
-            // Allow normal deletion within field
             return true
         }
-        
-        // Allow only one character input
+
+        // Allow only 1 digit
         guard string.count == 1 else { return false }
-        
-        // Only allow numeric characters
+
+        // Allow only numbers
         let allowedCharacters = CharacterSet.decimalDigits
         let characterSet = CharacterSet(charactersIn: string)
         guard allowedCharacters.isSuperset(of: characterSet) else { return false }
-        
-        // Update text field
+
+        // Set digit
         textField.text = string
-        
-        // Move to next field
+
         DispatchQueue.main.async {
             if let nextBox = self.nextBox(from: textField) {
                 nextBox.becomeFirstResponder()
             } else {
                 textField.resignFirstResponder()
             }
+
+            // ✅ Update button after input
+            self.updateNextButtonState()
         }
-        
+
         return false
     }
+
 }
 
 // MARK: - Helpers

@@ -42,13 +42,27 @@ class passwordViewController: UIViewController {
         self.navigationController?.popViewController(animated: true)
     }
 
+
     @IBAction func forgotPassword(_ sender: UIButton) {
         guard let phoneData = phoneData else {
-            print("Phone data is missing")
+            print("Phone data missing")
             return
         }
-//        requestForgotPassword(for: phoneData)
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let otpVC = storyboard.instantiateViewController(
+            withIdentifier: "OTPViewController"
+        ) as? OTPViewController else {
+            return
+        }
+
+        otpVC.phoneData = phoneData
+        otpVC.phoneNumber = phoneData.phone
+        otpVC.countryCode = phoneData.countryCode
+        otpVC.shouldAutoResendOTP = true   // ✅ KEY LINE
+        navigationController?.pushViewController(otpVC, animated: true)
     }
+
     
     @IBAction func continueButton(_ sender: UIButton) {
         guard let passwordText = password.text, !passwordText.isEmpty,
@@ -88,74 +102,7 @@ class passwordViewController: UIViewController {
             print("Failed to save password to Keychain")
         }
     }
-
-//    func callLoginAPI(with payload: [String: Any]) {
-//        let urlString = APIManager.shared.baseURL + "login/category/app?category=school&appName=GC2&addSchool=true"
-//        guard let url = URL(string: urlString) else { return }
-//
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//        do {
-//            request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
-//        } catch {
-//            print("Error serializing JSON: \(error)")
-//            return
-//        }
-//
-//        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//            if let error = error {
-//                print("Error making API call: \(error)")
-//                return
-//            }
-//
-//            if let httpResponse = response as? HTTPURLResponse {
-//                print("Status code: \(httpResponse.statusCode)")
-//
-//                if httpResponse.statusCode == 200 {
-//                    if let data = data {
-//                        do {
-//                            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-//                               let token = json["token"] as? String {
-//                                print("Authentication Token: \(token)")
-//
-//                                TokenManager.shared.setToken(token)
-//                                UserDefaults.standard.setValue(self.phoneData?.phone, forKey: "loggedInPhone")
-//                                UserDefaults.standard.set(true, forKey: "isLoggedIn")
-//
-//                                DispatchQueue.main.async {
-//                                    self.navigateToSetPIN()
-//                                }
-//                            } else {
-//                                print("No token found in response")
-//                            }
-//                        } catch {
-//                            print("Error parsing JSON: \(error)")
-//                        }
-//                    }
-//                } else {
-//                    if let data = data {
-//                        do {
-//                            if let errorResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-//                               let title = errorResponse["title"] as? String,
-//                               let message = errorResponse["message"] as? String {
-//                                print("Error: \(title) - \(message)")
-//                                DispatchQueue.main.async {
-//                                    self.showAlert(title: title, message: message)
-//                                }
-//                            }
-//                        } catch {
-//                            print("Error parsing error response: \(error)")
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        task.resume()
-//    }
-
+    
     func loginUser() {
         let device = UIDevice.current
         let bundle = Bundle.main
