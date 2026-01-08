@@ -11,7 +11,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var groupId: String?
     var school: School? // School object to hold school data
     var imageUrls: [String] = [] // Array to hold multiple image URLs
-    var groupDatas: [GroupData] = []
+    var homeData: HomeResponse?
+    var feature: [Feature] = []
     var studentTeams: [StudentTeam] = []
     var featureIcon: FeatureIcon?
     var currentRole: String?
@@ -34,6 +35,9 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        fetchHomeData()
+        tableView.sectionHeaderTopPadding = 0
+
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
         self.navigationController?.isNavigationBarHidden = true
@@ -53,29 +57,6 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         CustomTabManager.shared.hDelegate = self
         CustomTabManager.shared.mDelegate = self
         CustomTabManager.shared.dbDelegate = self
-        // Print the image URLs to verify their content
-        print("Image URLs: \(imageUrls)")
-        
-        for activity in self.groupDatas {
-            print("Received Activity: \(activity.activity)")
-            self.featureIcons = activity.featureIcons
-            for featureIcon in activity.featureIcons {
-                print("Received Feature Icon Type: \(featureIcon.name), Image: \(featureIcon.image)")
-            }
-        }
-        
-        // Set the shortNameLabel text
-        if let school = school {
-            shortNameLabel.text = school.shortName
-        } else {
-            print("No school data provided")
-        }
-        
-        if let name = name {
-            print("Name of Profile: \(name)")
-        } else {
-            print("No profile data provided")
-        }
         enableKeyboardDismissOnTap()
     }
     
@@ -86,8 +67,60 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         
     }
     
+    private func fetchHomeData() {
+        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+            print("❌ Role token missing")
+            return
+        }
+
+        let headers = ["Authorization": "Bearer \(token)"]
+
+        APIManager.shared.request(
+            endpoint: "home/services",
+            method: .get,
+            headers: headers
+        ) { (result: Result<HomeResponse, APIManager.APIError>) in
+
+            switch result {
+            case .success(let response):
+                DispatchQueue.main.async {
+
+                    self.homeData = response
+                    self.feature = response.features
+
+                    // ✅ Flatten all icons
+                    self.featureIcons = response.features.flatMap { $0.featureIcons }
+
+                    // ✅ Extract image URLs
+                    self.imageUrls = self.featureIcons.map { $0.logoUrl }
+
+                    // ✅ Set labels
+                    self.groupName = response.groupName
+                    self.groupId = response.groupId
+                    self.Role = response.role
+                    self.shortNameLabel.text = response.groupName
+
+                    print("✅ Home loaded:", self.feature.count)
+                    print("✅ Total icons:", self.featureIcons.count)
+                    print("✅ Image URLs:", self.imageUrls.count)
+
+                    self.tableView.reloadData()
+                }
+
+
+            case .failure(let error):
+                print("❌ Home API Error:", error)
+            }
+        }
+    }
+
     @IBAction func backAction(_ sender: Any) {
-        self.navigationController?.popViewController(animated: true)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let grpVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as? GrpViewController else {
+            print("ViewController with identifier 'feedVC' not found.")
+            return
+        }
+        self.navigationController?.pushViewController(grpVC, animated: true)
     }
     
     func tapforFeeds() {
@@ -132,54 +165,43 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     // MARK: - UITableView Data Source
     func numberOfSections(in tableView: UITableView) -> Int {
         //            return 1 + groupDatas.count
-        return groupDatas.count
+        return feature.count
     }
 
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
             return 1
         }
 
-        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//            if indexPath.section == 0 {
-//                let cell = tableView.dequeueReusableCell(withIdentifier: "BannerAndProfileTableViewCell", for: indexPath) as! BannerAndProfileTableViewCell
-//                cell.imageUrls = imageUrls
-//                cell.configureBannerImage(at: 0)
-//                cell.Profile.text = name
-//                cell.Profile.isHidden = (name == nil)
-//                cell.heightConstraintofAdminLabel.constant = name != nil ? 61 : 0
-//                return cell
-//            } else {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "AllIconsTableViewCell", for: indexPath) as! AllIconsTableViewCell
-                cell.delegate = self
-                cell.configure(with: groupDatas[indexPath.section])
-                return cell
-//            }
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "AllIconsTableViewCell",
+            for: indexPath
+        ) as! AllIconsTableViewCell
+
+        cell.delegate = self
+        cell.configure(with: self.feature[indexPath.section] )
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView,
+                   heightForRowAt indexPath: IndexPath) -> CGFloat {
+
+        let featureIcons = self.feature[indexPath.section].featureIcons
+        let count = featureIcons.count
+        let itemsPerRow = 4
+
+        if count <= itemsPerRow {
+            return 140
+        } else if count <= itemsPerRow * 2 {
+            return 225
+        } else if count <= itemsPerRow * 3 {
+            return 320
+        } else {
+            let rows = ceil(Double(count) / Double(itemsPerRow))
+            return CGFloat(rows) * 80 + CGFloat(rows - 1) * 10
         }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        if indexPath.section == 0 {
-//            return 150
-//        } else {
-            let featureIcons = groupDatas[indexPath.section].featureIcons
-            let count = featureIcons.count
-            let itemsPerRow = 4 // 🔄 Moved outside
-
-            if count <= itemsPerRow {
-                return 140
-            } else if count <= itemsPerRow * 2 {
-                return 225
-            } else if count <= itemsPerRow * 3 {
-                return 320
-            }else {
-                // For more than 8 items, calculate rows and return dynamic height
-                let rows = ceil(Double(count) / Double(itemsPerRow))
-                let baseRowHeight: CGFloat = 80
-                let verticalSpacing: CGFloat = 10
-
-                // Total = rows * rowHeight + (rows - 1) * spacing
-                return CGFloat(rows) * baseRowHeight + CGFloat(rows - 1) * verticalSpacing
-            }
-//        }
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -197,12 +219,12 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
            }
 
         guard indexPath.section > 0 else { return }
-        let selectedActivity = groupDatas[indexPath.section - 1]
+        let selectedActivity = homeData?.features[indexPath.section - 1]
         
-        if selectedActivity.activity == "Other Activities" {
+        if selectedActivity?.activity == "Other Activities" {
             navigateToCalendarViewController()
         } else {
-            print("No navigation configured for type: \(selectedActivity.activity)")
+            print("No navigation configured for type: \(selectedActivity?.activity)")
         }
     }
     
@@ -721,7 +743,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     func navigateToMangementViewController() {
         print("Home stack tapped, calling API...")
         
-        guard let token = TokenManager.shared.getToken() else {
+        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
             print("Token is missing")
             return
         }

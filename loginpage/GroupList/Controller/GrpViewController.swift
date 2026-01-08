@@ -6,11 +6,7 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
     @IBOutlet var teamCollectionView: UICollectionView!
     @IBOutlet weak var searchView: UIView!
     
-//    var images: [ImageData] = []
-//    var schools: [School] = [] // Received from SetPINViewController
-//    var filteredSchools: [School] = [] // For search results
     var filteredGroups: [GroupItem] = []
-    var groupDatas: [GroupData] = []
     var currentRole: String?
     private var isProcessingSelection = false
     var logoutDropdownView: UIView?
@@ -350,39 +346,6 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
         return UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     }
     
-//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        
-//        guard !isProcessingSelection else {
-//            print("Tap ignored – already processing.")
-//            return
-//        }
-//        
-//        isProcessingSelection = true
-//        
-//        // ✅ Get selected group
-//        let selectedGroup = groupDataResponse[indexPath.item]
-//        
-//        print("✅ Selected Group:")
-//        print("Group Name:", selectedGroup.groupName)
-//        print("Role:", selectedGroup.roleName)
-//        print("Category:", selectedGroup.gruppieCategory)
-//        
-//        // ✅ Store selected group token if needed
-//        UserDefaults.standard.set(selectedGroup.token, forKey: "groups_token")
-//        
-//        // 👉 Navigate to next screen (example: HomeVC)
-//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//        if let homeVC = storyboard.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC {
-//            
-//            // Pass basic group info
-//            homeVC.Role = selectedGroup.roleName
-//            homeVC.groupName = selectedGroup.groupName   // create this var in HomeVC if needed
-//            
-//            self.navigationController?.pushViewController(homeVC, animated: true)
-//        }
-//        
-//        isProcessingSelection = false
-//    }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         guard !isProcessingSelection else {

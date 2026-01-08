@@ -51,21 +51,6 @@ struct School {
     }
 }
 
-struct HomeResponse: Codable {
-    let data: [GroupData]
-}
-
-struct GroupData: Codable {
-    let activity: String
-    let featureIcons: [FeatureIcon]
-}
-
-struct FeatureIcon: Codable {
-    let name: String
-    let image: String
-    let role: String?
-}
-
 struct Event: Codable {
     var eventid: String?
     var title: String

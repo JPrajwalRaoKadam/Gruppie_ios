@@ -17,7 +17,10 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     
     var images: [ImageData] = []
     var schools: [School] = [] // Received from SetPINViewController
-    var groupDatas: [GroupData] = []
+    var homeData: HomeResponse?
+    var feature: [Feature] = []
+    var featureIcons: [FeatureIcon] = []
+    var imageUrls: [String] = []
     var currentRole: String?
     
     override func viewDidLoad() {
@@ -190,18 +193,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
             }
             
             dispatchGroup.enter()
-                       fetchHomeData(groupId: schoolData.id) { groupData in
-                           DispatchQueue.main.async {
-                               if let groupData = groupData {
-                                   homeVC.groupDatas = groupData
-                                   homeVC.currentRole = self.currentRole
-                                   print("✅ Loaded \(groupData.count) groups")
-                               } else {
-                                   print("⚠️ No group data received")
-                               }
-                               dispatchGroup.leave()
-                           }
-                       }
+            fetchHomeData()
             
             dispatchGroup.notify(queue: .main) {
                 if let imageUrls = imageUrls {
@@ -350,67 +342,43 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
         
         task.resume()
     }
-    private func fetchHomeData(groupId: String, completion: @escaping ([GroupData]?) -> Void) {
-        guard let token = TokenManager.shared.getToken() else {
-            print("❌ Token not found")
-            completion(nil)
+
+    private func fetchHomeData() {
+        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+            print("❌ Role token missing")
             return
         }
-        
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/home"
-        guard let url = URL(string: urlString) else {
-            print("❌ Invalid URL")
-            completion(nil)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ Network error: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let data = data else {
-                print("❌ No data received")
-                completion(nil)
-                return
-            }
-            
-            // 🪶 Print raw response for verification
-            if let raw = String(data: data, encoding: .utf8) {
-                print("\n🔹 Raw Response of Home API:\n\(raw)\n")
-            }
-            
-            do {
-                let decoder = JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-                
-                // ✅ Decode using wrapper object
-                let response = try decoder.decode(HomeResponse.self, from: data)
-                let groups = response.data
-                
-                // ✅ Debug print
-                print("✅ Successfully decoded groups:")
-                for group in groups {
-                    print("→ Activity: \(group.activity)")
-                    for icon in group.featureIcons {
-                        print("   - \(icon.name) (\(icon.role ?? "no role"))")
-                        self.currentRole = icon.role
-                    }
+
+        let headers = ["Authorization": "Bearer \(token)"]
+
+        APIManager.shared.request(
+            endpoint: "home/services",
+            method: .get,
+            headers: headers
+        ) { (result: Result<HomeResponse, APIManager.APIError>) in
+
+            switch result {
+            case .success(let response):
+                DispatchQueue.main.async {
+
+                    self.homeData = response
+                    self.feature = response.features
+
+                    // ✅ Flatten all icons
+                    self.featureIcons = response.features.flatMap { $0.featureIcons }
+
+                    // ✅ Extract image URLs
+                    self.imageUrls = self.featureIcons.map { $0.logoUrl }
                 }
-                
-                completion(groups)
-            } catch {
-                print("❌ Decoding error: \(error)")
-                completion(nil)
+
+
+            case .failure(let error):
+                print("❌ Home API Error:", error)
             }
-        }.resume()
+        }
     }
+
+
     private func callAPIAndNavigate(completion: @escaping () -> Void) {
         guard let token = TokenManager.shared.getToken() else {
             print("Token is nil. Cannot proceed with API call.")
@@ -477,7 +445,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     private func navigateToGroupViewController() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let groupVC = storyboard.instantiateViewController(withIdentifier: "GrpViewController") as? GrpViewController {
-            groupVC.groupDatas = self.groupDatas
+//            groupVC.groupDatas = self.groupDatas
             self.navigationController?.pushViewController(groupVC, animated: true)
         }
     }

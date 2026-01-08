@@ -43,7 +43,7 @@ class AlliconsCollectionViewCell: UICollectionViewCell {
         iconLabel.lineBreakMode = .byWordWrapping
         iconLabel.textAlignment = .center
         
-        if let imageUrl = URL(string: featureIcon.image) {
+        if let imageUrl = URL(string: featureIcon.logoUrl) {
             iconImage.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder"))
         }
     }
