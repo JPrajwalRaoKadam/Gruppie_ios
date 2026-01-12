@@ -73,3 +73,58 @@ struct UserDetails: Codable {
     let teamId: String?
     let studentName: String?
 }
+
+
+// MARK: - Top Level Response
+struct GroupClassResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: [GroupClass]
+    let pagination: Pagination
+}
+
+// MARK: - Group Class
+struct GroupClass: Decodable {
+    let id: String
+    let courseId: String
+    let groupAcademicYearId: String
+    let name: String
+    let course: Course
+    let academicYear: AcademicYear
+    let students: [Student]
+}
+
+// MARK: - Course
+struct Course: Decodable {
+    let id: String
+    let courseName: String
+    let departmentId: String
+    let groupId: String
+    let department: Department
+}
+
+// MARK: - Department
+struct Department: Decodable {
+    let id: String
+    let name: String
+}
+
+// MARK: - Academic Year
+struct AcademicYear: Decodable {
+    let id: String
+    let groupId: String
+}
+
+// MARK: - Student
+struct Student: Decodable {
+    let groupClassId: String
+    let studentId: String
+}
+
+// MARK: - Pagination
+struct Pagination: Decodable {
+    let total: Int
+    let page: Int
+    let limit: Int
+    let totalPages: Int
+}

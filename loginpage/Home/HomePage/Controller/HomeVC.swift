@@ -22,6 +22,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var userIds: [String] = []
     var userId:String = ""
     var featureIcons: [FeatureIcon] = []
+    public var groupClasses: [GroupClass] = []
+    public var pagination: Pagination?
     
     @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var tableView: UITableView! // TableView outlet
@@ -255,7 +257,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 return
             }
         case "Student Register":
-            fetchStudentDataAndNavigate()
+            fetchGroupClasses()
+            navigateToStudentRegister(groupClasses: groupClasses)
         case "Student Diary":
             fetchSubjectDataAndNavigate()
             fetchStudentDataAndNavigate()
@@ -295,6 +298,29 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
         default:
             print("No navigation configured for type: \(featureIcon.name)")
+        }
+    }
+    
+    
+    private func fetchGroupClasses() {
+        APIManager.shared.getGroupClasses(page: 1, limit: 5) { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case .success(let response):
+                // ✅ Save data locally
+                self.groupClasses = response.data
+                self.pagination = response.pagination
+
+                print("Saved Classes:", self.groupClasses.count)
+                print("Saved Pagination:", self.pagination ?? "nil")
+
+                // reload UI here
+                // self.tableView.reloadData()
+
+            case .failure(let error):
+                print("API Error:", error)
+            }
         }
     }
     
@@ -970,7 +996,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 case "Student Diary":
                     self.navigateToStudentDiary(studentTeams: studentTeams)
                 case "Student Register":
-                    self.navigateToStudentRegister(studentTeams: studentTeams)
+//                    self.navigateToStudentRegister(studentTeams: studentTeams)
                     self.studentTeams = studentTeams
                 default:
                     print("No navigation configured for type: \(self.featureIcon?.name)")
@@ -1058,17 +1084,13 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }.resume()
         }
     
-    private func navigateToStudentRegister(studentTeams: [StudentTeam]) {
+    private func navigateToStudentRegister(groupClasses: [GroupClass]) {
            let storyboard = UIStoryboard(name: "Student", bundle: nil)
            guard let studentRegisterVC = storyboard.instantiateViewController(withIdentifier: "StudentViewController") as? StudentViewController else {
                print("Failed to instantiate StudentViewController")
                return
            }
-           
-           studentRegisterVC.studentTeams = studentTeams
-           studentRegisterVC.token = TokenManager.shared.getToken() ?? ""
-           studentRegisterVC.groupIds = school?.id ?? ""
-           
+        studentRegisterVC.groupClasses = groupClasses
            self.navigationController?.pushViewController(studentRegisterVC, animated: true)
        }
 }

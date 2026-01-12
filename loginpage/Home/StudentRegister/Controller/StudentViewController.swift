@@ -9,6 +9,7 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
     @IBOutlet weak var backButton: UIButton!
 
+    var groupClasses: [GroupClass] = []
     var studentTeams: [StudentTeam] = []
     var filteredStudentTeams: [StudentTeam] = []
     var combinedStudentTeams: [CombinedStudentTeam] = []

@@ -195,6 +195,28 @@ class APIManager {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not allowed or all servers failed."])))
         }
     }
+    
+    func getGroupClasses(
+            page: Int,
+            limit: Int,
+            completion: @escaping (Result<GroupClassResponse, APIError>) -> Void
+        ) {
+
+            let token = UserDefaults.standard.string(forKey: "user_role_Token") ?? ""
+
+            request(
+                endpoint: "group-class",
+                method: .get,
+                queryParams: [
+                    "page": "\(page)",
+                    "limit": "\(limit)"
+                ],
+                headers: [
+                    "Authorization": "Bearer \(token)"
+                ],
+                completion: completion
+            )
+        }
 
     struct AnyEncodable: Encodable {
         private let encodeFunc: (Encoder) throws -> Void

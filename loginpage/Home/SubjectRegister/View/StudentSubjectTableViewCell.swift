@@ -21,7 +21,7 @@ class StudentSubjectTableViewCell: UITableViewCell {
     // ✅ Configure function to bind data
     func configure(with student: Student, isSelected: Bool) {
         self.isSelectedState = isSelected
-        StudentName.text = student.name
+//        StudentName.text = student.name
         updateButtonAppearance()
     }
 
