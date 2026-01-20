@@ -20,14 +20,14 @@ class TeachingDairyStaff: UITableViewCell {
     }
 
     func configureCell(with staff: Staff) {
-        name.text = staff.name
+//        name.text = staff.name
         designation.text = staff.designation
 
-        if let imageURL = staff.imageURL, let url = URL(string: imageURL) {
-            loadImage(from: url)
-        } else {
-            showFallbackImage(for: staff.name)
-        }
+//        if let imageURL = staff.imageURL, let url = URL(string: imageURL) {
+//            loadImage(from: url)
+//        } else {
+//            showFallbackImage(for: staff.name)
+//        }
     }
 
     // Load the image from the URL asynchronously

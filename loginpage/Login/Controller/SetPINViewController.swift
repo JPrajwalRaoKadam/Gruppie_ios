@@ -344,7 +344,7 @@ class SetPINViewController: UIViewController, UITextFieldDelegate {
     }
 
     private func fetchHomeData() {
-        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+        guard let token = SessionManager.useRoleToken else {
             print("❌ Role token missing")
             return
         }

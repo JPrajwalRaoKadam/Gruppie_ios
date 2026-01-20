@@ -165,7 +165,7 @@ class TimetableViewController: UIViewController {
             cell.configureCell(with: day, icon: nil)
         } else if isStaffSelected {
             let staff = staffDetails[indexPath.row]
-            cell.configureCell(with: staff.name ?? "No Name", icon: nil)
+//            cell.configureCell(with: staff.name ?? "No Name", icon: nil)
         } else if isSubjectAgain {
             let subject = subjects[indexPath.row]
             cell.configureCell(with: subject.name ?? "No Name", icon: nil)
@@ -193,13 +193,13 @@ class TimetableViewController: UIViewController {
         case 1:
             let selectedTeamId = teamIds[indexPath.row]
             let selectedStaff = staffDetails[indexPath.row]
-            let userId = selectedStaff.userId ?? ""
+//            let userId = selectedStaff.userId ?? ""
             let vc = storyboard?.instantiateViewController(withIdentifier: "TeacherTTViewController") as! TeacherTTViewController
             vc.groupId = groupId
             vc.token = token
             vc.subjects = subjects
             vc.teamIds = [selectedTeamId]
-            vc.userId = userId
+//            vc.userId = userId
             navigationController?.pushViewController(vc, animated: true)
 
         case 2:

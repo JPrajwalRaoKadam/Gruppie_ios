@@ -20,15 +20,15 @@ class NonTeachingStaff: UITableViewCell {
 
     // Configure the cell with staff data
     func configureCell(with staff: Staff) {
-        name.text = staff.name
+        name.text = staff.firstName
         designation.text = staff.designation
 
         // Set up image or fallback
-        if let imageURL = staff.imageURL, let url = URL(string: imageURL) {
-            loadImage(from: url)
-        } else {
-            showFallbackImage(for: staff.name ?? "")
-        }
+//        if let imageURL = staff., let url = URL(string: imageURL) {
+//            loadImage(from: url)
+//        } else {
+            showFallbackImage(for: staff.firstName ?? "")
+//        }
     }
 
     // Load the image from the URL asynchronously

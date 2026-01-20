@@ -1,5 +1,7 @@
 import Foundation
 
+
+
 struct SubjectRegisterResponse: Decodable {
     let data: [SubjectDetail]
 }

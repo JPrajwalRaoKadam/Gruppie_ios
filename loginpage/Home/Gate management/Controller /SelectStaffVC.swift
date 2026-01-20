@@ -41,9 +41,9 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
 
         if segmentController.selectedSegmentIndex == 0 {
-            fetchTeachingStaffData()
+//            fetchTeachingStaffData()
         } else {
-            fetchNonTeachingStaffData()
+//            fetchNonTeachingStaffData()
         }
     }
 
@@ -54,81 +54,81 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     @IBAction func segmentControllerChanged(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 0 {
             teachingStaffData.removeAll()
-            fetchTeachingStaffData()
+//            fetchTeachingStaffData()
         } else {
             nonTeachingStaffData.removeAll()
-            fetchNonTeachingStaffData()
+//            fetchNonTeachingStaffData()
         }
     }
 
-    private func fetchTeachingStaffData() {
-        guard let token = TokenManager.shared.getToken() else {
-            print("❌ Token not found")
-            return
-        }
-           guard let groupId = groupId else {
-               print("Missing groupId")
-               return
-           }
-           let url = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
-           print("Fetching teaching staff from: \(url)")
-           fetchStaffData(from: url, token: token) { [weak self] staff in
-               self?.teachingStaffData = staff
-               DispatchQueue.main.async {
-                   self?.staffRegister.reloadData()
-               }
-           }
-       }
-    private func fetchNonTeachingStaffData() {
-        guard let token = TokenManager.shared.getToken() else {
-            print("❌ Token not found")
-            return
-        }
+//    private func fetchTeachingStaffData() {
+//        guard let token = TokenManager.shared.getToken() else {
+//            print("❌ Token not found")
+//            return
+//        }
+//           guard let groupId = groupId else {
+//               print("Missing groupId")
+//               return
+//           }
+//           let url = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
+//           print("Fetching teaching staff from: \(url)")
+//           fetchStaffData(from: url, token: token) { [weak self] staff in
+//               self?.teachingStaffData = staff
+//               DispatchQueue.main.async {
+//                   self?.staffRegister.reloadData()
+//               }
+//           }
+//       }
+//    private func fetchNonTeachingStaffData() {
+//        guard let token = TokenManager.shared.getToken() else {
+//            print("❌ Token not found")
+//            return
+//        }
+//
+//        guard let groupId = groupId else {
+//            print("❌ Missing groupId")
+//            return
+//        }
+//
+//        let url = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=nonteaching"
+//        print("Fetching non-teaching staff from: \(url)")
+//
+//        fetchStaffData(from: url, token: token) { [weak self] staff in
+//            self?.nonTeachingStaffData = staff
+//            DispatchQueue.main.async {
+//                self?.staffRegister.reloadData()
+//            }
+//        }
+//    }
 
-        guard let groupId = groupId else {
-            print("❌ Missing groupId")
-            return
-        }
 
-        let url = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=nonteaching"
-        print("Fetching non-teaching staff from: \(url)")
-
-        fetchStaffData(from: url, token: token) { [weak self] staff in
-            self?.nonTeachingStaffData = staff
-            DispatchQueue.main.async {
-                self?.staffRegister.reloadData()
-            }
-        }
-    }
-
-
-    private func fetchStaffData(from urlString: String, token: String, completion: @escaping ([Staff]) -> Void) {
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL: \(urlString)")
-            completion([])
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            guard let data = data, error == nil else {
-                print("Error fetching staff data:", error?.localizedDescription ?? "Unknown error")
-                completion([])
-                return
-            }
-
-            do {
-                let responseModel = try JSONDecoder().decode(StaffResponse.self, from: data)
-                completion(responseModel.data)
-            } catch {
-                print("Error decoding staff data:", error)
-                completion([])
-            }
-        }.resume()
-    }
+//    private func fetchStaffData(from urlString: String, token: String, completion: @escaping ([Staff]) -> Void) {
+//        guard let url = URL(string: urlString) else {
+//            print("Invalid URL: \(urlString)")
+//            completion([])
+//            return
+//        }
+//
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "GET"
+//        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+//
+//        URLSession.shared.dataTask(with: request) { data, _, error in
+//            guard let data = data, error == nil else {
+//                print("Error fetching staff data:", error?.localizedDescription ?? "Unknown error")
+//                completion([])
+//                return
+//            }
+//
+//            do {
+//                let responseModel = try JSONDecoder().decode(StaffResponse.self, from: data)
+//                completion(responseModel.data)
+//            } catch {
+//                print("Error decoding staff data:", error)
+//                completion([])
+//            }
+//        }.resume()
+//    }
 
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -147,9 +147,9 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         if segmentController.selectedSegmentIndex == 0 {
             let staff = isSearching ? filteredTeachingStaff[indexPath.row] : teachingStaffData[indexPath.row]
             let cell = tableView.dequeueReusableCell(withIdentifier: "TeachingStaffCell", for: indexPath)
-            if let teachingCell = cell as? TeachingStaff {
-                teachingCell.configureCell(with: staff)
-            }
+//            if let teachingCell = cell as? TeachingStaff {
+//                teachingCell.configureCell(with: staff)
+//            }
             return cell
         } else {
             let data = isSearching ? filteredNonTeachingStaff : nonTeachingStaffData
@@ -162,37 +162,37 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
             } else {
                 let staff = data[indexPath.row]
                 let cell = tableView.dequeueReusableCell(withIdentifier: "NonTeachingStaffCell", for: indexPath)
-                if let nonTeachingCell = cell as? NonTeachingStaff {
-                    nonTeachingCell.configureCell(with: staff)
-                }
+//                if let nonTeachingCell = cell as? NonTeachingStaff {
+//                    nonTeachingCell.configureCell(with: staff)
+//                }
                 return cell
             }
         }
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedStaff: Staff
-        if segmentController.selectedSegmentIndex == 0 {
-            selectedStaff = isSearching ? filteredTeachingStaff[indexPath.row] : teachingStaffData[indexPath.row]
-        } else {
-            selectedStaff = isSearching ? filteredNonTeachingStaff[indexPath.row] : nonTeachingStaffData[indexPath.row]
-        }
-
-        fetchStaffDetails(staffId: selectedStaff.userId) { [weak self] staffDetails in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(
-                    name: Notification.Name("StaffSelected"),
-                    object: nil,
-                    userInfo: [
-                        "name": selectedStaff.name,
-                        "userId": selectedStaff.userId
-                    ]
-                )
-
-                self.navigationController?.popViewController(animated: true)
-            }
-        }
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let selectedStaff: Staff
+//        if segmentController.selectedSegmentIndex == 0 {
+//            selectedStaff = isSearching ? filteredTeachingStaff[indexPath.row] : teachingStaffData[indexPath.row]
+//        } else {
+//            selectedStaff = isSearching ? filteredNonTeachingStaff[indexPath.row] : nonTeachingStaffData[indexPath.row]
+//        }
+//
+//        fetchStaffDetails(staffId: selectedStaff.userId) { [weak self] staffDetails in
+//            guard let self = self else { return }
+//            DispatchQueue.main.async {
+//                NotificationCenter.default.post(
+//                    name: Notification.Name("StaffSelected"),
+//                    object: nil,
+//                    userInfo: [
+//                        "name": selectedStaff.name,
+//                        "userId": selectedStaff.userId
+//                    ]
+//                )
+//
+//                self.navigationController?.popViewController(animated: true)
+//            }
+//        }
+//    }
     
 //    private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
 //        guard let groupId = groupId else { return }
@@ -229,53 +229,53 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
 //            }
 //        }.resume()
 //    }
-    private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
-        guard let groupId = groupId else {
-            print("❌ groupId is nil")
-            completion(nil)
-            return
-        }
-
-        // ✅ Safely get token
-        guard let token = TokenManager.shared.getToken() else {
-            print("❌ Token not found in TokenManager")
-            completion(nil)
-            return
-        }
-
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/user/\(staffId)/profile/get?type=staff"
-        print("Fetching staff details from: \(urlString)")
-
-        guard let url = URL(string: urlString) else {
-            print("❌ Invalid URL: \(urlString)")
-            completion(nil)
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // ✅ use token here
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let httpResponse = response as? HTTPURLResponse {
-                print("HTTP Status Code: \(httpResponse.statusCode)")
-            }
-
-            guard let data = data, error == nil else {
-                print("❌ Error fetching staff details:", error?.localizedDescription ?? "Unknown error")
-                completion(nil)
-                return
-            }
-
-            do {
-                let response = try JSONDecoder().decode(StaffDetailsResponse.self, from: data)
-                completion(response.data)
-            } catch {
-                print("❌ Decoding error:", error)
-                completion(nil)
-            }
-        }.resume()
-    }
+//    private func fetchStaffDetails(staffId: String, completion: @escaping (StaffDetailsData?) -> Void) {
+//        guard let groupId = groupId else {
+//            print("❌ groupId is nil")
+//            completion(nil)
+//            return
+//        }
+//
+//        // ✅ Safely get token
+//        guard let token = TokenManager.shared.getToken() else {
+//            print("❌ Token not found in TokenManager")
+//            completion(nil)
+//            return
+//        }
+//
+//        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/user/\(staffId)/profile/get?type=staff"
+//        print("Fetching staff details from: \(urlString)")
+//
+//        guard let url = URL(string: urlString) else {
+//            print("❌ Invalid URL: \(urlString)")
+//            completion(nil)
+//            return
+//        }
+//
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "GET"
+//        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // ✅ use token here
+//
+//        URLSession.shared.dataTask(with: request) { data, response, error in
+//            if let httpResponse = response as? HTTPURLResponse {
+//                print("HTTP Status Code: \(httpResponse.statusCode)")
+//            }
+//
+//            guard let data = data, error == nil else {
+//                print("❌ Error fetching staff details:", error?.localizedDescription ?? "Unknown error")
+//                completion(nil)
+//                return
+//            }
+//
+//            do {
+//                let response = try JSONDecoder().decode(StaffDetailsResponse.self, from: data)
+//                completion(response.data)
+//            } catch {
+//                print("❌ Decoding error:", error)
+//                completion(nil)
+//            }
+//        }.resume()
+//    }
 
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden
@@ -299,28 +299,28 @@ class SelectStaffVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
 
-    func filterMembers(textField: String) {
-        if textField.isEmpty {
-            isSearching = false
-            staffRegister.reloadData()
-            return
-        }
+//    func filterMembers(textField: String) {
+//        if textField.isEmpty {
+//            isSearching = false
+//            staffRegister.reloadData()
+//            return
+//        }
+//
+//        isSearching = true
+//        let searchText = textField.lowercased()
+//
+//        if segmentController.selectedSegmentIndex == 0 {
+//            filteredTeachingStaff = teachingStaffData.filter { $0.name.lowercased().contains(searchText) }
+//        } else {
+//            filteredNonTeachingStaff = nonTeachingStaffData.filter { $0.name.lowercased().contains(searchText) }
+//        }
+//
+//        staffRegister.reloadData()
+//    }
 
-        isSearching = true
-        let searchText = textField.lowercased()
-
-        if segmentController.selectedSegmentIndex == 0 {
-            filteredTeachingStaff = teachingStaffData.filter { $0.name.lowercased().contains(searchText) }
-        } else {
-            filteredNonTeachingStaff = nonTeachingStaffData.filter { $0.name.lowercased().contains(searchText) }
-        }
-
-        staffRegister.reloadData()
-    }
-
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
-        filterMembers(textField: searchText)
-        return true
-    }
+//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//        let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
+//        filterMembers(textField: searchText)
+//        return true
+//    }
 }

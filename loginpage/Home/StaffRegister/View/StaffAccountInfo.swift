@@ -18,52 +18,49 @@ class StaffAccountInfo: UITableViewCell, UITextFieldDelegate {
         allTextFields.forEach { $0.delegate = self }
     }
 
-    func populate(with accountInfo: StaffDetailsData, isEditingEnabled: Bool) {
-        uanNumber.text = accountInfo.uanNumber
-        panNumber.text = accountInfo.panNumber
-        bankAccount.text = accountInfo.bankAccount
-        bankIfsc.text = accountInfo.bankIfsc
+//    func populate(with accountInfo: StaffDetailsData, isEditingEnabled: Bool) {
+//        uanNumber.text = accountInfo.uanNumber
+//        panNumber.text = accountInfo.panNumber
+//        bankAccount.text = accountInfo.bankAccount
+//        bankIfsc.text = accountInfo.bankIfsc
+//
+//        // Enable or disable user interaction based on editing mode
+//        allTextFields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
+//    }
 
-        // Enable or disable user interaction based on editing mode
-        allTextFields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
-    }
-
-    func collectUpdatedData() -> StaffDetailsData {
-        return StaffDetailsData(
-            staffId: nil,
-            aadharNumber: nil,
-            address: nil,
-            bankAccountNumber: bankAccount.text ?? "",
-            bankIfscCode: bankIfsc.text ?? "",
-            bloodGroup: nil,
-            caste: nil,
-            designation: nil,
-            disability: nil,
-            dob: nil,
-            doj: nil,
-            email: nil,
-            gender: nil,
-            image: nil,
-            name: nil,
-            panNumber: panNumber.text ?? "",
-            phone: nil,
-            qualification: nil,
-            religion: nil,
-            staffCategory: nil,
-            type: nil,
-            uanNumber: uanNumber.text ?? "",
-            classType: nil,
-            country: "",
-            className: "",
-            emailId: "",
-            aadharNo: "",
-            bankAccount: bankAccount.text ?? "",
-            bankIfsc: bankIfsc.text ?? ""
-        )
-    }
-
-
-
+//    func collectUpdatedData() -> StaffDetailsData {
+//        return StaffDetailsData(
+//            staffId: nil,
+//            aadharNumber: nil,
+//            address: nil,
+//            bankAccountNumber: bankAccount.text ?? "",
+//            bankIfscCode: bankIfsc.text ?? "",
+//            bloodGroup: nil,
+//            caste: nil,
+//            designation: nil,
+//            disability: nil,
+//            dob: nil,
+//            doj: nil,
+//            email: nil,
+//            gender: nil,
+//            image: nil,
+//            name: nil,
+//            panNumber: panNumber.text ?? "",
+//            phone: nil,
+//            qualification: nil,
+//            religion: nil,
+//            staffCategory: nil,
+//            type: nil,
+//            uanNumber: uanNumber.text ?? "",
+//            classType: nil,
+//            country: "",
+//            className: "",
+//            emailId: "",
+//            aadharNo: "",
+//            bankAccount: bankAccount.text ?? "",
+//            bankIfsc: bankIfsc.text ?? ""
+//        )
+//    }
     // Dismiss keyboard when pressing "Return"
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

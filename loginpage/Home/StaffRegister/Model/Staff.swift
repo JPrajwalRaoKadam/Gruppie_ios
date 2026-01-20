@@ -1,100 +1,204 @@
 import Foundation
 
-struct StaffResponse: Decodable {
-    let totalNumberOfPages: Int
+// MARK: - Main Response
+struct StaffRegistrationResponse: Decodable {
+    let success: Bool
     let data: [Staff]
+    let pagination: StaffPagination
 }
 
+// MARK: - Staff Model
 struct Staff: Decodable {
-    var userId: String
-    let name: String
-    let designation: String?
-    let imageURL: String?
-    let bloodGroup: String?
-    let panNumber: String?
-    let caste: String?
-    let doj: String?
-    let dob: String?
-    let address: String?
-    let phone: String?
+    let id: String
+    let firstName: String?
+    let middleName: String?
+    let lastName: String?
     let gender: String?
+    let dateOfBirth: String?
+    let nationality: String?
     let religion: String?
+    let bloodGroup: String?
+    let maritalStatus: String?
+    let contactNumber: String?
+    let alternateContactNumber: String?
     let email: String?
-    let bankAccountNumber: String?
+    let currentAddress: String?
+    let permanentAddress: String?
+    let city: String?
+    let state: String?
+    let country: String?
+    let postalCode: String?
+    let nationalId: String?
+    let emergencyContactName: String?
+    let emergencyContactNumber: String?
+    let profilePhotoUrl: String?
+    let staffCategory: String?
+    let staffType: String?
+    let staffDepartment: String?
+    let designation: String?
+    let reportingManager: String?
+    let jobGrade: String?
+    let workLocation: String?
+    let staffCode: String?
+    let employeeStatus: String?
+    let createdAt: String?
+    let updatedAt: String?
+}
 
-    enum CodingKeys: String, CodingKey {
-        case name, designation, imageURL = "image", bloodGroup = "bloodGroup", panNumber = "panNumber", caste, doj, dob, address, phone, gender, religion, email, bankAccountNumber = "bankAccountNumber", userId
-    }
+// MARK: - Pagination
+struct StaffPagination: Decodable {
+    let totalItems: Int
+    let currentPage: Int
+    let itemsPerPage: Int
+    let totalPages: Int
+}
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        if let decodedUserId = try? container.decode(String.self, forKey: .userId) {
-            self.userId = decodedUserId
-        } else {
-            throw DecodingError.dataCorruptedError(forKey: .userId, in: container, debugDescription: "userId is required but missing.")
-        }
-        
-        self.name = try container.decode(String.self, forKey: .name)
-        self.designation = try container.decodeIfPresent(String.self, forKey: .designation)
-        self.imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
-        self.bloodGroup = try container.decodeIfPresent(String.self, forKey: .bloodGroup)
-        self.panNumber = try container.decodeIfPresent(String.self, forKey: .panNumber)
-        self.caste = try container.decodeIfPresent(String.self, forKey: .caste)
-        self.doj = try container.decodeIfPresent(String.self, forKey: .doj)
-        self.dob = try container.decodeIfPresent(String.self, forKey: .dob)
-        self.address = try container.decodeIfPresent(String.self, forKey: .address)
-        self.phone = try container.decodeIfPresent(String.self, forKey: .phone)
-        self.gender = try container.decodeIfPresent(String.self, forKey: .gender)
-        self.religion = try container.decodeIfPresent(String.self, forKey: .religion)
-        self.email = try container.decodeIfPresent(String.self, forKey: .email)
-        self.bankAccountNumber = try container.decodeIfPresent(String.self, forKey: .bankAccountNumber)
-    }
+// MARK: - Root Response
+struct StaffDetailResponse: Decodable {
+    let success: Bool
+    let data: StaffDetail
+}
+
+// MARK: - Staff Detail
+struct StaffDetail: Decodable {
+
+    let id: String
+    let firstName: String?
+    let middleName: String?
+    let lastName: String?
+    let gender: String?
+    let dateOfBirth: String?
+    let nationality: String?
+    let religion: String?
+    let bloodGroup: String?
+    let maritalStatus: String?
+    let contactNumber: String?
+    let alternateContactNumber: String?
+    let email: String?
+    let currentAddress: String?
+    let permanentAddress: String?
+    let city: String?
+    let state: String?
+    let country: String?
+    let postalCode: String?
+    let nationalId: String?
+    let emergencyContactName: String?
+    let emergencyContactNumber: String?
+    let profilePhotoUrl: String?
+
+    let staffCategory: String?
+    let staffType: String?
+    let staffDepartment: String?
+    let designation: String?
+    let reportingManager: String?
+    let jobGrade: String?
+    let workLocation: String?
+    let staffCode: String?
+    let employeeStatus: String?
+
+    let additionalInfo: [AdditionalInfo]?
+    let hrDetails: [HRDetail]?
+    let certifications: [Certification]?
+    let documents: [StaffDocument]?
+    let userAccounts: [UserAccount]?
+}
+
+// MARK: - Additional Info
+struct AdditionalInfo: Decodable {
+    let id: String
+    let staffId: String
+    let skills: String?
+    let languagesKnown: String?
+    let awardsOrRecognitions: String?
+    let publications: String?
+    let specializations: String?
+    let researchProjects: String?
+}
+
+// MARK: - HR Details
+struct HRDetail: Decodable {
+    let id: String
+    let staffId: String
+    let dateOfApplication: String?
+    let applicationSource: String?
+    let dateOfInterview: String?
+    let interviewer: String?
+    let interviewRemarks: String?
+    let dateOfAppointment: String?
+    let probationPeriodMonths: Int?
+    let dateOfConfirmation: String?
+    let offerLetterUrl: String?
+    let appointmentLetterUrl: String?
+    let bankName: String?
+    let branchName: String?
+    let accountNumber: String?
+    let ifscOrSwiftCode: String?
+    let accountHolderName: String?
+    let panOrTaxId: String?
+}
+
+// MARK: - Certification / Education / Experience
+struct Certification: Decodable {
+
+    let id: String
+    let staffId: String
+    let certificationName: String?
+    let certifyingBody: String?
+    let yearObtained: Int?
+    let validTill: Int?
+    let certificateUrl: String?
+
+    let qualification: String?
+    let specialization: String?
+    let institutionName: String?
+    let boardOrUniversity: String?
+    let yearOfPassing: Int?
+    let percentageOrCGPA: String?
+
+    let organizationName: String?
+    let certificateDesignation: String?
+    let jobType: String?
+    let fromDate: String?
+    let toDate: String?
+    let totalExperienceYears: String?
+    let experienceCertificateUrl: String?
+}
+
+// MARK: - Documents
+struct StaffDocument: Decodable {
+    let id: String
+    let staffId: String
+    let documentType: String?
+    let documentName: String?
+    let documentUrl: String?
+    let verified: Bool
+}
+
+// MARK: - User Account
+struct UserAccount: Decodable {
+    let id: String
+    let name: String?
+    let email: String?
+    let phoneNumber: String?
+    let groupUserRoles: [GroupUserRole]?
+}
+
+// MARK: - Group User Role
+struct GroupUserRole: Decodable {
+    let id: String
+    let groupId: String
+    let roleId: String
+    let status: String?
+    let role: Role?
+}
+
+// MARK: - Role
+struct Role: Decodable {
+    let id: String
+    let name: String?
 }
 
 
-struct StaffDetailsResponse: Codable {
-    var status: String?
-    var data: StaffDetailsData
-}
-
-struct StaffDetailsData: Codable {
-    var staffId: String?
-    var aadharNumber: String?
-    var address: String?
-    var bankAccountNumber: String?
-    var bankIfscCode: String?
-    var bloodGroup: String?
-    var caste: String?
-    var designation: String?
-    var disability: String?
-    var dob: String?
-    var doj: String?
-    var email: String?
-//    var emergencyContactNumber: String
-//    var fatherName: String
-    var gender: String?
-    var image: String?
-//    var motherName: String
-    var name: String?
-    var panNumber: String?
-    var phone: String?
-//    var profession: String
-    var qualification: String?
-    var religion: String?
-    var staffCategory: String?
-    var type: String?
-    var uanNumber: String?
-    var classType: String?
-    var country: String?
-    
-    var className: String?
-    var emailId: String?
-    var aadharNo: String?
-    
-    var bankAccount: String?
-    var bankIfsc: String?
-}
 
 struct StaffBasicInfoModel {
     let name: String
@@ -124,4 +228,21 @@ struct StaffAccountInfoModel {
     let panNumber: String?
     let bankAccount: String?
     let bankIfsc: String?
+}
+
+struct StaffUpdateRequest: Encodable {
+
+    let firstName: String
+    let lastName: String
+    let gender: String?
+    let dateOfBirth: String?
+    let contactNumber: String?
+    let email: String?
+    let country: String?
+    let religion: String?
+    let bloodGroup: String?
+    let currentAddress: String?
+    let nationalId: String?
+    let staffType: String?
+    let designation: String?
 }

@@ -25,16 +25,9 @@ class SubjectTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
 
-    func configure(with subject: SubjectData) {
-        nameLabel.text = subject.name
-
-        if let imageURL = subject.image, let url = URL(string: imageURL) {
-            loadImage(from: url)
-            imageLabel.isHidden = true
-            iconImageView.isHidden = false
-        } else {
-            showFallback(with: subject.name)
-        }
+    func configure(with className: String) {
+        nameLabel.text = className
+        showFallback(with: className)
     }
 
     private func loadImage(from url: URL) {

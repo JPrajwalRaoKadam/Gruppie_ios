@@ -116,60 +116,69 @@ class StaffBasicInfo: UITableViewCell, UITextFieldDelegate, UIPickerViewDelegate
         return formatter.string(from: date)
     }
 
-    func populate(with basicInfo: StaffDetailsData, isEditingEnabled: Bool) {
-        name.text = basicInfo.name
-        country.text = basicInfo.country
-        phone.text = basicInfo.phone
-        staffId.text = basicInfo.staffId
-        doj.text = basicInfo.doj
-        Class.text = basicInfo.className
+    func populate(with basicInfo: StaffDetail, isEditingEnabled: Bool) {
+
+        // Full Name
+        let fullName = [
+            basicInfo.firstName,
+            basicInfo.middleName,
+            basicInfo.lastName
+        ]
+        .compactMap { $0 }
+        .joined(separator: " ")
+
+        name.text = fullName
+
+        phone.text = basicInfo.contactNumber
+        emailId.text = basicInfo.email
         gender.text = basicInfo.gender
-        qualification.text = basicInfo.qualification
-        dob.text = basicInfo.dob
-        address.text = basicInfo.address
+        dob.text = basicInfo.dateOfBirth
+        country.text = basicInfo.country
         religion.text = basicInfo.religion
-        caste.text = basicInfo.caste
         bloodgroup.text = basicInfo.bloodGroup
-        emailId.text = basicInfo.emailId
-        aadharNo.text = basicInfo.aadharNo
-        type.text = basicInfo.type
+        address.text = basicInfo.currentAddress
 
-        allTextFields.forEach { $0.isUserInteractionEnabled = isEditingEnabled }
+        staffId.text = basicInfo.staffCode
+        type.text = basicInfo.staffType
+        Class.text = basicInfo.designation
+
+        aadharNo.text = basicInfo.nationalId
+
+        // Optional / not provided by API (safe to leave empty)
+        qualification.text = ""
+        caste.text = ""
+        doj.text = ""
+        
+        allTextFields.forEach {
+            $0.isUserInteractionEnabled = isEditingEnabled
+        }
     }
 
-    func collectUpdatedData() -> StaffDetailsData {
-        return StaffDetailsData(
-            staffId: staffId.text ?? "",
-            aadharNumber: aadharNo.text ?? "",
-            address: address.text ?? "",
-            bankAccountNumber: nil,
-            bankIfscCode: nil,
-            bloodGroup: bloodgroup.text ?? "",
-            caste: caste.text ?? "",
-            designation: Class.text ?? "",
-            disability: "Select Disability",
-            dob: dob.text ?? "",
-            doj: doj.text ?? "",
-            email: emailId.text ?? "",
-            gender: gender.text ?? "",
-            image: nil,
-            name: name.text ?? "",
-            panNumber: nil,
-            phone: phone.text ?? "",
-            qualification: qualification.text ?? "",
-            religion: religion.text ?? "",
-            staffCategory: "Category",
-            type: type.text ?? "",
-            uanNumber: nil,
-            classType: nil,
-            country: country.text ?? "",
-            className: Class.text ?? "",
-            emailId: emailId.text ?? "",
-            aadharNo: aadharNo.text ?? "",
-            bankAccount: nil,
-            bankIfsc: nil
-        )
-    }
+//    func collectUpdatedData() -> StaffUpdateRequest {
+//
+//        let nameComponents = (name.text ?? "")
+//            .split(separator: " ")
+//            .map(String.init)
+//
+//        let firstName = nameComponents.first ?? ""
+//        let lastName = nameComponents.dropFirst().joined(separator: " ")
+//
+//        return StaffUpdateRequest(
+//            firstName: firstName,
+//            lastName: lastName,
+//            gender: gender.text,
+//            dateOfBirth: dob.text,
+//            contactNumber: phone.text,
+//            email: emailId.text,
+//            country: country.text,
+//            religion: religion.text,
+//            bloodGroup: bloodgroup.text,
+//            currentAddress: address.text,
+//            nationalId: aadharNo.text,
+//            staffType: type.text,
+//            designation: Class.text
+//        )
+//    }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

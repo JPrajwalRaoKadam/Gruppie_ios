@@ -202,7 +202,7 @@ class APIManager {
             completion: @escaping (Result<GroupClassResponse, APIError>) -> Void
         ) {
 
-            let token = UserDefaults.standard.string(forKey: "user_role_Token") ?? ""
+            let token = SessionManager.useRoleToken ?? ""
 
             request(
                 endpoint: "group-class",

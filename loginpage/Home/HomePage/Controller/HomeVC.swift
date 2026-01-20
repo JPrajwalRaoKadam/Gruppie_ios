@@ -70,7 +70,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     private func fetchHomeData() {
-        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+        guard let token = SessionManager.useRoleToken else {
             print("❌ Role token missing")
             return
         }
@@ -234,13 +234,15 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         self.featureIcon = featureIcon
         switch featureIcon.name {
         case "Staff Diary":
-            fetchStaffDataAndNavigate()
+//            fetchStaffDataAndNavigate()
+            break
         case "Calendar":
             navigateToCalendarViewController()
         case "Management Register":
             navigateToMangementViewController()
         case "Staff Register":
-            fetchStaffDataAndNavigate()
+            navigateToStaffRegister()
+//            fetchStaffDataAndNavigate()
         case "Staff Attendance":
                 navigateToStaffAttendance()
         case "Feed Back":
@@ -257,13 +259,16 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 return
             }
         case "Student Register":
-            fetchGroupClasses()
-            navigateToStudentRegister(groupClasses: groupClasses)
+            fetchGroupClasses {
+                self.navigateToStudentRegister(groupClasses: self.groupClasses)
+            }
         case "Student Diary":
             fetchSubjectDataAndNavigate()
             fetchStudentDataAndNavigate()
         case "Subject Register":
-            fetchSubjectDataAndNavigate()
+            fetchGroupClasses {
+                self.navigateToSubjectRegister(groupClass: self.groupClasses)
+            }
         case "Marks Card":
             fetchSubjectDataAndNavigate()
         case "Gallery":
@@ -302,8 +307,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     
-    private func fetchGroupClasses() {
-        APIManager.shared.getGroupClasses(page: 1, limit: 5) { [weak self] result in
+    private func fetchGroupClasses(completion: @escaping () -> Void) {
+        APIManager.shared.getGroupClasses(page: 1, limit: 10) { [weak self] result in
             guard let self = self else { return }
 
             switch result {
@@ -315,8 +320,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 print("Saved Classes:", self.groupClasses.count)
                 print("Saved Pagination:", self.pagination ?? "nil")
 
-                // reload UI here
-                // self.tableView.reloadData()
+                completion() // ✅ Notify caller that data is ready
 
             case .failure(let error):
                 print("API Error:", error)
@@ -618,7 +622,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                         print("🚀 Navigating to SubjectViewController with Team IDs: \(teamIds)")
                         switch self.featureIcon?.name {
                         case "Subject Register":
-                            self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
+//                            self.navigateToSubjectRegister(subjects: subjects, teamIds: teamIds)
+                            break
                         case "Marks Card":
                             break
 //                            self.navigateToMarksCard(subjects: subjects, teamIds: teamIds)
@@ -627,7 +632,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                         case "Time Table":
                             self.subjects = subjects
                             self.teamIds = teamIds
-                            self.fetchStaffDataAndNavigate()
+//                            self.fetchStaffDataAndNavigate()
                         case "Fee Payment New":
                             self.navigateToFeesNew(subjects: subjects)
                         case "Feed Back":
@@ -719,20 +724,13 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         }.resume()
     }
         
-    func navigateToSubjectRegister(subjects: [SubjectData], teamIds: [String]) {
+    func navigateToSubjectRegister(groupClass: [GroupClass]) {
         let storyboard = UIStoryboard(name: "Subject", bundle: nil)
         guard let subjectRegisterVC = storyboard.instantiateViewController(withIdentifier: "SubjectViewController") as? SubjectViewController else {
             print("❌ Failed to instantiate SubjectViewController")
             return
         }
-        
-        subjectRegisterVC.subjects = subjects
-        subjectRegisterVC.token = TokenManager.shared.getToken() ?? ""
-        subjectRegisterVC.groupId = school?.id ?? ""
-        subjectRegisterVC.teamIds = teamIds
-        
-        print("✅ Passing Team IDs to SubjectViewController: \(teamIds)")
-        print("✅ Passing Group ID to SubjectViewController: \(subjectRegisterVC.groupId)") // Fix: Use subjectRegisterVC.groupId
+        subjectRegisterVC.groupClasses = groupClass
         
         self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
     }
@@ -769,7 +767,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     func navigateToMangementViewController() {
         print("Home stack tapped, calling API...")
         
-        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+        guard let token = SessionManager.useRoleToken else {
             print("Token is missing")
             return
         }
@@ -787,7 +785,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         }
     }
     
-    private func fetchMembersData(completion: @escaping ([Member]) -> Void) {
+    private func fetchMembersData(completion: @escaping ([Member]) -> Void) { 
         var allMembers: [Member] = []
         let dispatchGroup = DispatchGroup()
         
@@ -852,124 +850,123 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 
     }
     
-    private func fetchStaffDataAndNavigate() {
-            guard let token = TokenManager.shared.getToken(), !token.isEmpty, let groupId = school?.id, !groupId.isEmpty else {
-                print("Token or Group ID is missing")
-                return
-            }
-            
-            let teachingURL = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
-            let dispatchGroup = DispatchGroup()
-            var teachingStaff: [Staff] = []
-            
-            dispatchGroup.enter()
-            fetchStaffData(from: teachingURL, token: token) { staff in
-                teachingStaff = staff
-                dispatchGroup.leave()
-            }
-            dispatchGroup.notify(queue: .main) {
-                switch self.featureIcon?.name {
-                case "Staff Diary":
-                    self.navigateToStaffDiary(teachingStaff: teachingStaff)
-                case "Staff Register":
-                    self.navigateToStaffRegister(teachingStaff: teachingStaff)
-                case "Time Table":
-                    self.navigateToTimeTable(staffDetails: teachingStaff)
-                default:
-                    print("No navigation configured for type: \(self.featureIcon?.name)")
-                }
-            }
-        }
+//    private func fetchStaffDataAndNavigate() {
+//            guard let token = TokenManager.shared.getToken(), !token.isEmpty, let groupId = school?.id, !groupId.isEmpty else {
+//                print("Token or Group ID is missing")
+//                return
+//            }
+//            
+//            let teachingURL = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
+//            let dispatchGroup = DispatchGroup()
+//            var teachingStaff: [Staff] = []
+//            
+//            dispatchGroup.enter()
+//            fetchStaffData(from: teachingURL, token: token) { staff in
+//                teachingStaff = staff
+//                dispatchGroup.leave()
+//            }
+//            dispatchGroup.notify(queue: .main) {
+//                switch self.featureIcon?.name {
+//                case "Staff Diary":
+////                    self.navigateToStaffDiary(teachingStaff: teachingStaff)
+//                    break
+//                case "Staff Register":
+////                    self.navigateToStaffRegister(teachingStaff: teachingStaff)
+//                    break
+//                case "Time Table":
+//                    self.navigateToTimeTable(staffDetails: teachingStaff)
+//                default:
+//                    print("No navigation configured for type: \(self.featureIcon?.name)")
+//                }
+//            }
+//        }
     
-    private func navigateToStaffDiary(teachingStaff: [Staff]) {
-            print("Teaching Staff List:")
-            for staff in teachingStaff {
-                print("qqqqqqqqqqqName: \(staff.name), Phone: \(staff.phone)")
-            }
-
-            if currentRole == "parent" || currentRole == "student" || currentRole == "admin" {
-                let storyboard = UIStoryboard(name: "StaffDiary", bundle: nil)
-                guard let staffDiaryVC = storyboard.instantiateViewController(withIdentifier: "StaffDiaryVc") as? StaffDiaryVc else {
-                    print("Failed to instantiate StaffDiaryVc")
-                    return
-                }
-
-                staffDiaryVC.token = TokenManager.shared.getToken() ?? ""
-                staffDiaryVC.groupIds = school?.id ?? ""
-                staffDiaryVC.teachingStaffData = teachingStaff
-                staffDiaryVC.currentRole = self.currentRole
-
-                print("✅ Assigned \(teachingStaff.count) staff to staffDiaryVC")
-                navigationController?.pushViewController(staffDiaryVC, animated: true)
-
-            } else if currentRole == "teacher" {
-                let storyboard = UIStoryboard(name: "StaffDiary", bundle: nil)
-                guard let staffDaysVC = storyboard.instantiateViewController(withIdentifier: "StaffDaysViewController") as? StaffDaysViewController else {
-                    print("Failed to instantiate StaffDaysViewController")
-                    return
-                }
-
-                staffDaysVC.token = TokenManager.shared.getToken() ?? ""
-                staffDaysVC.groupIds = school?.id ?? ""
-                staffDaysVC.currentRole = self.currentRole
-                staffDaysVC.teachingStaff = teachingStaff
-
-                if let teacherUserId = teachingStaff.first?.userId {
-                    staffDaysVC.userId = teacherUserId
-                    print("👨‍🏫 Passed userId to StaffDaysViewController: \(teacherUserId)")
-                } else {
-                    print("❌ No userId found in teachingStaff")
-                }
-
-                print("✅ Navigating directly to StaffDaysViewController for staff role")
-                navigationController?.pushViewController(staffDaysVC, animated: true)
-            }
-        }
+//    private func navigateToStaffDiary(teachingStaff: [Staff]) {
+//            print("Teaching Staff List:")
+//            for staff in teachingStaff {
+//                print("qqqqqqqqqqqName: \(staff.name), Phone: \(staff.phone)")
+//            }
+//
+//            if currentRole == "parent" || currentRole == "student" || currentRole == "admin" {
+//                let storyboard = UIStoryboard(name: "StaffDiary", bundle: nil)
+//                guard let staffDiaryVC = storyboard.instantiateViewController(withIdentifier: "StaffDiaryVc") as? StaffDiaryVc else {
+//                    print("Failed to instantiate StaffDiaryVc")
+//                    return
+//                }
+//
+//                staffDiaryVC.token = TokenManager.shared.getToken() ?? ""
+//                staffDiaryVC.groupIds = school?.id ?? ""
+//                staffDiaryVC.teachingStaffData = teachingStaff
+//                staffDiaryVC.currentRole = self.currentRole
+//
+//                print("✅ Assigned \(teachingStaff.count) staff to staffDiaryVC")
+//                navigationController?.pushViewController(staffDiaryVC, animated: true)
+//
+//            } else if currentRole == "teacher" {
+//                let storyboard = UIStoryboard(name: "StaffDiary", bundle: nil)
+//                guard let staffDaysVC = storyboard.instantiateViewController(withIdentifier: "StaffDaysViewController") as? StaffDaysViewController else {
+//                    print("Failed to instantiate StaffDaysViewController")
+//                    return
+//                }
+//
+//                staffDaysVC.token = TokenManager.shared.getToken() ?? ""
+//                staffDaysVC.groupIds = school?.id ?? ""
+//                staffDaysVC.currentRole = self.currentRole
+//                staffDaysVC.teachingStaff = teachingStaff
+//
+//                if let teacherUserId = teachingStaff.first?.userId {
+//                    staffDaysVC.userId = teacherUserId
+//                    print("👨‍🏫 Passed userId to StaffDaysViewController: \(teacherUserId)")
+//                } else {
+//                    print("❌ No userId found in teachingStaff")
+//                }
+//
+//                print("✅ Navigating directly to StaffDaysViewController for staff role")
+//                navigationController?.pushViewController(staffDaysVC, animated: true)
+//            }
+//        }
     
-    private func fetchStaffData(from urlString: String, token: String, completion: @escaping ([Staff]) -> Void) {
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL: \(urlString)")
-            completion([])
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                print("Error fetching staff data: \(error.localizedDescription)")
-                completion([])
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received.")
-                completion([])
-                return
-            }
-            
-            do {
-                let decoder = JSONDecoder()
-                let responseModel = try decoder.decode(StaffResponse.self, from: data)
-                completion(responseModel.data)
-            } catch {
-                print("Error decoding staff data: \(error.localizedDescription)")
-                completion([])
-            }
-        }.resume()
-    }
+//    private func fetchStaffData(from urlString: String, token: String, completion: @escaping ([Staff]) -> Void) {
+//        guard let url = URL(string: urlString) else {
+//            print("Invalid URL: \(urlString)")
+//            completion([])
+//            return
+//        }
+//        
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "GET"
+//        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+//        
+//        URLSession.shared.dataTask(with: request) { data, _, error in
+//            if let error = error {
+//                print("Error fetching staff data: \(error.localizedDescription)")
+//                completion([])
+//                return
+//            }
+//            
+//            guard let data = data else {
+//                print("No data received.")
+//                completion([])
+//                return
+//            }
+//            
+//            do {
+//                let decoder = JSONDecoder()
+//                let responseModel = try decoder.decode(StaffResponse.self, from: data)
+//                completion(responseModel.data)
+//            } catch {
+//                print("Error decoding staff data: \(error.localizedDescription)")
+//                completion([])
+//            }
+//        }.resume()
+//    }
     
-    private func navigateToStaffRegister(teachingStaff: [Staff]) {
+    private func navigateToStaffRegister() {
         let storyboard = UIStoryboard(name: "Staff", bundle: nil)
         guard let staffRegisterVC = storyboard.instantiateViewController(withIdentifier: "StaffRegister") as? StaffRegister else {
             print("Failed to instantiate StaffRegister view controller")
             return
         }
-        staffRegisterVC.token = TokenManager.shared.getToken() ?? ""
-        staffRegisterVC.groupIds = school?.id ?? ""
-        staffRegisterVC.teachingStaffData = teachingStaff
         navigationController?.pushViewController(staffRegisterVC, animated: true)
     }
     

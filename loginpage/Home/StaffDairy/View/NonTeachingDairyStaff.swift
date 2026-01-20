@@ -19,17 +19,17 @@ class NonTeachingDairyStaff: UITableViewCell {
     }
 
     // Configure the cell with staff data
-    func configureCell(with staff: Staff) {
-        name.text = staff.name
-        designation.text = staff.designation
-
-        // Set up image or fallback
-        if let imageURL = staff.imageURL, let url = URL(string: imageURL) {
-            loadImage(from: url)
-        } else {
-            showFallbackImage(for: staff.name)
-        }
-    }
+//    func configureCell(with staff: Staff) {
+//        name.text = staff.name
+//        designation.text = staff.designation
+//
+//        // Set up image or fallback
+//        if let imageURL = staff.imageURL, let url = URL(string: imageURL) {
+//            loadImage(from: url)
+//        } else {
+//            showFallbackImage(for: staff.name)
+//        }
+//    }
 
     // Load the image from the URL asynchronously
     private func loadImage(from url: URL) {
