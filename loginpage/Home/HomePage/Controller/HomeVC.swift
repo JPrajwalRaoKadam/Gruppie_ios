@@ -132,7 +132,6 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             return
         }
         feedVC.currentRole = self.currentRole
-        feedVC.schoolId = school?.id ?? ""
         self.navigationController?.pushViewController(feedVC, animated: true)
     }
     

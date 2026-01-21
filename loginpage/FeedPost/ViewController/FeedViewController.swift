@@ -5,9 +5,24 @@
 //  Created by Prajwal Rao Kadam on 30/12/24.
 //
 
+//
+//  FeedViewController.swift
+//  YourAppName
+//
+//  Created by Prajwal Rao Kadam on 30/12/24.
+//
+
 import UIKit
 
-class FeedViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate, PostActivityDelegate {
+class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,UIScrollViewDelegate,PostActivityDelegate {
+    func didTapLikeButton(cell: FeedPostTableViewCell) {
+        
+    }
+    
+    func didTapMedia(cell: FeedPostTableViewCell, url: String) {
+        
+    }
+    
     
     // MARK: - Outlets
     @IBOutlet weak var feedTableView: UITableView!
@@ -15,18 +30,17 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     @IBOutlet weak var viewBottomConstraint: NSLayoutConstraint!
     
     // MARK: - Properties
-    var likeUnlikeResponse: LikeStatus?
-    var activityIndicator: UIActivityIndicatorView!
-    var schoolId: String = ""
-    let authKey = TokenManager.shared.getToken()!
     var loadingIndicator: UIActivityIndicatorView!
     var lastContentOffset: CGFloat = 0
     var currentRole: String?
     var currentPage = 1
     var isLoading = false
-    var response: PostResponse?
-    var likeUnlikeStatus: String?
     var hasMorePages = true
+    
+    var feedResponse: FeedResponse?
+    var feedPosts: [FeedPost] = []
+    
+    let authKey = TokenManager.shared.getToken() ?? ""
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {
@@ -34,7 +48,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         setupUI()
         setupTableView()
         setupRefreshControl()
-        setupKeyboardDismiss()
+//        setupKeyboardDismiss()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -45,289 +59,237 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     // MARK: - UI Setup
     private func setupUI() {
-        self.navigationController?.isNavigationBarHidden = true
+        navigationController?.isNavigationBarHidden = true
         feedTableView.layer.cornerRadius = 10
-        // Role-based UI setup
         bottomLeftButton.isHidden = (currentRole == "parent" || currentRole == "teacher")
         
-        // Loading indicator setup
         loadingIndicator = UIActivityIndicatorView(style: .large)
         loadingIndicator.center = view.center
         loadingIndicator.hidesWhenStopped = true
-        loadingIndicator.color = .black
         view.addSubview(loadingIndicator)
     }
     
     private func setupTableView() {
-        feedTableView.register(UINib(nibName: "FeedPostTableViewCell", bundle: nil), forCellReuseIdentifier: "FeedPostTableViewCell")
+        feedTableView.register(
+            UINib(nibName: "FeedPostTableViewCell", bundle: nil),
+            forCellReuseIdentifier: "FeedPostTableViewCell"
+        )
         feedTableView.rowHeight = UITableView.automaticDimension
         feedTableView.estimatedRowHeight = 400
         feedTableView.tableFooterView = UIView()
     }
     
     private func setupRefreshControl() {
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-        feedTableView.refreshControl = refreshControl
+        let refresh = UIRefreshControl()
+        refresh.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        feedTableView.refreshControl = refresh
     }
     
     private func setupTabBar() {
-        CustomTabManager.addTabBar(self,
-                                 isRemoveLast: false,
-                                 selectIndex: 1,
-                                 bottomConstraint: &self.viewBottomConstraint)
+        CustomTabManager.addTabBar(
+            self,
+            isRemoveLast: false,
+            selectIndex: 1,
+            bottomConstraint: &viewBottomConstraint
+        )
     }
     
-    private func setupKeyboardDismiss() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardd))
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
+//    private func setupKeyboardDismiss() {
+//        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+//        tap.cancelsTouchesInView = false
+//        view.addGestureRecognizer(tap)
+//    }
     
-    @objc private func dismissKeyboardd() {
-        view.endEditing(true)
-    }
+//    @objc private func dismissKeyboard() {
+//        view.endEditing(true)
+//    }
     
     // MARK: - Data Loading
     @objc private func loadInitialData() {
         currentPage = 1
         hasMorePages = true
+        feedPosts.removeAll()
+        feedTableView.reloadData()
         loadingIndicator.startAnimating()
-        fetchPostsWithAuth(page: currentPage) { [weak self] result in
-            self?.handleDataResponse(result: result)
-        }
+        fetchFeed(page: currentPage)
     }
     
     @objc private func refreshData() {
         currentPage = 1
         hasMorePages = true
-        fetchPostsWithAuth(page: currentPage) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.feedTableView.refreshControl?.endRefreshing()
-            }
-            self?.handleDataResponse(result: result)
-        }
+        fetchFeed(page: currentPage, isRefresh: true)
     }
     
-    func loadMorePosts() {
-        guard !isLoading && hasMorePages else { return }
+    func getFeedView(
+        page: Int,
+        limit: Int,
+        token: String,
+        completion: @escaping (Result<FeedResponse, APIManager.APIError>) -> Void
+    ) {
+        let headers = [
+            "Authorization": "Bearer \(token)"
+        ]
+        
+        let queryParams = [
+            "page": "\(page)",
+            "limit": "\(limit)"
+        ]
+        
+        APIManager.shared.request(
+            endpoint: "feed-view",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers,
+            completion: completion
+        )
+    }
+    
+    private func fetchFeed(page: Int, isRefresh: Bool = false) {
+        guard let token = SessionManager.useRoleToken else {
+            loadingIndicator.stopAnimating()
+            return
+        }
         
         isLoading = true
-        currentPage += 1
         
-        let spinner = UIActivityIndicatorView(style: .medium)
-        spinner.startAnimating()
-        spinner.frame = CGRect(x: 0, y: 0, width: feedTableView.bounds.width, height: 44)
-        feedTableView.tableFooterView = spinner
-        
-        fetchPostsWithAuth(page: currentPage) { [weak self] result in
+        getFeedView(page: page, limit: 10, token: token) { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
+                self.loadingIndicator.stopAnimating()
+                self.feedTableView.refreshControl?.endRefreshing()
                 self.isLoading = false
-                self.feedTableView.tableFooterView = nil
                 
                 switch result {
-                case .success(let fetchedResponse):
-                    self.handleNewPageResponse(fetchedResponse)
+                case .success(let response):
+                    self.feedResponse = response
+                    
+                    if page == 1 {
+                        self.feedPosts = response.data
+                    } else {
+                        self.feedPosts.append(contentsOf: response.data)
+                    }
+                    
+                    self.hasMorePages =
+                    response.pagination.currentPage < response.pagination.totalPages
+                    
+                    self.feedTableView.reloadData()
+                    
                 case .failure(let error):
-                    print("Failed to load more posts: \(error.localizedDescription)")
-                    self.currentPage -= 1
+                    print("❌ Feed API Error:", error)
+                    self.showErrorState()
                 }
             }
         }
     }
     
-    private func handleDataResponse(result: Result<PostResponse, Error>) {
-        DispatchQueue.main.async {
-            self.loadingIndicator.stopAnimating()
-            
-            switch result {
-            case .success(let fetchedResponse):
-                self.response = fetchedResponse
-                // Changed from currentPage/totalPages to page number comparison
-                self.hasMorePages = self.currentPage < fetchedResponse.totalNumberOfPages
-                self.feedTableView.reloadData()
-            case .failure(let error):
-                print("Failed to fetch data: \(error.localizedDescription)")
-                self.showErrorState()
-            }
-        }
+    func loadMorePosts() {
+        guard !isLoading, hasMorePages else { return }
+        currentPage += 1
+        fetchFeed(page: currentPage)
     }
     
-    private func handleNewPageResponse(_ fetchedResponse: PostResponse) {
-        guard !fetchedResponse.data.isEmpty else {
-            hasMorePages = false
-            return
-        }
-        
-        response?.data.append(contentsOf: fetchedResponse.data)
-        // Removed page number assignments since they're not in the model
-        hasMorePages = currentPage < fetchedResponse.totalNumberOfPages
-        
-        feedTableView.reloadData()
-    }
-    
-    // MARK: - TableView DataSource & Delegate
+    // MARK: - TableView DataSource
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let count = response?.data.count ?? 0
+    func tableView(_ tableView: UITableView,
+                   numberOfRowsInSection section: Int) -> Int {
+        let count = feedPosts.count
         tableView.backgroundView = count == 0 ? createEmptyStateView() : nil
         tableView.separatorStyle = count == 0 ? .none : .singleLine
         return count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "FeedPostTableViewCell",
-                                                     for: indexPath) as? FeedPostTableViewCell,
-              let post = response?.data[indexPath.row] else {
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "FeedPostTableViewCell",
+            for: indexPath
+        ) as? FeedPostTableViewCell else {
             return UITableViewCell()
         }
         
-        cell.post = post
+        let post = feedPosts[indexPath.row]
         cell.delegate = self
-        
-        if post.fileType == "youtube" {
-            cell.videoPlayerURL = post.video
-        } else if let fileName = post.fileName?.first, !fileName.isEmpty {
-            cell.videoPlayerURL = fileName
-        }
-        
         cell.configure(with: post)
         
-        cell.commentAction = { [weak self] in
-            self?.navigateToComments(groupId: cell.grpId, postId: cell.postId)
-        }
+//        cell.commentAction = { [weak self] in
+//            self?.navigateToComments(
+//                groupId: post.team?.id,
+//                postId: post.postId
+//            )
+//        }
         
         return cell
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.alpha = 0
-        UIView.animate(withDuration: 0.3) {
-            cell.alpha = 1
-        }
-        
-        guard let response = response else { return }
-        if indexPath.row == response.data.count - 3 && hasMorePages && !isLoading {
+    func tableView(_ tableView: UITableView,
+                   willDisplay cell: UITableViewCell,
+                   forRowAt indexPath: IndexPath) {
+        if indexPath.row == feedPosts.count - 3 {
             loadMorePosts()
         }
     }
     
-    // MARK: - ScrollView Delegate
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        lastContentOffset = scrollView.contentOffset.y
-    }
-    
-    // MARK: - Actions
-    @IBAction func backButtonAction(_ sender: Any) {
-        navigationController?.popViewController(animated: true)
-    }
-    
-    @IBAction func bottomLeftButtonAction(_ sender: Any) {
-        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
-        guard let addFeedVC = storyboard.instantiateViewController(withIdentifier: "AddFeedVC") as? AddFeedVC else {
-            print("ViewController with identifier 'AddFeedVC' not found.")
-            return
-        }
-        addFeedVC.groupID = self.schoolId
-        addFeedVC.response = self.response
-        navigationController?.pushViewController(addFeedVC, animated: true)
-    }
-    
     // MARK: - PostActivityDelegate
     func didTapReadMore(text: String, from cell: FeedPostTableViewCell) {
-        let fullTextVC = FullTextViewController()
-        fullTextVC.fullText = text
-        fullTextVC.modalPresentationStyle = .pageSheet
+        let vc = FullTextViewController()
+        vc.fullText = text
+        vc.modalPresentationStyle = .pageSheet
         
-        if let sheet = fullTextVC.sheetPresentationController {
+        if let sheet = vc.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.prefersGrabberVisible = true
         }
         
-        present(fullTextVC, animated: true)
+        present(vc, animated: true)
     }
     
-    func didTapLikeButton(cell: FeedPostTableViewCell) {
-        guard let indexPath = feedTableView.indexPath(for: cell),
-              let groupId = cell.grpId,
-              let postId = cell.postId else {
-            print("Missing required parameters for like action")
-            return
-        }
-        
-        likePost(groupId: groupId, postId: postId) { [weak self] response in
-            guard let self = self,
-                  let response = response,
-                  let postIndex = self.response?.data.firstIndex(where: { $0.id == postId }) else {
-                return
-            }
-            
-            DispatchQueue.main.async {
-                var post = self.response!.data[postIndex]
-                post.isLiked = response.status.lowercased() == "liked"
-                post.likes += post.isLiked ? 1 : -1
-                self.response?.data[postIndex] = post
-                self.feedTableView.reloadRows(at: [indexPath], with: .none)
-            }
-        }
-    }
+//    func didTapLikeButton(cell: FeedPostTableViewCell) {
+//        guard let indexPath = feedTableView.indexPath(for: cell),
+//              let postId = cell.postId,
+//              let groupId = cell.grpId else { return }
+//        
+//        likePost(groupId: groupId, postId: postId) { [weak self] response in
+//            guard let self = self,
+//                  let response = response,
+//                  let index = self.feedPosts.firstIndex(where: { $0.postId == postId }) else {
+//                return
+//            }
+//            
+//            DispatchQueue.main.async {
+//                if response.status.lowercased() == "liked" {
+//                    self.feedPosts[index].likeCount += 1
+//                } else {
+//                    self.feedPosts[index].likeCount =
+//                    max(0, self.feedPosts[index].likeCount - 1)
+//                }
+//                
+//                self.feedTableView.reloadRows(at: [indexPath], with: .none)
+//            }
+//        }
+//    }
     
     func taptoNaviagteWithURL(cell: FeedPostTableViewCell, videoURL: String) {
         let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
-        guard let videoViewController = storyboard.instantiateViewController(withIdentifier: "VideoPlayerVC") as? VideoPlayerVC else {
-            print("ViewController with identifier 'VideoPlayerVC' not found.")
-            return
-        }
-        videoViewController.videoPlayerURL = videoURL
-        navigationController?.pushViewController(videoViewController, animated: true)
+        let vc = storyboard.instantiateViewController(
+            withIdentifier: "VideoPlayerVC"
+        ) as! VideoPlayerVC
+        vc.videoPlayerURL = videoURL
+        navigationController?.pushViewController(vc, animated: true)
     }
     
-    // MARK: - API Calls
-    func fetchPostsWithAuth(page: Int, completion: @escaping (Result<PostResponse, Error>) -> Void) {
-        let urlString = APIManager.shared.baseURL + "groups/\(schoolId)/all/post/get?page=\(page)"
-        guard let url = URL(string: urlString) else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(authKey)", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                completion(.failure(NSError(domain: "Invalid Response", code: 401, userInfo: nil)))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No Data", code: 404, userInfo: nil)))
-                return
-            }
-            
-            do {
-                let decodedResponse = try JSONDecoder().decode(PostResponse.self, from: data)
-                completion(.success(decodedResponse))
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
-    
-    func likePost(groupId: String, postId: String, completion: @escaping (LikeStatus?) -> Void) {
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/posts/\(postId)/like"
+    // MARK: - Like API
+    func likePost(groupId: String,
+                  postId: String,
+                  completion: @escaping (LikeStatus?) -> Void) {
+        
+        let urlString = APIManager.shared.baseURL +
+        "groups/\(groupId)/posts/\(postId)/like"
+        
         guard let url = URL(string: urlString) else {
             completion(nil)
             return
@@ -338,88 +300,71 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         request.addValue("Bearer \(authKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
+        URLSession.shared.dataTask(with: request) { data, _, _ in
+            guard let data = data else {
                 completion(nil)
                 return
             }
             
-            do {
-                let response = try JSONDecoder().decode(LikeStatus.self, from: data)
-                completion(response)
-            } catch {
-                completion(nil)
-            }
+            let response = try? JSONDecoder().decode(LikeStatus.self, from: data)
+            completion(response)
         }.resume()
     }
     
-    // MARK: - Helper Methods
-    private func navigateToComments(groupId: String?, postId: String?) {
-        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
-
-        guard let commentsVC = storyboard.instantiateViewController(withIdentifier: "CommentsVC") as? CommentsVC,
-              let groupId = groupId,
-              let postId = postId else {
-            return
-        }
-
-        commentsVC.grpID = groupId
-        commentsVC.postID = postId
-
-        commentsVC.modalPresentationStyle = .pageSheet
-
-        if let sheet = commentsVC.sheetPresentationController {
-            sheet.detents = [.large()]          // ⬅️ almost full screen
-            sheet.prefersGrabberVisible = true
-            sheet.prefersScrollingExpandsWhenScrolledToEdge = true
-        }
-
-        present(commentsVC, animated: true)
-    }
+    // MARK: - Navigation
+//    private func navigateToComments(groupId: String?, postId: String?) {
+//        guard let groupId = groupId,
+//              let postId = postId else { return }
+//        
+//        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+//        let vc = storyboard.instantiateViewController(
+//            withIdentifier: "CommentsVC"
+//        ) as! CommentsVC
+//        
+//        vc.grpID = groupId
+//        vc.postID = postId
+//        vc.modalPresentationStyle = .pageSheet
+//        
+//        if let sheet = vc.sheetPresentationController {
+//            sheet.detents = [.large()]
+//            sheet.prefersGrabberVisible = true
+//        }
+//        
+//        present(vc, animated: true)
+//    }
     
+    // MARK: - Empty / Error States
     private func createEmptyStateView() -> UIView {
-        let emptyView = UIView(frame: CGRect(x: 0, y: 0, width: feedTableView.bounds.width, height: feedTableView.bounds.height))
-        
-        let messageLabel = UILabel()
-        messageLabel.text = "No posts available"
-        messageLabel.textColor = .gray
-        messageLabel.textAlignment = .center
-        messageLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        emptyView.addSubview(messageLabel)
+        let view = UIView(frame: feedTableView.bounds)
+        let label = UILabel()
+        label.text = "No posts available"
+        label.textColor = .gray
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
         
         NSLayoutConstraint.activate([
-            messageLabel.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor),
-            messageLabel.centerYAnchor.constraint(equalTo: emptyView.centerYAnchor)
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
         
-        return emptyView
+        return view
     }
     
     private func showErrorState() {
-        let errorView = UIView(frame: CGRect(x: 0, y: 0, width: feedTableView.bounds.width, height: feedTableView.bounds.height))
+        let view = UIView(frame: feedTableView.bounds)
+        let label = UILabel()
+        label.text = "Failed to load posts"
+        label.textColor = .red
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
         
-        let errorLabel = UILabel()
-        errorLabel.text = "Failed to load posts"
-        errorLabel.textColor = .red
-        errorLabel.textAlignment = .center
-        errorLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        let retryButton = UIButton(type: .system)
-        retryButton.setTitle("Retry", for: .normal)
-        retryButton.addTarget(self, action: #selector(loadInitialData), for: .touchUpInside)
-        retryButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        errorView.addSubview(errorLabel)
-        errorView.addSubview(retryButton)
-        
+        view.addSubview(label)
         NSLayoutConstraint.activate([
-            errorLabel.centerXAnchor.constraint(equalTo: errorView.centerXAnchor),
-            errorLabel.centerYAnchor.constraint(equalTo: errorView.centerYAnchor, constant: -20),
-            retryButton.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 10),
-            retryButton.centerXAnchor.constraint(equalTo: errorView.centerXAnchor)
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
         
-        feedTableView.backgroundView = errorView
+        feedTableView.backgroundView = view
     }
 }
