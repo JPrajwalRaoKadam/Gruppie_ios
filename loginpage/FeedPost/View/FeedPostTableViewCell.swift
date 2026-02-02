@@ -127,6 +127,15 @@ final class FeedPostTableViewCell: UITableViewCell {
         guard let text = descriptionLabel.text else { return }
         delegate?.didTapReadMore(text: text, from: self)
     }
+    
+    @IBAction func commentAction(_ sender: UIButton) {
+        
+    }
+    
+    @IBAction func playPauseAction(_ sender: UIButton) {
+        
+    }
+    
 }
 
 // MARK: - UICollectionView Delegate/DataSource

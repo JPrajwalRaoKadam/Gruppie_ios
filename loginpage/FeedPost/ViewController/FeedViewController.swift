@@ -15,15 +15,7 @@
 import UIKit
 
 class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,UIScrollViewDelegate,PostActivityDelegate {
-    func didTapLikeButton(cell: FeedPostTableViewCell) {
-        
-    }
-    
-    func didTapMedia(cell: FeedPostTableViewCell, url: String) {
-        
-    }
-    
-    
+
     // MARK: - Outlets
     @IBOutlet weak var feedTableView: UITableView!
     @IBOutlet weak var bottomLeftButton: UIButton!
@@ -248,38 +240,54 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
         present(vc, animated: true)
     }
     
-//    func didTapLikeButton(cell: FeedPostTableViewCell) {
-//        guard let indexPath = feedTableView.indexPath(for: cell),
-//              let postId = cell.postId,
-//              let groupId = cell.grpId else { return }
-//        
-//        likePost(groupId: groupId, postId: postId) { [weak self] response in
+    // MARK: - PostActivityDelegate
+
+    func didTapMedia(cell: FeedPostTableViewCell, url: String) {
+
+        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+        // ⚠️ Use same storyboard where VideoPlayerVC exists
+
+        guard let vc = storyboard.instantiateViewController(
+            withIdentifier: "VideoPlayerVC"
+        ) as? VideoPlayerVC else {
+            print("❌ VideoPlayerVC not found in storyboard")
+            return
+        }
+
+        vc.mediaURL = url   // Pass media URL
+
+        navigationController?.pushViewController(vc, animated: true)
+    }
+
+
+    func didTapLikeButton(cell: FeedPostTableViewCell) {
+//        guard let indexPath = feedTableView.indexPath(for: cell) else { return }
+//
+//        let post = feedPosts[indexPath.row]
+//
+//        likePost(
+//            groupId: post.groupId,
+//            postId: post.postId
+//        ) { [weak self] response in
+//
 //            guard let self = self,
-//                  let response = response,
-//                  let index = self.feedPosts.firstIndex(where: { $0.postId == postId }) else {
-//                return
-//            }
-//            
+//                  let response = response else { return }
+//
 //            DispatchQueue.main.async {
+//
 //                if response.status.lowercased() == "liked" {
-//                    self.feedPosts[index].likeCount += 1
+//                    self.feedPosts[indexPath.row].likeCount += 1
 //                } else {
-//                    self.feedPosts[index].likeCount =
-//                    max(0, self.feedPosts[index].likeCount - 1)
+//                    self.feedPosts[indexPath.row].likeCount =
+//                        max(0, self.feedPosts[indexPath.row].likeCount - 1)
 //                }
-//                
-//                self.feedTableView.reloadRows(at: [indexPath], with: .none)
+//
+//                self.feedTableView.reloadRows(
+//                    at: [indexPath],
+//                    with: .none
+//                )
 //            }
 //        }
-//    }
-    
-    func taptoNaviagteWithURL(cell: FeedPostTableViewCell, videoURL: String) {
-        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
-        let vc = storyboard.instantiateViewController(
-            withIdentifier: "VideoPlayerVC"
-        ) as! VideoPlayerVC
-        vc.videoPlayerURL = videoURL
-        navigationController?.pushViewController(vc, animated: true)
     }
     
     // MARK: - Like API
