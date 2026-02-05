@@ -763,77 +763,6 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
         }
     
-    func navigateToMangementViewController() {
-        print("Home stack tapped, calling API...")
-        
-        guard let token = SessionManager.useRoleToken else {
-            print("Token is missing")
-            return
-        }
-        
-        let groupId = school?.id ?? ""
-        print("Navigating to Management Register with:")
-        print("Group ID: \(groupId)")
-        print("Token: \(token)")
-
-        fetchMembersData { [weak self] members in
-            guard let self = self else { return }
-            
-            print("Received members count: \(members.count)")
-            self.navigateToManagementViewController(members: members)
-        }
-    }
-    
-    private func fetchMembersData(completion: @escaping ([Member]) -> Void) { 
-        var allMembers: [Member] = []
-        let dispatchGroup = DispatchGroup()
-        
-        dispatchGroup.enter()
-        fetchMembers(for: school?.id ?? "", token: TokenManager.shared.getToken() ?? "") { members in
-            allMembers.append(contentsOf: members)
-            dispatchGroup.leave()
-        }
-        
-        dispatchGroup.notify(queue: .main) {
-            completion(allMembers)
-        }
-    }
-
-    private func fetchMembers(for groupId: String, token: String, completion: @escaping ([Member]) -> Void) {
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/management/get?page=1"
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL: \(urlString)")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                print("Error fetching members data for group \(groupId): \(error.localizedDescription)")
-                completion([])
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received for group \(groupId).")
-                completion([])
-                return
-            }
-            
-            do {
-                let decoder = JSONDecoder()
-                let responseModel = try decoder.decode(MemberResponse.self, from: data)
-                completion(responseModel.data)
-            } catch {
-                print("Error decoding members data: \(error.localizedDescription)")
-                completion([])
-            }
-        }.resume()
-    }
-    
     private func navigateToManagementViewController(members: [Member]) {
         let storyboard = UIStoryboard(name: "Management", bundle: nil)
         guard let managementVC = storyboard.instantiateViewController(withIdentifier: "ManagementViewController") as? ManagementViewController else {
@@ -841,12 +770,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             return
         }
         
-        managementVC.token = TokenManager.shared.getToken()
-        managementVC.groupIds = school?.id ?? ""
-        managementVC.members = members
-        
         navigationController?.pushViewController(managementVC, animated: true)
-
     }
     
 //    private func fetchStaffDataAndNavigate() {
