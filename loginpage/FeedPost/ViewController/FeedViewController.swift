@@ -112,6 +112,15 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
         fetchFeed(page: currentPage, isRefresh: true)
     }
     
+    
+    @IBAction func addFeedAction(_ sender: Any) {
+        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+
+        if let addFeedVC = storyboard.instantiateViewController(withIdentifier: "AddFeedVC") as? AddFeedVC {
+            self.navigationController?.pushViewController(addFeedVC, animated: true)
+        }
+    }
+    
     func getFeedView(
         page: Int,
         limit: Int,
