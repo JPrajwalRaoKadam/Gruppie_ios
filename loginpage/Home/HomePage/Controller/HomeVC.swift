@@ -238,7 +238,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         case "Calendar":
             navigateToCalendarViewController()
         case "Management Register":
-            navigateToMangementViewController()
+            navigateToManagementViewController()
         case "Staff Register":
             navigateToStaffRegister()
 //            fetchStaffDataAndNavigate()
@@ -763,7 +763,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
         }
     
-    private func navigateToManagementViewController(members: [Member]) {
+    private func navigateToManagementViewController() {
         let storyboard = UIStoryboard(name: "Management", bundle: nil)
         guard let managementVC = storyboard.instantiateViewController(withIdentifier: "ManagementViewController") as? ManagementViewController else {
             print("Failed to instantiate ManagementViewController")
