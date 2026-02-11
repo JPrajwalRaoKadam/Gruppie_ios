@@ -8,6 +8,7 @@
 enum FeedSource {
     case classroom(teamId: String)
     case normalFeed
+    case noticeBoard
 }
 
 import UIKit
@@ -180,6 +181,13 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
                         } else {
                             self.hasMorePages = false
                         }
+                    case .noticeBoard:
+                        // ✅ FILTER ONLY GROUP POSTS
+                           self.feedPosts = response.data.filter { post in
+                               post.postType?.lowercased() == "group"
+                           }
+
+                           self.hasMorePages = false
                     }
                     
                     self.feedTableView.reloadData()
@@ -216,10 +224,18 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
                 ]
                 
             case .normalFeed:
-                endpoint = "feed-view"
+                endpoint = "posts"
                 queryParams = [
                     "page": "\(page)",
                     "limit": "\(limit)"
+                ]
+            case .noticeBoard:
+                endpoint = "posts"
+
+                queryParams = [
+                    "page": "\(page)",
+                    "limit": "\(limit)",
+                    "postType": "group"   // ✅ IMPORTANT
                 ]
             }
             

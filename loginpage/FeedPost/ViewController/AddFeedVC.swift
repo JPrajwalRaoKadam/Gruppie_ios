@@ -36,42 +36,41 @@ class AddFeedVC: UIViewController,
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         setupUI()
         loadTeams()
     }
 
-
     // MARK: - UI Setup
 
     private func setupUI() {
-        
+
         addFeedTableView.layer.cornerRadius = 10
-        
+
         backButton.layer.cornerRadius = backButton.frame.height / 2
         backButton.clipsToBounds = true
-        
+
         submitButton.layer.cornerRadius = 10
-        
-        addFeedTableView.register(UINib(nibName: "AddFeedInfoTableViewCell", bundle: nil), forCellReuseIdentifier: "AddFeedInfoTableViewCell")
-        addFeedTableView.register(UINib(nibName: "ClassTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassTableViewCell")
-        
+
+        addFeedTableView.register(UINib(nibName: "AddFeedInfoTableViewCell", bundle: nil),
+                                  forCellReuseIdentifier: "AddFeedInfoTableViewCell")
+
+        addFeedTableView.register(UINib(nibName: "ClassTableViewCell", bundle: nil),
+                                  forCellReuseIdentifier: "ClassTableViewCell")
+
         addFeedTableView.delegate = self
         addFeedTableView.dataSource = self
-        
+
         addFeedTableView.rowHeight = UITableView.automaticDimension
         addFeedTableView.estimatedRowHeight = 100
-        
+
         enableKeyboardDismissOnTap()
     }
-
 
     // MARK: - Actions
 
     @IBAction func backButtonAction(_ sender: Any) {
         navigationController?.popViewController(animated: true)
     }
-
 
     @IBAction func submitAction(_ sender: Any) {
 
@@ -95,8 +94,6 @@ class AddFeedVC: UIViewController,
             return
         }
 
-        let teamId = teamPosts[selectedIndexPath.row].id
-
         showLoading()
 
         // -------------------------
@@ -113,10 +110,30 @@ class AddFeedVC: UIViewController,
             "body": body,
 
             "shareInternal": "true",
-            "shareExternal": "false",
-
-            "teamId": teamId
+            "shareExternal": "false"
         ]
+
+        // -------------------------
+        // ✅ FIXED SELECTION LOGIC
+        // -------------------------
+        let row = selectedIndexPath.row
+
+        if row == 0 {
+
+            print("📌 Posting to NOTICE BOARD")
+
+            params["postType"] = "group"
+            params["teamId"] = nil
+
+        } else if row - 1 < teamPosts.count {
+
+            let team = teamPosts[row - 1]
+
+            print("📌 Posting to TEAM:", team.name ?? "")
+            print("📌 Team ID:", team.id)
+
+            params["teamId"] = team.id
+        }
 
         var files: [URL] = []
 
@@ -127,18 +144,20 @@ class AddFeedVC: UIViewController,
 
             let urlString = url.absoluteString.lowercased()
 
-            // ✅ YouTube
             if urlString.contains("youtube.com") ||
                urlString.contains("youtu.be") {
+
+                print("🎥 YouTube URL:", url.absoluteString)
 
                 params["videoUrl"] = url.absoluteString
                 params["hasAttachments"] = "false"
 
-            }
-            // ✅ Local file
-            else {
+            } else {
 
                 let mime = url.mimeType()
+
+                print("📎 File Selected:", url.lastPathComponent)
+                print("📎 MIME Type:", mime)
 
                 if mime.contains("video") ||
                    mime.contains("image") ||
@@ -160,13 +179,28 @@ class AddFeedVC: UIViewController,
         }
 
         // -------------------------
+        // ✅ PRINT FULL PAYLOAD
+        // -------------------------
+        print("\n==============================")
+        print("🚀 FINAL POST PAYLOAD")
+        print("==============================")
+        print("📄 Params:")
+        params.forEach { print("\($0.key): \($0.value)") }
+
+        print("\n📎 Files:")
+        if files.isEmpty {
+            print("No Attachments")
+        } else {
+            files.forEach { print($0.lastPathComponent) }
+        }
+        print("==============================\n")
+
+        // -------------------------
         // Upload
         // -------------------------
-        uploadMultipart(
-            token: token,
-            params: params,
-            files: files
-        ) { [weak self] result in
+        uploadMultipart(token: token,
+                        params: params,
+                        files: files) { [weak self] (result: Result<String, Error>) in
 
             guard let self else { return }
 
@@ -176,37 +210,172 @@ class AddFeedVC: UIViewController,
 
             case .success(let response):
 
-                print("✅ Response:", response)
+                print("✅ Server Response:", response)
                 self.showSuccessAndDismiss()
 
             case .failure(let error):
 
-                print("❌ Error:", error)
+                print("❌ Error:", error.localizedDescription)
 
-                self.showAlert(
-                    title: "Failed",
-                    message: error.localizedDescription
-                )
+                self.showAlert(title: "Failed",
+                               message: error.localizedDescription)
             }
         }
     }
+
+    // MARK: - Load Teams
 
     func loadTeams() {
 
         guard !isLoading else { return }
 
         isLoading = true
-        
+
         fetchTeams { [weak self] teams in
-
-            guard let self = self else { return }
-
+            guard let self else { return }
             self.teamPosts = teams
-
+            self.isLoading = false
             self.addFeedTableView.reloadData()
         }
+    }
 
+    // MARK: - Fetch Teams
 
+    func fetchTeams(completion: @escaping ([GroupClass]) -> Void) {
+
+        APIManager.shared.getGroupClasses(page: 1, limit: 10) { result in
+
+            switch result {
+
+            case .success(let response):
+                DispatchQueue.main.async {
+                    completion(response.data)
+                }
+
+            case .failure(let error):
+                print("❌ API Error:", error)
+                DispatchQueue.main.async {
+                    completion([])
+                }
+            }
+        }
+    }
+
+    // MARK: - TableView
+
+    func numberOfSections(in tableView: UITableView) -> Int { 2 }
+
+    func tableView(_ tableView: UITableView,
+                   numberOfRowsInSection section: Int) -> Int {
+        section == 0 ? 1 : teamPosts.count + 1
+    }
+
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        if indexPath.section == 0 {
+
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: "AddFeedInfoTableViewCell",
+                for: indexPath
+            ) as! AddFeedInfoTableViewCell
+
+            cell.delegate = self
+            cell.parentViewController = self
+            return cell
+        }
+
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "ClassTableViewCell",
+            for: indexPath
+        ) as! ClassTableViewCell
+
+        if indexPath.row == 0 {
+            cell.classLabel.text = "Notice Board"
+        } else {
+            let team = teamPosts[indexPath.row - 1]
+            cell.configure(teamPost: team)
+        }
+
+        let selected = selectedIndexPath == indexPath
+
+        cell.checkBox.setImage(
+            UIImage(systemName: selected
+                    ? "checkmark.rectangle.fill"
+                    : "rectangle"),
+            for: .normal
+        )
+
+        cell.checkBox.tag = indexPath.row
+        cell.checkBox.addTarget(self,
+                                action: #selector(checkboxTapped(_:)),
+                                for: .touchUpInside)
+
+        return cell
+    }
+
+    // MARK: - Checkbox
+
+    @objc func checkboxTapped(_ sender: UIButton) {
+
+        let indexPath = IndexPath(row: sender.tag, section: 1)
+
+        selectedIndexPath = (selectedIndexPath == indexPath)
+        ? nil : indexPath
+
+        addFeedTableView.reloadSections(IndexSet(integer: 1),
+                                       with: .automatic)
+    }
+
+    // MARK: - Delegates
+
+    func assignPostName(postName: String) { self.postName = postName }
+    func assignPostDescription(postDescription: String) { self.postDescription = postDescription }
+    func assignFinalUrl(finalUrl: URL) { self.documentURL = finalUrl }
+
+    // MARK: - Helpers
+
+    private func showLoading() {
+
+        let alert = UIAlertController(title: nil,
+                                      message: "Posting...",
+                                      preferredStyle: .alert)
+
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.startAnimating()
+
+        alert.view.addSubview(indicator)
+
+        NSLayoutConstraint.activate([
+            indicator.centerXAnchor.constraint(equalTo: alert.view.centerXAnchor),
+            indicator.bottomAnchor.constraint(equalTo: alert.view.bottomAnchor, constant: -20)
+        ])
+
+        present(alert, animated: true)
+    }
+
+    private func hideLoading() { dismiss(animated: true) }
+
+    private func showSuccessAndDismiss() {
+
+        showAlert(title: "Success", message: "Post created") { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+    }
+
+    private func showAlert(title: String,
+                           message: String,
+                           completion: (() -> Void)? = nil) {
+
+        let alert = UIAlertController(title: title,
+                                      message: message,
+                                      preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "OK",
+                                      style: .default) { _ in completion?() })
+
+        present(alert, animated: true)
     }
     
     func uploadMultipart(
@@ -232,231 +401,36 @@ class AddFeedVC: UIViewController,
             forHTTPHeaderField: "Authorization"
         )
 
-        // Timeout for big videos
         request.timeoutInterval = 300
-
-
-        // Temp file for stream
-        let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-
-        do {
-
-            let output = try OutputStream(url: tempURL, append: false)!
-            output.open()
-
-            // -------------------------
-            // Text params
-            // -------------------------
-            for (key, value) in params {
-
-                output.writeString("--\(boundary)\r\n")
-                output.writeString(
-                    "Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n"
-                )
-                output.writeString("\(value)\r\n")
-            }
-
-            // -------------------------
-            // Files (streamed)
-            // -------------------------
-            for fileURL in files {
-
-                let fileName = fileURL.lastPathComponent
-                let mime = fileURL.mimeType()
-
-                output.writeString("--\(boundary)\r\n")
-
-                output.writeString(
-                    "Content-Disposition: form-data; name=\"attachments\"; filename=\"\(fileName)\"\r\n"
-                )
-
-                output.writeString(
-                    "Content-Type: \(mime)\r\n\r\n"
-                )
-
-                let input = InputStream(url: fileURL)!
-                input.open()
-
-                let bufferSize = 1024 * 64
-                var buffer = [UInt8](repeating: 0, count: bufferSize)
-
-                while input.hasBytesAvailable {
-
-                    let read = input.read(&buffer, maxLength: bufferSize)
-
-                    if read > 0 {
-                        output.write(buffer, maxLength: read)
-                    }
-                }
-
-                input.close()
-                output.writeString("\r\n")
-            }
-
-            // -------------------------
-            // Close
-            // -------------------------
-            output.writeString("--\(boundary)--\r\n")
-            output.close()
-
-
-            // -------------------------
-            // Upload task
-            // -------------------------
-            let config = URLSessionConfiguration.default
-            config.timeoutIntervalForRequest = 300
-            config.timeoutIntervalForResource = 300
-
-            let session = URLSession(configuration: config)
-
-            let task = session.uploadTask(
-                with: request,
-                fromFile: tempURL
-            ) { data, response, error in
-
-                defer {
-                    try? FileManager.default.removeItem(at: tempURL)
-                }
-
-                if let error = error {
-
-                    DispatchQueue.main.async {
-                        completion(.failure(error))
-                    }
-                    return
-                }
-
-                guard let data = data else { return }
-
-                let result = String(decoding: data, as: UTF8.self)
-
-                print("📩 Server:", result)
-
-                DispatchQueue.main.async {
-                    completion(.success(result))
-                }
-            }
-
-            task.resume()
-
-        } catch {
-
-            completion(.failure(error))
-        }
-    }
-
-
-    func fetchTeams(completion: @escaping ([GroupClass]) -> Void) {
-
-        APIManager.shared.getGroupClasses(page: 1, limit: 10) { result in
-
-            switch result {
-
-            case .success(let response):
-
-                let teams = response.data
-
-                DispatchQueue.main.async {
-                    completion(teams) // ✅ return data
-                }
-
-            case .failure(let error):
-
-                print("API Error:", error)
-
-                DispatchQueue.main.async {
-                    completion([]) // return empty on failure
-                }
-            }
-        }
-    }
-
-
-
-
-    // MARK: - Multipart API
-
-    func createPostAPI(
-        token: String,
-        params: [String: String],
-        files: [URL],
-        completion: @escaping (Result<String, Error>) -> Void
-    ) {
-
-        guard let url = URL(string: "https://dev.gruppie.in/api/v1/posts") else {
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-
-        let boundary = "Boundary-\(UUID().uuidString)"
-
-        request.setValue(
-            "multipart/form-data; boundary=\(boundary)",
-            forHTTPHeaderField: "Content-Type"
-        )
-
-        request.setValue(
-            "Bearer \(token)",
-            forHTTPHeaderField: "Authorization"
-        )
 
         var body = Data()
 
-        // ------------------------
-        // Text Parameters
-        // ------------------------
         for (key, value) in params {
 
             body.appendString("--\(boundary)\r\n")
-
-            body.appendString(
-                "Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n"
-            )
-
+            body.appendString("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n")
             body.appendString("\(value)\r\n")
         }
-
-        // ------------------------
-        // Files
-        // ------------------------
 
         for fileURL in files {
 
             let fileName = fileURL.lastPathComponent
-            let mimeType = fileURL.mimeType() // ✅ FIX
+            let mimeType = fileURL.mimeType()
 
-            guard let fileData = try? Data(contentsOf: fileURL) else {
-                continue
-            }
+            guard let fileData = try? Data(contentsOf: fileURL) else { continue }
 
             body.appendString("--\(boundary)\r\n")
-
-            body.appendString(
-                "Content-Disposition: form-data; name=\"attachments\"; filename=\"\(fileName)\"\r\n"
-            )
-
-            body.appendString(
-                "Content-Type: \(mimeType)\r\n\r\n"
-            )
+            body.appendString("Content-Disposition: form-data; name=\"attachments\"; filename=\"\(fileName)\"\r\n")
+            body.appendString("Content-Type: \(mimeType)\r\n\r\n")
 
             body.append(fileData)
-
             body.appendString("\r\n")
         }
-        
-        // ------------------------
-        // Closing Boundary
-        // ------------------------
+
         body.appendString("--\(boundary)--\r\n")
 
         request.httpBody = body
 
-        // ------------------------
-        // API Call
-        // ------------------------
         URLSession.shared.dataTask(with: request) { data, response, error in
 
             if let error = error {
@@ -468,7 +442,7 @@ class AddFeedVC: UIViewController,
 
             guard let data = data else { return }
 
-            let result = String(data: data, encoding: .utf8) ?? ""
+            let result = String(decoding: data, as: UTF8.self)
 
             print("📩 Server Response:", result)
 
@@ -479,186 +453,6 @@ class AddFeedVC: UIViewController,
         }.resume()
     }
 
-
-
-    // MARK: - TableView
-
-    func numberOfSections(in tableView: UITableView) -> Int {
-        2
-    }
-
-
-    func tableView(_ tableView: UITableView,
-                   numberOfRowsInSection section: Int) -> Int {
-
-        section == 0 ? 1 : teamPosts.count
-    }
-
-
-    func tableView(_ tableView: UITableView,
-                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
-        if indexPath.section == 0 {
-
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: "AddFeedInfoTableViewCell",
-                for: indexPath
-            ) as! AddFeedInfoTableViewCell
-
-            cell.delegate = self
-            cell.parentViewController = self
-
-            return cell
-        }
-
-
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: "ClassTableViewCell",
-            for: indexPath
-        ) as! ClassTableViewCell
-
-        let team = teamPosts[indexPath.row]
-
-        cell.configure(teamPost: team)
-        cell.setFirstLetterAsImage()
-
-        let selected = selectedIndexPath == indexPath
-
-        let imageName = selected
-        ? "checkmark.rectangle.fill"
-        : "rectangle"
-
-        cell.checkBox.setImage(
-            UIImage(systemName: imageName),
-            for: .normal
-        )
-
-        cell.checkBox.tag = indexPath.row
-
-        cell.checkBox.addTarget(
-            self,
-            action: #selector(checkboxTapped(_:)),
-            for: .touchUpInside
-        )
-
-        return cell
-    }
-
-
-    // MARK: - Checkbox
-
-    @objc func checkboxTapped(_ sender: UIButton) {
-
-        let indexPath = IndexPath(
-            row: sender.tag,
-            section: 1
-        )
-
-        if selectedIndexPath == indexPath {
-            selectedIndexPath = nil
-        } else {
-            selectedIndexPath = indexPath
-        }
-
-        addFeedTableView.reloadSections(
-            IndexSet(integer: 1),
-            with: .automatic
-        )
-    }
-
-
-    // MARK: - Delegates
-
-    func assignPostName(postName: String) {
-        self.postName = postName
-    }
-
-    func assignPostDescription(postDescription: String) {
-        self.postDescription = postDescription
-    }
-
-    func assignFinalUrl(finalUrl: URL) {
-        self.documentURL = finalUrl
-    }
-
-
-    // MARK: - Helpers
-
-    private func showLoading() {
-
-        let alert = UIAlertController(
-            title: nil,
-            message: "Posting...",
-            preferredStyle: .alert
-        )
-
-        let indicator = UIActivityIndicatorView(style: .medium)
-
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        indicator.startAnimating()
-
-        alert.view.addSubview(indicator)
-
-        indicator.centerXAnchor.constraint(
-            equalTo: alert.view.centerXAnchor
-        ).isActive = true
-
-        indicator.bottomAnchor.constraint(
-            equalTo: alert.view.bottomAnchor,
-            constant: -20
-        ).isActive = true
-
-        present(alert, animated: true)
-    }
-
-
-    private func hideLoading() {
-        dismiss(animated: true)
-    }
-
-
-    private func showSuccessAndDismiss() {
-
-        showAlert(
-            title: "Success",
-            message: "Post created"
-        ) { [weak self] in
-
-            self?.navigationController?.popViewController(animated: true)
-        }
-    }
-
-
-    private func showAlert(title: String,
-                           message: String,
-                           completion: (() -> Void)? = nil) {
-
-        let alert = UIAlertController(
-            title: title,
-            message: message,
-            preferredStyle: .alert
-        )
-
-        alert.addAction(
-            UIAlertAction(title: "OK", style: .default) { _ in
-                completion?()
-            }
-        )
-
-        present(alert, animated: true)
-    }
-}
-
-
-
-// MARK: - Data Extension
-
-extension Data {
-    mutating func appendString(_ string: String) {
-        if let data = string.data(using: .utf8) {
-            append(data)
-        }
-    }
 }
 
 import MobileCoreServices
@@ -688,6 +482,14 @@ extension URL {
     }
 }
 
+extension Data {
+    mutating func appendString(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}
+
 extension OutputStream {
 
     func writeString(_ string: String) {
@@ -695,7 +497,6 @@ extension OutputStream {
         if let data = string.data(using: .utf8) {
 
             data.withUnsafeBytes {
-
                 write(
                     $0.bindMemory(to: UInt8.self).baseAddress!,
                     maxLength: data.count

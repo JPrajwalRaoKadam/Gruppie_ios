@@ -262,6 +262,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchGroupClasses {
                 self.navigateToRlassroomCommunication(groupClass: self.groupClasses)
             }
+        case "Notice Board":
+            navigateToNoticeBoard()
         case "Student Register":
             fetchGroupClasses {
                 self.navigateToStudentRegister(groupClasses: self.groupClasses)
@@ -737,6 +739,20 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         subjectRegisterVC.groupClasses = groupClass
         
         self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
+    }
+    
+    func navigateToNoticeBoard() {
+        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+
+        guard let feedVC = storyboard.instantiateViewController(
+            withIdentifier: "FeedViewController"
+        ) as? FeedViewController else {
+            print("❌ Failed to instantiate FeedViewController")
+            return
+        }
+
+        feedVC.feedSource = .noticeBoard   // ✅ IMPORTANT
+        navigationController?.pushViewController(feedVC, animated: true)
     }
     
     func navigateToRlassroomCommunication(groupClass: [GroupClass]) {
