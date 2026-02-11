@@ -20,6 +20,7 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
     @IBOutlet weak var bottomLeftButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
     @IBOutlet weak var viewBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var headerName : UILabel!
     
     // MARK: - Properties
     var loadingIndicator: UIActivityIndicatorView!
@@ -164,10 +165,12 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
                         
                     case .classroom:
                         // Classroom → no pagination
+                        self.headerName.text = "Classroom Communication"
                         self.feedPosts = response.data
                         self.hasMorePages = false
                         
                     case .normalFeed:
+                        self.headerName.text = "Campus Connect"
                         if page == 1 {
                             self.feedPosts = response.data
                         } else {
@@ -181,6 +184,7 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
                             self.hasMorePages = false
                         }
                     case .noticeBoard:
+                        self.headerName.text = "Notice Board"
                         // ✅ FILTER ONLY GROUP POSTS
                            self.feedPosts = response.data.filter { post in
                                post.postType?.lowercased() == "group"
@@ -278,7 +282,9 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
             ) as? FeedPostTableViewCell else {
                 return UITableViewCell()
             }
-            
+            if case .noticeBoard = feedSource {
+                cell.activityView.isHidden = true
+            }
             let post = feedPosts[indexPath.row]
             cell.delegate = self
             cell.configure(with: post)

@@ -27,7 +27,7 @@ final class FeedPostTableViewCell: UITableViewCell {
     @IBOutlet weak var commentButton: UIButton!
     @IBOutlet weak var downloadButton: UIButton!
     @IBOutlet weak var cardView: UIView!
-    
+    @IBOutlet weak var activityView: UIView!
     @IBOutlet weak var mediaCollectionView: UICollectionView!
     @IBOutlet weak var pageControl: UIPageControl! 
 
