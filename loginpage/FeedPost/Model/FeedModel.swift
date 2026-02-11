@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Root Response
 struct FeedResponse: Decodable {
     let success: Bool
-    let pagination: FeedPagination
+    let pagination: FeedPagination?
     let data: [FeedPost]
 }
 
@@ -19,50 +19,91 @@ struct FeedPagination: Decodable {
     let totalRecords: Int
     let totalPages: Int
     let currentPage: Int
-    let pageSize: Int
+    let pageSize: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case totalRecords
+        case totalPages
+        case currentPage
+        case pageSize
+    }
 }
 
 // MARK: - Post
 struct FeedPost: Decodable {
+
     let postId: String
-    let postType: String
-    let title: String
-    let body: String
+    let postType: String?
+    let title: String?
+    let body: String?
     let attachments: [FeedAttachment]
-    let shareInternal: Bool
-    let shareExternal: Bool
+    let shareInternal: Bool?
+    let shareExternal: Bool?
     let commentCount: Int
     var likeCount: Int
-    let createdAt: String
-    let updatedAt: String
+
+    // Local only
+    var isLiked: Bool = false
+
+    let createdAt: String?
+    let updatedAt: String?
     let fromUser: FeedUser
     let toUser: FeedUser?
     let team: FeedTeam?
+
+    enum CodingKeys: String, CodingKey {
+        case postId
+        case postType
+        case title
+        case body
+        case attachments
+        case shareInternal
+        case shareExternal
+        case commentCount
+        case likeCount
+        case createdAt
+        case updatedAt
+        case fromUser
+        case toUser
+        case team
+    }
 }
+
+
 
 // MARK: - Attachment
 struct FeedAttachment: Decodable {
-    let fileId: Int
-    let fileUrl: String
-    let fileName: String
-    let fileType: String
+    let fileId: Int?
+    let fileUrl: String?
+    let fileName: String?
+    let fileType: String?
 }
 
 // MARK: - User
 struct FeedUser: Decodable {
     let id: String
-    let name: String
+    let name: String?
 }
 
 // MARK: - Team
 struct FeedTeam: Decodable {
     let id: String
-    let name: String
+    let name: String?
 }
 
-struct LikeStatus: Codable {
-    let status: String
+struct LikePostRequest: Encodable {
+    let postId: Int
 }
+
+struct LikePostResponse: Decodable {
+    let success: Bool
+    let message: String?
+    let likeCount: Int?
+}
+
+//struct LikeStatus: Codable {
+//    let status: String
+//}
 
 //// MARK: - PostResponse
 //struct PostResponse: Codable {

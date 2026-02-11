@@ -27,38 +27,61 @@ class FeedMediaCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(with attachment: FeedAttachment) {
-        let urlString = attachment.fileUrl
-        let type = attachment.fileType.lowercased()
-        
-        // Reset
+
+        // Reset UI
         ImageView.image = nil
         audioView.isHidden = true
         audioPlayPauseButton.isHidden = true
-        
+
+        // Safely unwrap
+        guard let urlString = attachment.fileUrl,
+              !urlString.isEmpty else {
+            ImageView.image = UIImage(named: "file_placeholder")
+            return
+        }
+
+        let type = attachment.fileType?.lowercased() ?? ""
+
+        // ✅ YouTube
         if FeedMediaCollectionViewCell.isYouTubeURL(urlString) {
-            // YouTube thumbnail
+
             audioPlayPauseButton.isHidden = false
             let thumbnailURL = FeedMediaCollectionViewCell.youtubeThumbnailURL(from: urlString)
             loadImage(thumbnailURL)
-            
-        } else if type.contains("image") {
+
+        }
+        // ✅ Image
+        else if type.contains("image") {
+
             loadImage(urlString)
-            
-        } else if type.contains("video") {
+
+        }
+        // ✅ Video
+        else if type.contains("video") {
+
             audioPlayPauseButton.isHidden = false
             loadVideoThumbnail(urlString)
-            
-        } else if type.contains("audio") {
+
+        }
+        // ✅ Audio
+        else if type.contains("audio") {
+
             audioView.isHidden = false
             ImageView.image = UIImage(named: "audioMedia")
-            
-        } else if type.contains("pdf") {
+
+        }
+        // ✅ PDF
+        else if type.contains("pdf") {
+
             ImageView.image = UIImage(named: "defaultpdf")
-            
-        } else {
+
+        }
+        // ✅ Fallback
+        else {
             ImageView.image = UIImage(named: "file_placeholder")
         }
     }
+
     
     // MARK: - Image Loader
     private func loadImage(_ urlString: String) {

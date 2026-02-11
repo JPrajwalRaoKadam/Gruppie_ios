@@ -131,6 +131,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("ViewController with identifier 'feedVC' not found.")
             return
         }
+        feedVC.feedSource = .normalFeed
         feedVC.currentRole = self.currentRole
         self.navigationController?.pushViewController(feedVC, animated: true)
     }
@@ -256,6 +257,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             default:
                 print("❌ Invalid or missing role")
                 return
+            }
+        case  "Classroom Communication":
+            fetchGroupClasses {
+                self.navigateToRlassroomCommunication(groupClass: self.groupClasses)
             }
         case "Student Register":
             fetchGroupClasses {
@@ -727,6 +732,17 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         let storyboard = UIStoryboard(name: "Subject", bundle: nil)
         guard let subjectRegisterVC = storyboard.instantiateViewController(withIdentifier: "SubjectViewController") as? SubjectViewController else {
             print("❌ Failed to instantiate SubjectViewController")
+            return
+        }
+        subjectRegisterVC.groupClasses = groupClass
+        
+        self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
+    }
+    
+    func navigateToRlassroomCommunication(groupClass: [GroupClass]) {
+        let storyboard = UIStoryboard(name: "Communication", bundle: nil)
+        guard let subjectRegisterVC = storyboard.instantiateViewController(withIdentifier: "ClassroomViewController") as? ClassroomViewController else {
+            print("❌ Failed to instantiate ClassroomViewController")
             return
         }
         subjectRegisterVC.groupClasses = groupClass

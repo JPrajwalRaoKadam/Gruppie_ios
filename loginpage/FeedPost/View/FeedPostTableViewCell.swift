@@ -65,9 +65,10 @@ final class FeedPostTableViewCell: UITableViewCell {
 
     // MARK: - Configure
     func configure(with post: FeedPost) {
+        firstDescriptionLabel.text = post.team?.name
         adminLabel.text = post.fromUser.name
         descriptionLabel.text = post.body
-        timingLabel.text = formatDate(post.createdAt)
+        timingLabel.text = formatDate(post.createdAt ?? "")
         noOfLikes.text = "\(post.likeCount)"
         noOfComments.text = "\(post.commentCount)"
         noticeLabel.text = post.title
@@ -88,14 +89,26 @@ final class FeedPostTableViewCell: UITableViewCell {
             playPauseButton.isHidden = true
         }
 
+        if post.isLiked {
+            likeButton.setImage(UIImage(systemName: "hand.thumbsup.fill"), for: .normal)
+            likeButton.tintColor = .black
+        } else {
+            likeButton.setImage(UIImage(systemName: "hand.thumbsup"), for: .normal)
+            likeButton.tintColor = .lightGray
+        }
+
         updateReadMoreVisibility()
     }
 
     // MARK: - Helpers
     private func isVideoOrYouTube(_ attachment: FeedAttachment) -> Bool {
-        let type = attachment.fileType.lowercased()
-        let url = attachment.fileUrl
-        return type.contains("video") || url.contains("youtube.com") || url.contains("youtu.be")
+        
+        let type = attachment.fileType?.lowercased() ?? ""
+        let url  = attachment.fileUrl?.lowercased() ?? ""
+        
+        return type.contains("video")
+            || url.contains("youtube.com")
+            || url.contains("youtu.be")
     }
 
     private func updateReadMoreVisibility() {
@@ -156,7 +169,7 @@ extension FeedPostTableViewCell: UICollectionViewDelegate, UICollectionViewDataS
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let attachment = attachments[indexPath.row]
-        delegate?.didTapMedia(cell: self, url: attachment.fileUrl)
+        delegate?.didTapMedia(cell: self, url: attachment.fileUrl ?? "")
     }
 
     func collectionView(_ collectionView: UICollectionView,
