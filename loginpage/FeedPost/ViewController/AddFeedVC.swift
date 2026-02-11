@@ -24,13 +24,29 @@ class AddFeedVC: UIViewController,
 
     var selectedIndexPath: IndexPath?
 
-    var groupID: String?
-
+    var teamID: String?
+    var feedSource: FeedSource = .normalFeed
+    
     var currentPage = 1
     var isLoading = false
 
     public var teamPosts: [GroupClass] = []
     public var pagination: Pagination?
+    
+    var visibleTeams: [GroupClass] {
+
+          switch feedSource {
+
+          case .normalFeed:
+              return teamPosts
+
+          case .noticeBoard:
+              return []
+
+          case .classroom(let teamId):
+              return teamPosts.filter { $0.id == teamId }
+          }
+      }
 
     // MARK: - LifeCycle
 
@@ -116,23 +132,32 @@ class AddFeedVC: UIViewController,
         // -------------------------
         // ✅ FIXED SELECTION LOGIC
         // -------------------------
-        let row = selectedIndexPath.row
+        switch feedSource {
 
-        if row == 0 {
-
-            print("📌 Posting to NOTICE BOARD")
+        case .noticeBoard:
 
             params["postType"] = "group"
             params["teamId"] = nil
 
-        } else if row - 1 < teamPosts.count {
+        case .classroom(let teamId):
 
-            let team = teamPosts[row - 1]
+            params["postType"] = "team"
+            params["teamId"] = teamId
 
-            print("📌 Posting to TEAM:", team.name ?? "")
-            print("📌 Team ID:", team.id)
+        case .normalFeed:
 
-            params["teamId"] = team.id
+            let row = selectedIndexPath.row
+
+            if row == 0 {
+
+                params["postType"] = "group"
+                params["teamId"] = nil
+
+            } else if row - 1 < teamPosts.count {
+
+                let team = teamPosts[row - 1]
+                params["teamId"] = team.id
+            }
         }
 
         var files: [URL] = []
@@ -222,6 +247,19 @@ class AddFeedVC: UIViewController,
             }
         }
     }
+    
+    static func create(feedSource: FeedSource) -> AddFeedVC {
+
+        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+
+        let vc = storyboard.instantiateViewController(
+            withIdentifier: "AddFeedVC"
+        ) as! AddFeedVC
+
+        vc.feedSource = feedSource
+
+        return vc
+    }
 
     // MARK: - Load Teams
 
@@ -267,7 +305,20 @@ class AddFeedVC: UIViewController,
 
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-        section == 0 ? 1 : teamPosts.count + 1
+
+        if section == 0 { return 1 }
+
+        switch feedSource {
+
+        case .normalFeed:
+            return visibleTeams.count + 1   // Notice Board + Teams
+
+        case .noticeBoard:
+            return 1                        // Only Notice Board
+
+        case .classroom:
+            return visibleTeams.count       // Only Matching Team
+        }
     }
 
     func tableView(_ tableView: UITableView,
@@ -290,10 +341,24 @@ class AddFeedVC: UIViewController,
             for: indexPath
         ) as! ClassTableViewCell
 
-        if indexPath.row == 0 {
+        switch feedSource {
+
+        case .normalFeed:
+
+            if indexPath.row == 0 {
+                cell.classLabel.text = "Notice Board"
+            } else {
+                let team = visibleTeams[indexPath.row - 1]
+                cell.configure(teamPost: team)
+            }
+
+        case .noticeBoard:
+
             cell.classLabel.text = "Notice Board"
-        } else {
-            let team = teamPosts[indexPath.row - 1]
+
+        case .classroom:
+
+            let team = visibleTeams[indexPath.row]
             cell.configure(teamPost: team)
         }
 
@@ -307,6 +372,7 @@ class AddFeedVC: UIViewController,
         )
 
         cell.checkBox.tag = indexPath.row
+        cell.checkBox.accessibilityIdentifier = "\(indexPath.section)"
         cell.checkBox.addTarget(self,
                                 action: #selector(checkboxTapped(_:)),
                                 for: .touchUpInside)
@@ -314,19 +380,23 @@ class AddFeedVC: UIViewController,
         return cell
     }
 
+
     // MARK: - Checkbox
 
     @objc func checkboxTapped(_ sender: UIButton) {
 
-        let indexPath = IndexPath(row: sender.tag, section: 1)
+        guard let sectionString = sender.accessibilityIdentifier,
+              let section = Int(sectionString) else { return }
+
+        let indexPath = IndexPath(row: sender.tag, section: section)
 
         selectedIndexPath = (selectedIndexPath == indexPath)
         ? nil : indexPath
 
-        addFeedTableView.reloadSections(IndexSet(integer: 1),
-                                       with: .automatic)
+        addFeedTableView.reloadSections(IndexSet(integer: section),
+                                       with: .none)
     }
-
+    
     // MARK: - Delegates
 
     func assignPostName(postName: String) { self.postName = postName }

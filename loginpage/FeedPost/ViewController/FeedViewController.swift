@@ -123,11 +123,10 @@ class FeedViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
     }
     
     @IBAction func addFeedAction(_ sender: Any) {
-        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
-        
-        if let addFeedVC = storyboard.instantiateViewController(withIdentifier: "AddFeedVC") as? AddFeedVC {
-            self.navigationController?.pushViewController(addFeedVC, animated: true)
-        }
+
+        let vc = AddFeedVC.create(feedSource: feedSource)
+
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     private func fetchFeed(
