@@ -5,6 +5,7 @@ protocol PostActivityDelegate: AnyObject {
     func didTapLikeButton(cell: FeedPostTableViewCell)
     func didTapMedia(cell: FeedPostTableViewCell, url: String)
     func didTapReadMore(text: String, from cell: FeedPostTableViewCell)
+    func didTapCommentButton(cell: FeedPostTableViewCell)
 }
 
 final class FeedPostTableViewCell: UITableViewCell {
@@ -144,7 +145,7 @@ final class FeedPostTableViewCell: UITableViewCell {
     }
     
     @IBAction func commentAction(_ sender: UIButton) {
-        
+        delegate?.didTapCommentButton(cell: self)
     }
     
     @IBAction func playPauseAction(_ sender: UIButton) {

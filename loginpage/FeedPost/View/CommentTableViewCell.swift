@@ -1,114 +1,140 @@
-////
-////  CommentTableViewCell.swift
-////  loginpage
-////
-////  Created by Prajwal rao Kadam J on 01/01/25.
-////
 //
-//import UIKit
+//  CommentTableViewCell.swift
+//  loginpage
 //
-//class CommentTableViewCell: UITableViewCell {
+//  Created by Prajwal rao Kadam J on 01/01/25.
 //
-//    @IBOutlet weak var timeLabel: UILabel!
-//    @IBOutlet weak var adminImage: UIImageView!
-//    @IBOutlet weak var noOfReply: UILabel!
-//    @IBOutlet weak var commentText: UILabel!
-//    @IBOutlet weak var adminName: UILabel!
-//    
-//    override func awakeFromNib() {
-//        super.awakeFromNib()
-//        // Initialization code
-//    }
-//
-//    override func setSelected(_ selected: Bool, animated: Bool) {
-//        super.setSelected(selected, animated: animated)
-//
-//        // Configure the view for the selected state
-//    }
-//    
-//    func configure(with commentInfo: Comment) {
-//        adminName.text = commentInfo.createdByName
-//        // Set adminImageView to show the first letter of the admin's name
-//        updateImageViewWithFirstLetter(from: adminName, in: adminImage)
-//        timeLabel.text = timeAgo(from: commentInfo.insertedAt)
-//        noOfReply.text = ("\(commentInfo.replies)")
-//        commentText.text = commentInfo.text
-//        
-//    }
-//    
-//    func updateImageViewWithFirstLetter(from label: UILabel, in imageView: UIImageView) {
-//        guard let text = label.text, let firstLetter = text.first else {
-//            imageView.image = nil  // If there's no text or it's empty, clear the image
-//            return
-//        }
-//
-//        // Create an image with the first letter
-//        let letterImage = generateLetterImage(from: String(firstLetter).uppercased())
-//
-//        // Set the generated image to the imageView
-//        imageView.image = letterImage
-//    }
-//    
-//    func generateLetterImage(from letter: String) -> UIImage? {
-//        // Create a label with the letter
-//        let letterLabel = UILabel()
-//        letterLabel.text = letter
-//        letterLabel.font = UIFont.boldSystemFont(ofSize: 30)  // Adjust size based on your needs
-//        letterLabel.textColor = .white
-//        letterLabel.textAlignment = .center
-//        let customColor = UIColor(hex: "#F5F3EF")
-//        letterLabel.backgroundColor = customColor // Adjust the color
-//        letterLabel.layer.cornerRadius = 25  // Adjust for circle size
-//        letterLabel.layer.masksToBounds = true
-//        letterLabel.frame = CGRect(x: 0, y: 0, width: 50, height: 50)  // Size of the circle
-//
-//        // Render the label into an image
-//        UIGraphicsBeginImageContextWithOptions(letterLabel.bounds.size, false, 0)
-//        letterLabel.layer.render(in: UIGraphicsGetCurrentContext()!)
-//        let image = UIGraphicsGetImageFromCurrentImageContext()
-//        UIGraphicsEndImageContext()
-//
-//        return image
-//    }
-//    
-//    func timeAgo(from dateTimeString: String) -> String? {
-//        // Define the input date format
-//        let inputDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"
-//        
-//        // Create a DateFormatter for the input format
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateFormat = inputDateFormat
-//        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-//        
-//        // Convert the date-time string to a Date object
-//        guard let date = dateFormatter.date(from: dateTimeString) else {
-//            print("Invalid date-time string.")
-//            return nil
-//        }
-//        
-//        // Get the current date
-//        let currentDate = Date()
-//        
-//        // Calculate the difference between the dates
-//        let differenceInSeconds = currentDate.timeIntervalSince(date)
-//        
-//        // Calculate days, hours, and minutes
-//        let secondsInADay: TimeInterval = 86400
-//        let secondsInAnHour: TimeInterval = 3600
-//        let secondsInAMinute: TimeInterval = 60
-//        
-//        if differenceInSeconds < secondsInAMinute {
-//            return "just now"
-//        } else if differenceInSeconds < secondsInAnHour {
-//            let minutesAgo = Int(differenceInSeconds / secondsInAMinute)
-//            return "\(minutesAgo) minutes ago"
-//        } else if differenceInSeconds < secondsInADay {
-//            let hoursAgo = Int(differenceInSeconds / secondsInAnHour)
-//            return "\(hoursAgo) hour ago"
-//        } else {
-//            let daysAgo = Int(differenceInSeconds / secondsInADay)
-//            return "\(daysAgo) days ago"
-//        }
-//    }
-//
-//}
+
+import UIKit
+
+class CommentTableViewCell: UITableViewCell {
+
+    @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet weak var adminImage: UIImageView!
+    @IBOutlet weak var noOfReply: UILabel!
+    @IBOutlet weak var commentText: UILabel!
+    @IBOutlet weak var adminName: UILabel!
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        setupImageView()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Ensure corner radius is applied after layout
+        adminImage.layer.cornerRadius = adminImage.frame.height / 2
+    }
+    
+    private func setupImageView() {
+        adminImage.layer.cornerRadius = adminImage.frame.height / 2
+        adminImage.clipsToBounds = true
+        adminImage.contentMode = .scaleAspectFill
+        adminImage.backgroundColor = UIColor(hex: "#F5F3EF")
+    }
+
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+    }
+    
+    func configure(with commentInfo: Comment) {
+        adminName.text = commentInfo.createdByName
+        updateImageViewWithFirstLetter(from: commentInfo.createdByName)
+        timeLabel.text = timeAgo(from: commentInfo.insertedAt)
+        noOfReply.text = "\(commentInfo.replies)"
+        commentText.text = commentInfo.text
+    }
+    
+    private func updateImageViewWithFirstLetter(from name: String) {
+        guard let firstLetter = name.first else {
+            adminImage.image = nil
+            return
+        }
+        
+        let letterImage = generateLetterImage(from: String(firstLetter).uppercased())
+        adminImage.image = letterImage
+    }
+    
+    private func generateLetterImage(from letter: String) -> UIImage? {
+        let size = CGSize(width: 50, height: 50)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        
+        return renderer.image { context in
+            // Draw background
+            let customColor = UIColor(hex: "#F5F3EF")
+            customColor.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            
+            // Draw letter
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = .center
+            
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.boldSystemFont(ofSize: 25),
+                .foregroundColor: UIColor.darkGray,
+                .paragraphStyle: paragraphStyle
+            ]
+            
+            let letterRect = CGRect(x: 0, y: 12, width: size.width, height: size.height)
+            letter.draw(in: letterRect, withAttributes: attributes)
+        }
+    }
+    
+    private func timeAgo(from dateTimeString: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        // Try multiple date formats
+        let formats = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ",
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss"
+        ]
+        
+        var date: Date?
+        for format in formats {
+            dateFormatter.dateFormat = format
+            if let parsedDate = dateFormatter.date(from: dateTimeString) {
+                date = parsedDate
+                break
+            }
+        }
+        
+        guard let commentDate = date else {
+            return "Unknown"
+        }
+        
+        let currentDate = Date()
+        let difference = currentDate.timeIntervalSince(commentDate)
+        
+        let secondsInMinute: TimeInterval = 60
+        let secondsInHour: TimeInterval = 3600
+        let secondsInDay: TimeInterval = 86400
+        let secondsInWeek: TimeInterval = 604800
+        let secondsInMonth: TimeInterval = 2592000
+        let secondsInYear: TimeInterval = 31536000
+        
+        if difference < secondsInMinute {
+            return "just now"
+        } else if difference < secondsInHour {
+            let minutes = Int(difference / secondsInMinute)
+            return "\(minutes) \(minutes == 1 ? "minute" : "minutes") ago"
+        } else if difference < secondsInDay {
+            let hours = Int(difference / secondsInHour)
+            return "\(hours) \(hours == 1 ? "hour" : "hours") ago"
+        } else if difference < secondsInWeek {
+            let days = Int(difference / secondsInDay)
+            return "\(days) \(days == 1 ? "day" : "days") ago"
+        } else if difference < secondsInMonth {
+            let weeks = Int(difference / secondsInWeek)
+            return "\(weeks) \(weeks == 1 ? "week" : "weeks") ago"
+        } else if difference < secondsInYear {
+            let months = Int(difference / secondsInMonth)
+            return "\(months) \(months == 1 ? "month" : "months") ago"
+        } else {
+            let years = Int(difference / secondsInYear)
+            return "\(years) \(years == 1 ? "year" : "years") ago"
+        }
+    }
+}

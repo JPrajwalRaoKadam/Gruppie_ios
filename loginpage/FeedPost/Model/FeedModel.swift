@@ -108,6 +108,193 @@ struct ToggleLikeResponse: Codable {
     let likesCount: Int?
 }
 
+// MARK: - Comment Response - Flexible
+struct CommentResponse: Decodable {
+    let data: [Comment]
+    let totalPages: Int?
+    let totalRecords: Int?
+    let message: String?
+    let success: Bool?
+    let status: Bool?
+    let statusCode: Int?
+    
+    enum CodingKeys: String, CodingKey {
+        case data
+        case totalPages
+        case totalRecords
+        case message
+        case success
+        case status
+        case statusCode
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Try different possible data structures
+        if let dataArray = try? container.decode([Comment].self, forKey: .data) {
+            data = dataArray
+        } else if let dataDict = try? container.decode([String: [Comment]].self, forKey: .data),
+                  let comments = dataDict["comments"] ?? dataDict["data"] ?? dataDict["items"] {
+            data = comments
+        } else {
+            data = []
+        }
+        
+        totalPages = try container.decodeIfPresent(Int.self, forKey: .totalPages)
+        totalRecords = try container.decodeIfPresent(Int.self, forKey: .totalRecords)
+        message = try container.decodeIfPresent(String.self, forKey: .message)
+        success = try container.decodeIfPresent(Bool.self, forKey: .success)
+        status = try container.decodeIfPresent(Bool.self, forKey: .status)
+        statusCode = try container.decodeIfPresent(Int.self, forKey: .statusCode)
+    }
+    
+    // Manual initializer for fallback
+    init(data: [Comment], totalPages: Int?, totalRecords: Int?, message: String?, success: Bool?, status: Bool?, statusCode: Int?) {
+        self.data = data
+        self.totalPages = totalPages
+        self.totalRecords = totalRecords
+        self.message = message
+        self.success = success
+        self.status = status
+        self.statusCode = statusCode
+    }
+}
+
+// MARK: - Comment
+struct Comment: Codable {
+    let text: String
+    let replies: Int
+    let likes: Int
+    let insertedAt: String
+    let id: String
+    let createdByPhone: String?
+    let createdByName: String
+    let createdByImage: String?
+    let createdById: String
+    let canEdit: Bool?
+    let userId: String?
+    let postId: String?
+    let createdAt: String?
+    let updatedAt: String?
+    let content: String?
+    let comment: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case text
+        case replies
+        case likes
+        case insertedAt
+        case id = "_id"
+        case createdByPhone
+        case createdByName
+        case createdByImage
+        case createdById
+        case canEdit
+        case userId
+        case postId
+        case createdAt
+        case updatedAt
+        case content
+        case comment
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Handle text - could be in different fields
+        if let textValue = try? container.decode(String.self, forKey: .text) {
+            text = textValue
+        } else if let contentValue = try? container.decode(String.self, forKey: .content) {
+            text = contentValue
+        } else if let commentValue = try? container.decode(String.self, forKey: .comment) {
+            text = commentValue
+        } else {
+            text = ""
+        }
+        
+        replies = try container.decodeIfPresent(Int.self, forKey: .replies) ?? 0
+        likes = try container.decodeIfPresent(Int.self, forKey: .likes) ?? 0
+        
+        // Handle insertedAt
+        if let insertedAtValue = try? container.decode(String.self, forKey: .insertedAt) {
+            insertedAt = insertedAtValue
+        } else if let createdAtValue = try? container.decode(String.self, forKey: .createdAt) {
+            insertedAt = createdAtValue
+        } else if let updatedAtValue = try? container.decode(String.self, forKey: .updatedAt) {
+            insertedAt = updatedAtValue
+        } else {
+            insertedAt = ISO8601DateFormatter().string(from: Date())
+        }
+        
+        id = try container.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString
+        createdByPhone = try container.decodeIfPresent(String.self, forKey: .createdByPhone)
+        createdByName = try container.decodeIfPresent(String.self, forKey: .createdByName) ?? "Anonymous"
+        createdByImage = try container.decodeIfPresent(String.self, forKey: .createdByImage)
+        createdById = try container.decodeIfPresent(String.self, forKey: .createdById) ?? ""
+        canEdit = try container.decodeIfPresent(Bool.self, forKey: .canEdit)
+        userId = try container.decodeIfPresent(String.self, forKey: .userId)
+        postId = try container.decodeIfPresent(String.self, forKey: .postId)
+        createdAt = try container.decodeIfPresent(String.self, forKey: .createdAt)
+        updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
+        content = try container.decodeIfPresent(String.self, forKey: .content)
+        comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+    
+    // Manual initializer for fallback
+    init(text: String, replies: Int, likes: Int, insertedAt: String, id: String, createdByPhone: String?, createdByName: String, createdByImage: String?, createdById: String, canEdit: Bool?, userId: String?, postId: String?, createdAt: String?, updatedAt: String?, content: String?, comment: String?) {
+        self.text = text
+        self.replies = replies
+        self.likes = likes
+        self.insertedAt = insertedAt
+        self.id = id
+        self.createdByPhone = createdByPhone
+        self.createdByName = createdByName
+        self.createdByImage = createdByImage
+        self.createdById = createdById
+        self.canEdit = canEdit
+        self.userId = userId
+        self.postId = postId
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.content = content
+        self.comment = comment
+    }
+}
+
+// MARK: - Add Comment Request
+struct AddCommentRequest: Encodable {
+    let postId: Int
+    let content: String
+}
+
+// MARK: - Add Comment Response
+struct AddCommentResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: Comment?
+    let status: Bool?
+    let error: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case success
+        case message
+        case data
+        case status
+        case error
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        success = try container.decodeIfPresent(Bool.self, forKey: .success) ?? false
+        status = try container.decodeIfPresent(Bool.self, forKey: .status)
+        message = try container.decodeIfPresent(String.self, forKey: .message) ?? ""
+        data = try container.decodeIfPresent(Comment.self, forKey: .data)
+        error = try container.decodeIfPresent(String.self, forKey: .error)
+    }
+}
+
 //struct LikeStatus: Codable {
 //    let status: String
 //}

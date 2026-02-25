@@ -321,6 +321,67 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         navigationController?.pushViewController(vc, animated: true)
     }
     
+    func didTapCommentButton(cell: FeedPostTableViewCell) {
+        guard let indexPath = feedTableView.indexPath(for: cell) else {
+            print("❌ Could not find indexPath for cell")
+            return
+        }
+        
+        let post = feedPosts[indexPath.row]
+        
+        // Handle postId whether it's String or Int
+        let postId: String
+        if let idString = post.postId as? String {
+            postId = idString
+        } else if let idInt = post.postId as? Int {
+            postId = String(idInt)
+        } else {
+            print("❌ Invalid post ID type: \(type(of: post.postId))")
+            return
+        }
+        
+        print("📱 Comment button tapped for post ID: \(postId)")
+        
+        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+        guard let commentsVC = storyboard.instantiateViewController(withIdentifier: "CommentsVC") as? CommentsVC else {
+            print("❌ Could not instantiate CommentsVC")
+            return
+        }
+        
+        commentsVC.postID = postId
+        
+       
+        // Set up bottom sheet presentation
+        if #available(iOS 15.0, *) {
+            // Use UISheetPresentationController for iOS 15+
+            if let sheet = commentsVC.sheetPresentationController {
+                // Set detents (heights the sheet can snap to)
+                sheet.detents = [
+                    .medium(),  // About half screen
+                    .large()    // Full screen
+                ]
+                
+                // Show grabber at the top for better UX
+                sheet.prefersGrabberVisible = true
+                
+                // Allow scrolling to dismiss (when user scrolls down from top)
+                sheet.prefersEdgeAttachedInCompactHeight = true
+                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+                
+                // Optional: Set corner radius
+                sheet.preferredCornerRadius = 24
+            }
+        } else {
+            // Fallback for older iOS versions
+            commentsVC.modalPresentationStyle = .pageSheet
+            if let sheet = commentsVC.popoverPresentationController {
+                sheet.permittedArrowDirections = []
+            }
+        }
+        
+        // Present the view controller
+        self.present(commentsVC, animated: true)
+    }
     // MARK: - Final Working Like Functionality
     func didTapLikeButton(cell: FeedPostTableViewCell) {
         
