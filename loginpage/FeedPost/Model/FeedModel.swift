@@ -91,14 +91,21 @@ struct FeedTeam: Decodable {
     let name: String?
 }
 
-struct LikePostRequest: Encodable {
+// MARK: - Request/Response Models
+// Add this at the top of the file or in a separate models file
+struct ToggleLikeRequest: Codable {
     let postId: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case postId
+    }
 }
 
-struct LikePostResponse: Decodable {
-    let success: Bool
+struct ToggleLikeResponse: Codable {
+    let success: Bool?
     let message: String?
-    let likeCount: Int?
+    let liked: Bool?
+    let likesCount: Int?
 }
 
 //struct LikeStatus: Codable {

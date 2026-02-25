@@ -89,17 +89,19 @@ final class FeedPostTableViewCell: UITableViewCell {
             playPauseButton.isHidden = true
         }
 
-        if post.isLiked {
+        // Update like button based on isLiked state
+        updateLikeButton(isLiked: post.isLiked)
+    }
+
+    func updateLikeButton(isLiked: Bool) {
+        if isLiked {
             likeButton.setImage(UIImage(systemName: "hand.thumbsup.fill"), for: .normal)
-            likeButton.tintColor = .black
+            likeButton.tintColor = .systemBlue
         } else {
             likeButton.setImage(UIImage(systemName: "hand.thumbsup"), for: .normal)
             likeButton.tintColor = .lightGray
         }
-
-        updateReadMoreVisibility()
     }
-
     // MARK: - Helpers
     private func isVideoOrYouTube(_ attachment: FeedAttachment) -> Bool {
         
