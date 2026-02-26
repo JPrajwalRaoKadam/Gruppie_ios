@@ -39,6 +39,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     override func viewDidLoad() {
         super.viewDidLoad()
         fetchHomeData()
+        fetchGroupAcademicYearList()
         tableView.sectionHeaderTopPadding = 0
 
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
@@ -656,6 +657,40 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 }
             }.resume()
         }
+    
+    private func fetchGroupAcademicYearList() {
+
+        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+            print("❌ Role token missing")
+            return
+        }
+
+        let headers: [String: String] = [
+            "Authorization": "Bearer \(token)"
+        ]
+
+        APIManager.shared.request(
+            endpoint: "group-academicyear-list",
+            method: .get,
+            headers: headers
+        ) { (result: Result<GroupAcademicYearResponse, APIManager.APIError>) in
+
+            switch result {
+
+            case .success(let response):
+
+                // store full response so you can pass to next VC
+                self.groupAcademicYearResponse = response
+
+                // example log
+                print("✅ academic years :", response.data.academicYears.count)
+
+            case .failure(let error):
+                print("❌ group academic year api error :", error)
+            }
+        }
+    }
+
 
     func navigateToListOfStudentsVC(subjects: [SubjectData]) {
         let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
