@@ -2,10 +2,22 @@ import Foundation
 import AVFoundation
 import UIKit
 
+// MARK: - API Response
+
 struct AlbumResponse: Codable {
-    let totalNumberOfPages: Int
+    let success: Bool
+    let message: String
     let data: [AlbumData]
+    let meta: AlbumMeta
 }
+
+struct AlbumMeta: Codable {
+    let totalRecords: Int
+    let currentPage: Int
+    let totalPages: Int
+}
+
+// MARK: - Album Data
 
 struct AlbumData: Codable {
     let updatedAt: String
@@ -19,34 +31,78 @@ struct AlbumData: Codable {
     let fileName: [String]?
 
     enum CodingKeys: String, CodingKey {
-        case updatedAt, groupId, description, createdAt, canEdit, albumName, albumId, fileType, fileName
+        case updatedAt
+        case groupId
+        case description
+        case createdAt
+        case canEdit
+        case albumName
+        case albumId
+        case fileType
+
+        // API-only keys
+        case attachments
+        case albumDate
+        case name
+        case id
     }
 
+    // MARK: - Decoding
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        updatedAt = try container.decode(String.self, forKey: .updatedAt)
-        groupId = try container.decode(String.self, forKey: .groupId)
+
+        // Defaults (not sent by API)
+        updatedAt = ""
+        groupId = ""
+        canEdit = true
+        fileType = nil
+
+        // API fields
         description = try container.decodeIfPresent(String.self, forKey: .description)
-        createdAt = try container.decode(String.self, forKey: .createdAt)
-        canEdit = try container.decode(Bool.self, forKey: .canEdit)
-        albumName = try container.decode(String.self, forKey: .albumName)
-        albumId = try container.decode(String.self, forKey: .albumId)
-        fileType = try container.decodeIfPresent(String.self, forKey: .fileType)
-        
-        if let singleFileName = try? container.decode(String.self, forKey: .fileName) {
-            fileName = [singleFileName]
+        createdAt = try container.decodeIfPresent(String.self, forKey: .albumDate) ?? ""
+        albumName = try container.decode(String.self, forKey: .name)
+        albumId = String(try container.decode(Int.self, forKey: .id))
+
+        // Attachments → fileName[]
+        if let attachments = try? container.decode([AlbumAttachment].self, forKey: .attachments) {
+            let urls = attachments.map { $0.fileUrl }
+            fileName = urls.isEmpty ? nil : urls
         } else {
-            fileName = try container.decodeIfPresent([String].self, forKey: .fileName)
+            fileName = nil
         }
     }
+
+    // MARK: - Encoding (required because of custom init)
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(updatedAt, forKey: .updatedAt)
+        try container.encode(groupId, forKey: .groupId)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(canEdit, forKey: .canEdit)
+        try container.encode(albumName, forKey: .albumName)
+        try container.encode(albumId, forKey: .albumId)
+        try container.encodeIfPresent(fileType, forKey: .fileType)
+    }
 }
+
+// MARK: - Attachment Model
+
+struct AlbumAttachment: Codable {
+    let id: Int
+    let fileUrl: String
+    let fileSizeKb: Int
+    let attachmentType: String
+}
+
+// MARK: - Media Models
 
 enum MediaType {
     case image(UIImage)
     case videoThumbnail(UIImage, URL)
     case video(URL, AVPlayerItem)
 }
-
 
 struct MediaItem {
     let type: MediaType

@@ -286,8 +286,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                    }
         case "Syllabus Tracker":
             fetchSubjectDataAndNavigate()
-        case "Time Table":
-            fetchSubjectDataAndNavigate()
+        case "Time Table", "Timetable":
+            navigateToTimeTable()
         case "Fee Payment New":
             fetchSubjectDataAndNavigate()
         case "Notes & Videos":
@@ -489,15 +489,22 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         }
     }
     
+    func navigateToTimeTable() {
+            let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
+            guard let timetableViewController = storyboard.instantiateViewController(withIdentifier: "TimetableViewController") as? TimetableViewController else {
+                print("❌ Failed to instantiate TimetableViewController")
+                return
+            }
+            
+            navigationController?.pushViewController(timetableViewController, animated: true)
+        }
+    
     func navigateToGalleryViewController() {
             let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
             if let galleryVC = storyboard.instantiateViewController(withIdentifier: "GalleryViewController") as? GalleryViewController {
-                galleryVC.groupId = school?.id ?? ""
                 galleryVC.token = TokenManager.shared.getToken() ?? ""
                 galleryVC.currentRole = self.currentRole ?? ""
                 print("Navigating to GalleryViewController with:")
-                print("Group ID: \(galleryVC.groupId)")
-                print("Token: \(galleryVC.token)")
 
                 navigationController?.pushViewController(galleryVC, animated: true)
             } else {

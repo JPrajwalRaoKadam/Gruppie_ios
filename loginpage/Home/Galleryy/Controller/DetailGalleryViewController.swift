@@ -12,9 +12,8 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     @IBOutlet weak var albumName: UILabel!
     @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
-    @IBOutlet weak var plusButton: UIButton!
 
-
+    var attachmentIds: [Int] = []
     var processedMediaItems: [MediaType] = []
     var currentRole: String = ""
     var groupId: String = ""
@@ -61,19 +60,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         albumName.text = albumNameString
         loadImages()
         loadVideos()
-    }
-    @IBAction func plusButtonTapped(_ sender: UIButton) {
-        let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
-        if let addVC = storyboard.instantiateViewController(withIdentifier: "AddViewController") as? AddViewController {
-            addVC.groupId = self.groupId
-            addVC.token = self.token
-            
-            self.navigationController?.pushViewController(addVC, animated: true)
-            
-           
-        } else {
-            print("❌ Could not instantiate AddViewController")
-        }
     }
 
     
@@ -178,61 +164,315 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         }
     }
     
-    func showFullScreenImage(image: UIImage) {
-        let backgroundView = UIView(frame: self.view.bounds)
-        backgroundView.backgroundColor = UIColor.white
-        backgroundView.alpha = 0
-        backgroundView.tag = 999
+    @IBAction func addButtonTapped(_ sender: UIButton) {
+        let actionSheet = UIAlertController(title: "Add Media", message: "Choose an option", preferredStyle: .actionSheet)
 
-        let imageView = UIImageView(image: image)
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.tag = 1000
-        backgroundView.addSubview(imageView)
+        let addPhotoAction = UIAlertAction(title: "Add Photo", style: .default) { _ in
+            self.presentPhotoOptions()
+        }
 
-        let buttonStack = UIStackView()
-        buttonStack.axis = .horizontal
-        buttonStack.alignment = .center
-        buttonStack.distribution = .equalSpacing
-        buttonStack.spacing = 40
-        
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
-        backgroundView.addSubview(buttonStack)
+        let addVideoAction = UIAlertAction(title: "Add Video", style: .default) { _ in
+            self.presentVideoOptions()
+        }
 
-        let downloadButton = createIconButton(systemName: "arrow.down.circle", action: #selector(downloadImageTapped))
-        downloadButton.accessibilityLabel = "Download"
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
 
-        let shareButton = createIconButton(systemName: "square.and.arrow.up", action: #selector(shareImageTapped))
-        shareButton.accessibilityLabel = "Share"
+        actionSheet.addAction(addPhotoAction)
+        actionSheet.addAction(addVideoAction)
+        actionSheet.addAction(cancelAction)
 
-        let rotateButton = createIconButton(systemName: "rotate.right", action: #selector(rotateImageTapped))
-        rotateButton.accessibilityLabel = "Rotate"
+        if let popoverController = actionSheet.popoverPresentationController {
+            popoverController.sourceView = sender
+            popoverController.sourceRect = sender.bounds
+        }
 
-        buttonStack.addArrangedSubview(downloadButton)
-        buttonStack.addArrangedSubview(shareButton)
-        buttonStack.addArrangedSubview(rotateButton)
+        present(actionSheet, animated: true, completion: nil)
+    }
+    
+    func presentPhotoOptions() {
+        let photoSheet = UIAlertController(title: "Add Photo", message: "Choose source", preferredStyle: .actionSheet)
 
-        self.view.addSubview(backgroundView)
+        let cameraAction = UIAlertAction(title: "Open Camera", style: .default) { _ in
+            self.openCamera(forSourceType: .image)
+        }
 
-        NSLayoutConstraint.activate([
-            imageView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor, constant: -40),
-            imageView.widthAnchor.constraint(lessThanOrEqualTo: backgroundView.widthAnchor),
-            imageView.heightAnchor.constraint(lessThanOrEqualTo: backgroundView.heightAnchor, constant: -100),
+        let galleryAction = UIAlertAction(title: "Gallery", style: .default) { _ in
+            self.openMediaPicker(for: .image)  // for images
+        }
 
-            buttonStack.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
-            buttonStack.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 20)
-        ])
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
 
-        backgroundView.accessibilityElements = [image]
+        photoSheet.addAction(cameraAction)
+        photoSheet.addAction(galleryAction)
+        photoSheet.addAction(cancelAction)
 
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideFullScreenImage(_:)))
-        backgroundView.addGestureRecognizer(tapGesture)
+        present(photoSheet, animated: true)
+    }
 
-        UIView.animate(withDuration: 0.3) {
-            backgroundView.alpha = 1
+    func presentVideoOptions() {
+        let videoSheet = UIAlertController(title: "Add Video", message: "Choose source", preferredStyle: .actionSheet)
+
+        let cameraAction = UIAlertAction(title: "Open Camera", style: .default) { _ in
+            self.openCamera(forSourceType: .video)
+        }
+
+        let galleryAction = UIAlertAction(title: "Gallery", style: .default) { _ in
+            self.openMediaPicker(for: .video)  // for videos
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+
+        videoSheet.addAction(cameraAction)
+        videoSheet.addAction(galleryAction)
+        videoSheet.addAction(cancelAction)
+
+        present(videoSheet, animated: true)
+    }
+
+    func openCamera(forSourceType type: MediaSourceType) {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            let picker = UIImagePickerController()
+            picker.sourceType = .camera
+            picker.delegate = self
+
+            switch type {
+            case .image:
+                picker.mediaTypes = ["public.image"]
+            case .video:
+                picker.mediaTypes = ["public.movie"]
+            }
+
+            present(picker, animated: true, completion: nil)
+        } else {
+            let alert = UIAlertController(title: "Error", message: "Camera not available", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true, completion: nil)
         }
     }
+    
+    private func openMediaPicker(for type: MediaSourceType) {
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 0
+        switch type {
+        case .image:
+            config.filter = .images
+        case .video:
+            config.filter = .videos
+        }
+
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = self
+        present(picker, animated: true, completion: nil)
+    }
+
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+
+        let dispatchGroup = DispatchGroup()
+
+        for result in results {
+            dispatchGroup.enter()
+
+            if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+                result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
+                    guard let self = self, let selectedImage = image as? UIImage else {
+                        dispatchGroup.leave()
+                        return
+                    }
+
+                    DispatchQueue.main.async {
+                        self.processedMediaItems.append(.image(selectedImage))
+                        self.CollectionView.reloadData()
+                    }
+                    dispatchGroup.leave()
+                }
+            }
+            else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { [weak self] url, error in
+                    guard let self = self, let tempURL = url else {
+                        print("❌ Failed to get video URL: \(error?.localizedDescription ?? "")")
+                        dispatchGroup.leave()
+                        return
+                    }
+
+                    let fileManager = FileManager.default
+                    let targetURL = fileManager.temporaryDirectory.appendingPathComponent(tempURL.lastPathComponent)
+                    try? fileManager.removeItem(at: targetURL)
+
+                    do {
+                        try fileManager.copyItem(at: tempURL, to: targetURL)
+                        DispatchQueue.main.async {
+                            self.processedMediaItems.append(.video(targetURL, AVPlayerItem(url: targetURL)))
+                            self.CollectionView.reloadData()
+                        }
+                    } catch {
+                        print("❌ Failed to copy video: \(error.localizedDescription)")
+                    }
+                    dispatchGroup.leave()
+                }
+            } else {
+                print("⚠️ Unsupported media type")
+                dispatchGroup.leave()
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            let newItems = results.count > 0
+                ? self.processedMediaItems.suffix(results.count)
+                : []
+
+            self.uploadMediaToAlbum(mediaItems: Array(newItems))
+        }
+    }
+    
+    func uploadMediaToAlbum(mediaItems: [MediaType]) {
+        guard !albumId.isEmpty else {
+            print("❌ albumId is empty")
+            return
+        }
+
+        guard !token.isEmpty else {
+            print("❌ Token missing")
+            return
+        }
+
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var body = Data()
+
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"albumId\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(albumId)\r\n".data(using: .utf8)!)
+
+        var uploadCount = 0
+
+        for (index, media) in mediaItems.enumerated() {
+
+            switch media {
+
+            case .image(let image):
+                guard let imageData = image.jpegData(compressionQuality: 0.7) else { continue }
+
+                body.append("--\(boundary)\r\n".data(using: .utf8)!)
+                body.append(
+                    "Content-Disposition: form-data; name=\"attachments\"; filename=\"image\(index).jpg\"\r\n"
+                        .data(using: .utf8)!
+                )
+                body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+                body.append(imageData)
+                body.append("\r\n".data(using: .utf8)!)
+                uploadCount += 1
+
+            case .video(let url, _),
+                 .videoThumbnail(_, let url):
+
+                guard let videoData = try? Data(contentsOf: url) else {
+                    print("❌ Failed to read video:", url.lastPathComponent)
+                    continue
+                }
+
+                body.append("--\(boundary)\r\n".data(using: .utf8)!)
+                body.append(
+                    "Content-Disposition: form-data; name=\"attachments\"; filename=\"video\(index).mp4\"\r\n"
+                        .data(using: .utf8)!
+                )
+                body.append("Content-Type: video/mp4\r\n\r\n".data(using: .utf8)!)
+                body.append(videoData)
+                body.append("\r\n".data(using: .utf8)!)
+                uploadCount += 1
+            }
+        }
+
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        print("📤 Uploading \(uploadCount) NEW media files | Size: \(body.count / 1024) KB")
+
+        // MARK: - REQUEST
+        var request = URLRequest(
+            url: URL(string: "https://dev.gruppie.in/api/v1/gallery/attachments")!
+        )
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.timeoutIntervalForRequest = 300
+        sessionConfig.timeoutIntervalForResource = 600
+
+        let session = URLSession(configuration: sessionConfig)
+
+        session.uploadTask(with: request, from: body) { data, response, error in
+            DispatchQueue.main.async {
+
+                if let error = error {
+                    self.showError("Upload failed: \(error.localizedDescription)")
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self.showError("Invalid server response")
+                    return
+                }
+
+                print("✅ Status Code:", httpResponse.statusCode)
+
+                guard let data = data else {
+                    self.showError("No response data")
+                    return
+                }
+
+                if let raw = String(data: data, encoding: .utf8) {
+                    print("📝 Server Response:", raw)
+                }
+
+                if (200...299).contains(httpResponse.statusCode) {
+                    self.showAlert(
+                        message: "Media uploaded successfully",
+                        success: true
+                    )
+                } else {
+                    self.showError("Upload validation failed")
+                }
+            }
+        }.resume()
+    }
+
+    func showError(_ message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
+    func showAlert(message: String, success: Bool) {
+        let alert = UIAlertController(title: success ? "Success" : "Info", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
+    func convertImageToBase64(_ image: UIImage) -> String? {
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else { return nil }
+        return "data:image/jpeg;base64," + imageData.base64EncodedString()
+    }
+
+    func convertBase64ToImage(_ base64String: String) -> UIImage? {
+        let cleanedString = base64String.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "\n", with: "")
+
+        if let imageData = Data(base64Encoded: cleanedString, options: .ignoreUnknownCharacters) {
+            return UIImage(data: imageData)
+        } else {
+            print("❌ Failed to decode base64: \(cleanedString.prefix(30))...")
+            return nil
+        }
+    }
+
+    private func openVideoPicker() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.mediaTypes = [UTType.movie.identifier]
+        present(imagePicker, animated: true, completion: nil)
+    }
+    
 
     func createIconButton(systemName: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
@@ -417,214 +657,60 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         navigationController?.popViewController(animated: true)
     }
     
-    @IBAction func addButtonTapped(_ sender: UIButton) {
-        let actionSheet = UIAlertController(title: "Add Media", message: "Choose an option", preferredStyle: .actionSheet)
+    func showFullScreenImage(image: UIImage) {
+        let backgroundView = UIView(frame: self.view.bounds)
+        backgroundView.backgroundColor = UIColor.white
+        backgroundView.alpha = 0
+        backgroundView.tag = 999
 
-        let addPhotoAction = UIAlertAction(title: "Add Photo", style: .default) { _ in
-            self.presentPhotoOptions()
-        }
+        let imageView = UIImageView(image: image)
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.tag = 1000
+        backgroundView.addSubview(imageView)
 
-        let addVideoAction = UIAlertAction(title: "Add Video", style: .default) { _ in
-            self.presentVideoOptions()
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-
-        actionSheet.addAction(addPhotoAction)
-        actionSheet.addAction(addVideoAction)
-        actionSheet.addAction(cancelAction)
-
-        if let popoverController = actionSheet.popoverPresentationController {
-            popoverController.sourceView = sender
-            popoverController.sourceRect = sender.bounds
-        }
-
-        present(actionSheet, animated: true, completion: nil)
-    }
-
-    func presentPhotoOptions() {
-        let photoSheet = UIAlertController(title: "Add Photo", message: "Choose source", preferredStyle: .actionSheet)
-
-        let cameraAction = UIAlertAction(title: "Open Camera", style: .default) { _ in
-            self.openCamera(forSourceType: .image)
-        }
-
-        let galleryAction = UIAlertAction(title: "Gallery", style: .default) { _ in
-            self.openMediaPicker()
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-
-        photoSheet.addAction(cameraAction)
-        photoSheet.addAction(galleryAction)
-        photoSheet.addAction(cancelAction)
-
-        present(photoSheet, animated: true, completion: nil)
-    }
-
-    func presentVideoOptions() {
-        let videoSheet = UIAlertController(title: "Add Video", message: "Choose source", preferredStyle: .actionSheet)
+        let buttonStack = UIStackView()
+        buttonStack.axis = .horizontal
+        buttonStack.alignment = .center
+        buttonStack.distribution = .equalSpacing
+        buttonStack.spacing = 40
         
-        let cameraAction = UIAlertAction(title: "Open Camera", style: .default) { _ in
-            self.openCamera(forSourceType: .video)
+        buttonStack.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.addSubview(buttonStack)
+
+        let downloadButton = createIconButton(systemName: "arrow.down.circle", action: #selector(downloadImageTapped))
+        downloadButton.accessibilityLabel = "Download"
+
+        let shareButton = createIconButton(systemName: "square.and.arrow.up", action: #selector(shareImageTapped))
+        shareButton.accessibilityLabel = "Share"
+
+        let rotateButton = createIconButton(systemName: "rotate.right", action: #selector(rotateImageTapped))
+        rotateButton.accessibilityLabel = "Rotate"
+
+        buttonStack.addArrangedSubview(downloadButton)
+        buttonStack.addArrangedSubview(shareButton)
+        buttonStack.addArrangedSubview(rotateButton)
+
+        self.view.addSubview(backgroundView)
+
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor, constant: -40),
+            imageView.widthAnchor.constraint(lessThanOrEqualTo: backgroundView.widthAnchor),
+            imageView.heightAnchor.constraint(lessThanOrEqualTo: backgroundView.heightAnchor, constant: -100),
+
+            buttonStack.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
+            buttonStack.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 20)
+        ])
+
+        backgroundView.accessibilityElements = [image]
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideFullScreenImage(_:)))
+        backgroundView.addGestureRecognizer(tapGesture)
+
+        UIView.animate(withDuration: 0.3) {
+            backgroundView.alpha = 1
         }
-        
-        let galleryAction = UIAlertAction(title: "Gallery", style: .default) { _ in
-            self.openVideoPicker()
-        }
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        
-        videoSheet.addAction(cameraAction)
-        videoSheet.addAction(galleryAction)
-        videoSheet.addAction(cancelAction)
-        
-        present(videoSheet, animated: true, completion: nil)
-    }
-
-    func openCamera(forSourceType type: MediaSourceType) {
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            let picker = UIImagePickerController()
-            picker.sourceType = .camera
-            picker.delegate = self
-
-            switch type {
-            case .image:
-                picker.mediaTypes = ["public.image"]
-            case .video:
-                picker.mediaTypes = ["public.movie"]
-            }
-
-            present(picker, animated: true, completion: nil)
-        } else {
-            let alert = UIAlertController(title: "Error", message: "Camera not available", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true, completion: nil)
-        }
-    }
-
-    private func openMediaPicker() {
-        var config = PHPickerConfiguration()
-        config.selectionLimit = 0
-        config.filter = .images
-        
-        let picker = PHPickerViewController(configuration: config)
-        picker.delegate = self
-        present(picker, animated: true, completion: nil)
-    }
-
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true)
-        
-        var encodedImages: [String] = []
-        let dispatchGroup = DispatchGroup()
-        
-        for result in results {
-            dispatchGroup.enter()
-            result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
-                guard let self = self, let selectedImage = image as? UIImage else {
-                    dispatchGroup.leave()
-                    return
-                }
-                
-                DispatchQueue.main.async {
-                    self.mediaItems.append(selectedImage)
-                    self.processedMediaItems.append(.image(selectedImage))
-                    self.CollectionView.reloadData()
-                }
-
-                if let base64String = self.convertImageToBase64(selectedImage) {
-                    encodedImages.append(base64String)
-                }
-                dispatchGroup.leave()
-            }
-        }
-        
-        dispatchGroup.notify(queue: .main) {
-            self.uploadImages(encodedImages)
-        }
-    }
-
-    func uploadImages(_ encodedImages: [String]) {
-        guard !groupId.isEmpty, !albumId.isEmpty else {
-            print("❌ Error: groupId or albumId is empty")
-            return
-        }
-
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/album/\(albumId)/add"
-        guard let url = URL(string: urlString) else {
-            print("❌ Invalid URL")
-            return
-        }
-
-        let requestData: [String: Any] = [
-            "fileName": encodedImages,
-            "fileType": "image"
-        ]
-
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: requestData, options: []) else {
-            print("❌ Failed to encode JSON request body")
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.httpBody = jsonData
-
-        print("📤 Uploading \(encodedImages.count) images to API...")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ Error uploading images: \(error.localizedDescription)")
-                return
-            }
-
-            if let httpResponse = response as? HTTPURLResponse {
-                print("✅ Response Code: \(httpResponse.statusCode)")
-
-                if httpResponse.statusCode == 200 {
-                    print("🎉 Images successfully uploaded!")
-                    // Add the new images to mediaItemsStrings
-                    DispatchQueue.main.async {
-                        self.mediaItemsStrings.append(contentsOf: encodedImages)
-                    }
-                } else {
-                    print("⚠️ Failed to upload images. Response code: \(httpResponse.statusCode)")
-                }
-            }
-
-            if let data = data, let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) {
-                print("✅ Upload Response JSON: \(jsonResponse)")
-            } else {
-                print("❌ Failed to parse response data")
-            }
-        }.resume()
-    }
-
-    func convertImageToBase64(_ image: UIImage) -> String? {
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else { return nil }
-        return "data:image/jpeg;base64," + imageData.base64EncodedString()
-    }
-
-    func convertBase64ToImage(_ base64String: String) -> UIImage? {
-        let cleanedString = base64String.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "\n", with: "")
-
-        if let imageData = Data(base64Encoded: cleanedString, options: .ignoreUnknownCharacters) {
-            return UIImage(data: imageData)
-        } else {
-            print("❌ Failed to decode base64: \(cleanedString.prefix(30))...")
-            return nil
-        }
-    }
-
-    private func openVideoPicker() {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        imagePicker.mediaTypes = [UTType.movie.identifier]
-        present(imagePicker, animated: true, completion: nil)
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -638,8 +724,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         let item = processedMediaItems[indexPath.row]
 
-        switch item {
-        case .image(let image):
+        switch item {         case .image(let image):
             cell.imageView.image = image
         case .videoThumbnail(let thumbnail, _):
             cell.imageView.image = thumbnail
@@ -700,106 +785,121 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         
         present(alert, animated: true, completion: nil)
     }
-
+    
     func deleteSelectedImages() {
-        guard !groupId.isEmpty, !albumId.isEmpty else {
-            print("❌ Error: groupId or albumId is empty")
-            showAlert(title: "Error", message: "Missing group or album information")
+
+        guard !albumId.isEmpty else {
+            print("❌ albumId is empty")
+            showAlert(title: "Error", message: "Missing album information")
             return
         }
 
-        let selectedImages = selectedIndices
-            .filter { $0 < mediaItemsStrings.count }
-            .map { mediaItemsStrings[$0] }
+        guard !token.isEmpty else {
+            print("❌ Token missing")
+            showAlert(title: "Error", message: "Authentication error")
+            return
+        }
 
-        guard !selectedImages.isEmpty else {
-            print("❌ No valid items selected for deletion")
+        let selectedAttachmentIds: [Int] = selectedIndices.compactMap { index in
+            if index < attachmentIds.count {
+                return attachmentIds[index]
+            }
+            return nil
+        }
+
+        guard !selectedAttachmentIds.isEmpty else {
+            print("❌ No valid attachment IDs")
             showAlert(title: "Error", message: "No valid items selected")
             return
         }
 
-        let fileNamesParam = selectedImages
-            .compactMap { $0.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) }
-            .joined(separator: ",")
-
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/album/\(albumId)/remove?fileName=\(fileNamesParam)"
+        let urlString = APIManager.shared.baseURL +
+            "gallery/album/\(attachmentIds)/attachments/delete"
 
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")
             showAlert(title: "Error", message: "Invalid server URL")
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        print("📤 Deleting \(selectedImages.count) images from API...")
-        print("Request URL: \(urlString)")
+        let body: [String: Any] = [
+            "ids": selectedAttachmentIds
+        ]
 
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("❌ Failed to encode body:", error)
+            return
+        }
+
+        print("📡 DELETE API:", urlString)
+        print("📤 BODY:", body)
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             guard let self = self else { return }
-            
+
             if let error = error {
-                print("❌ Error deleting images: \(error.localizedDescription)")
                 DispatchQueue.main.async {
-                    self.showAlert(title: "Error", message: "Failed to delete: \(error.localizedDescription)")
+                    self.showAlert(title: "Error", message: error.localizedDescription)
                 }
                 return
             }
 
             guard let httpResponse = response as? HTTPURLResponse else {
-                print("❌ Invalid response")
                 DispatchQueue.main.async {
-                    self.showAlert(title: "Error", message: "Invalid server response")
+                    self.showAlert(title: "Error", message: "Invalid response")
                 }
                 return
             }
 
-            print("✅ Response Code: \(httpResponse.statusCode)")
-
-            if let data = data {
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("📝 Raw Response: \(responseString)")
-                }
-                
-                do {
-                    let jsonResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                    print("✅ Parsed JSON Response: \(jsonResponse)")
-                } catch {
-                    print("⚠️ Could not parse JSON: \(error.localizedDescription)")
-                }
-            }
+            print("📡 Status Code:", httpResponse.statusCode)
 
             DispatchQueue.main.async {
+
                 if (200...299).contains(httpResponse.statusCode) {
-                    let indicesToDelete = self.selectedIndices.sorted(by: >)
-                    
-                    for index in indicesToDelete {
+
+                    let sortedIndexes = self.selectedIndices.sorted(by: >)
+
+                    for index in sortedIndexes {
+
                         if index < self.processedMediaItems.count {
                             self.processedMediaItems.remove(at: index)
                         }
+
                         if index < self.mediaItems.count {
                             self.mediaItems.remove(at: index)
                         }
+
                         if index < self.mediaItemsStrings.count {
                             self.mediaItemsStrings.remove(at: index)
                         }
+
+                        if index < self.attachmentIds.count {
+                            self.attachmentIds.remove(at: index)
+                        }
                     }
-                    
+
                     self.selectedIndices.removeAll()
                     self.CollectionView.reloadData()
-                    print("✅ Successfully deleted items and updated UI")
+
+                    print("✅ Successfully deleted media")
                 } else {
-                    print("⚠️ Failed to delete images. Response code: \(httpResponse.statusCode)")
-                    let message = self.parseErrorMessage(from: data) ?? "Server returned status code \(httpResponse.statusCode)"
+                    let message = self.parseErrorMessage(from: data)
+                        ?? "Server returned \(httpResponse.statusCode)"
                     self.showAlert(title: "Error", message: message)
                 }
             }
-        }
-        task.resume()
+
+        }.resume()
     }
+
 
     private func parseErrorMessage(from data: Data?) -> String? {
         guard let data = data else { return nil }
@@ -828,3 +928,4 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         }
     }
 }
+

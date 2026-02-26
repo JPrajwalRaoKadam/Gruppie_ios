@@ -2,9 +2,12 @@ import UIKit
 
 class TimetableViewController: UIViewController {
 
-    @IBOutlet weak var segmentController: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var previousButton: UIButton!
+    @IBOutlet weak var nextButton: UIButton!
+    @IBOutlet weak var dateButton: UIButton!
+    @IBOutlet weak var contentView: UIView!
 
     var selectedClassName: String = ""
     var subjects: [SubjectData] = []
@@ -16,6 +19,12 @@ class TimetableViewController: UIViewController {
     var staffDetails: [Staff] = []
     let daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
+    // API Data
+    var daysList: [DayData] = []
+    var classSummaryList: [DailyClass] = []
+    var selectedDayId: Int?
+    var dailySummaryData: DailySummaryData? // ✅ Store full summary for groupAcademicYearId
+
     var isStaffSelected: Bool = false
     var isFreeTeachersSelected: Bool = false
     var isSubjectAgain: Bool = false
@@ -23,12 +32,18 @@ class TimetableViewController: UIViewController {
 
     var daysVC: DaysViewController?
 
+    // ✅ Date Properties
+    private var currentDate: Date = Date()
+    private let datePicker = UIDatePicker()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.delegate = self
         tableView.dataSource = self
-
+        contentView.layer.cornerRadius = 10
+        contentView.layer.masksToBounds = true
+        
         tableView.register(UINib(nibName: "TimetableTableViewCell", bundle: nil), forCellReuseIdentifier: "TimetableTableViewCell")
         tableView.estimatedRowHeight = 80
         tableView.rowHeight = UITableView.automaticDimension
@@ -39,22 +54,139 @@ class TimetableViewController: UIViewController {
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
 
-        segmentController.isUserInteractionEnabled = true
-        handleSegments()
-        segmentController.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
-
-        print("✅ Token:", token)
-        print("✅ GroupId:", groupId)
-        print("✅ Subjects:", subjects)
-        print("✅ TeamIds:", teamIds)
-        print("✅ Staff Details:", staffDetails)
+        setupDatePicker()
+        updateDateButtonTitle()
 
         tableView.reloadData()
+        fetchDays()   // 🔥 First API call
     }
-    
+
+    func fetchDays() {
+        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+            print("No token found in UserDefaults")
+            return
+        }
+
+        guard let url = URL(string: "https://dev.gruppie.in/api/v1/days") else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Days API Error:", error)
+                return
+            }
+
+            guard let data = data else { return }
+
+            do {
+                let decoded = try JSONDecoder().decode(DaysResponse.self, from: data)
+
+                DispatchQueue.main.async {
+                    self.daysList = decoded.data
+
+                    if let firstDay = self.daysList.first {
+                        self.selectedDayId = firstDay.id
+                        self.dateButton.setTitle(firstDay.name, for: .normal)
+
+                        self.fetchDailySummary(dayId: firstDay.id) // 🔥 Call second API
+                    }
+                }
+
+            } catch {
+                print("Days Decode Error:", error)
+            }
+
+        }.resume()
+    }
+
+    func fetchDailySummary(dayId: Int) {
+        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+            print("No token found in UserDefaults")
+            return
+        }
+
+        let urlString = "https://dev.gruppie.in/api/v1/time-table/daily-summary?groupAcademicYearId=3&dayId=\(dayId)"
+        guard let url = URL(string: urlString) else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Summary API Error:", error)
+                return
+            }
+
+            guard let data = data else { return }
+
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Received Daily Summary API Response:\n\(jsonString)")
+            }
+
+            do {
+                let decoded = try JSONDecoder().decode(DailySummaryAPIResponse.self, from: data)
+
+                DispatchQueue.main.async {
+                    self.dailySummaryData = decoded.data // ✅ Store full summary
+                    self.classSummaryList = decoded.data.classes
+                    self.tableView.reloadData()
+                }
+
+            } catch {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("Summary Decode Error:", error)
+                    print("Received JSON:", jsonString)
+                }
+            }
+
+        }.resume()
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedClass = classSummaryList[indexPath.row]
+
+        guard let dailySummaryData = self.dailySummaryData else { return }
+
+        let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
+        if let periodVC = storyboard.instantiateViewController(withIdentifier: "PeriodViewController") as? PeriodViewController {
+
+            // ✅ Pass all the data
+            periodVC.groupId = groupId
+            periodVC.token = token
+            periodVC.teamIds = teamIds
+            periodVC.subjects = subjects
+            periodVC.day = selectedDayId ?? 0
+            periodVC.classId = selectedClass.classId
+            periodVC.groupAcademicYearId = dailySummaryData.groupAcademicYearId // ✅ Correct source
+            periodVC.flowMode = .subject
+            // Map periods
+            periodVC.periods = selectedClass.periods?.map {
+                PeriodData(
+                    staffId: $0.timeTableEntry.staffId,
+                    period: $0.periodNumber,
+                    name: $0.timeTableEntry.staffName,
+                    day: selectedDayId != nil ? String(selectedDayId!) : nil,
+                    subjectsHandled: [SubjectsData(
+                        subjectId: $0.timeTableEntry.subjectId,
+                        subjectName: $0.timeTableEntry.subjectName,
+                        className: selectedClass.className,
+                        optional: false
+                    )],
+                    startTime: $0.startTime,
+                    endTime: $0.endTime
+                )
+            } ?? []
+
+            navigationController?.pushViewController(periodVC, animated: true)
+        }
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Update back button corner radius after layout is complete
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
 
@@ -63,77 +195,64 @@ class TimetableViewController: UIViewController {
         tableView.reloadData()
     }
 
-    func handleSegments() {
-        if let role = currentRole?.lowercased() {
-            switch role {
-            case "admin":
-                hideSegment(at: 4)
-            case "parent":
-                hideSegment(at: 1)
-                hideSegment(at: 2)
-            case "teacher":
-                hideSegment(at: 1)
-            default:
-                break
-            }
+    // ✅ Setup DatePicker
+    private func setupDatePicker() {
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .wheels
+        datePicker.maximumDate = Date()
+        datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
+    }
+
+    // ✅ Update Button Title
+    private func updateDateButtonTitle() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMM yyyy"
+        let dateString = formatter.string(from: currentDate)
+        dateButton.setTitle(dateString, for: .normal)
+    }
+
+    // ✅ Date Changed
+    @objc private func dateChanged(_ sender: UIDatePicker) {
+        currentDate = sender.date
+        updateDateButtonTitle()
+    }
+
+    // ✅ Show DatePicker on Button Click
+    @IBAction func dateButtonTapped(_ sender: UIButton) {
+        datePicker.date = currentDate
+
+        let alert = UIAlertController(title: "Select Date\n\n\n\n\n\n\n\n\n",
+                                      message: nil,
+                                      preferredStyle: .actionSheet)
+
+        datePicker.frame = CGRect(x: 0, y: 40, width: alert.view.bounds.width - 20, height: 200)
+        alert.view.addSubview(datePicker)
+
+        let doneAction = UIAlertAction(title: "Done", style: .default) { _ in
+            self.currentDate = self.datePicker.date
+            self.updateDateButtonTitle()
+        }
+
+        alert.addAction(doneAction)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        present(alert, animated: true)
+    }
+
+    // ✅ Next Date
+    @IBAction func nextButtonTapped(_ sender: UIButton) {
+        if let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: currentDate) {
+            currentDate = nextDay
+            updateDateButtonTitle()
         }
     }
 
-    func hideSegment(at index: Int) {
-        segmentController.setEnabled(false, forSegmentAt: index)
-        segmentController.setWidth(0.1, forSegmentAt: index)
-    }
-
-    @objc func segmentChanged(_ sender: UISegmentedControl) {
-        print("🔥 Segment Index:", sender.selectedSegmentIndex)
-
-        isStaffSelected = false
-        isFreeTeachersSelected = false
-        isSubjectAgain = false
-        isDayIselected = false
-
-        switch sender.selectedSegmentIndex {
-        case 0: break // Default
-        case 1: isStaffSelected = true
-        case 2: isFreeTeachersSelected = true
-        case 3: isSubjectAgain = true
-        case 4: isDayIselected = true
-        default: break
+    // ✅ Previous Date
+    @IBAction func previousButtonTapped(_ sender: UIButton) {
+        if let previousDay = Calendar.current.date(byAdding: .day, value: -1, to: currentDate) {
+            currentDate = previousDay
+            updateDateButtonTitle()
         }
-
-        print("✅ isStaffSelected:", isStaffSelected)
-        print("✅ isFreeTeachersSelected:", isFreeTeachersSelected)
-        print("✅ isSubjectAgain:", isSubjectAgain)
-        print("✅ isDayIselected:", isDayIselected)
-
-        if isDayIselected {
-            showDaysViewController()
-        } else {
-            hideDaysViewController()
-            tableView.reloadData()
-        }
-    }
-
-    func showDaysViewController() {
-        if daysVC == nil {
-            let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
-            if let vc = storyboard.instantiateViewController(withIdentifier: "DaysViewController") as? DaysViewController {
-                vc.currentRole = self.currentRole
-                vc.groupId = self.groupId
-                daysVC = vc
-                addChild(vc)
-                vc.view.frame = tableView.bounds
-                tableView.addSubview(vc.view)
-                vc.didMove(toParent: self)
-            }
-        }
-        daysVC?.view.isHidden = false
-    }
-
-    func hideDaysViewController() {
-        daysVC?.view.removeFromSuperview()
-        daysVC?.removeFromParent()
-        daysVC = nil
     }
 
     @IBAction func BackButton(_ sender: UIButton) {
@@ -141,79 +260,23 @@ class TimetableViewController: UIViewController {
     }
 }
 
-    extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
+// MARK: - TableView Delegates
+extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if isDayIselected {
-            return 0
-        } else if isFreeTeachersSelected {
-            return daysOfWeek.count
-        } else if isStaffSelected {
-            return staffDetails.count
-        } else if isSubjectAgain {
-            return subjects.count
-        } else {
-            return subjects.count
-        }
+        return classSummaryList.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TimetableTableViewCell", for: indexPath) as! TimetableTableViewCell
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        if isFreeTeachersSelected {
-            let day = daysOfWeek[indexPath.row]
-            cell.configureCell(with: day, icon: nil)
-        } else if isStaffSelected {
-            let staff = staffDetails[indexPath.row]
-//            cell.configureCell(with: staff.name ?? "No Name", icon: nil)
-        } else if isSubjectAgain {
-            let subject = subjects[indexPath.row]
-            cell.configureCell(with: subject.name ?? "No Name", icon: nil)
-        } else {
-            let subject = subjects[indexPath.row]
-            cell.configureCell(with: subject.name ?? "No Name", icon: nil)
-        }
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "TimetableTableViewCell",
+            for: indexPath) as! TimetableTableViewCell
+
+        let classItem = classSummaryList[indexPath.row]
+        cell.configureCell(with: classItem)
 
         return cell
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        switch segmentController.selectedSegmentIndex {
-        case 0:
-            let selectedTeamId = teamIds[indexPath.row]
-            let selectedClassName = subjects[indexPath.row].name ?? "No Class Name"
-            let vc = storyboard?.instantiateViewController(withIdentifier: "AcademicViewController") as! AcademicViewController
-            vc.groupId = groupId
-            vc.token = token
-            vc.subjects = subjects
-            vc.teamIds = [selectedTeamId]
-            vc.classTitle = selectedClassName
-            navigationController?.pushViewController(vc, animated: true)
-
-        case 1:
-            let selectedTeamId = teamIds[indexPath.row]
-            let selectedStaff = staffDetails[indexPath.row]
-//            let userId = selectedStaff.userId ?? ""
-            let vc = storyboard?.instantiateViewController(withIdentifier: "TeacherTTViewController") as! TeacherTTViewController
-            vc.groupId = groupId
-            vc.token = token
-            vc.subjects = subjects
-            vc.teamIds = [selectedTeamId]
-//            vc.userId = userId
-            navigationController?.pushViewController(vc, animated: true)
-
-        case 2:
-            let selectedDay = indexPath.row + 1
-            let vc = storyboard?.instantiateViewController(withIdentifier: "PeriodViewController") as! PeriodViewController
-            vc.groupId = groupId
-            vc.token = token
-            vc.teamIds = teamIds
-            vc.subjects = subjects
-            vc.day = selectedDay
-            navigationController?.pushViewController(vc, animated: true)
-
-        default:
-            break
-        }
     }
 }
