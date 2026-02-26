@@ -1,6 +1,6 @@
 import UIKit
 
-class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, StudentCellDelegate, EditAttendanceDelegate {
+class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
     
     @IBOutlet weak var midView: UIView!
     @IBOutlet weak var bcbutton: UIButton!
@@ -9,13 +9,21 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
     @IBOutlet weak var currDate: UIButton!
     @IBOutlet weak var DoneButton: UIButton!
     
+    var classId: String?
+    var className: String?
+    var minimalStudents: [StudentMinimal] = []
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
+    var attendanceSettingsResponse: AttendanceSettingsAllResponse?
+    var attendanceSessions: [AttendanceSessionDetail] = []
+    var groupAcademicYearId: String?
+    var classAttendanceSettings: ClassAttendanceSettingsData?
+
     var studentID: String?
       var currentDatePicker: UIDatePicker?
       var groupId: String?
       var teamId: String?
       var selectedDate: Date?
       var currentDate: String?
-      var className: String?
       var students: [StudentAtten] = []
       var attendanceData: [Attendance] = []
       var selectedClassnumberOfTimeAttendance: Int?
@@ -31,7 +39,8 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        printAttendanceSettings()
+        print("classId: \(classId), className: \(className) ")
         studentTBL.register(UINib(nibName: "StudentVCTableViewCell", bundle: nil), forCellReuseIdentifier: "StudentVCTableViewCell")
         studentTBL.dataSource = self
         studentTBL.delegate = self
@@ -49,10 +58,278 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         // Display the class name in the label
         name.text = className != nil ? "Attendance - (\(className!))" : "No Class Name"
         print("Received attendanceData no of numberOfTimeAttendance: \(selectedClassnumberOfTimeAttendance)")
+        
+        self.groupAcademicYearId =
+            groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId
         setCurrentDate()
-        fetchStudentData()
+        fetchMinimalStudentList()
         enableKeyboardDismissOnTap()
+        fetchClassAttendanceSettings()
+        fetchAttendanceSessions()
+        
     }
+    // Add this method to StudentVC
+    func resetAllCheckboxes() {
+        // Clear the unchecked students arrays
+        uncheckedStudents.removeAll()
+        uncheckedStudentsIds.removeAll()
+        
+        // Reload the table view to reset all checkboxes to checked state
+        DispatchQueue.main.async {
+            self.studentTBL.reloadData()
+        }
+        
+        print("✅ All checkboxes reset to checked state")
+    }
+    private func printAttendanceSettings() {
+
+        guard let response = attendanceSettingsResponse else {
+            print("❌ attendanceSettingsResponse is NIL in StudentVC")
+            return
+        }
+
+        print("✅ AttendanceSettingsAllResponse received in StudentVC")
+        dump(response)
+    }
+    
+//    func fetchMinimalStudentList() 
+    func fetchMinimalStudentList() {
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Role token missing")
+            return
+        }
+
+        guard let classId = classId,
+                let groupAcademicYearId =
+                        groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+                    print("❌ groupAcademicYearId not available from GroupAcademicYearResponse")
+                    return
+                }
+
+        let headers = [
+            "Authorization": "Bearer \(token)"
+        ]
+
+        let queryParams: [String: String] = [
+            "classId": classId,
+            "groupAcademicYearId": groupAcademicYearId,
+            "page": "1",
+            "limit": "50"
+        ]
+
+        APIManager.shared.request(
+            endpoint: "student/minimal-list",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { (result: Result<StudentMinimalListResponse, APIManager.APIError>) in
+
+            switch result {
+            case .success(let response):
+                self.minimalStudents = response.data.studentsList
+
+                print("✅ class :", response.data.className)
+                print("✅ total :", response.data.totalStudents)
+
+                for s in self.minimalStudents {
+                    print("Student :", s.fullName, " Roll :", s.rollNumber ?? "-")
+                }
+
+                DispatchQueue.main.async {
+                    self.studentTBL.reloadData()
+                }
+
+            case .failure(let error):
+                print("❌ minimal list error :", error)
+                
+                // Add more detailed error info
+                if case .decodingError = error {
+                    print("❌ Decoding failed - check your structs match the API response")
+                    // You might want to print the raw response here if available
+                }
+            }
+        }
+    }
+    
+    func fetchAttendanceSessions() {
+
+        guard let token = SessionManager.useRoleToken,
+              let classId = classId,
+              let groupAcademicYearId = groupAcademicYearId,   // ✅ cached value
+              let displayDate = currentDate else {
+
+            print("❌ Missing params in fetchAttendanceSessions")
+            print("classId:", classId as Any)
+            print("groupAcademicYearId:", groupAcademicYearId as Any)
+            print("currentDate:", currentDate as Any)
+            return
+        }
+
+        // Convert dd-MM-yyyy  ->  yyyy-MM-dd
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "dd-MM-yyyy"
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy-MM-dd"
+
+        guard let dateObj = inputFormatter.date(from: displayDate) else {
+            print("❌ Date conversion failed")
+            return
+        }
+
+        let apiDate = outputFormatter.string(from: dateObj)
+
+        let headers = [
+            "Authorization": "Bearer \(token)"
+        ]
+
+        let queryParams: [String: String] = [
+            "groupAcademicYearId": groupAcademicYearId,
+            "classId": classId,
+            "sessionDate": apiDate
+        ]
+
+        APIManager.shared.request(
+            endpoint: "attendance-sessions",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { (result: Result<AttendanceSessionsResponse, APIManager.APIError>) in
+
+            switch result {
+
+            case .success(let response):
+
+                self.attendanceSessions = response.data.sessions
+
+                print("✅ attendance sessions count :", self.attendanceSessions.count)
+
+                for s in self.attendanceSessions {
+                    print("Session:", s.sessionNumber,
+                          "Subject:", s.subjectName,
+                          "Marked by:", s.markedByName)
+                }
+
+            case .failure(let error):
+                print("❌ attendance-sessions error :", error)
+            }
+        }
+    }
+    
+    func fetchClassAttendanceSettings() {
+
+        guard let token = SessionManager.useRoleToken,
+              let classId = classId,
+              let groupAcademicYearId = groupAcademicYearId else {
+
+            print("❌ Missing params in fetchClassAttendanceSettings")
+            return
+        }
+
+        let queryParams: [String: String] = [
+            "groupAcademicYearId": groupAcademicYearId,
+            "classId": classId,
+            "page": "1",
+            "limit": "10"
+        ]
+
+        let headers = [
+            "Authorization": "Bearer \(token)"
+        ]
+
+        APIManager.shared.request(
+            endpoint: "attendance-settings",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { (result: Result<ClassAttendanceSettingsResponse,
+                            APIManager.APIError>) in
+
+            switch result {
+
+            case .success(let response):
+
+                self.classAttendanceSettings = response.data
+                self.updateSelectedDayAttendanceInfo()
+
+                print("✅ class name :", response.data.className)
+                print("✅ settings count :", response.data.attendanceSettings.count)
+
+                // example debug
+                for item in response.data.attendanceSettings {
+                    print(item.dayOfWeek, item.sessionsPerDay)
+                }
+
+            case .failure(let error):
+                print("❌ attendance-settings error :", error)
+            }
+        }
+    }
+    
+    private func weekDayString(from dateString: String) -> String? {
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+
+        guard let date = formatter.date(from: dateString) else { return nil }
+
+        let weekFormatter = DateFormatter()
+        weekFormatter.locale = Locale(identifier: "en_US_POSIX")
+        weekFormatter.dateFormat = "EEEE"
+
+        return weekFormatter.string(from: date).uppercased()
+    }
+    
+
+    private func getSettingForSelectedDate()
+    -> (attendanceSettingsId: String, sessionsPerDay: Int)? {
+
+        guard
+            let settings = classAttendanceSettings?.attendanceSettings,
+            let dateString = currentDate,
+            let weekday = weekDayString(from: dateString)
+        else {
+            print("❌ Missing data for attendance setting lookup")
+            return nil
+        }
+
+        guard let item = settings.first(where: {
+            $0.dayOfWeek.uppercased() == weekday
+        }) else {
+            print("❌ No attendance setting for weekday:", weekday)
+            return nil
+        }
+
+        return (item.attendanceSettingsId, item.sessionsPerDay)
+    }
+    
+    private func updateSelectedDayAttendanceInfo() {
+
+        guard let result = getSettingForSelectedDate() else { return }
+
+        self.selectedAttendanceId = result.attendanceSettingsId
+        self.selectedClassnumberOfTimeAttendance = result.sessionsPerDay
+
+        print("✅ Selected attendanceSettingsId:", result.attendanceSettingsId)
+        print("✅ Selected sessionsPerDay:", result.sessionsPerDay)
+    }
+    
+    private func apiDateString() -> String? {
+
+        guard let displayDate = currentDate else { return nil }
+
+        let input = DateFormatter()
+        input.dateFormat = "dd-MM-yyyy"
+
+        let output = DateFormatter()
+        output.dateFormat = "yyyy-MM-dd"
+
+        guard let d = input.date(from: displayDate) else { return nil }
+        return output.string(from: d)
+    }
+    
+    
     let slideMenuView = UIView()
     let declareHolidayButton = UIButton(type: .system)
     let attendanceReportButton = UIButton(type: .system)
@@ -135,7 +412,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
             print("Holiday declared on \(dateString)")
             // Call your API here
-            self.markHoliday()
+            //self.markHoliday()
         }))
 
         self.present(alert, animated: true)
@@ -148,29 +425,76 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         print("Navigate to Attendance Report")
     }
 
-    @IBAction func doneButton(_ sender: UIButton) {
+//    @IBAction func doneButton(_ sender: UIButton) {
+//        let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+//        if let absentVC = storyboard.instantiateViewController(withIdentifier: "AbsentStudentVC") as? AbsentStudentVC {
+//            absentVC.modalPresentationStyle = .custom
+//            absentVC.transitioningDelegate = self
+//            absentVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+//            absentVC.classId = self.classId
+//            
+//            absentVC.absentList = uncheckedStudents
+//            absentVC.groupId = groupId
+//            absentVC.teamId = teamId
+//            absentVC.attendanceData = self.attendanceData
+//            absentVC.numberOfTimeAttendance = selectedClassnumberOfTimeAttendance
+//            absentVC.studentID = self.studentID
+//            absentVC.currDate = currDate.titleLabel?.text
+//            absentVC.currentDate = self.currentDate
+//            
+//            absentVC.uncheckedStudentsIds = self.uncheckedStudentsIds
+//            present(absentVC, animated: true, completion: nil)
+//        }
+//    }
+     @IBAction func doneButton(_ sender: UIButton) {
+        
+        guard let setting = getSettingForSelectedDate() else {
+            print("❌ No attendance setting for selected date")
+            return
+        }
+
+        // ✅ all students ids from current screen
+        let allStudentIds = minimalStudents.map { $0.studentId }
+
+        // ✅ checked = all - unchecked
+        let checkedStudentIds = allStudentIds.filter {
+            !uncheckedStudentsIds.contains($0)
+        }
+
         let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
-        if let absentVC = storyboard.instantiateViewController(withIdentifier: "AbsentStudentVC") as? AbsentStudentVC {
+
+        if let absentVC = storyboard.instantiateViewController(
+            withIdentifier: "AbsentStudentVC"
+        ) as? AbsentStudentVC {
+
             absentVC.modalPresentationStyle = .custom
             absentVC.transitioningDelegate = self
+
+            absentVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+            absentVC.classId = self.classId
+
+            // already passing
             absentVC.absentList = uncheckedStudents
-            absentVC.groupId = groupId
-            absentVC.teamId = teamId
-            absentVC.attendanceData = self.attendanceData
-            absentVC.numberOfTimeAttendance = selectedClassnumberOfTimeAttendance
-            absentVC.studentID = self.studentID
-            absentVC.currDate = currDate.titleLabel?.text
-            absentVC.currentDate = self.currentDate
-            
-            absentVC.uncheckedStudentsIds = self.uncheckedStudentsIds
-            present(absentVC, animated: true, completion: nil)
+            absentVC.uncheckedStudentsIds = uncheckedStudentsIds
+
+            // ✅ NEW – pass checked students ids
+            absentVC.presentStudentIds = checkedStudentIds
+
+            absentVC.numberOfTimeAttendance = setting.sessionsPerDay
+            absentVC.attendanceSettingsId = setting.attendanceSettingsId
+            absentVC.groupAcademicYearId = self.groupAcademicYearId
+            absentVC.sessionDate = self.currentDate
+
+            print("✅ checked student ids :", checkedStudentIds)
+
+            present(absentVC, animated: true)
         }
     }
 
     func didTapEditAttendance(status: String, attendanceId: String, userId: String) {
         // Call your API from the ViewController here
         
-        editAttendance(attendance: status, attendanceId: attendanceId, userId: userId)
+        //editAttendance(attendance: status, attendanceId: attendanceId, userId: userId)
         print("Edit requested with status: \(status), id: \(attendanceId), user: \(userId)")
         dismissPopup()
     }
@@ -241,7 +565,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
                     print("📩 Response: \(responseBody)")
                 }
                 DispatchQueue.main.async {
-                    self.fetchStudentData() // Or reload UI
+                    self.fetchMinimalStudentList() // Or reload UI
                 }
             }
         }.resume()
@@ -286,7 +610,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
                 print("✅ Attendance successfully deleted")
                 // Optionally refresh data on main thread
                 DispatchQueue.main.async {
-                    self.fetchStudentData() // Or reload UI
+                   // self. fetchMinimalStudentList() // Or reload UI
                 }
             } else {
                 print("❌ Failed with status code: \(httpResponse.statusCode)")
@@ -410,7 +734,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
 
             if httpResponse.statusCode == 200 {
                 DispatchQueue.main.async {
-                    self.fetchStudentData() // Or reload UI
+                    self.fetchMinimalStudentList() // Or reload UI
             
                     print("✅ Holiday marked successfully")
                     // You can show success alert or reload data if needed
@@ -441,7 +765,7 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
     }
 
     func didTapDeleteAttendance(attendanceId: String) {
-        deleteAttendance(attendanceId: attendanceId)
+       // deleteAttendance(attendanceId: attendanceId)
     }
     
     func showEditAttendancePopup(for student: StudentAtten) {
@@ -501,128 +825,105 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         }
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return students.count
-    }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: "StudentVCTableViewCell",
-            for: indexPath
-        ) as? StudentVCTableViewCell else {
-            return UITableViewCell()
-        }
-
-        let student = students[indexPath.row]
-
-        cell.configure(
-            with: student,
-            allStudents: students,
-            at: indexPath,
-            delegate: self
-        )
-
-        // ✅ Load image
-        if let urlString = student.studentImage,
-           let url = URL(string: urlString), !urlString.isEmpty {
-            URLSession.shared.dataTask(with: url) { data, _, _ in
-                if let data = data, let img = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        cell.images.image = img
-                        cell.fallback.isHidden = true
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        cell.showFallbackImage(for: student.studentName)
-                        cell.fallback.isHidden = false
-                    }
-                }
-            }.resume()
-        } else {
-            cell.showFallbackImage(for: student.studentName)
-            cell.fallback.isHidden = false
-        }
-
-        // ✅ Show dynamic attendance buttons
-        if student.lastDaysAttendance.isEmpty {
-            cell.attenStatusStackView.isHidden = true
-        } else {
-            cell.attenStatusStackView.isHidden = false
-            cell.configureAttendanceButtons(lastDaysAttendance: student.lastDaysAttendance)
-        }
-        DoneButton.isHidden = student.hasHolidayAttendance
-        return cell
-    }
-
-    @objc private func editButtonTapped(_ sender: UIButton) {
-      let row = sender.tag
-      let indexPath = IndexPath(row: row, section: 0)
-      // Manually forward to your delegate method:
-        self.tableView(self.studentTBL, didSelectRowAt: indexPath)
-        
-        let selectedStudent = students[indexPath.row]
-        self.selectedStud = selectedStudent
-
-        // Safely get attendance data
-        if let firstAttendance = selectedStudent.lastDaysAttendance.first {
-            self.studAtten = firstAttendance
-            self.attendenceId = firstAttendance.attendanceId
-            print("📌 Selected attendanceId: \(firstAttendance.attendanceId ?? "nil")")
-        } else {
-            self.studAtten = nil
-            self.attendenceId = nil
-            print("⚠️ No attendanceId available for this student.")
-        }
-
-        // 💡 Now show popup safely
-        showEditAttendancePopup(for: selectedStudent)
-    }
+   
+//    @objc private func editButtonTapped(_ sender: UIButton) {
+//      let row = sender.tag
+//      let indexPath = IndexPath(row: row, section: 0)
+//      // Manually forward to your delegate method:
+//        self.tableView(self.studentTBL, didSelectRowAt: indexPath)
+//        
+//        let selectedStudent = students[indexPath.row]
+//        self.selectedStud = selectedStudent
+//
+//        // Safely get attendance data
+//        if let firstAttendance = selectedStudent.lastDaysAttendance.first {
+//            self.studAtten = firstAttendance
+//            self.attendenceId = firstAttendance.attendanceId
+//            print("📌 Selected attendanceId: \(firstAttendance.attendanceId ?? "nil")")
+//        } else {
+//            self.studAtten = nil
+//            self.attendenceId = nil
+//            print("⚠️ No attendanceId available for this student.")
+//        }
+//
+//        // 💡 Now show popup safely
+//        showEditAttendancePopup(for: selectedStudent)
+//    }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedStudent = students[indexPath.row]
-       // DoneButton.isHidden = selected.hasHolidayAttendance
-        DoneButton.isHidden = selectedStudent.hasHolidayAttendance
-        self.selectedStud = selectedStudent
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let selectedStudent = students[indexPath.row]
+//       // DoneButton.isHidden = selected.hasHolidayAttendance
+//        DoneButton.isHidden = selectedStudent.hasHolidayAttendance
+//        self.selectedStud = selectedStudent
+//
+//        // Safely get attendance data
+//        if let firstAttendance = selectedStudent.lastDaysAttendance.first {
+//            self.studAtten = firstAttendance
+//            self.attendenceId = firstAttendance.attendanceId
+//            print("📌 Selected attendanceId: \(firstAttendance.attendanceId ?? "nil")")
+//        } else {
+//            self.studAtten = nil
+//            self.attendenceId = nil
+//            print("⚠️ No attendanceId available for this student.")
+//        }
+//    }
+    func didUpdateUncheckedStudent(_ student: StudentMinimal, isChecked: Bool) {
 
-        // Safely get attendance data
-        if let firstAttendance = selectedStudent.lastDaysAttendance.first {
-            self.studAtten = firstAttendance
-            self.attendenceId = firstAttendance.attendanceId
-            print("📌 Selected attendanceId: \(firstAttendance.attendanceId ?? "nil")")
-        } else {
-            self.studAtten = nil
-            self.attendenceId = nil
-            print("⚠️ No attendanceId available for this student.")
-        }
-    }
+        let name = student.fullName
+        let id   = student.studentId
 
-    func didUpdateUncheckedStudents(_ studentName: String, students: [StudentAtten], isChecked: Bool) {
-        // 🔍 Find the matching student object
-        guard let student = students.first(where: { $0.studentName == studentName }) else {
-            print("Student not found for name: \(studentName)")
-            return
-        }
-        
-        let studentId = student.userId  // ✅ Now it's in scope
-        
         if isChecked {
-            // ✅ Remove from unchecked list when reselected
-            if let index = uncheckedStudents.firstIndex(of: studentName) {
+
+            if let index = uncheckedStudents.firstIndex(of: name) {
                 uncheckedStudents.remove(at: index)
             }
-            if let index = uncheckedStudentsIds.firstIndex(of: studentId) {
+
+            if let index = uncheckedStudentsIds.firstIndex(of: id) {
                 uncheckedStudentsIds.remove(at: index)
             }
+
         } else {
-            // ✅ Add to unchecked list when deselected
-            if !uncheckedStudents.contains(studentName), !uncheckedStudentsIds.contains(studentId)  {
-                uncheckedStudents.append(studentName)
-                uncheckedStudentsIds.append(studentId)
+
+            if !uncheckedStudents.contains(name) {
+                uncheckedStudents.append(name)
+            }
+
+            if !uncheckedStudentsIds.contains(id) {
+                uncheckedStudentsIds.append(id)
             }
         }
 
-        print("Unchecked Students: \(uncheckedStudents)")
-        print("Unchecked IDs: \(uncheckedStudentsIds)")
+        print("✅ Unchecked names :", uncheckedStudents)
+        print("✅ Unchecked ids   :", uncheckedStudentsIds)
     }
+//    func didUpdateUncheckedStudents(_ studentName: String, students: [StudentAtten], isChecked: Bool) {
+//        // 🔍 Find the matching student object
+//        guard let student = students.first(where: { $0.studentName == studentName }) else {
+//            print("Student not found for name: \(studentName)")
+//            return
+//        }
+//        
+//        let studentId = student.userId  // ✅ Now it's in scope
+//        
+//        if isChecked {
+//            // ✅ Remove from unchecked list when reselected
+//            if let index = uncheckedStudents.firstIndex(of: studentName) {
+//                uncheckedStudents.remove(at: index)
+//            }
+//            if let index = uncheckedStudentsIds.firstIndex(of: studentId) {
+//                uncheckedStudentsIds.remove(at: index)
+//            }
+//        } else {
+//            // ✅ Add to unchecked list when deselected
+//            if !uncheckedStudents.contains(studentName), !uncheckedStudentsIds.contains(studentId)  {
+//                uncheckedStudents.append(studentName)
+//                uncheckedStudentsIds.append(studentId)
+//            }
+//        }
+//
+//        print("Unchecked Students: \(uncheckedStudents)")
+//        print("Unchecked IDs: \(uncheckedStudentsIds)")
+//    }
         @IBAction func sendUncheckedStudents(_ sender: UIButton) {
             print("Sending unchecked students: \(uncheckedStudents)")
             // Here you can send the uncheckedStudents array to your API or perform any action
@@ -655,7 +956,8 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             currDate.setTitle(currentDate, for: .normal)
             
             print("Selected Date: \(currentDate ?? "")")
-            fetchStudentData()
+            fetchMinimalStudentList()
+           // fetchStudentData()
         }
     }
     @IBAction func nextDate(_ sender: Any) {
@@ -672,7 +974,8 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             currDate.setTitle(currentDate, for: .normal)
             
             print("Selected Date: \(currentDate ?? "")")
-            fetchStudentData()
+            fetchMinimalStudentList()
+           // fetchStudentData()
         } else {
             print("Cannot go beyond today's date")
         }
@@ -744,9 +1047,11 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
             currDate.setTitle(selectedDate, for: .normal) // Update button title
             currentDate = selectedDate // Update selected date
             
-            print("Selected Date: \(selectedDate)")
             
-            fetchStudentData() // Fetch data for the selected date
+            print("Selected Date: \(selectedDate)")
+            fetchMinimalStudentList()
+            
+           // fetchStudentData() // Fetch data for the selected date
             
             if let backgroundView = sender.superview?.superview {
                 backgroundView.removeFromSuperview()
@@ -765,10 +1070,78 @@ class StudentVC: UIViewController, UITableViewDataSource, UITableViewDelegate, S
         }
     }
 }
-extension StudentVC: UIViewControllerTransitioningDelegate {
+extension StudentVC: UIViewControllerTransitioningDelegate, UITableViewDataSource, UITableViewDelegate {
+    
     func presentationController(forPresented presented: UIViewController,
                                 presenting: UIViewController?,
                                 source: UIViewController) -> UIPresentationController? {
         return ThreeFourthPresentationController(presentedViewController: presented, presenting: presenting)
     }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return minimalStudents.count
+    }
+
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "StudentVCTableViewCell",
+            for: indexPath
+        ) as? StudentVCTableViewCell else {
+            return UITableViewCell()
+        }
+
+        let student = minimalStudents[indexPath.row]
+
+        // Name
+        cell.studentName.text = student.fullName
+        cell.student = student
+        cell.delegate = self
+
+        // Roll number
+        if let roll = student.rollNumber, !roll.isEmpty {
+            cell.rollNo.text = "Roll No: \(roll)"
+        } else {
+            cell.rollNo.text = "Roll No: -"
+        }
+
+        // Reset image (important for reuse)
+        cell.images.image = nil
+        cell.fallback.isHidden = true
+
+        // Profile image
+        if let urlString = student.profilePhoto,
+           !urlString.isEmpty,
+           let url = URL(string: urlString) {
+
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                guard let data = data,
+                      let img = UIImage(data: data) else {
+
+                    DispatchQueue.main.async {
+                        cell.showFallbackImage(for: student.fullName)
+                        cell.fallback.isHidden = false
+                    }
+                    return
+                }
+
+                DispatchQueue.main.async {
+                    cell.images.image = img
+                    cell.fallback.isHidden = true
+                }
+            }.resume()
+
+        } else {
+            cell.showFallbackImage(for: student.fullName)
+            cell.fallback.isHidden = false
+        }
+
+        // ✅ IMPORTANT:
+        // This screen uses StudentMinimal (no attendance info)
+        cell.attenStatusStackView.isHidden = true
+        return cell
+    }
+
+
 }

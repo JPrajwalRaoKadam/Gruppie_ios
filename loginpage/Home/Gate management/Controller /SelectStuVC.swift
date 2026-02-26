@@ -136,7 +136,7 @@ class SelectStuVC: UIViewController, UITableViewDelegate, UITableViewDataSource,
             let iconImage: UIImage? = UIImage(named: "default_profile")
             let phoneNumber = studentTeam.phone.isEmpty ? "N/A" : studentTeam.phone
             
-            cell.configure(name: studentTeam.name, designation: studentTeam.members, icon: iconImage, phoneNumber: phoneNumber)
+//            cell.configure(name: studentTeam.name, designation: studentTeam.members, icon: iconImage, phoneNumber: phoneNumber)
             
             return cell
         } else {

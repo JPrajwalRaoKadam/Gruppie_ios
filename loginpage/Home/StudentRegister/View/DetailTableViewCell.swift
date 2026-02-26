@@ -36,7 +36,7 @@ class DetailTableViewCell: UITableViewCell {
         imageLabel.textAlignment = .center
         imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
         imageLabel.textColor = .black
-        imageLabel.backgroundColor = .clear
+       // imageLabel.backgroundColor = .clear
     }
 
     private func setupGestureRecognizers() {
@@ -48,34 +48,20 @@ class DetailTableViewCell: UITableViewCell {
         whatsAppImageView.addGestureRecognizer(whatsAppTapGesture)
         whatsAppImageView.isUserInteractionEnabled = true
     }
+    func configure(with student: StudentRegistration) {
+        
+        nameLabel.text = student.firstName
+        designationLabel.text = student.fatherName ?? "N/A"
 
-    func configure(name: String, designation: Int, icon: UIImage?, phoneNumber: String) {
-        nameLabel.text = name
-        designationLabel.text = "\(designation)"
+        // Profile image (if available later)
+        iconImageView.image = nil
+        iconImageView.backgroundColor = UIColor.systemBlue
 
-        if let image = icon {
-            iconImageView.image = image
-            iconImageView.backgroundColor = .clear
-            imageLabel.isHidden = true
-        } else {
-            iconImageView.image = nil
-            iconImageView.backgroundColor = UIColor.systemBlue
-
-            let firstLetter = String(name.prefix(1)).uppercased()
-            print("Fallback Text: \(firstLetter)")
-
-            imageLabel.text = firstLetter
-            imageLabel.isHidden = false
-
-            imageLabel.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                imageLabel.centerXAnchor.constraint(equalTo: iconImageView.centerXAnchor),
-                imageLabel.centerYAnchor.constraint(equalTo: iconImageView.centerYAnchor),
-                imageLabel.widthAnchor.constraint(equalTo: iconImageView.widthAnchor),
-                imageLabel.heightAnchor.constraint(equalTo: iconImageView.heightAnchor)
-            ])
-        }
+        let firstLetter = String(student.firstName.prefix(1)).uppercased()
+        imageLabel.text = firstLetter
+        imageLabel.isHidden = false
     }
+
 
     @objc private func callTapped() {
         print("Call button tapped")

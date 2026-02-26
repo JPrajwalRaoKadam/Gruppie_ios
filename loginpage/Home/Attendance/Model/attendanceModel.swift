@@ -1,5 +1,36 @@
 
 import Foundation
+//AttendanceVC
+struct AttendanceSummaryResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: AttendanceSummaryData
+}
+
+struct AttendanceSummaryData: Decodable {
+    let groupAcademicYearId: String
+    let groupAcademicYear: String
+    let date: String
+    let classes: [AttendanceClassSummary]
+}
+
+struct AttendanceClassSummary: Decodable {
+    let classId: String
+    let className: String
+    let totalStudents: Int
+    let sessions: [AttendanceSession]
+}
+
+struct AttendanceSession: Decodable {
+    let sessionNumber: Int
+    let presentStudents: Int
+    let subjectName: String
+    let staffName: String
+}
+
+
+
+
 
 // MARK: - Student Response Model
 struct StudentResponse: Codable {
@@ -56,16 +87,45 @@ struct StudentAttendance: Codable {
         case time, teacherName, teacherId, subjectName, subjectId, periodNumber, day, dateString, date, attendanceId, attendanceAt, attendance
     }
 }
-// MARK: - Top-level response
-struct SubjectResponseAtten: Codable {
-    let data: [SubjectDataAtten]
+
+
+struct SubjectRegisterResponse1: Decodable {
+    let success: Bool
+    let data: SubjectRegisterData
 }
 
-// MARK: - Each subject item
-struct SubjectDataAtten: Codable {
+struct SubjectRegisterData: Decodable {
+    let `class`: SubjectRegisterClass
+    let subjectGroups: [SubjectGroup]
+}
+
+struct SubjectRegisterClass: Decodable {
+    let classId: Int
+    let className: String
+    let totalStudents: Int
+}
+
+struct SubjectGroup: Decodable {
+    let type: String
+    let subjects: [SubjectRegisterSubject]
+}
+
+struct SubjectRegisterSubject: Decodable {
+    let subjectId: Int
     let subjectName: String
-    let subjectId : String
-    // Add others if needed like subjectId, canPost, etc.
+    let code: String
+    let subjectPriority: Int
+    let isActive: Bool
+    let isCustom: Bool
+    let assignedStaffCount: Int
+    let assignedStudentsCount: Int
+    let assignedStaff: [AssignedStaff]
+}
+
+struct AssignedStaff: Decodable {
+    let staffId: Int
+    let staffName: String
+    let profilePhoto: String?
 }
 
 struct Attendance: Codable {
@@ -107,4 +167,133 @@ struct AttendanceModel: Codable {
         self.image = image
         self.enableAttendance = enableAttendance
     }
+}
+struct AttendanceSettingsAllResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: [AttendanceSettingsClass]
+    let meta: AttendanceSettingsMeta
+}
+
+struct AttendanceSettingsClass: Decodable {
+    let classId: String
+    let className: String
+    let settings: [AttendanceSettingItem]
+}
+
+struct AttendanceSettingItem: Decodable {
+    let attendanceSettingsId: String
+    let dayOfWeek: String
+    let attendanceMode: String
+    let sessionsPerDay: Int
+    let startTime: String?
+    let endTime: String?
+    let isHoliday: Bool
+    let isActive: Bool
+}
+
+struct AttendanceSettingsMeta: Decodable {
+    let totalItems: Int
+    let currentPage: Int
+    let itemsPerPage: Int
+    let totalPages: Int
+}
+
+
+//StudentVC
+struct StudentMinimalListResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: StudentMinimalListData
+    let pagination: Pagination1
+}
+
+struct StudentMinimalListData: Decodable {
+    let groupAcademicYearId: String
+    let classId: String
+    let className: String
+    let totalStudents: Int
+    let studentsList: [StudentMinimal]
+}
+
+struct StudentMinimal: Decodable {
+    let studentId: String
+    let fullName: String
+    let gender: String?
+    let omrNumber: String?
+    let rollNumber: String?
+    let satsNumber: String?
+    let studentMobileNumber: String?
+    let fatherMobileNumber: String?
+    let motherMobileNumber: String?
+    let fatherName: String?
+    let motherName: String?
+    let profilePhoto: String?
+}
+
+struct Pagination1: Decodable {
+    let totalItems: Int
+    let currentPage: Int
+    let itemsPerPage: Int
+    let totalPages: Int
+}
+struct AttendanceSessionsResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: AttendanceSessionsData
+    let meta: AttendanceSessionsMeta
+}
+
+struct AttendanceSessionsData: Decodable {
+    let classId: String
+    let className: String
+    let groupAcademicYearId: String
+    let sessions: [AttendanceSessionDetail]
+}
+
+struct AttendanceSessionDetail: Decodable {
+    let sessionId: String
+    let sessionDate: String
+    let sessionNumber: Int
+    let subjectId: String
+    let subjectName: String
+    let markedBy: String
+    let markedByName: String
+    let attendanceJson: [String: String]?
+    let isLocked: Bool
+}
+
+struct AttendanceSessionsMeta: Decodable {
+    let totalItems: Int
+    let currentPage: Int
+    let itemsPerPage: Int
+    let totalPages: Int
+}
+
+struct ClassAttendanceSettingsResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: ClassAttendanceSettingsData
+}
+
+struct ClassAttendanceSettingsData: Decodable {
+    let groupAcademicYearId: Int
+    let classId: Int
+    let className: String
+    let attendanceSettings: [ClassAttendanceSettingItem]
+}
+
+struct ClassAttendanceSettingItem: Decodable {
+    let attendanceSettingsId: String
+    let dayOfWeek: String
+    let attendanceMode: String
+    let sessionsPerDay: Int
+    let startTime: String?
+    let endTime: String?
+    let isHoliday: Bool
+    let isActive: Bool
+}
+struct CommonSuccessResponse: Decodable {
+    let success: Bool
+    let message: String
 }

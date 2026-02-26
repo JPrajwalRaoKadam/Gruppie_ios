@@ -24,6 +24,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var featureIcons: [FeatureIcon] = []
     public var groupClasses: [GroupClass] = []
     public var pagination: Pagination?
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
     
     @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var tableView: UITableView! // TableView outlet
@@ -279,12 +280,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchSubjectDataAndNavigate()
         case "Gallery":
             navigateToGalleryViewController()
-        case "Attendance":
-            if currentRole == "admin" {
-                navigateToAttendanceViewController()
-            } else if currentRole == "teacher" {
-                fetchSubjectDataAndNavigate()
-            }
+        case "Students Attendance":
+            fetchGroupClasses {
+                       self.navigateToAttendanceViewController(groupClass: self.groupClasses)
+                   }
         case "Syllabus Tracker":
             fetchSubjectDataAndNavigate()
         case "Time Table":
@@ -464,28 +463,6 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
         }
     
-    func navigateToAttendanceViewController() {
-                let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
-                if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
-                    attendanceVC.groupId = school?.id ?? ""
-                    attendanceVC.currentRole = self.currentRole ?? ""
-                    print("groupId of attendance: \(attendanceVC.groupId)")
-                    navigationController?.pushViewController(attendanceVC, animated: true)
-                }
-            }
-    
-    func navigateToAttendanceViewControllerWithClass(subjects: [SubjectData], teamIds: [String]) {
-                let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
-                if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
-                    attendanceVC.groupId = school?.id ?? ""
-                    attendanceVC.teamid = teamIds[indexPath?.row ?? 0]
-                    attendanceVC.subjects = subjects
-                    attendanceVC.currentRole = self.currentRole ?? ""
-                    print("groupId of attendance: \(attendanceVC.groupId)")
-                    navigationController?.pushViewController(attendanceVC, animated: true)
-                }
-            }
-    
     func navigateToFeedBackViewController() {
         let storyboard = UIStoryboard(name: "FeedBack", bundle: nil)
         if let feedbackVC = storyboard.instantiateViewController(withIdentifier: "FeedBackViewController") as? FeedBackViewController {
@@ -499,6 +476,16 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             navigationController?.pushViewController(feedbackVC, animated: true)
         } else {
             print("Failed to instantiate FeedBackViewController")
+        }
+    }
+    
+    func navigateToAttendanceViewController(groupClass: [GroupClass]) {
+        let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+        if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
+            attendanceVC.groupClasses = groupClass  // Pass the group classes data
+            attendanceVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+            print("📚 Passing \(groupClass.count) group classes to AttendanceVC")
+            navigationController?.pushViewController(attendanceVC, animated: true)
         }
     }
     
@@ -645,8 +632,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.navigateToListOfStudentsVC(subjects: subjects)
                         case "Notes & Videos":
                             self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
-                        case "Attendance":
-                            self.navigateToAttendanceViewControllerWithClass(subjects: subjects, teamIds: teamIds)
+                        case "Students Attendance":
+                            self.fetchGroupClasses {
+                                       self.navigateToAttendanceViewController(groupClass: self.groupClasses)
+                                   }
                         case "Marks Card New":
                             self.navigateToExamination_ActivityVC(subjects: subjects, teamIds: teamIds, userIds: self.userIds)
                         default:

@@ -8,29 +8,32 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
     @IBOutlet weak var backButton: UIButton!
+    
+    var classId: String = ""
+    var groupAcademicYearId: String = ""
+    var className: String = ""
+    var studentName: String = ""
+    var students: [StudentRegistration] = []
+    var filteredStudents: [StudentRegistration] = []
+
 
     var studentDbId: String?
-    var token: String = ""
-    var groupIds: String = ""
     var teamId: String = ""
     var userId: String = ""
     var studentDetails: [StudentData] = []
     var filteredStudentDetails: [StudentData] = []
-    var studentName: String?
     var newStudent: StudentData?
     var searchTextField: UITextField?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        if let studentName = studentName {
-            name.text = studentName
-        }
         heightConstraintOfSearchView.constant = 0
+        name.text = className
 
         searchView.isHidden = true
         print("DetailViewController loaded")
-        print("groupIds: \(groupIds), teamId: \(teamId), token: \(token), studentDbId: \(studentDbId ?? "N/A")")
+
+        print(" className: \(className),classId: \(classId), token: \(SessionManager.useRoleToken), groupAcademicYearId: \(groupAcademicYearId ?? "N/A")")
         
         TableView.register(UINib(nibName: "DetailTableViewCell", bundle: nil), forCellReuseIdentifier: "DetailTableViewCell")
         
@@ -42,7 +45,9 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         
         searchView.isHidden = true
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
-        filteredStudentDetails = studentDetails
+        filteredStudents = students
+
+        //filteredStudentDetails = studentDetails
         
         TableView.layer.cornerRadius = 10
         TableView.layer.masksToBounds = true
@@ -55,6 +60,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         print("Student details count: \(studentDetails.count)")
         
         enableKeyboardDismissOnTap()
+        fetchStudentList()
     }
     
     override func viewDidLayoutSubviews() {
@@ -84,21 +90,39 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         }
     }
     
+    
+//    func filterMembers(textField: String) {
+//        let searchText = textField.trimmingCharacters(in: .whitespacesAndNewlines)
+//        
+//        if searchText.isEmpty {
+//            filteredStudentDetails = studentDetails
+//            TableView.reloadData()
+//            return
+//        }
+//
+//        filteredStudentDetails = studentDetails.filter {
+//            ($0.name ?? "").lowercased().contains(searchText.lowercased())
+//        }
+//
+//        TableView.reloadData()
+//    }
     func filterMembers(textField: String) {
         let searchText = textField.trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         if searchText.isEmpty {
-            filteredStudentDetails = studentDetails
+            filteredStudents = students
             TableView.reloadData()
             return
         }
 
-        filteredStudentDetails = studentDetails.filter {
-            ($0.name ?? "").lowercased().contains(searchText.lowercased())
+        filteredStudents = students.filter {
+            $0.firstName.lowercased().contains(searchText.lowercased())
         }
 
         TableView.reloadData()
     }
+
+    
 
    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
     let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
@@ -106,49 +130,51 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     return true
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredStudentDetails.count
+        return filteredStudents.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "DetailTableViewCell", for: indexPath) as? DetailTableViewCell else {
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "DetailTableViewCell",
+            for: indexPath
+        ) as? DetailTableViewCell else {
             fatalError("Cell could not be dequeued")
         }
 
-        let student = filteredStudentDetails[indexPath.row]
-        self.newStudent = student
-        cell.nameLabel.text = student.name
-        cell.designationLabel.text = student.fatherName
+        let student = filteredStudents[indexPath.row]
+        cell.configure(with: student)
 
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedStudent = studentDetails[indexPath.row]
-        
-        guard let userId = selectedStudent.userId, !userId.isEmpty else {
-            print("User ID is missing or empty for selected student")
-            return
-        }
-
-        let selectedStudentDbId = selectedStudent.studentDbId ?? "N/A"
-        
-        print("Navigating with userId: \(userId), studentDbId: \(selectedStudentDbId), teamId: \(teamId), groupId: \(groupIds), token: \(token)")
-
-        DispatchQueue.main.async {
-            let storyboard = UIStoryboard(name: "Student", bundle: nil)
-            if let studentDetailVC = storyboard.instantiateViewController(withIdentifier: "StudentDetailViewController") as? StudentDetailViewController {
-                
-                studentDetailVC.student = selectedStudent
-                studentDetailVC.token = self.token
-                studentDetailVC.groupId = self.groupIds
-                studentDetailVC.teamId = self.teamId
-                studentDetailVC.userId = userId
-                studentDetailVC.studentDbId = selectedStudentDbId
-
-                self.navigationController?.pushViewController(studentDetailVC, animated: true)
-            }
-        }
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let selectedStudent = filteredStudents[indexPath.row]
+//
+//        guard let userId = selectedStudent.userId, !userId.isEmpty else {
+//            print("User ID is missing or empty for selected student")
+//            return
+//        }
+//
+//        let selectedStudentDbId = selectedStudent.studentDbId ?? "N/A"
+//        
+//        print("Navigating with userId: \(userId), studentDbId: \(selectedStudentDbId), teamId: \(teamId), groupId: \(groupIds)")
+//
+//        DispatchQueue.main.async {
+//            let storyboard = UIStoryboard(name: "Student", bundle: nil)
+//            if let studentDetailVC = storyboard.instantiateViewController(withIdentifier: "StudentDetailViewController") as? StudentDetailViewController {
+//                
+//                studentDetailVC.student = selectedStudent
+//                studentDetailVC.groupId = self.groupIds
+//                studentDetailVC.teamId = self.teamId
+//                studentDetailVC.userId = userId
+//                studentDetailVC.studentDbId = selectedStudentDbId
+//
+//                self.navigationController?.pushViewController(studentDetailVC, animated: true)
+//            }
+//        }
+//    }
     
     @IBAction func addButtonTapped(_ sender: UIButton) {
         let alertController = UIAlertController(title: "Select Option", message: "Choose an action", preferredStyle: .actionSheet)
@@ -171,13 +197,9 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     }
 
     private func navigateToAddStudentViewController() {
-        print("Navigating with teamId: \(self.teamId), groupId: \(self.groupIds), token: \(self.token)")
-
         let storyboard = UIStoryboard(name: "Student", bundle: nil)
         if let addStudentVC = storyboard.instantiateViewController(withIdentifier: "AddStudentViewController") as? AddStudentViewController {
-            addStudentVC.token = self.token
-            addStudentVC.groupId = self.groupIds
-            addStudentVC.teamId = self.teamId
+            addStudentVC.classId = self.classId
             addStudentVC.newStudentDetails = self.studentDetails
             self.navigationController?.pushViewController(addStudentVC, animated: true)
         }
@@ -186,8 +208,8 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     private func navigateToAddStaffStudent(with staffList: [StaffMember]) {
         let storyboard = UIStoryboard(name: "Student", bundle: nil)
         if let addStaffVC = storyboard.instantiateViewController(withIdentifier: "AddStaffStudent") as? AddStaffStudent {
-            addStaffVC.token = self.token
-            addStaffVC.groupId = self.groupIds
+            //addStaffVC.token = self.token
+           // addStaffVC.groupId = self.groupIds
             addStaffVC.userId = self.userId
             addStaffVC.staffList = staffList
             self.navigationController?.pushViewController(addStaffVC, animated: true)
@@ -197,14 +219,14 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     private func navigateToAddStaffViewController() {
         print("Fetching staff data before navigation...")
 
-        guard let url = URL(string: APIManager.shared.baseURL + "groups/\(groupIds)/staff/get?type=teaching") else {
+        guard let url = URL(string: APIManager.shared.baseURL + "/staff/get?type=teaching") else {
             print("Invalid URL")
             return
         }
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("Bearer \(self.token)", forHTTPHeaderField: "Authorization")
+        //request.setValue("Bearer \(self.token)", forHTTPHeaderField: "Authorization")
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -261,5 +283,60 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     @IBAction func backButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
+    
+    func fetchStudentList() {
+
+        guard let roleToken = SessionManager.useRoleToken else {
+            print("❌ Role token missing")
+            return
+        }
+
+        let headers = [
+            "Authorization": "Bearer \(roleToken)"
+        ]
+
+        let queryParams: [String: String] = [
+            "classId": classId,
+            "groupAcademicYearId": groupAcademicYearId,
+            "page": "1",
+            "limit": "50"
+        ]
+
+        APIManager.shared.request(
+            endpoint: "student/full-registration",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { [weak self] (result: Result<StudentFullRegistrationResponse, APIManager.APIError>) in
+
+            guard let self = self else { return }
+
+            switch result {
+
+            case .success(let response):
+                print("✅ API SUCCESS")
+                print("Message:", response.message)
+                print("Total students:", response.data.count)
+
+                // 🔍 Pretty print each student
+                response.data.forEach {
+                    print("👤 Student:", $0.fullName, "| Mobile:", $0.studentMobileNumber ?? "N/A")
+                }
+
+                // 🔄 Save & reload UI
+                DispatchQueue.main.async {
+                    self.students = response.data
+                    self.filteredStudents = response.data
+                    self.TableView.reloadData()
+                }
+
+
+            case .failure(let error):
+                print("❌ API FAILED:", error.localizedDescription)
+            }
+        }
+    }
+
+
 
 }

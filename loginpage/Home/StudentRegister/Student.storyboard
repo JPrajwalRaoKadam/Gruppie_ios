@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24127" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -58,51 +58,50 @@
                                 </constraints>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="tiB-bO-49Y">
-                                <rect key="frame" x="20" y="232" width="352" height="364"/>
+                                <rect key="frame" x="15" y="183" width="363" height="575"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="364" id="m4E-NK-YFi"/>
-                                </constraints>
                             </tableView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lcl-sY-MRD">
-                                <rect key="frame" x="106" y="631" width="180" height="48"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fbz-O6-egz">
+                                <rect key="frame" x="198" y="766" width="180" height="48"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="180" id="99Q-e3-LhS"/>
-                                    <constraint firstAttribute="height" constant="48" id="Njs-Lb-7gG"/>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="48" id="9xX-SV-leo"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="180" id="aFT-Yy-8ul"/>
+                                    <constraint firstAttribute="height" constant="48" id="awp-TB-h5G"/>
+                                    <constraint firstAttribute="width" constant="180" id="cpn-J6-6uI"/>
                                 </constraints>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                 <state key="normal" title="ADD"/>
                                 <connections>
-                                    <action selector="AddButton:" destination="M1r-g0-s0a" eventType="touchUpInside" id="UCW-32-icz"/>
+                                    <action selector="addButtonAction:" destination="M1r-g0-s0a" eventType="touchUpInside" id="NwB-KK-Rx4"/>
                                 </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="dA9-mV-Qmf"/>
                         <color key="backgroundColor" red="0.9606168866" green="0.95324307679999998" blue="0.9372524619" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
-                            <constraint firstItem="tiB-bO-49Y" firstAttribute="leading" secondItem="dA9-mV-Qmf" secondAttribute="leading" constant="20" id="2w6-g6-O5H"/>
+                            <constraint firstItem="tiB-bO-49Y" firstAttribute="top" secondItem="cnq-OM-14V" secondAttribute="bottom" constant="15" id="2iD-5e-1R9"/>
                             <constraint firstItem="cnq-OM-14V" firstAttribute="leading" secondItem="dA9-mV-Qmf" secondAttribute="leading" id="6ll-6W-mvo"/>
-                            <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="lcl-sY-MRD" secondAttribute="trailing" constant="107" id="NyD-tf-6vQ"/>
-                            <constraint firstItem="lcl-sY-MRD" firstAttribute="leading" secondItem="dA9-mV-Qmf" secondAttribute="leading" constant="106" id="Omo-OH-4Bg"/>
+                            <constraint firstItem="tiB-bO-49Y" firstAttribute="bottom" secondItem="dA9-mV-Qmf" secondAttribute="bottom" constant="-26" id="Dml-F9-tmw"/>
                             <constraint firstItem="cnq-OM-14V" firstAttribute="top" secondItem="dA9-mV-Qmf" secondAttribute="top" id="Pk3-mA-xRC"/>
+                            <constraint firstItem="tiB-bO-49Y" firstAttribute="leading" secondItem="dA9-mV-Qmf" secondAttribute="leading" constant="15" id="Tjr-aK-jwh"/>
                             <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="cnq-OM-14V" secondAttribute="trailing" id="X7k-Le-LWT"/>
-                            <constraint firstItem="tiB-bO-49Y" firstAttribute="top" secondItem="cnq-OM-14V" secondAttribute="bottom" constant="64" id="XFT-GL-7P4"/>
-                            <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="tiB-bO-49Y" secondAttribute="trailing" constant="21" id="eKw-Vg-itf"/>
-                            <constraint firstItem="lcl-sY-MRD" firstAttribute="top" secondItem="tiB-bO-49Y" secondAttribute="bottom" constant="35" id="fAH-SF-4JD"/>
+                            <constraint firstItem="Fbz-O6-egz" firstAttribute="top" secondItem="tiB-bO-49Y" secondAttribute="bottom" constant="8" id="fbR-p5-J9m"/>
+                            <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="tiB-bO-49Y" secondAttribute="trailing" constant="15" id="rio-rS-Eud"/>
+                            <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="Fbz-O6-egz" secondAttribute="trailing" constant="15" id="vsF-tQ-d0G"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="TableView" destination="tiB-bO-49Y" id="22E-xm-Wvi"/>
-                        <outlet property="addButton" destination="lcl-sY-MRD" id="Xnx-Tm-EE0"/>
+                        <outlet property="addButton" destination="Fbz-O6-egz" id="I6M-cg-xei"/>
                         <outlet property="backButton" destination="VQB-Wo-Mg3" id="0Vj-27-ynS"/>
                     </connections>
                 </viewController>
                 <navigationItem id="gOW-a6-Xev"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5wZ-LL-g7q" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="7781" y="865"/>
+            <point key="canvasLocation" x="7780.9160305343512" y="864.78873239436621"/>
         </scene>
         <!--Add Regular Class-->
         <scene sceneID="2y7-gn-NRp">
@@ -334,9 +333,6 @@
                                             <imageReference key="image" image="plus.circle" catalog="system" symbolScale="default"/>
                                             <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                         </state>
-                                        <connections>
-                                            <action selector="AddButton:" destination="X1n-Y1-z0U" eventType="touchUpInside" id="inV-Y2-EqC"/>
-                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.9606168866" green="0.95324307679999998" blue="0.9372524619" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>

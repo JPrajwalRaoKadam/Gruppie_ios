@@ -133,16 +133,16 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
         switch indexPath.section {
         case 0:
             let cell = tableView.dequeueReusableCell(withIdentifier: "BasicInfoCell", for: indexPath) as! BasicInfoCell
-            cell.delegate = self
-            cell.populate(with: student, isEditingEnabled: isEditingEnabled)
+//            cell.delegate = self
+//            cell.populate(with: student, isEditingEnabled: isEditingEnabled)
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(withIdentifier: "EducationInfoCell", for: indexPath) as! EducationInfoCell
             cell.populate(with: student, isEditingEnabled: isEditingEnabled)
             return cell
         case 2:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "AccountInfoCell", for: indexPath) as! AccountInfoCell
-            cell.populate(with: student, isEditingEnabled: isEditingEnabled)
+            let cell = tableView.dequeueReusableCell(withIdentifier: "BasicInfoCell", for: indexPath) as! BasicInfoCell
+           // cell.populate(with: student, isEditingEnabled: isEditingEnabled)
             return cell
         default:
             return UITableViewCell()
@@ -179,48 +179,48 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
             let indexPath = IndexPath(row: 0, section: section)
             guard let cell = TableView.cellForRow(at: indexPath) else { continue }
 
-            switch cell {
-            case let basic as BasicInfoCell:
-                profile.name = basic.name.text ?? ""
-                profile.gender = basic.gender.text ?? ""
-                profile.className = basic.studentClass.text ?? ""
-                profile.section = basic.section.text ?? ""
-                profile.rollNumber = basic.rollNo.text ?? ""
-                profile.email = basic.email.text ?? ""
-                profile.phone = basic.phone.text ?? ""
-                profile.doj = basic.doj.text ?? ""
-
-            case let edu as EducationInfoCell:
-                profile.nationality = edu.nationality.text ?? ""
-                profile.bloodGroup = edu.bloodGroup.text ?? ""
-                profile.religion = edu.religion.text ?? ""
-                profile.caste = edu.caste.text ?? ""
-                profile.category = edu.category.text ?? ""
-                profile.disability = edu.disability.text ?? ""
-                profile.dob = edu.dob.text ?? ""
-                profile.admissionNumber = edu.admissionNo.text ?? ""
-                profile.satsNumber = edu.satsNumber.text ?? ""
-                profile.address = edu.address.text ?? ""
-                profile.aadharNumber = edu.aadharNo.text ?? ""
-
-            case let acc as AccountInfoCell:
-                profile.fatherName = acc.fatherName.text
-                profile.motherName = acc.motherName.text
-                profile.fatherPhone = acc.fatherPhone.text
-                profile.motherPhone = acc.motherPhone.text
-                profile.fatherEmail = acc.fatherEmail.text
-                profile.motherEmail = acc.motherEmail.text
-                profile.fatherEducation = acc.fatherQualification.text
-                profile.motherEducation = acc.motherQualification.text
-                profile.fatherOccupation = acc.fatherOccupation.text
-                profile.motherOccupation = acc.motherOccupation.text
-                profile.fatherAadharNumber = acc.fatherAadharNo.text
-                profile.motherAadharNumber = acc.motherAadharNo.text
-                profile.familyIncome = acc.fatherIncome.text
-
-            default:
-                break
-            }
+//            switch cell {
+//            case let basic as BasicInfoCell:
+//                profile.name = basic.name.text ?? ""
+//                profile.gender = basic.gender.text ?? ""
+//                profile.className = basic.studentClass.text ?? ""
+//                profile.section = basic.section.text ?? ""
+//                profile.rollNumber = basic.rollNo.text ?? ""
+//                profile.email = basic.email.text ?? ""
+//                profile.phone = basic.phone.text ?? ""
+//                profile.doj = basic.doj.text ?? ""
+//
+//            case let edu as EducationInfoCell:
+//                profile.nationality = edu.nationality.text ?? ""
+//                profile.bloodGroup = edu.bloodGroup.text ?? ""
+//                profile.religion = edu.religion.text ?? ""
+//                profile.caste = edu.caste.text ?? ""
+//                profile.category = edu.category.text ?? ""
+//                profile.disability = edu.disability.text ?? ""
+//                profile.dob = edu.dob.text ?? ""
+//                profile.admissionNumber = edu.admissionNo.text ?? ""
+//                profile.satsNumber = edu.satsNumber.text ?? ""
+//                profile.address = edu.address.text ?? ""
+//                profile.aadharNumber = edu.aadharNo.text ?? ""
+//
+//            case let acc as AccountInfoCell:
+//                profile.fatherName = acc.fatherName.text
+//                profile.motherName = acc.motherName.text
+//                profile.fatherPhone = acc.fatherPhone.text
+//                profile.motherPhone = acc.motherPhone.text
+//                profile.fatherEmail = acc.fatherEmail.text
+//                profile.motherEmail = acc.motherEmail.text
+//                profile.fatherEducation = acc.fatherQualification.text
+//                profile.motherEducation = acc.motherQualification.text
+//                profile.fatherOccupation = acc.fatherOccupation.text
+//                profile.motherOccupation = acc.motherOccupation.text
+//                profile.fatherAadharNumber = acc.fatherAadharNo.text
+//                profile.motherAadharNumber = acc.motherAadharNo.text
+//                profile.familyIncome = acc.fatherIncome.text
+//
+//            default:
+//                break
+//            }
         }
 
         return profile
@@ -321,18 +321,18 @@ class StudentDetailViewController: UIViewController, UITableViewDelegate, UITabl
     }
 }
 
-extension StudentDetailViewController: BasicInfoCellDelegate {
-    func didUpdateField(field: String, value: String) {
-        switch field {
-        case "name": student?.name = value
-        case "gender": student?.gender = value
-        case "className": student?.className = value
-        case "section": student?.section = value
-        case "rollNumber": student?.rollNumber = value
-        case "email": student?.email = value
-        case "phone": student?.phone = value
-        case "dateOfJoining": student?.dateOfJoining = value
-        default: break
-        }
-    }
-}
+//extension StudentDetailViewController: BasicInfoCellDelegate {
+//    func didUpdateField(field: String, value: String) {
+//        switch field {
+//        case "name": student?.name = value
+//        case "gender": student?.gender = value
+//        case "className": student?.className = value
+//        case "section": student?.section = value
+//        case "rollNumber": student?.rollNumber = value
+//        case "email": student?.email = value
+//        case "phone": student?.phone = value
+//        case "dateOfJoining": student?.dateOfJoining = value
+//        default: break
+//        }
+//    }
+//}

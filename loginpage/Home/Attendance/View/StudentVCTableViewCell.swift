@@ -3,7 +3,7 @@ import UIKit
   
   // ✅ Protocol to communicate unchecked students and attendance taps back to the parent VC
 protocol StudentCellDelegate: AnyObject {
-    func didUpdateUncheckedStudents(_ studentName: String, students: [StudentAtten], isChecked: Bool)
+    func didUpdateUncheckedStudent(_ student: StudentMinimal, isChecked: Bool)
     func didTapAttendanceStatus(for student: StudentAtten, at indexPath: IndexPath)
     
     //      func didTapAttendanceStatus(for student: StudentAtten, attendanceList: [StudentAttendance], at indexPath: IndexPath)
@@ -18,6 +18,8 @@ protocol StudentCellDelegate: AnyObject {
         @IBOutlet weak var images: UIImageView!
         @IBOutlet weak var fallback: UILabel!
         @IBOutlet weak var attenStatusStackViewWidth: NSLayoutConstraint!
+        var student: StudentMinimal?
+        
         var userId: String?
         
         // MARK: - Data
@@ -75,10 +77,13 @@ protocol StudentCellDelegate: AnyObject {
     
         @IBAction func checkButtonTapped(_ sender: UIButton) {
             sender.isSelected.toggle()
-            checkButton.backgroundColor = .white
-            if let name = studentName.text, let students = self.students {
-                delegate?.didUpdateUncheckedStudents(name, students: students, isChecked: sender.isSelected)
-            }
+
+            guard let student = student else { return }
+
+            delegate?.didUpdateUncheckedStudent(
+                student,
+                isChecked: sender.isSelected
+            )
         }
         
         func configureAttendanceButtons(numberOfTimes: Int) {

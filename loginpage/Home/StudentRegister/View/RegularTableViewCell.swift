@@ -14,6 +14,16 @@ class RegularTableViewCell: UITableViewCell {
         setupUI()
         setupGestureRecognizers()
     }
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        nameLabel.text = nil
+        designationLabel.text = nil
+        iconImageView.image = nil
+        imageLabel.text = nil
+        imageLabel.isHidden = true
+    }
+
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -28,22 +38,32 @@ class RegularTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
 
+//    private func setupUI() {
+//        iconImageView.clipsToBounds = true
+//        imageLabel.clipsToBounds = true
+//        whatsAppImageView.clipsToBounds = true
+//        callImageView.clipsToBounds = true
+//        
+//        iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
+//        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
+//        whatsAppImageView.layer.cornerRadius = whatsAppImageView.frame.height / 2
+//        callImageView.layer.cornerRadius = callImageView.frame.height / 2
+//
+//        imageLabel.isHidden = true
+//        imageLabel.textAlignment = .center
+//        imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
+//        imageLabel.textColor = .black
+//        
+//    }
     private func setupUI() {
+        iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
-        imageLabel.clipsToBounds = true
-        whatsAppImageView.clipsToBounds = true
-        callImageView.clipsToBounds = true
-        
-        iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
-        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
-        whatsAppImageView.layer.cornerRadius = whatsAppImageView.frame.height / 2
-        callImageView.layer.cornerRadius = callImageView.frame.height / 2
-
+        iconImageView.contentMode = .scaleAspectFill
         imageLabel.isHidden = true
         imageLabel.textAlignment = .center
         imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
         imageLabel.textColor = .black
-        
+       // imageLabel.backgroundColor = .clear
     }
 
     private func setupGestureRecognizers() {
@@ -56,23 +76,31 @@ class RegularTableViewCell: UITableViewCell {
         whatsAppImageView.isUserInteractionEnabled = true
     }
 
-    func configure(name: String, designation: Int, icon: UIImage?, phoneNumber: String) {
+//    func configure(name: String, designation: Int, icon: UIImage?, phoneNumber: String) {
+//        nameLabel.text = name
+//        designationLabel.text = "Students: \(designation)"
+//
+//        if let image = icon {
+//            iconImageView.image = image
+//            imageLabel.isHidden = true
+//        } else {
+//            iconImageView.image = nil
+//            imageLabel.text = String(name.prefix(1)).uppercased()
+//            imageLabel.textColor = .black // Better contrast
+//            imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
+//            imageLabel.textAlignment = .center
+//            imageLabel.isHidden = false
+//        }
+//                setNeedsLayout()
+//    }
+    func configure(name: String, studentCount: Int) {
         nameLabel.text = name
-        designationLabel.text = "Students: \(designation)"
+        designationLabel.text = "Students: \(studentCount)"
 
-        if let image = icon {
-            iconImageView.image = image
-            imageLabel.isHidden = true
-        } else {
-            iconImageView.image = nil
-            imageLabel.text = String(name.prefix(1)).uppercased()
-            imageLabel.textColor = .black // Better contrast
-            imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
-            imageLabel.textAlignment = .center
-            imageLabel.isHidden = false
-        }
-                setNeedsLayout()
+        iconImageView.image = UIImage(named: "default_profile")
+        imageLabel.isHidden = true
     }
+
 
     @objc private func callTapped() {
         print("Call button tapped")

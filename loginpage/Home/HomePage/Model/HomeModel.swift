@@ -29,3 +29,27 @@ struct FeatureIcon: Decodable {
     let logoUrl: String
 }
 
+struct GroupAcademicYearResponse: Decodable {
+    let success: Bool
+    let data: GroupAcademicYearData
+    let message: String
+}
+
+struct GroupAcademicYearData: Decodable {
+    let groupInfo: GroupInfo
+    let academicYears: [GroupAcademicYearItem]
+}
+
+struct GroupInfo: Decodable {
+    let groupName: String
+    let shortName: String
+    let logo: String?
+    let address: String
+}
+
+struct GroupAcademicYearItem: Decodable {
+    let groupAcademicYearId: String
+    let academicYearId: String
+    let boardAndUniversityId: String
+    let academicLabel: String
+}

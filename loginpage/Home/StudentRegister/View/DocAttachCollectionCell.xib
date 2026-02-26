@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="Inter-SemiBold.ttf">
+            <string>Inter-SemiBold</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="DocAttachCollectionCell" customModule="loginpage" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="103" height="111"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jQf-BE-K03">
+                    <rect key="frame" x="0.0" y="0.0" width="103" height="111"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lMY-Za-Y2F" userLabel="containerView" customClass="GroupCollectionViewCell" customModule="loginpage" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="0.0" width="103" height="111"/>
+                            <subviews>
+                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.94999998807907104" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="square.and.arrow.up" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="H9X-mH-9mm">
+                                    <rect key="frame" x="26" y="9.5" width="50" height="52"/>
+                                    <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <gestureRecognizers/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="50" id="1EF-JY-d9F"/>
+                                        <constraint firstAttribute="height" constant="50" id="qf5-8D-WIG"/>
+                                    </constraints>
+                                </imageView>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Student ImageStudent Image" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="6" translatesAutoresizingMaskIntoConstraints="NO" id="WF4-gm-dSp" userLabel="Title">
+                                    <rect key="frame" x="8" y="66" width="87" height="39"/>
+                                    <fontDescription key="fontDescription" name="Inter-SemiBold" family="Inter" pointSize="12"/>
+                                    <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <accessibility key="accessibilityConfiguration" identifier="GroupCollectionViewCell"/>
+                            <gestureRecognizers/>
+                            <constraints>
+                                <constraint firstAttribute="bottom" secondItem="WF4-gm-dSp" secondAttribute="bottom" constant="6" id="1BU-Y6-PKz"/>
+                                <constraint firstAttribute="trailing" secondItem="WF4-gm-dSp" secondAttribute="trailing" constant="8" id="6Fi-cQ-GyB"/>
+                                <constraint firstItem="H9X-mH-9mm" firstAttribute="top" secondItem="lMY-Za-Y2F" secondAttribute="top" constant="12" id="FWd-Hd-12O"/>
+                                <constraint firstItem="WF4-gm-dSp" firstAttribute="top" secondItem="H9X-mH-9mm" secondAttribute="bottom" constant="4" id="O4c-H8-bh2"/>
+                                <constraint firstItem="WF4-gm-dSp" firstAttribute="leading" secondItem="lMY-Za-Y2F" secondAttribute="leading" constant="8" id="Rvc-SR-P4y"/>
+                                <constraint firstItem="H9X-mH-9mm" firstAttribute="leading" secondItem="lMY-Za-Y2F" secondAttribute="leading" constant="26" id="lFY-GK-exg"/>
+                                <constraint firstAttribute="trailing" secondItem="H9X-mH-9mm" secondAttribute="trailing" constant="27" id="odX-Zh-53c"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="lMY-Za-Y2F" secondAttribute="trailing" id="FJi-7H-VpY"/>
+                        <constraint firstAttribute="bottom" secondItem="lMY-Za-Y2F" secondAttribute="bottom" id="OE6-3f-lkX"/>
+                        <constraint firstItem="lMY-Za-Y2F" firstAttribute="leading" secondItem="jQf-BE-K03" secondAttribute="leading" id="aFF-nv-0Le"/>
+                        <constraint firstAttribute="height" constant="111" id="cqw-XT-X6m"/>
+                        <constraint firstItem="lMY-Za-Y2F" firstAttribute="top" secondItem="jQf-BE-K03" secondAttribute="top" id="xa0-7s-T1X"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="jQf-BE-K03" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="BS4-4R-hJh"/>
+                <constraint firstAttribute="bottom" secondItem="jQf-BE-K03" secondAttribute="bottom" id="Dvv-9G-jgB"/>
+                <constraint firstItem="jQf-BE-K03" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="i4w-vg-w8Y"/>
+                <constraint firstItem="jQf-BE-K03" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="nCB-DT-R9o"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="aLabelTeamNameIcon" destination="WF4-gm-dSp" id="vIB-k5-8ct"/>
+                <outlet property="anImageIcon" destination="H9X-mH-9mm" id="y1c-ST-ce2"/>
+            </connections>
+            <point key="canvasLocation" x="-183.33333333333334" y="-91.40625"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
