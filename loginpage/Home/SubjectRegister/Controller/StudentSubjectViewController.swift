@@ -112,11 +112,13 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
                 let decodedResponse = try JSONDecoder().decode(StudentSubjectResponse.self, from: data)
 
                 DispatchQueue.main.async {
-                    self.students = decodedResponse.data.flatMap { $0.studentsList }
+                    // FIXED: Changed from studentsList to students
+                    self.students = decodedResponse.data.flatMap { $0.students }
 
                     print("📌 Total students fetched: \(self.students.count)")
                     for (index, student) in self.students.enumerated() {
-                        print("👤 Student \(index + 1): \(student.studentName ?? "N/A") - ID: \(student.userId ?? "N/A")")
+                        // FIXED: studentName is now a computed property, not an optional
+                        print("👤 Student \(index + 1): \(student.studentName) - ID: \(student.userId ?? "N/A")")
                     }
 
                     self.TableView.reloadData()
@@ -139,7 +141,8 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
         }
 
         let student = students[indexPath.row]
-        cell.StudentName.text = student.studentName ?? "No Name"
+        // FIXED: studentName is now a computed property, not an optional
+        cell.StudentName.text = student.studentName
         let isSelected = selectedStudentIds.contains(student.userId ?? "")
         cell.checkBoxButton.setImage(UIImage(systemName: isSelected ? "checkmark.square.fill" : "square"), for: .normal)
         cell.checkBoxTappedAction = { [weak self] in
@@ -158,6 +161,7 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
 
         return cell
     }
+    
     @IBAction func saveButtonTapped(_ sender: UIButton) {
         guard let subjectId = subjectId,
               let subjectPriority = subjectPriority else {
@@ -207,8 +211,21 @@ class StudentSubjectViewController: UIViewController, UITableViewDelegate, UITab
             if let httpResponse = response as? HTTPURLResponse {
                 if (200...299).contains(httpResponse.statusCode) {
                     print("✅ Students successfully added to subject!")
+                    DispatchQueue.main.async {
+                        // Show success message and pop back
+                        let alert = UIAlertController(title: "Success", message: "Students successfully added to subject!", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                            self.navigationController?.popViewController(animated: true)
+                        })
+                        self.present(alert, animated: true)
+                    }
                 } else {
                     print("❌ Failed to add students. Status Code: \(httpResponse.statusCode)")
+                    DispatchQueue.main.async {
+                        let alert = UIAlertController(title: "Error", message: "Failed to add students. Please try again.", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(alert, animated: true)
+                    }
                 }
             }
         }

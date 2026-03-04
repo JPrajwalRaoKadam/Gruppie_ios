@@ -293,8 +293,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             fetchSubjectDataAndNavigate()
         case "Time Table", "Timetable":
             navigateToTimeTable()
-        case "Fee Payment New":
-            fetchSubjectDataAndNavigate()
+        case "Fee":
+                self.navigateToFeesNew()
         case "Notes & Videos":
                    fetchSubjectDataAndNavigate()
         case "Marks Card New":
@@ -418,14 +418,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 }
             }
     
-    func navigateToFeesNew(subjects: [SubjectData]) {
+    func navigateToFeesNew() {
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as! PaymentClassListingVC
-        vc.groupId = school?.id ?? ""
-        vc.subjects = subjects
-        vc.currentRole = self.currentRole
-        vc.subjects = subjects
-        
+        vc.groupAcademicYearResponse = self.groupAcademicYearResponse
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -635,7 +631,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                             self.teamIds = teamIds
 //                            self.fetchStaffDataAndNavigate()
                         case "Fee Payment New":
-                            self.navigateToFeesNew(subjects: subjects)
+                            break
+//                            self.navigateToFeesNew(subjects: subjects)
                         case "Feed Back":
                             self.navigateToListOfStudentsVC(subjects: subjects)
                         case "Notes & Videos":
@@ -763,15 +760,15 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
         
     func navigateToSubjectRegister(groupClass: [GroupClass]) {
-        let storyboard = UIStoryboard(name: "Subject", bundle: nil)
-        guard let subjectRegisterVC = storyboard.instantiateViewController(withIdentifier: "SubjectViewController") as? SubjectViewController else {
-            print("❌ Failed to instantiate SubjectViewController")
-            return
-        }
-        subjectRegisterVC.groupClasses = groupClass
-        
-        self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
-    }
+           let storyboard = UIStoryboard(name: "Subject", bundle: nil)
+           guard let subjectRegisterVC = storyboard.instantiateViewController(withIdentifier: "SubjectViewController") as? SubjectViewController else {
+               print("❌ Failed to instantiate SubjectViewController")
+               return
+           }
+           subjectRegisterVC.groupClasses = groupClass
+           
+           self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
+       }
     
     func navigateToNoticeBoard() {
         let storyboard = UIStoryboard(name: "Feeds", bundle: nil)

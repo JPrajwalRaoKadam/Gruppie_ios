@@ -68,3 +68,12 @@ enum CodableClassSort: Decodable {
         }
     }
 }
+struct StaffListResponse1: Codable {
+    let success: Bool
+    let data: [StaffResponse]
+}
+
+struct StaffResponse: Codable {
+    let id: String
+    let fullName: String  // ✅ Use fullName instead of name
+}

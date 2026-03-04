@@ -24,9 +24,9 @@ class AddSubject: UIViewController {
         
         styleButton(Save)
         enableKeyboardDismissOnTap()
-        TableView.delegate = self
-        TableView.dataSource = self
-        
+//        TableView.delegate = self
+//        TableView.dataSource = self
+//        
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
@@ -205,51 +205,51 @@ class AddSubject: UIViewController {
     }
 }
 
-extension AddSubject: UITableViewDataSource, UITableViewDelegate, AddSubjectTableViewCellDelegate {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return subjects.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AddSubjectTableViewCell", for: indexPath) as? AddSubjectTableViewCell else {
-            return UITableViewCell()
-        }
-        
-        let subject = subjects[indexPath.row]
-        let isSelected = selectedSubjects.contains(subject)
-        
-        cell.configure(with: subject, isSelected: isSelected)
-        cell.delegate = self
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60
-    }
-    
-    func didTapCheckBox(for subject: SubjectDetail) {
-        print("Toggled Subject: \(subject.subjectName) - ID: \(subject.subjectId ?? "N/A")")
-        
-        if selectedSubjects.contains(subject) {
-            selectedSubjects.remove(subject)
-        } else {
-            selectedSubjects.insert(subject)
-        }
-        
-        if let index = subjects.firstIndex(where: { $0.subjectId == subject.subjectId }) {
-            DispatchQueue.main.async {
-                self.TableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none) // ✅ Reload only selected row
-            }
-        }
-        
-        func BackButton(_ sender: UIButton) {
-            navigationController?.popViewController(animated: true)
-        }
-    }
-    @IBAction func BackButton(_ sender: UIButton) {
-        navigationController?.popViewController(animated: true)
-    }
-
-}
+//extension AddSubject: UITableViewDataSource, UITableViewDelegate, AddSubjectTableViewCellDelegate {
+//    
+//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        return subjects.count
+//    }
+//    
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AddSubjectTableViewCell", for: indexPath) as? AddSubjectTableViewCell else {
+//            return UITableViewCell()
+//        }
+//        
+//        let subject = subjects[indexPath.row]
+//        let isSelected = selectedSubjects.contains(subject)
+//        
+//        cell.configure(with: subject, isSelected: isSelected)
+//        cell.delegate = self
+//        
+//        return cell
+//    }
+//    
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        return 60
+//    }
+//    
+//    func didTapCheckBox(for subject: SubjectDetail) {
+//        print("Toggled Subject: \(subject.subjectName) - ID: \(subject.subjectId ?? "N/A")")
+//        
+//        if selectedSubjects.contains(subject) {
+//            selectedSubjects.remove(subject)
+//        } else {
+//            selectedSubjects.insert(subject)
+//        }
+//        
+//        if let index = subjects.firstIndex(where: { $0.subjectId == subject.subjectId }) {
+//            DispatchQueue.main.async {
+//                self.TableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none) // ✅ Reload only selected row
+//            }
+//        }
+//        
+//        func BackButton(_ sender: UIButton) {
+//            navigationController?.popViewController(animated: true)
+//        }
+//    }
+//    @IBAction func BackButton(_ sender: UIButton) {
+//        navigationController?.popViewController(animated: true)
+//    }
+//
+//}
