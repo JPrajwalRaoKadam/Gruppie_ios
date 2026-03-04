@@ -42,21 +42,21 @@ class Member_TableViewCell: UITableViewCell {
         imageLabel.minimumScaleFactor = 0.5
     }
     
-    func configureCell(with member: Member) {
-        name.text = member.name
-        designation.text = member.designation
+    func configureCell(with member: ManagementMember) {
+        name.text = member.fullName
+        designation.text = member.professionalDetails?.designation
         
         // Reset both views
         icon.image = nil
         icon.backgroundColor = nil
         imageLabel.isHidden = true
         
-        if let imageURL = member.image, let url = URL(string: imageURL) {
+        if let imageURL = member.profilePhotoPath, let url = URL(string: imageURL) {
             // Load image from URL
             loadImage(from: url)
         } else {
             // Show fallback with first letter in imageLabel
-            showFallbackImage(with: member.name ?? "")
+            showFallbackImage(with: member.fullName ?? "")
         }
     }
     

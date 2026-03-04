@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24127" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -247,7 +247,7 @@
                                             <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="small"/>
                                         </state>
                                         <connections>
-                                            <action selector="addUser:" destination="39L-wm-NNd" eventType="touchUpInside" id="ZI6-a7-EHZ"/>
+                                            <action selector="addButtonTapped:" destination="39L-wm-NNd" eventType="touchUpInside" id="ZQ4-vj-UEx"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0rT-Us-31W">
@@ -314,6 +314,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="9j0-mb-TF4"/>
                     <connections>
+                        <outlet property="addButton" destination="Zzl-MG-Iif" id="HQP-4p-CSQ"/>
                         <outlet property="backButton" destination="0rT-Us-31W" id="rfp-Un-HFS"/>
                         <outlet property="heightConstraintOfSearchView" destination="mpI-ou-EJQ" id="RUV-ua-Htb"/>
                         <outlet property="searchButton" destination="6px-DG-NaX" id="EWf-oC-viG"/>
@@ -323,7 +324,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fas-kB-5wb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="7895.419847328244" y="813.38028169014092"/>
+            <point key="canvasLocation" x="7958" y="813"/>
         </scene>
         <!--More Detail View Controller-->
         <scene sceneID="ETC-2O-CEg">
@@ -337,19 +338,6 @@
                                 <rect key="frame" x="15" y="314" width="362" height="397"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </tableView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LjD-Xj-NY2">
-                                <rect key="frame" x="43" y="726" width="315" height="48"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="48" id="VqD-IW-3MH"/>
-                                </constraints>
-                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                <state key="normal" title="EDIT"/>
-                                <connections>
-                                    <action selector="Edit:" destination="hW9-T1-D70" eventType="touchUpInside" id="N05-KH-8lh"/>
-                                </connections>
-                            </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6qi-UC-N7f" userLabel="TopView">
                                 <rect key="frame" x="0.0" y="118" width="393" height="50"/>
                                 <subviews>
@@ -365,7 +353,7 @@
                                             <imageReference key="image" image="arrow.backward" catalog="system" symbolScale="medium"/>
                                         </state>
                                         <connections>
-                                            <action selector="backButtonTapped:" destination="hW9-T1-D70" eventType="touchUpInside" id="xQs-ub-Tpz"/>
+                                            <action selector="backButtonTapped:" destination="hW9-T1-D70" eventType="touchUpInside" id="fom-do-GXR"/>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Managment Details" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hpf-GU-4yu">
@@ -388,9 +376,6 @@
                                         <buttonConfiguration key="configuration" style="plain">
                                             <imageReference key="image" image="trash" catalog="system" symbolScale="default"/>
                                         </buttonConfiguration>
-                                        <connections>
-                                            <action selector="deleteButtonTapped:" destination="hW9-T1-D70" eventType="touchUpInside" id="uq0-4I-IDy"/>
-                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.9606168866" green="0.95324307679999998" blue="0.9372524619" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -456,26 +441,59 @@
                                     <constraint firstItem="hXu-4v-ACC" firstAttribute="leading" secondItem="Izg-18-UHJ" secondAttribute="leading" id="rLR-JX-heC"/>
                                 </constraints>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8xM-Ev-g5M">
+                                <rect key="frame" x="15" y="726" width="157" height="48"/>
+                                <color key="backgroundColor" systemColor="labelColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="IIR-SG-HiF"/>
+                                    <constraint firstAttribute="width" constant="157" id="g78-Gm-u9a"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
+                                <state key="normal" title="Add User">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="addUser:" destination="Ix7-jn-aGV" eventType="touchUpInside" id="h1U-6M-QK2"/>
+                                    <action selector="addUserButtonTapped:" destination="hW9-T1-D70" eventType="touchUpInside" id="nWz-fK-Syf"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LjD-Xj-NY2">
+                                <rect key="frame" x="221" y="726" width="157" height="48"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="157" id="ZYK-Jn-5Qf"/>
+                                    <constraint firstAttribute="height" constant="48" id="bCJ-dZ-tiX"/>
+                                </constraints>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="EDIT"/>
+                                <connections>
+                                    <action selector="editButtonTapped:" destination="hW9-T1-D70" eventType="touchUpInside" id="nhc-bK-VB3"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="gTq-UT-337"/>
                         <color key="backgroundColor" red="0.9606168866" green="0.95324307679999998" blue="0.9372524619" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
-                            <constraint firstItem="LjD-Xj-NY2" firstAttribute="top" secondItem="33Q-KV-4zF" secondAttribute="bottom" constant="15" id="6Nm-Ha-4PL"/>
                             <constraint firstItem="d6k-7x-JBl" firstAttribute="leading" secondItem="gTq-UT-337" secondAttribute="leading" constant="15" id="6dv-iq-fDr"/>
-                            <constraint firstItem="gTq-UT-337" firstAttribute="trailing" secondItem="LjD-Xj-NY2" secondAttribute="trailing" constant="35" id="GNe-JH-csV"/>
+                            <constraint firstItem="8xM-Ev-g5M" firstAttribute="top" secondItem="33Q-KV-4zF" secondAttribute="bottom" constant="15" id="8N7-Cl-5lP"/>
+                            <constraint firstItem="gTq-UT-337" firstAttribute="bottom" secondItem="LjD-Xj-NY2" secondAttribute="bottom" constant="10" id="C1S-br-af4"/>
+                            <constraint firstItem="gTq-UT-337" firstAttribute="trailing" secondItem="LjD-Xj-NY2" secondAttribute="trailing" constant="15" id="DjF-RZ-CX5"/>
+                            <constraint firstItem="gTq-UT-337" firstAttribute="bottom" secondItem="8xM-Ev-g5M" secondAttribute="bottom" constant="10" id="HIg-ae-w15"/>
                             <constraint firstItem="6qi-UC-N7f" firstAttribute="trailing" secondItem="gTq-UT-337" secondAttribute="trailing" id="Hfw-2O-TNx"/>
                             <constraint firstItem="6qi-UC-N7f" firstAttribute="top" secondItem="gTq-UT-337" secondAttribute="top" id="Jf3-ce-GfQ"/>
                             <constraint firstItem="33Q-KV-4zF" firstAttribute="leading" secondItem="gTq-UT-337" secondAttribute="leading" constant="15" id="MR4-RL-Ujm"/>
                             <constraint firstItem="d6k-7x-JBl" firstAttribute="top" secondItem="6qi-UC-N7f" secondAttribute="bottom" constant="15" id="Mu7-xq-nA8"/>
+                            <constraint firstItem="LjD-Xj-NY2" firstAttribute="top" secondItem="33Q-KV-4zF" secondAttribute="bottom" constant="15" id="PEw-TG-8Q6"/>
                             <constraint firstItem="6qi-UC-N7f" firstAttribute="leading" secondItem="gTq-UT-337" secondAttribute="leading" id="az9-Qo-CY3"/>
+                            <constraint firstItem="8xM-Ev-g5M" firstAttribute="leading" secondItem="gTq-UT-337" secondAttribute="leading" constant="15" id="c4G-8n-aaJ"/>
                             <constraint firstItem="33Q-KV-4zF" firstAttribute="top" secondItem="d6k-7x-JBl" secondAttribute="bottom" constant="15" id="gt7-dl-aUx"/>
                             <constraint firstItem="gTq-UT-337" firstAttribute="trailing" secondItem="33Q-KV-4zF" secondAttribute="trailing" constant="16" id="raM-FP-K9c"/>
-                            <constraint firstItem="LjD-Xj-NY2" firstAttribute="leading" secondItem="gTq-UT-337" secondAttribute="leading" constant="43" id="xAD-T9-gCX"/>
-                            <constraint firstItem="gTq-UT-337" firstAttribute="bottom" secondItem="LjD-Xj-NY2" secondAttribute="bottom" constant="10" id="zBu-Ct-3y9"/>
                             <constraint firstItem="gTq-UT-337" firstAttribute="trailing" secondItem="d6k-7x-JBl" secondAttribute="trailing" constant="15" id="zGT-3U-jKA"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="addUserButton" destination="8xM-Ev-g5M" id="34B-B8-M8E"/>
                         <outlet property="backButton" destination="lPG-hx-81k" id="Lfs-QN-klu"/>
                         <outlet property="customView" destination="d6k-7x-JBl" id="IIt-rC-ZNb"/>
                         <outlet property="designation" destination="Izg-18-UHJ" id="BI3-ba-1Kv"/>
@@ -487,7 +505,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="T5K-Yb-jok" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <navigationItem id="lxC-ln-aAn"/>
             </objects>
-            <point key="canvasLocation" x="9256" y="813"/>
+            <point key="canvasLocation" x="9255.7251908396938" y="812.67605633802816"/>
         </scene>
     </scenes>
     <resources>

@@ -189,11 +189,11 @@ struct GroupUserRole: Decodable {
     let groupId: String
     let roleId: String
     let status: String?
-    let role: Role?
+    let role: StaffRole?
 }
 
 // MARK: - Role
-struct Role: Decodable {
+struct StaffRole: Decodable {
     let id: String
     let name: String?
 }

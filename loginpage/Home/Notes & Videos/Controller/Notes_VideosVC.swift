@@ -13,7 +13,7 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
     var groupId: String = "" // Group ID
     var teamId: String = ""
     var className: String = ""
-    var subjects: [SubjectData] = [] // Store fetched subjects
+    var groupClasses: [GroupClass] = []
     var currentRole: String?
     
     @IBOutlet weak var bcbutton: UIButton!
@@ -33,7 +33,7 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        subjects.count
+        groupClasses.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -41,18 +41,18 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
             return UITableViewCell()
         }
         
-        let subject = subjects[indexPath.row]
+        let subject = groupClasses[indexPath.row]
         cell.configure(with: subject)
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedSubject = subjects[indexPath.row]
-        let teamId = selectedSubject.teamId
-        self.className = selectedSubject.name
+        let groupClass = groupClasses[indexPath.row]
+        let teamId = groupClass.id
+        self.className = groupClass.name
         print("Extracted teamId: \(teamId)")
-        self.navigateToSubjectStaffVC(subjects: self.subjects, teamId: teamId, selectedSubject: selectedSubject)
+        self.navigateToSubjectStaffVC(teamId: groupClass.id, groupClass: groupClass)
     }
     
     @IBAction func backButton(_ sender: Any) {
@@ -87,13 +87,10 @@ extension Notes_VideosVC {
 //        }
 //    }
 
-    func navigateToSubjectStaffVC(subjects: [SubjectData], teamId: String, selectedSubject: SubjectData) {
+    func navigateToSubjectStaffVC(teamId: String, groupClass: GroupClass) {
         let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
         if let subjectNotesVC = storyboard.instantiateViewController(withIdentifier: "SubjectNotes_VideosVC") as? SubjectNotes_VideosVC {
-            subjectNotesVC.groupId = self.groupId
             subjectNotesVC.clsName = self.className
-            subjectNotesVC.subjects = subjects
-            subjectNotesVC.token = TokenManager.shared.getToken() ?? ""
             subjectNotesVC.teamId = teamId
             subjectNotesVC.currentRole = self.currentRole
             print("✅ Selected teamId: \(teamId)")

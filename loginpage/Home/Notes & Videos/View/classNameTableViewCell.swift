@@ -32,8 +32,8 @@ override func awakeFromNib() {
 override func setSelected(_ selected: Bool, animated: Bool) {
     super.setSelected(selected, animated: animated)
 }
- func configure(with subject: SubjectData) {
-        classLabel.text = subject.name
+ func configure(with groupClasses: GroupClass ) {
+     classLabel.text = groupClasses.name
 
 //        if let imageURL = subject.image, let url = URL(string: imageURL) {
 //            loadImage(from: url)
@@ -41,7 +41,7 @@ override func setSelected(_ selected: Bool, animated: Bool) {
 //            iconImageView.isHidden = false
 //        } else {
             // Use label fallback
-            fallbackLabel.text = String(subject.name.prefix(1)).uppercased()
+            fallbackLabel.text = String(groupClasses.name.prefix(1)).uppercased()
             fallbackLabel.isHidden = false
             iconImageView.isHidden = true
 

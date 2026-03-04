@@ -1,269 +1,233 @@
 import UIKit
 
 class ManagementViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
-    @IBAction func addUser(_ sender: UIButton) {
-        callAddManagementAPI()
-    }
+    
     @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var heightConstraintOfSearchView: NSLayoutConstraint!
     
-    var filteredMembers: [Member] = []
-    var token: String?
-    var groupIds = ""
-    var members: [Member] = []
+    var managementResponse: [ManagementMember] = []
+    var filteredMembers: [ManagementMember] = []
     var searchTextField: UITextField?
-    var searchButtonTapped = false
+    var token: String?
+    var groupIds: String = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        heightConstraintOfSearchView.constant = 0
-        print("groupId:\(groupIds)")
-        if let token = token {
-            print("Received token in management: \(token)")
-        } else {
-            print("Received token: No token provided")
-        }
-        tableView.dataSource = self
-        tableView.delegate = self
-
-        tableView.register(UINib(nibName: "Member_TableViewCell", bundle: nil), forCellReuseIdentifier: "Member_TableViewCell")
-        searchView.isHidden = true
-        filteredMembers = members
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-        }
-        
-        tableView.layer.cornerRadius = 10
-        tableView.layer.masksToBounds = true
-        
-        backButton.layer.cornerRadius = backButton.frame.size.height / 2
-        backButton.clipsToBounds = true
-        backButton.layer.masksToBounds = true
-        
-        backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
-        searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
+        setupUI()
+        fetchManagementList()
         enableKeyboardDismissOnTap()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Update back button corner radius after layout is complete
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        tableView.reloadData()
+    func setupUI() {
+        heightConstraintOfSearchView.constant = 0
+        searchView.isHidden = true
+        
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UINib(nibName: "Member_TableViewCell", bundle: nil),
+                           forCellReuseIdentifier: "Member_TableViewCell")
+        tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
+        
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        
+        backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-           return filteredMembers.count
-           return members.count
-       }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "Member_TableViewCell", for: indexPath) as? Member_TableViewCell {
-            let member = filteredMembers[indexPath.row]
-            cell.configureCell(with: member)
-            return cell
-        }
-        return UITableViewCell()
-    }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let member = filteredMembers[indexPath.row]
-        guard indexPath.row < groupIds.count else {
-            print("Error: Index out of bounds for groupIds array.")
+
+        tableView.deselectRow(at: indexPath, animated: true)
+
+        guard let token = self.token else {
+            print("❌ Token not available")
             return
         }
-        let selectedGroupId = groupIds
-        callDynamicAPI(groupId: selectedGroupId, member: member) { [weak self] success, updatedMember in
-            if success, let updatedMember = updatedMember {
-                print("Fetched API Response: \(updatedMember)")
-                self?.navigateToMoreDetailsViewController(member: updatedMember)
-            } else {
-                print("API call failed, navigation will still happen.")
-                self?.navigateToMoreDetailsViewController(member: member)
-            }
+
+        let selectedMember = filteredMembers[indexPath.row]
+
+        let storyboard = UIStoryboard(name: "Management", bundle: nil)
+        guard let vc = storyboard.instantiateViewController(
+            withIdentifier: "MoreDetailViewController"
+        ) as? MoreDetailViewController else {
+            return
         }
+
+        vc.token = token
+        vc.member = selectedMember
+        vc.userId = selectedMember.id  
+
+        
+        
+        navigationController?.pushViewController(vc, animated: true)
     }
-    func callDynamicAPI(groupId: String, member: Member, completion: @escaping (Bool, Member?) -> Void) {
-        guard let token = token else {
-            print("Token is nil, cannot make API call.")
-            completion(false, nil)
+    @IBAction func addButtonTapped(_ sender: UIButton) {
+
+        guard let token = self.token else {
+            print("❌ Token not available")
             return
         }
-        let apiUrlString = APIManager.shared.baseURL + "groups/\(groupId)/user/\(member.userId)/management/get"
+
+        let storyboard = UIStoryboard(name: "Management", bundle: nil)
+        guard let vc = storyboard.instantiateViewController(
+            withIdentifier: "MoreDetailViewController"
+        ) as? MoreDetailViewController else {
+            print("❌ Failed to instantiate MoreDetailViewController")
+            return
+        }
+
+        // Pass required data
+        vc.token = token
+
+        // Since this is ADD flow, there is NO selected member
+        vc.member = nil
+        vc.userId = nil
+//        vc.isFromAdd = true   // optional flag (recommended)
+
+        navigationController?.pushViewController(vc, animated: true)
+    }
+
+
+    
+    func fetchManagementList() {
+        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
+            print("❌ Token missing")
+            return
+        }
+        self.token = token
+        
+        let apiUrlString = APIManager.shared.baseURL + "management"
         guard let url = URL(string: apiUrlString) else {
-            print("Invalid URL: \(apiUrlString)")
-            completion(false, nil)
+            print("❌ Invalid URL:", apiUrlString)
             return
         }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        print("📡 GET:", apiUrlString)
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
             if let error = error {
-                print("Error making API request: \(error.localizedDescription)")
-                completion(false, nil)
+                print("❌ Network Error:", error.localizedDescription)
                 return
             }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Invalid response type")
+                return
+            }
+            
+            print("📡 Status Code:", httpResponse.statusCode)
+            guard (200...299).contains(httpResponse.statusCode) else {
+                print("❌ API failed with status:", httpResponse.statusCode)
+                return
+            }
+            
             guard let data = data else {
-                print("No data received from API")
-                completion(false, nil)
+                print("❌ No data received")
                 return
             }
-            if let rawString = String(data: data, encoding: .utf8) {
-                print("Raw API Response: \(rawString)")
+            
+            if let raw = String(data: data, encoding: .utf8) {
+                print("📥 Raw Management Response:\n", raw)
             }
-            if data.isEmpty {
-                print("API response is empty, using original member.")
-                completion(true, member)
-                return
-            }
+            
             do {
                 let decoder = JSONDecoder()
-                let apiResponse = try decoder.decode(Member.self, from: data)
-
-                print("Parsed API Response: \(apiResponse)")
-
-                if apiResponse.userId.isEmpty || apiResponse.name.isEmpty {
-                    print("API response has invalid or empty data, using the original member.")
-                    completion(true, member)
-                } else {
-                    completion(true, apiResponse)
+                let response = try decoder.decode(ManagementResponse.self, from: data)
+                print("✅ Decoded members count:", response.data.count)
+                
+                DispatchQueue.main.async {
+                    self.managementResponse = response.data
+                    self.filteredMembers = response.data
+                    self.tableView.reloadData()
                 }
+                
             } catch {
-                print("Failed to parse API response: \(error.localizedDescription)")
-                completion(true, member)
+                print("❌ Decoding Error:", error)
             }
-        }
-        task.resume()
+            
+        }.resume()
     }
-    func navigateToMoreDetailsViewController(member: Member) {
-        let managementStoryboard = UIStoryboard(name: "Management", bundle: nil)
-        DispatchQueue.main.async {
-            if let moreDetailVC = managementStoryboard.instantiateViewController(withIdentifier: "MoreDetailViewController") as? MoreDetailViewController {
-                moreDetailVC.token = self.token ?? ""
-                moreDetailVC.groupIds = self.groupIds
-                moreDetailVC.member = member
-                moreDetailVC.userId = member.userId
-                print("Navigating to MoreDetailViewController with member: \(member)")
-                self.navigationController?.pushViewController(moreDetailVC, animated: true)
-            } else {
-                print("Failed to instantiate MoreDetailViewController from Management storyboard.")
-            }
-        }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return filteredMembers.count
     }
-    func callAddManagementAPI() {
-        guard let token = token else {
-            print("Token is nil, cannot make API call")
-            return
+    
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "Member_TableViewCell",
+            for: indexPath
+        ) as? Member_TableViewCell else {
+            return UITableViewCell()
         }
-        guard let groupId = groupIds.first else {
-            print("No group ID available.")
-            return
-        }
-        let apiUrlString = APIManager.shared.baseURL + "groups/\(groupIds)/management/add"
-        guard let url = URL(string: apiUrlString) else {
-            print("Invalid URL: \(apiUrlString)")
-            return
-        }
-        print("API URL: \(apiUrlString)")
-        print("Group ID: \(groupId)")
-        print("Token: \(token)")
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let managementData: [[String: String]] = [
-            ["countryCode": "IN", "designation": "zbgs", "name": "hshs sh", "phone": "9764575575"]
-        ]
-        let body: [String: Any] = ["managementData": managementData]
-        do {
-            let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
-            request.httpBody = bodyData
-        } catch {
-            print("Error serializing JSON body: \(error.localizedDescription)")
-            return
-        }
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error making API request: \(error.localizedDescription)")
-                return
-            }
-            guard let data = data else {
-                print("No data received from API")
-                return
-            }
-            if let rawString = String(data: data, encoding: .utf8) {
-                print("Raw API Response: \(rawString)")
-            }
-            DispatchQueue.main.async {
-                print("Navigating to AddSingleManagement now...")
-                self.navigateToAddManagement()
-            }
-        }
-        task.resume()
+        
+        let member = filteredMembers[indexPath.row]
+        cell.configureCell(with: member)
+        return cell
     }
-    func navigateToAddManagement() {
-        print("Trying to navigate to AddSingleManagement view controller...")
-        let managementStoryboard = UIStoryboard(name: "Management", bundle: nil)
-        DispatchQueue.main.async {
-            if let addManagementVC = managementStoryboard.instantiateViewController(withIdentifier: "AddSingleManagement") as? AddSingleManagement {
-                addManagementVC.token = self.token
-                addManagementVC.groupIds = self.groupIds 
-                print("Successfully instantiated AddSingleManagement view controller.")
-                self.navigationController?.pushViewController(addManagementVC, animated: true)
-            } else {
-                print("Failed to instantiate AddSingleManagement view controller.")
-            }
-        }
-    }
-    @objc func backButtonTapped() {
-            self.navigationController?.popViewController(animated: true)
-    }
+        
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden
         searchView.isHidden = !shouldShow
         heightConstraintOfSearchView.constant = shouldShow ? 47 : 0
+        
         if shouldShow {
-            searchTextField = UITextField(frame: CGRect(x: 10, y: 10, width: searchView.frame.width - 20, height: 40))
+            searchTextField = UITextField(
+                frame: CGRect(x: 10, y: 5,
+                              width: searchView.frame.width - 20,
+                              height: 35)
+            )
             searchTextField?.placeholder = "Search"
             searchTextField?.delegate = self
             searchTextField?.borderStyle = .roundedRect
-            searchTextField?.backgroundColor = .white
-            searchTextField?.layer.cornerRadius = 5
-            searchTextField?.layer.borderWidth = 1
-            searchTextField?.layer.borderColor = UIColor.gray.cgColor
-            if let searchTextField = searchTextField {
-                searchView.addSubview(searchTextField)
-            }
+            searchView.addSubview(searchTextField!)
         } else {
             searchTextField?.removeFromSuperview()
             searchTextField = nil
         }
     }
-        func filterMembers(searchText: String) {
-        print("Search text entered: '\(searchText)'")
-        let lowercasedSearchText = searchText.lowercased().trimmingCharacters(in: .whitespaces)
-        if lowercasedSearchText.isEmpty {
-            filteredMembers = members
-            print("No search text, showing all members.")
+    
+    func filterMembers(searchText: String) {
+        if searchText.isEmpty {
+            filteredMembers = managementResponse
         } else {
-            filteredMembers = members.filter { member in
-                let lowercasedName = member.name.lowercased()
-                print("Comparing member's name: \(lowercasedName) with search text: \(lowercasedSearchText)")
-                return lowercasedName.contains(lowercasedSearchText)
+            filteredMembers = managementResponse.filter {
+                $0.fullName.lowercased().contains(searchText.lowercased())
             }
         }
-        print("Filtered members count: \(filteredMembers.count)")
         tableView.reloadData()
     }
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
-        filterMembers(searchText: searchText)
+    
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+        
+        let text = (textField.text! as NSString)
+            .replacingCharacters(in: range, with: string)
+        filterMembers(searchText: text)
         return true
+    }
+    
+    @objc func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
     }
 }

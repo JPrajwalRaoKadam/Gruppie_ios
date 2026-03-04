@@ -1,11 +1,12 @@
 import Foundation
 
-struct AddManagementResponse: Codable {
-    let status: String
-    let message: String
-    let data: ManagementData?
+struct AddManagementRequest: Encodable {
+    let fullName: String
+    let dateOfBirth: String
+    let mobileNumber: String
 }
 
-struct ManagementData: Codable {
-    let managementId: String
+struct AddManagementResponse: Decodable {
+    let success: Bool
+    let message: String?
 }

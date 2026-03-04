@@ -16,7 +16,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var studentTeams: [StudentTeam] = []
     var featureIcon: FeatureIcon?
     var currentRole: String?
-    var teachingStaff: [Staff] = []
+//    var teachingStaff: [Staff] = []
     var subjects: [SubjectData] = [] // Store fetched subjects
     var teamIds: [String] = []
     var userIds: [String] = []
@@ -235,6 +235,10 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon
         switch featureIcon.name {
+        case "Notes and videos":
+            fetchGroupClasses {
+                self.navigateToNotes_Videos(groupClass: self.groupClasses)
+            }
         case "Staff Diary":
 //            fetchStaffDataAndNavigate()
             break
@@ -389,20 +393,16 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 }
             }
     
-    func navigateToNotes_Videos(subjects: [SubjectData], teamIds: [String]) {
+    func navigateToNotes_Videos(groupClass: [GroupClass]) {
                 let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
             if let Notes_VideosVC = storyboard.instantiateViewController(withIdentifier: "Notes_VideosVC") as? Notes_VideosVC {
-                Notes_VideosVC.groupId = school?.id ?? ""
-                Notes_VideosVC.subjects = subjects
-                Notes_VideosVC.currentRole = self.currentRole
-                Notes_VideosVC.token = TokenManager.shared.getToken() ?? ""
-                Notes_VideosVC.teamId = teamIds[indexPath?.row ?? 0]
-                    print("groupId of Notes_Videos: \(Notes_VideosVC.groupId)")
                     navigationController?.pushViewController(Notes_VideosVC, animated: true)
+                Notes_VideosVC.groupClasses = groupClass
                 } else {
                     print("Failed to instantiate SyllabusTrackerVC")
                 }
             }
+    
     func navigateToExamination_ActivityVC(subjects: [SubjectData], teamIds: [String],  userIds: [String]) {
                 let storyboard = UIStoryboard(name: "Examination Activity", bundle: nil)
             if let examinationActivity = storyboard.instantiateViewController(withIdentifier: "Examination_ActivityVC") as? Examination_ActivityVC {
@@ -639,7 +639,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                         case "Feed Back":
                             self.navigateToListOfStudentsVC(subjects: subjects)
                         case "Notes & Videos":
-                            self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
+//                            self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
+                            break
                         case "Students Attendance":
                             self.fetchGroupClasses {
                                        self.navigateToAttendanceViewController(groupClass: self.groupClasses)
@@ -832,7 +833,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("Failed to instantiate ManagementViewController")
             return
         }
-        
+        managementVC.token = SessionManager.useRoleToken
         navigationController?.pushViewController(managementVC, animated: true)
     }
     
