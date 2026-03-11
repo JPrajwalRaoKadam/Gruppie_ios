@@ -13,7 +13,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
 
     var demandTotalAmount: String?
     var dueAmpount: String?
-    
+    var studentId: String?
     var feePaymentData: FeePaymentData?
     let feeTypes = ["Tution Fee", "Management Fee"]
     

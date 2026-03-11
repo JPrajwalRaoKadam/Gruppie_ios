@@ -9,6 +9,7 @@ import UIKit
 
 class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    // MARK: - Outlets
     @IBOutlet weak var classTableView: UITableView!
     @IBOutlet weak var demandAmount: UILabel!
     @IBOutlet weak var concessionAmount: UILabel!
@@ -19,163 +20,147 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var customContainerView: UIView!
 
+    // MARK: - Properties
     var groupId: String?
-    var feeReport: PaymentResponse?
-    let totalFee: Double? = nil
-    var studentData: [StudentDataa]? = nil
-    var teamData: [TeamData]? = nil
     var currentRole: String?
-    var subjects: [SubjectData] = []
-        
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
+    
+    var classwiseData: [ClasswiseFeeData] = []
+    var feeTotals: FeeTotals?
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupUI()
+        fetchClasswiseFeeDetails()
+    }
+    
+    // MARK: - Setup UI
+    private func setupUI() {
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
+        
         classTableView.layer.cornerRadius = 10
-        enableKeyboardDismissOnTap()
+        customContainerView.layer.cornerRadius = 10
+        
         classTableView.delegate = self
         classTableView.dataSource = self
-        customContainerView.layer.cornerRadius = 10
-
-        classTableView.register(UINib(nibName: "ClassesTableViewCell", bundle: nil), forCellReuseIdentifier: "ClassesTableViewCell")
-
-        let token = TokenManager.shared.getToken() ?? ""
         
-        fetchFeeReport(withToken: token) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let feeReport):
-                print("Fee Report fetched successfully!")
-                self.feeReport = feeReport
-                self.studentData = feeReport.studentData
-                self.teamData = feeReport.teamData
+        classTableView.register(
+            UINib(nibName: "ClassesTableViewCell", bundle: nil),
+            forCellReuseIdentifier: "ClassesTableViewCell"
+        )
+    }
 
-                DispatchQueue.main.async {
-                    self.classTableView.reloadData()
-                    self.updateUI()
-                }
+    // MARK: - API CALL
+    func fetchClasswiseFeeDetails() {
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Token not found")
+            return
+        }
+        
+        guard let groupAcademicYearId =
+                groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+            print("❌ groupAcademicYearId not available from GroupAcademicYearResponse")
+            return
+        }
+        
+        APIManager.shared.request(
+            endpoint: "fees/classwise-fee-details",
+            method: .get,
+            queryParams: ["groupAcademicYearId": groupAcademicYearId],
+            body: nil,
+            headers: ["Authorization": "Bearer \(token)"]
+        ) { (result: Result<ClasswiseFeeResponse, APIManager.APIError>) in
+            
+            switch result {
+                
+            case .success(let response):
+                print("✅ Classwise Fee Response:", response)
+                
+                self.classwiseData = response.data
+                self.feeTotals = response.totals
+                
+                self.updateTotalsUI()
+                self.classTableView.reloadData()
+                
             case .failure(let error):
-                print("Error fetching fee report: \(error.localizedDescription)")
+                print("❌ API Error:", error)
             }
         }
     }
-
     
-    func updateUI() {
-        demandAmount.text = "\(feeReport?.totalFee ?? 0)"
-        concessionAmount.text = "\(feeReport?.totalConcession ?? 0)"
-        collectionAmount.text = "\(feeReport?.totalAmountPaid ?? 0)"
-        balenceAmount.text = "\(feeReport?.totalBalance ?? 0)"
-        overdueAmount.text = "\(feeReport?.totalOverDue ?? 0)"
-        fineAmount.text = "\(feeReport?.fineAmount ?? 0)"
+    // MARK: - Update Totals
+    func updateTotalsUI() {
+        demandAmount.text = "₹ \(feeTotals?.totalDemand ?? 0)"
+        concessionAmount.text = "₹ \(feeTotals?.totalConcession ?? 0)"
+        collectionAmount.text = "₹ \(feeTotals?.totalCollection ?? 0)"
+        balenceAmount.text = "₹ \(feeTotals?.totalBalance ?? 0)"
+        
+        overdueAmount.text = "₹ 0"
+        fineAmount.text = "₹ 0"
     }
     
+    // MARK: - Back Button
     @IBAction func backButtonAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
     
-    // MARK: - TableView DataSource Methods
+    // MARK: - TableView DataSource
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print("counttt...\(teamData?.count)")
-        return subjects.count
+        return classwiseData.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ClassesTableViewCell", for: indexPath) as? ClassesTableViewCell else {
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "ClassesTableViewCell",
+            for: indexPath
+        ) as? ClassesTableViewCell else {
             return UITableViewCell()
         }
         
-        let sub = subjects[indexPath.row]
-        cell.nameLabel?.text = sub.name
-        cell.configurePayment(with: sub)
+        let item = classwiseData[indexPath.row]
         
+        cell.nameLabel.text = item.className
+        cell.Demand.text = "₹ \(item.demand)"
+        cell.Collected.text = "₹ \(item.collection)"
+        cell.Balance.text = "₹ \(item.balance)"
+        
+        cell.iconImageView.image = cell.generateImage(from: item.className)
+        cell.configurePayment(with: item)
         return cell
     }
     
+    // MARK: - TableView Selection
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        navigateToStudentListingForParent(at: indexPath)
+        navigateToStudentListing(at: indexPath)
     }
-
     
-    private func navigateToStudentListingForParent(at indexPath: IndexPath) {
-
-        let selectedTeam = subjects[indexPath.row]
-        // Extract subject name from firstSubject (optional – you can adjust this logic)
-        let trimmedName: String
-        if let firstSubject = subjects.first,
-           let range = firstSubject.name.range(of: #"(?<=\().*?(?=\))"#, options: .regularExpression) {
-            trimmedName = String(firstSubject.name[range])
-        } else {
-            trimmedName = selectedTeam.name ?? ""
-        }
-
-        print("✅ Selected Team: \(selectedTeam.name)")
-        print("📋 All teamData class names:")
-        subjects.forEach { print("→ \($0.name)") }
-
+    private func navigateToStudentListing(at indexPath: IndexPath) {
+        
+        let selectedClass = classwiseData[indexPath.row]
+        
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-        if let studentListingVC = storyboard.instantiateViewController(withIdentifier: "StudentListingVC") as? StudentListingVC {
-
-            studentListingVC.groupId = self.groupId
-            studentListingVC.subjects = self.subjects
-            studentListingVC.currentRole = self.currentRole
-            studentListingVC.teamId = selectedTeam.teamId
-
-            _ = studentListingVC.view
-            studentListingVC.className.text = selectedTeam.name
-
-            var viewControllers = self.navigationController?.viewControllers ?? []
-            viewControllers.removeLast()
-            viewControllers.append(studentListingVC)
-            self.navigationController?.setViewControllers(viewControllers, animated: false)
-        }
-    }
-
-    
-    func fetchFeeReport(withToken token: String, completion: @escaping (Result<PaymentResponse, Error>) -> Void) {
-        guard let groupId = groupId,
-              let url = URL(string: APIManager.shared.baseURL + "groups/\(groupId)/fee/report/get") else {
-            completion(.failure(URLError(.badURL)))
-            return
-        }
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("API Error:", error.localizedDescription)
-                completion(.failure(error))
+        if let studentListingVC = storyboard.instantiateViewController(
+            withIdentifier: "StudentListingVC"
+        ) as? StudentListingVC {
+            guard let groupAcademicYearId =
+                    groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+                print("❌ groupAcademicYearId not available from GroupAcademicYearResponse")
                 return
             }
-            
-            guard let data = data else {
-                print("No data received from API")
-                completion(.failure(URLError(.badServerResponse)))
-                return
-            }
-            
-            // Print the raw JSON response for debugging
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Raw API Response: \(jsonString)")
-            }
-            
-            if let httpResponse = response as? HTTPURLResponse {
-                print("Response Code: \(httpResponse.statusCode)")
-                print("Response Headers: \(httpResponse.allHeaderFields)")
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                let feeReport = try decoder.decode(PaymentResponse.self, from: data)
-                print(feeReport.installments ?? "No installments data available")
-                completion(.success(feeReport))
-            } catch {
-                print("Decoding Error:", error)
-                completion(.failure(error))
-            }
-        }.resume()
+            studentListingVC.groupAcademicYearId = groupAcademicYearId
+            studentListingVC.selectedClassName = selectedClass.className
+            studentListingVC.classId = selectedClass.classId
+            studentListingVC.selectedClass = selectedClass
+            self.navigationController?.pushViewController(studentListingVC, animated: true)
+        }
     }
 }
-

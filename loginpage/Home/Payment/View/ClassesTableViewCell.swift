@@ -34,16 +34,31 @@ class ClassesTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
 
-    func configure(with student: StudentFinancialData) {
-        nameLabel.text = student.name
-            iconImageView.image = generateImage(from: student.name)  // This triggers the fallback image
+    func configure(with student: StudentFeeSummary) {
+        Demand.text = "\(Int(student.demand ?? 0))"
+        Collected.text = "\(Int(student.collection ?? 0))"
+        Balance.text = "\(Int(student.balance ?? 0))"
+        
+        nameLabel.text = student.studentName ?? "-"
+        
+        // Generate fallback image using student name
+        if let name = student.studentName, !name.isEmpty {
+            iconImageView.image = generateImage(from: name)
             iconImageView.isHidden = false
-            imageLabel.isHidden = true  // Optionally, hide the label
+            imageLabel.isHidden = true
+        } else {
+            iconImageView.image = nil
+            iconImageView.isHidden = true
+            imageLabel.isHidden = false
+        }
     }
     
-    func configurePayment(with sub: SubjectData ) {
-        nameLabel.text = sub.name
-        iconImageView.image = generateImage(from: sub.name ?? "")  // This triggers the fallback image
+    func configurePayment(with sub: ClasswiseFeeData ) {
+        Demand.text = String(sub.demand)
+        Collected.text = String(sub.collection)
+        Balance.text = String(sub.balance)
+        nameLabel.text = sub.className
+        iconImageView.image = generateImage(from: sub.className ?? "")  // This triggers the fallback image
             iconImageView.isHidden = false
             imageLabel.isHidden = true  // Optionally, hide the label
     }
@@ -64,7 +79,7 @@ class ClassesTableViewCell: UITableViewCell {
     }
 
     // Method to generate a circular image with the first letter of the name as fallback
-    private func generateImage(from name: String) -> UIImage? {
+    func generateImage(from name: String) -> UIImage? {
         let letter = name.prefix(1).uppercased()
         
         let size = CGSize(width: 50, height: 50)

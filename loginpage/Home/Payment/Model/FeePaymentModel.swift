@@ -7,6 +7,126 @@
 
 import Foundation
 
+// MARK: - Classwise Fee Response
+struct ClasswiseFeeResponse: Decodable {
+    let success: Bool
+    let totals: FeeTotals
+    let data: [ClasswiseFeeData]
+}
+
+struct FeeTotals: Decodable {
+    let totalDemand: Double
+    let totalConcession: Double
+    let totalCollection: Double
+    let totalBalance: Double
+}
+
+struct ClasswiseFeeData: Decodable {
+    let slNo: Int
+    let classId: String
+    let className: String
+    let demand: Double
+    let concession: Double
+    let collection: Double
+    let balance: Double
+}
+
+// MARK: - API Response Model
+struct StudentFeeSummaryResponse: Codable {
+    let success: Bool
+    let data: [StudentFeeSummary]
+    let meta: Meta?
+}
+
+struct StudentFeeSummary: Codable {
+    let slNo: Int?
+    let studentId: String?
+    let studentName: String?
+    let fatherName: String?
+    let phone: String?
+    let demand: Double?
+    let concession: Double?
+    let fine: Double?
+    let collection: Double?
+    let balance: Double?
+    let overdue: Double?
+    let photo: String?
+}
+
+struct Meta: Codable {
+    let totalRecords: Int?
+    let currentPage: Int?
+    let totalPages: Int?
+}
+
+struct StudentFeeSummaryDetailResponse: Codable {
+    let success: Bool?
+    let data: StudentFeeSummaryDetail?
+}
+
+struct StudentFeeSummaryDetail: Codable {
+    let student: StudentInfo?
+    let breakdown: FeeBreakdown?
+    let feeDetails: [FeeDetail]?
+    let paidDetails: [PaidDetail]?
+    let installments: [FeeSummaryInstallment]?
+}
+
+struct StudentInfo: Codable {
+    let fullName: String?
+    let studentId: String?
+    let className: String?
+}
+
+struct FeeBreakdown: Codable {
+    let totalDue: Double?
+    let totalPaid: Double?
+    let totalConcession: Double?
+    let totalCollectedFine: Double?
+    let totalOutstandingFine: Double?
+    let totalArrearsDue: Double?
+    let totalArrearsPaid: Double?
+    let arrearsBalance: Double?
+    let balance: Double?
+}
+
+struct FeeDetail: Codable {
+    let demandId: String?
+    let demandSourceType: String?
+    let demandSourceId: String?
+    let fee: String?
+    let demand: Double?
+    let concession: Double?
+    let collected: Double?
+    let balance: Double?
+    let dueAmount: Double?
+    let upcomingAmount: Double?
+    let payable: Double?
+    let fine: Double?
+    let paidFine: Double?
+    let fineRuleId: String?
+    let hasInstalments: Bool?
+}
+
+struct PaidDetail: Codable {
+    let slNo: Int?
+    let rcptNo: String?
+    let amountPaid: Double?
+    let fineAmount: Double?
+    let mode: String?
+    let status: String?
+    let date: String?
+}
+
+struct FeeSummaryInstallment: Codable {
+    let name: String?
+    let dueDate: String?
+    let amount: Double?
+    let fine: Double?
+    let status: String?
+    let feeType: String?
+}
+
 // MARK: - PaymentResponse
 struct PaymentResponse: Codable {
     let totalPaidList: [PaymentItem]?

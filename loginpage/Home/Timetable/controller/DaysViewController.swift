@@ -121,9 +121,9 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
             return UITableViewCell()
         }
 
-        let item = timetableData?.data[safe: indexPath.section]?
+        let item = timetableData?.data[indexPath.section]
             .academicTimeTable.first?
-            .classTimeTable[safe: indexPath.row]
+            .classTimeTable[indexPath.row]
 
         cell.periodNo.text = "\(item?.period ?? "")"
         cell.startTime.text = item?.startTime ?? "-"
@@ -141,7 +141,7 @@ class DaysViewController: UIViewController, UITableViewDataSource, UITableViewDe
         classLabel.font = UIFont.boldSystemFont(ofSize: 18)
         classLabel.textColor = .black
         classLabel.translatesAutoresizingMaskIntoConstraints = false
-        classLabel.text = timetableData?.data[safe: section]?.academicTimeTable.first?.name ?? "Class: Unknown"
+        classLabel.text = timetableData?.data[section].academicTimeTable.first?.name ?? "Class: Unknown"
         headerView.addSubview(classLabel)
 
         let firstStackView = UIStackView()
