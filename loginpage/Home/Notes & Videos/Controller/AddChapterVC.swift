@@ -22,10 +22,11 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
     @IBOutlet weak var pdfNameLabel: UILabel!
     @IBOutlet weak var mediaContainer: UIView!
     @IBOutlet weak var submitButton: UIButton!
-    
-    var groupId: String?
-    var teamId: String?
-    var subjectId: String?
+
+    var classId: String = ""
+    var subjectId: String = ""
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
+    var groupAcademicYearId: String = ""
 
     var chapterNames: [String] = []
     var topicNames: [String] = []
@@ -71,8 +72,12 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
 
         addDropDownIcon(to: ChapterName, action: #selector(showChapterPicker))
         addDropDownIcon(to: topicName, action: #selector(showTopicPicker))
+        if let id = groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId {
+            self.groupAcademicYearId = id
+            print("groupAcademicYearId:", self.groupAcademicYearId)
+        }
 
-        fetchSyllabusData()
+        //fetchSyllabusData()
         enableKeyboardDismissOnTap()
     }
 
@@ -91,27 +96,77 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
         textField.rightView = container
         textField.rightViewMode = .always
     }
+    func clearForm() {
 
-    // MARK: - Fetch Data
-    func fetchSyllabusData() {
-        guard let token = TokenManager.shared.getToken(),
-              let groupId = groupId,
-              let teamId = teamId,
-              let subjectId = subjectId else {
-            print("❌ Missing token or IDs")
-            return
-        }
+        ChapterName.text = ""
+        topicName.text = ""
 
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/syllabus/get/master"
+        contentImage.image = nil
+        pdfNameLabel.text = ""
+        pdfNameLabel.isHidden = true
+
+        contentCancel.isHidden = true
+
+        documentURL = nil
+        vidUrl = nil
+        image = nil
+        finalURL = nil
+    }
+    
+    func uploadNotes() {
+
+        guard let token = SessionManager.useRoleToken else { return }
+
+        let urlString = "https://dev.gruppie.in/api/v1/notes"
 
         guard let url = URL(string: urlString) else { return }
+
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpMethod = "POST"
+
+        let boundary = "Boundary-\(UUID().uuidString)"
+
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        var body = Data()
+
+        let params: [String: String] = [
+            "classId": classId,
+            "subjectId": subjectId,
+            "chapterId": "1",
+            "title": ChapterName.text ?? "",
+            "description": topicName.text ?? "",
+            "groupAcademicYearId": groupAcademicYearId
+        ]
+
+        // Parameters
+        for (key,value) in params {
+
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
+
+        // File
+        if let fileURL = documentURL,
+           let fileData = try? Data(contentsOf: fileURL) {
+
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"attachmentLinks\"; filename=\"\(fileURL.lastPathComponent)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
+            body.append(fileData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
 
         URLSession.shared.dataTask(with: request) { data, response, error in
+
             if let error = error {
-                print("❌ API Error: \(error)")
+                print("❌ Error:", error.localizedDescription)
                 return
             }
 
@@ -120,17 +175,28 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
                 return
             }
 
-            do {
-                let decodedResponse = try JSONDecoder().decode(SyllabusResponse.self, from: data)
-                self.chapterNames = decodedResponse.data.map { $0.chapterName }
-                self.topicNames = decodedResponse.data.flatMap { $0.topicsList.map { $0.topicName } }
+            // Print raw response
+            if let raw = String(data: data, encoding: .utf8) {
+                print("📩 RAW RESPONSE:", raw)
+            }
+
+             do {
+                let decoded = try JSONDecoder().decode(AddNoteResponse.self, from: data)
+                print("✅ Decoded:", decoded)
 
                 DispatchQueue.main.async {
-                    print("✅ Chapters: \(self.chapterNames)")
-                    print("✅ Topics: \(self.topicNames)")
+
+                    self.clearForm()
+
+                    if let previousVC = self.navigationController?.viewControllers.dropLast().last as? SubDetailsVC {
+                        previousVC.fetchNotes()
+                    }
+
+                    self.navigationController?.popViewController(animated: true)
                 }
+
             } catch {
-                print("❌ JSON Decode Error: \(error)")
+                print("❌ Decoding Error:", error)
             }
         }.resume()
     }
@@ -164,17 +230,12 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
         self.navigationController?.popViewController(animated: true)
     }
 
-    @IBAction func addButton(_ sender: Any) {
+    @IBAction func submitButton(_ sender: Any) {
         ChapterName.resignFirstResponder()
         topicName.resignFirstResponder()
-
-        print("✅ Add Button Tapped")
-        print("📘 Chapter Name: \(ChapterName.text ?? "")")
-        print("📗 Topic Name: \(topicName.text ?? "")")
-
-        // Call your API here
-        submitSubjectPost()
+        uploadNotes()
     }
+ 
 
     @IBAction func chapterAddButton(_ sender: Any) {
         ChapterName.becomeFirstResponder()
@@ -484,10 +545,7 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
         
-        //        dataViewHeightCn.constant = 150
-        //        mainViewHtCn.constant = 448
-        
-        if let selectedImage = info[.originalImage] as? UIImage {
+         if let selectedImage = info[.originalImage] as? UIImage {
             // Set the selected image into contentImage
             contentImage.image = selectedImage
             image = contentImage.image
@@ -500,10 +558,6 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
             customParentViewController?.view.layoutIfNeeded()
         } else if let videoURL = info[.mediaURL] as? URL {
             
-            //            dataViewHeightCn.constant = 150
-            //            mainViewHtCn.constant = 448
-            //
-            // Generate thumbnail and set it into contentImage
             contentImage.image = generateThumbnail(for: videoURL)
             self.vidUrl = videoURL
             submitFeedInfo()
@@ -567,94 +621,6 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
         self.documentURL = finalUrl
     }
 
-    
-    func submitSubjectPost() {
-        let postName = self.postName
-        
-        // Validate required fields
-        guard let postDescription = self.topicName.text else {
-            print("❌ Post Name or Description is missing")
-            return
-        }
-
-        // Determine fileType and fileName array
-        var fileType: String = ""
-        var fileNameArray: [String] = []
-        var youTube: URL = URL(fileURLWithPath: "")
-
-        if let documentURL = self.finalURL {
-            let absoluteString = documentURL.absoluteString.lowercased()
-
-            if absoluteString.contains("youtube.com") || absoluteString.contains("youtu.be") {
-                fileType = "youtube"
-            } else {
-                let pathExtension = documentURL.pathExtension.lowercased()
-                switch pathExtension {
-                case "jpg", "jpeg", "png", "gif":
-                    fileType = "image"
-                case "mp4", "mov", "avi":
-                    fileType = "video"
-                case "pdf":
-                    fileType = "pdf"
-                case "mp3", "aac", "wav":
-                    fileType = "audio"
-                default:
-                    fileType = "unknown"
-                }
-            }
-
-            // Encode file URL to Base64
-            if let base64URL = documentURL.absoluteString.data(using: .utf8)?.base64EncodedString() {
-                youTube = documentURL
-                fileNameArray.append(base64URL)
-            }
-        }
-
-        // Dummy chapter and topic name; ideally these should come from user input or picker
-        let chapterName = ChapterName.text ?? ""
-        let topicName = topicName.text ?? ""
-
-        let postRequest = SubjectPostRequest(
-            chapterName: chapterName,
-            fileName: fileNameArray,
-            fileType: fileType,
-            thumbnailImage: [],
-            topicName: topicName,
-            video: ""
-        )
-
-        // Use actual IDs and token
-        guard let bearerToken = TokenManager.shared.getToken(),
-              let groupId = groupId,
-              let teamId = teamId,
-              let subjectId = subjectId else {
-            print("❌ Missing group/team/subject ID or token")
-            return
-        }
-
-        addSubjectPost(
-            token: bearerToken,
-            groupId: groupId,
-            teamId: teamId,
-            subjectId: subjectId,
-            postRequest: postRequest
-        ) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let response):
-                    print("✅ Subject Post Added: \(response.message ?? "")")
-                case .failure(let error):
-                    print("❌ Error Submitting Subject Post: \(error.localizedDescription)")
-                }
-                if let previousVC = self.navigationController?.viewControllers.dropLast().last as? SubDetailsVC {
-                            previousVC.shouldRefreshData = true
-                        }
-                        self.navigationController?.popViewController(animated: true)
-            }
-        }
-    }
-
-    
     func assignPostName(postName: String) {
         self.postName = postName
     }
@@ -662,70 +628,6 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
     func assignPostDescription(postDescription: String) {
         self.postDescription = postDescription
     }
-    
-    func addSubjectPost(
-        token: String,
-        groupId: String,
-        teamId: String,
-        subjectId: String,
-        postRequest: SubjectPostRequest,
-        completion: @escaping (Result<SubjectPostResponse, Error>) -> Void
-    ) {
-        let baseURL = APIManager.shared.baseURL
-        let endpoint = "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/posts/add"
-        
-        guard let url = URL(string: baseURL + endpoint) else {
-            completion(.failure(NSError(domain: "Invalid URL", code: -1)))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        do {
-            let jsonData = try JSONEncoder().encode(postRequest)
-            request.httpBody = jsonData
-
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("📤 Final JSON Body Sent:\n\(jsonString)")
-            }
-        } catch {
-            print("❌ JSON Encoding Error: \(error.localizedDescription)")
-            completion(.failure(error))
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ Request Error: \(error.localizedDescription)")
-                completion(.failure(error))
-                return
-            }
-
-            if let httpResponse = response as? HTTPURLResponse {
-                print("📡 Response Status Code: \(httpResponse.statusCode)")
-            }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No Data", code: 1001)))
-                return
-            }
-
-            do {
-                let decodedResponse = try JSONDecoder().decode(SubjectPostResponse.self, from: data)
-                completion(.success(decodedResponse))
-            } catch {
-                print("❌ Decoding Error: \(error.localizedDescription)")
-                completion(.failure(error))
-            }
-        }
-
-        task.resume()
-    }
-
-    
 }
 
 // MARK: - UITextFieldDelegate

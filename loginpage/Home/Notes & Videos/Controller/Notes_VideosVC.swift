@@ -9,11 +9,9 @@ import UIKit
 
 class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    var token: String = "" // Authentication token
-    var groupId: String = "" // Group ID
-    var teamId: String = ""
     var className: String = ""
     var groupClasses: [GroupClass] = []
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
     var currentRole: String?
     
     @IBOutlet weak var bcbutton: UIButton!
@@ -52,7 +50,7 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
         let teamId = groupClass.id
         self.className = groupClass.name
         print("Extracted teamId: \(teamId)")
-        self.navigateToSubjectStaffVC(teamId: groupClass.id, groupClass: groupClass)
+        self.navigateToSubjectStaffVC(classId: groupClass.id, groupClass: groupClass)
     }
     
     @IBAction func backButton(_ sender: Any) {
@@ -61,39 +59,13 @@ class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSour
 }
 extension Notes_VideosVC {
 
-//    func navigateToSubjectStaffVC() {
-//        let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
-//        if let SubjectNotes_VideosVC = storyboard.instantiateViewController(withIdentifier: "SubjectNotes_VideosVC") as? SubjectNotes_VideosVC {
-////            SubjectNotes_VideosVC.SubjectStaff = staffDetails
-//            SubjectNotes_VideosVC.className = self.className
-//            SubjectNotes_VideosVC.groupId = self.groupId  // Pass groupId
-//            SubjectNotes_VideosVC.teamId = self.teamId    // Pass teamId
-//           // SubjectNotes_VideosVC.passedSubjectId = subjectId // Pass subjectId
-//
-//            self.navigationController?.pushViewController(SubjectNotes_VideosVC, animated: true)
-//        }
-//    }
-    
-//    func navigateToSubjectStaffVC(subjects: [SubjectData], teamId: [String], selectedSubject: Int) {
-//        let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
-//        if let SubjectNotes_VideosVC = storyboard.instantiateViewController(withIdentifier: "SubjectNotes_VideosVC") as? SubjectNotes_VideosVC {
-//            SubjectNotes_VideosVC.groupId = self.groupId
-//            SubjectNotes_VideosVC.clsName = self.className
-//            SubjectNotes_VideosVC.subjects = subjects
-//            SubjectNotes_VideosVC.token = TokenManager.shared.getToken() ?? ""
-//            SubjectNotes_VideosVC.teamId = teamId[selectedSubject]
-//            print("✅ Selected teamId: \(teamId[selectedSubject])")
-//            self.navigationController?.pushViewController(SubjectNotes_VideosVC, animated: true)
-//        }
-//    }
-
-    func navigateToSubjectStaffVC(teamId: String, groupClass: GroupClass) {
+    func navigateToSubjectStaffVC(classId: String, groupClass: GroupClass) {
         let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
         if let subjectNotesVC = storyboard.instantiateViewController(withIdentifier: "SubjectNotes_VideosVC") as? SubjectNotes_VideosVC {
             subjectNotesVC.clsName = self.className
-            subjectNotesVC.teamId = teamId
-            subjectNotesVC.currentRole = self.currentRole
-            print("✅ Selected teamId: \(teamId)")
+            subjectNotesVC.classId = classId
+            subjectNotesVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+            print("✅ Selected teamId: \(classId)")
             self.navigationController?.pushViewController(subjectNotesVC, animated: true)
         }
     }

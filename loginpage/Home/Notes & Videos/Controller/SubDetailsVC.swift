@@ -1,260 +1,362 @@
-//
-//  SubDetailsVC.swift
-//  loginpage
-//
-//  Created by apple on 17/04/25.
-//
-
 import UIKit
 
-class SubDetailsVC: UIViewController {
+class SubDetailsVC: UIViewController, SubDetailsCellDelegate {
 
     @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var classsubjName: UILabel!
     @IBOutlet weak var subTableView: UITableView!
-    @IBOutlet weak var plusButton: UIButton!
-    
+    @IBOutlet weak var addButton: UIButton!
+
+    var classId: String = ""
     var subjectId: String = ""
     var subjectName: String = ""
-    var groupId: String = ""
-    var teamId: String = ""
     var className: String = ""
-    var topicsList: [TopicNV] = []
-    var currentRole: String?
+
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
+    var notesList: [NoteItem] = []
+
     var shouldRefreshData = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         subTableView.layer.cornerRadius = 10
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
+
         subTableView.delegate = self
         subTableView.dataSource = self
-//        if let role = currentRole?.lowercased(), role == "parent" || role == "teacher" {
-//            plusButton.isHidden = true
-//        }
-        if let role = currentRole?.lowercased(), role == "parent"{
-            plusButton.isHidden = true
+
+        print("classId:", classId)
+        print("subjectId:", subjectId)
+
+        if let groupAcademicYearId = groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId {
+            print("groupAcademicYearId:", groupAcademicYearId)
         }
-        classsubjName.text = "\(subjectName)- (\(className))"
-        print("adsbgid: \(groupId) adsbtid: \(teamId) subid: \(subjectId)")
-        subTableView.register(UINib(nibName: "SubDetailsTableViewCell", bundle: nil), forCellReuseIdentifier: "SubDetailsTableViewCell")
-        fetchSubjectDetails()
+
+        classsubjName.text = "\(subjectName) - (\(className))"
+
+        subTableView.register(UINib(nibName: "SubDetailsTableViewCell", bundle: nil),
+                              forCellReuseIdentifier: "SubDetailsTableViewCell")
+
+        fetchNotes()
         enableKeyboardDismissOnTap()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
         if shouldRefreshData {
-            fetchSubjectDetails()
+            fetchNotes()
             shouldRefreshData = false
         }
     }
+    
+    func didTapDelete(at cell: SubDetailsTableViewCell) {
 
-    func fetchSubjectDetails() {
-        guard let token = TokenManager.shared.getToken() else {
-            print("❌ Token not found")
+        guard let indexPath = subTableView.indexPath(for: cell) else { return }
+
+        let note = notesList[indexPath.row]
+
+        guard let noteId = note.noteId else { return }
+
+        showDeleteAlert(noteId: noteId)
+    }
+    func showDeleteAlert(noteId: String) {
+
+        let alert = UIAlertController(
+            title: "Delete Note",
+            message: "Are you sure you want to delete this note?",
+            preferredStyle: .alert
+        )
+
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel)
+
+        let delete = UIAlertAction(title: "Delete", style: .destructive) { _ in
+            self.deleteNote(noteId: noteId)
+        }
+
+        alert.addAction(cancel)
+        alert.addAction(delete)
+
+        present(alert, animated: true)
+    }
+    func deleteNote(noteId: String) {
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Token missing")
             return
         }
 
-        let urlString = APIManager.shared.baseURL + "groups/\(groupId)/team/\(teamId)/subject/\(subjectId)/posts/get"
-        guard let url = URL(string: urlString) else { return }
+        let endpoint = "notes/\(noteId)"
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        APIManager.shared.request(
+            endpoint: endpoint,
+            method: .delete,
+            headers: ["Authorization": "Bearer \(token)"]
+        ) { (result: Result<DeleteNoteResponse, APIManager.APIError>) in
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ Error:", error)
-                return
+            switch result {
+
+            case .success(let response):
+
+                print("✅ Delete Success:", response)
+
+                self.showMessage(response.message ?? "Note deleted successfully")
+
+                self.fetchNotes()
+
+            case .failure(let error):
+
+                print("❌ Delete Error:", error)
             }
+        }
+    }
+    func showMessage(_ message: String) {
 
-            guard let data = data else { return }
+        let alert = UIAlertController(
+            title: "Success",
+            message: message,
+            preferredStyle: .alert
+        )
 
-            do {
-                let result = try JSONDecoder().decode(SubDetailsResponse.self, from: data)
-                self.topicsList = result.data.flatMap { $0.topics }
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
 
+        present(alert, animated: true)
+    }
+    
+    func fetchNotes() {
+        guard let roleToken = SessionManager.useRoleToken else {
+            print("❌ Role token missing")
+            return
+        }
+
+        let queryParams: [String: String] = [
+            "classId": classId,
+            "subjectId": subjectId
+        ]
+
+        print("📤 Query Params:", queryParams)
+
+        APIManager.shared.request(
+            endpoint: "notes",
+            method: .get,
+            queryParams: queryParams,
+            headers: ["Authorization": "Bearer \(roleToken)"]
+        ) { (result: Result<NotesResponse, APIManager.APIError>) in
+
+            switch result {
+            case .success(let response):
+                print("API Response:", response)
+                
+                // Filter notes to show only those matching current classId and subjectId
+                let allNotes = response.data ?? []
+                self.notesList = allNotes.filter { note in
+                    return note.classId == self.classId && note.subjectId == self.subjectId
+                }
+                
+                print("📊 Filtered notes count: \(self.notesList.count) out of \(allNotes.count)")
+                
                 DispatchQueue.main.async {
                     self.subTableView.reloadData()
                 }
-            } catch {
-                print("❌ Decoding error:", error)
+
+            case .failure(let error):
+                print("❌ Notes API Error:", error)
             }
-        }.resume()
+        }
     }
+    // MARK: - Buttons
 
     @IBAction func backButton(_ sender: Any) {
-        self.navigationController?.popViewController(animated: true)
+        navigationController?.popViewController(animated: true)
     }
 
     @IBAction func addButton(_ sender: Any) {
-        print("add button tapped")
         navigateToAddChapter()
     }
 
     func navigateToAddChapter() {
+
         let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
-        if let AddChapterVC = storyboard.instantiateViewController(withIdentifier: "AddChapterVC") as? AddChapterVC {
-            AddChapterVC.groupId = groupId
-            AddChapterVC.teamId = teamId
-            AddChapterVC.subjectId = subjectId
-            self.navigationController?.pushViewController(AddChapterVC, animated: true)
+
+        if let vc = storyboard.instantiateViewController(withIdentifier: "AddChapterVC") as? AddChapterVC {
+
+            vc.subjectId = subjectId
+            vc.classId = classId
+            vc.groupAcademicYearResponse = self.groupAcademicYearResponse
+            navigationController?.pushViewController(vc, animated: true)
         }
     }
 }
 
-extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
+// MARK: - TableView
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return topicsList.count
+extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
+    
+    func formatDate(_ isoDate: String) -> String {
+        
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        if let date = isoFormatter.date(from: isoDate) {
+            
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "MMM d, yyyy"
+            
+            return displayFormatter.string(from: date)
+        }
+        
+        return ""
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "SubDetailsTableViewCell", for: indexPath) as? SubDetailsTableViewCell else {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return notesList.count
+    }
+
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "SubDetailsTableViewCell",
+            for: indexPath) as? SubDetailsTableViewCell else {
             return UITableViewCell()
         }
 
-        let topic = topicsList[indexPath.row]
-        cell.topicName.text = topic.topicName
-        cell.createdBy.text = topic.createdByName
+        let topic = notesList[indexPath.row]
 
-        // Format date
-        let inputFormatter = ISO8601DateFormatter()
-        if let date = inputFormatter.date(from: topic.insertedAt) {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "dd-MM-yyyy"
-            cell.createdOn.text = formatter.string(from: date)
-        } else {
-            cell.createdOn.text = "-"
+        cell.topicName.text = topic.title ?? "-"
+        cell.descriptions.text = topic.description ?? "-"
+        cell.createdOn.text = formatDate(topic.createdAt ?? "")
+        cell.delegate = self
+        // Date format
+        if let createdAt = topic.createdAt {
+
+            let isoFormatter = ISO8601DateFormatter()
+
+            if let date = isoFormatter.date(from: createdAt) {
+
+                let formatter = DateFormatter()
+                formatter.dateFormat = "dd-MM-yyyy"
+
+                cell.createdOn.text = formatter.string(from: date)
+            }
         }
 
-        // Clear previous content
+        // Remove previous views
         cell.datacontainer.subviews.forEach { $0.removeFromSuperview() }
 
-        // Load file preview
-        if let encodedFile = topic.fileName.first,
-           let decodedURLString = decodeBase64String(encodedFile),
-           let fileURL = URL(string: decodedURLString) {
+        guard let firstAttachment = topic.attachmentLinks?.first,
+              let fileUrl = firstAttachment.fileUrl,
+              let url = URL(string: fileUrl) else {
 
-            print("✅ Decoded URL: \(decodedURLString)")
+            let label = UILabel(frame: cell.datacontainer.bounds)
+            label.text = "No Attachment"
+            label.textAlignment = .center
+            cell.datacontainer.addSubview(label)
+            return cell
+        }
 
-            let type = topic.fileType.lowercased()
+        let fileExtension = url.pathExtension.lowercased()
 
-            if let encoded = topic.fileName.first,
-               let decoded = decodeBase64String(encoded),
-               let url = URL(string: decoded) {
+        switch fileExtension {
 
-                switch type {
-                case "image":
-                    let imageView = UIImageView(frame: cell.datacontainer.bounds)
-                    imageView.contentMode = .scaleAspectFit
-                    imageView.clipsToBounds = true
-                    imageView.load(url: encoded)
-                    cell.datacontainer.addSubview(imageView)
+        case "png", "jpg", "jpeg":
 
-                case "video":
-                    let label = UILabel(frame: cell.datacontainer.bounds)
-                    label.text = "🎥 Video: \(url.lastPathComponent)"
-                    label.textAlignment = .center
-                    label.numberOfLines = 2
-                    label.textColor = .systemRed
-                    cell.datacontainer.addSubview(label)
+            let imageView = UIImageView(frame: cell.datacontainer.bounds)
+            imageView.contentMode = .scaleAspectFit
+            imageView.clipsToBounds = true
+            imageView.load(url: fileUrl)
 
-                case "audio":
-                    let label = UILabel(frame: cell.datacontainer.bounds)
-                    label.text = "🎵 Audio: \(url.lastPathComponent)"
-                    label.textAlignment = .center
-                    label.numberOfLines = 2
-                    label.textColor = .systemGreen
-                    cell.datacontainer.addSubview(label)
+            cell.datacontainer.addSubview(imageView)
 
-                case "youtube":
-                    let label = UILabel(frame: cell.datacontainer.bounds)
-                    label.text = "▶️ YouTube: \(url.absoluteString)"
-                    label.textAlignment = .center
-                    label.numberOfLines = 2
-                    label.textColor = .systemOrange
-                    cell.datacontainer.addSubview(label)
+        case "mp4", "mov":
 
-                case "pdf":
-                    let imageView = UIImageView(image: UIImage(named: "defaultpdf"))
-                    imageView.frame = cell.datacontainer.bounds
-                    imageView.contentMode = .scaleAspectFit
-                    cell.datacontainer.addSubview(imageView)
+            let label = UILabel(frame: cell.datacontainer.bounds)
+            label.text = "🎥 Video: \(url.lastPathComponent)"
+            label.textAlignment = .center
+            label.textColor = .systemRed
 
-                default:
-                    let imageView = UIImageView(image: UIImage(named: "defaultpdf"))
-                    imageView.frame = cell.datacontainer.bounds
-                    imageView.contentMode = .scaleAspectFit
-                    cell.datacontainer.addSubview(imageView)
-                }
+            cell.datacontainer.addSubview(label)
 
-            } else {
-                // Fallback if decoding fails or URL is invalid
-                let label = UILabel(frame: cell.datacontainer.bounds)
-                label.text = "❌ Invalid or missing file"
-                label.textAlignment = .center
-                label.textColor = .systemGray
-                cell.datacontainer.addSubview(label)
-            }
+        case "mp3", "wav":
 
+            let label = UILabel(frame: cell.datacontainer.bounds)
+            label.text = "🎵 Audio: \(url.lastPathComponent)"
+            label.textAlignment = .center
+            label.textColor = .systemGreen
 
+            cell.datacontainer.addSubview(label)
+
+        case "pdf":
+
+            let imageView = UIImageView(image: UIImage(named: "defaultpdf"))
+            imageView.frame = cell.datacontainer.bounds
+            imageView.contentMode = .scaleAspectFit
+
+            cell.datacontainer.addSubview(imageView)
+
+        default:
+
+            let label = UILabel(frame: cell.datacontainer.bounds)
+            label.text = "📎 File: \(url.lastPathComponent)"
+            label.textAlignment = .center
+
+            cell.datacontainer.addSubview(label)
         }
 
         return cell
     }
     
-    func decodeBase64String(_ base64String: String) -> String? {
-        guard let decodedData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),
-              let decodedString = String(data: decodedData, encoding: .utf8) else {
-            return nil
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+        
+        guard let vc = storyboard.instantiateViewController(
+            withIdentifier: "VideoPlayerVC"
+        ) as? VideoPlayerVC else {
+            print("❌ VideoPlayerVC not found in storyboard")
+            return
         }
-        return decodedString
+        
+        vc.mediaURL = notesList[indexPath.row].attachmentLinks?[indexPath.row].fileUrl
+        navigationController?.pushViewController(vc, animated: true)
     }
     
-}
+    func didTapDownload(at cell: SubDetailsTableViewCell) {
 
-extension UIImageView {
-    func load(url base64String: String) {
-        guard let decodedURLString = decodeBase64String(base64String),
-              let url = URL(string: decodedURLString) else {
-            DispatchQueue.main.async {
-                self.image = nil
-            }
+        guard let indexPath = subTableView.indexPath(for: cell) else { return }
+
+        let note = notesList[indexPath.row]
+
+        guard let fileUrl = note.attachmentLinks?.first?.fileUrl,
+              let url = URL(string: fileUrl) else {
+            print("❌ Invalid URL")
             return
         }
 
-        let urlRequest = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+        print("Opening:", url)
 
-        URLSession.shared.dataTask(with: urlRequest) { data, _, error in
-            if let error = error {
-                print("❌ Failed to load image: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.image = nil
-                }
-                return
-            }
-
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    self.image = image
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.image = nil
-                }
-            }
-        }.resume()
+        UIApplication.shared.open(url)
     }
+}
 
-    private func decodeBase64String(_ base64String: String) -> String? {
-        let cleaned = base64String.replacingOccurrences(of: "\n", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let decodedData = Data(base64Encoded: cleaned),
-              let decodedString = String(data: decodedData, encoding: .utf8) else {
-            return nil
-        }
-        return decodedString
+// MARK: - Image Loader
+
+extension UIImageView {
+
+    func load(url: String) {
+
+        guard let imageURL = URL(string: url) else { return }
+
+        URLSession.shared.dataTask(with: imageURL) { data, _, _ in
+
+            if let data = data {
+
+                DispatchQueue.main.async {
+                    self.image = UIImage(data: data)
+                }
+            }
+
+        }.resume()
     }
 }

@@ -287,7 +287,11 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             navigateToGalleryViewController()
         case "Students Attendance":
             fetchGroupClasses {
-                       self.navigateToAttendanceViewController(groupClass: self.groupClasses)
+                self.navigateToAttendanceViewController(groupClass: self.groupClasses)
+                   }
+        case "Homework or Assignment":
+            fetchGroupClasses {
+                self.navigateToHomeworkViewController(groupClass: self.groupClasses)
                    }
         case "Syllabus Tracker":
             fetchSubjectDataAndNavigate()
@@ -398,6 +402,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             if let Notes_VideosVC = storyboard.instantiateViewController(withIdentifier: "Notes_VideosVC") as? Notes_VideosVC {
                     navigationController?.pushViewController(Notes_VideosVC, animated: true)
                 Notes_VideosVC.groupClasses = groupClass
+                Notes_VideosVC.groupAcademicYearResponse = self.groupAcademicYearResponse
                 } else {
                     print("Failed to instantiate SyllabusTrackerVC")
                 }
@@ -479,6 +484,15 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     func navigateToAttendanceViewController(groupClass: [GroupClass]) {
         let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
         if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
+            attendanceVC.groupClasses = groupClass  // Pass the group classes data
+            attendanceVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+            print("📚 Passing \(groupClass.count) group classes to AttendanceVC")
+            navigationController?.pushViewController(attendanceVC, animated: true)
+        }
+    }
+    func navigateToHomeworkViewController(groupClass: [GroupClass]) {
+        let storyboard = UIStoryboard(name: "HomeWork", bundle: nil)
+        if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "HomeWorkVC") as? HomeWorkVC {
             attendanceVC.groupClasses = groupClass  // Pass the group classes data
             attendanceVC.groupAcademicYearResponse = self.groupAcademicYearResponse
             print("📚 Passing \(groupClass.count) group classes to AttendanceVC")
