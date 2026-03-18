@@ -1,5 +1,5 @@
 import UIKit
-
+import PDFKit
 class SubDetailsVC: UIViewController, SubDetailsCellDelegate {
 
     @IBOutlet weak var bcbutton: UIButton!
@@ -307,19 +307,125 @@ extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
 
         return cell
     }
-    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+        let note = notesList[indexPath.row]
+
+        guard let attachments = note.attachmentLinks, !attachments.isEmpty else {
+            print("❌ No attachments")
+            return
+        }
+
+        if attachments.count > 1 {
+            showAttachmentPicker(attachments: attachments)
+        } else {
+            openInPlayer(attachment: attachments[0])
+        }
+    }
+    func showAttachmentPicker(attachments: [AttachmentLink]) {
+
+        let alert = UIAlertController(title: "Select File", message: nil, preferredStyle: .actionSheet)
+
+        for attachment in attachments {
+
+            let fileName = attachment.fileName ?? "File"
+
+            let action = UIAlertAction(title: fileName, style: .default) { _ in
+                self.openInPlayer(attachment: attachment)
+            }
+
+            alert.addAction(action)
+        }
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        present(alert, animated: true)
+    }
+    func openInPlayer(attachment: AttachmentLink) {
+
+        guard let fileUrl = attachment.fileUrl else { return }
+
         let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
-        
+
         guard let vc = storyboard.instantiateViewController(
             withIdentifier: "VideoPlayerVC"
         ) as? VideoPlayerVC else {
-            print("❌ VideoPlayerVC not found in storyboard")
+            print("❌ VideoPlayerVC not found")
             return
         }
-        
-        vc.mediaURL = notesList[indexPath.row].attachmentLinks?[indexPath.row].fileUrl
+
+        vc.mediaURL = fileUrl
+        vc.fileType = attachment.fileType // 👈 IMPORTANT
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func openMedia(fileUrl: String) {
+
+        guard let url = URL(string: fileUrl) else { return }
+
+        let fileExtension = url.pathExtension.lowercased()
+
+        switch fileExtension {
+
+        case "png", "jpg", "jpeg":
+            openImage(url: url)
+
+        case "mp4", "mov":
+            openVideo(url: url)
+
+        case "pdf":
+            openPDF(url: url)
+
+        default:
+            UIApplication.shared.open(url)
+        }
+    }
+    func openImage(url: URL) {
+
+        let vc = UIViewController()
+        let imageView = UIImageView(frame: vc.view.bounds)
+
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+
+        vc.view.addSubview(imageView)
+
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            if let data = data {
+                DispatchQueue.main.async {
+                    imageView.image = UIImage(data: data)
+                }
+            }
+        }.resume()
+
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    func openVideo(url: URL) {
+
+        let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+
+        if let vc = storyboard.instantiateViewController(withIdentifier: "VideoPlayerVC") as? VideoPlayerVC {
+
+            vc.mediaURL = url.absoluteString
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    func openPDF(url: URL) {
+
+        let pdfVC = UIViewController()
+        let pdfView = PDFView(frame: pdfVC.view.bounds)
+
+        pdfView.autoScales = true
+        pdfVC.view.addSubview(pdfView)
+
+        if let document = PDFDocument(url: url) {
+            pdfView.document = document
+        } else {
+            print("❌ Failed to load PDF")
+        }
+
+        navigationController?.pushViewController(pdfVC, animated: true)
     }
     
     func didTapDownload(at cell: SubDetailsTableViewCell) {
@@ -333,8 +439,6 @@ extension SubDetailsVC: UITableViewDelegate, UITableViewDataSource {
             print("❌ Invalid URL")
             return
         }
-
-        print("Opening:", url)
 
         UIApplication.shared.open(url)
     }

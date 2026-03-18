@@ -19,6 +19,7 @@ class VideoPlayerVC: UIViewController {
     
     // MARK: - Properties
     var mediaURL: String?
+    var fileType: String?
     
     private var player: AVPlayer?
     private var playerLayer: AVPlayerLayer?
