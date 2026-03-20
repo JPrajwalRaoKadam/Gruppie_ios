@@ -473,3 +473,92 @@ struct EasebuzzPaymentResponse: Codable {
     let redirectionUrl: String
     let data: String
 }
+
+// MARK: - Root
+struct PaymentViewResponse: Codable {
+    let success: Bool?
+    let data: PaymentViewData?
+}
+
+// MARK: - Data
+struct PaymentViewData: Codable {
+    let student: PaymentStudent?
+    let demands: [PaymentDemand]?
+}
+
+// MARK: - Student (RENAMED)
+struct PaymentStudent: Codable {
+    let studentId: String?
+    let fullName: String?
+    let classId: String?
+    let className: String?
+}
+
+// MARK: - Demand
+struct PaymentDemand: Codable {
+    let studentFeeDemandId: String?
+    let feeType: String?
+    let total: Double?
+    let concession: Double?
+    let netAmount: Double?
+    let paid: Double?
+    let balance: Double?
+    let dueAmount: Double?
+    let payable: Double?
+    let fine: Double?
+    let status: String?
+}
+
+struct CommonResponse<T: Decodable>: Decodable {
+    let success: Int?
+    let message: String?
+    let data: T?
+}
+
+struct PaymentRequest: Encodable {
+    let data: [PaymentData]
+}
+
+struct PaymentData: Encodable {
+    let advanceAmounts: [String]
+    let advancePayment: Int
+    let allocations: [Allocation]
+    let amount: Double
+    let classId: Int
+    let groupAcademicYearId: String
+    let idempotencyKey: String?
+    let paymentMode: String
+    let studentId: Int
+    let useAdvance: Bool
+}
+
+struct Allocation: Encodable {
+    let amount: Double
+    let fineAmount: Double
+    let studentFeeDemandId: Int
+}
+
+struct PaymentGatewayResponse: Decodable {
+    let status: String?
+    let message: String?
+    let data: PaymentGatewayData?
+}
+
+struct PaymentGatewayData: Decodable {
+    let redirectUrl: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case redirectUrl = "redirectUrl" // if backend sends redirect_url → change here
+    }
+}
+
+struct PaymentSuccessResponse: Decodable {
+    let status: String?
+    let message: String?
+    let data: PaymentSuccessData?
+}
+
+struct PaymentSuccessData: Decodable {
+    let receiptNumber: String?
+    let amount: Double?
+}

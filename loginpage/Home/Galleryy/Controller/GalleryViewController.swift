@@ -326,7 +326,7 @@ class GalleryViewController: UIViewController {
         fetchAlbumList(page: currentPage)
     }
 
-                           override func viewDidLayoutSubviews() {
+    override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
@@ -577,6 +577,7 @@ extension GalleryViewController: UICollectionViewDelegate,
             detailVC.mediaItemsStrings = album.fileName ?? []
             detailVC.token = self.token
             detailVC.currentRole = self.currentRole
+            detailVC.attachmentIds = albums[indexPath.row].attachments?.map { $0.id } ?? []
 
             navigationController?.pushViewController(detailVC, animated: true)
         }

@@ -29,6 +29,7 @@ struct AlbumData: Codable {
     let albumId: String
     let fileType: String?
     let fileName: [String]?
+    let attachments: [AlbumAttachment]?
 
     enum CodingKeys: String, CodingKey {
         case updatedAt
@@ -51,23 +52,21 @@ struct AlbumData: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        // Defaults (not sent by API)
         updatedAt = ""
         groupId = ""
         canEdit = true
         fileType = nil
 
-        // API fields
         description = try container.decodeIfPresent(String.self, forKey: .description)
         createdAt = try container.decodeIfPresent(String.self, forKey: .albumDate) ?? ""
         albumName = try container.decode(String.self, forKey: .name)
         albumId = String(try container.decode(Int.self, forKey: .id))
 
-        // Attachments → fileName[]
-        if let attachments = try? container.decode([AlbumAttachment].self, forKey: .attachments) {
-            let urls = attachments.map { $0.fileUrl }
-            fileName = urls.isEmpty ? nil : urls
+        if let attachmentsData = try? container.decode([AlbumAttachment].self, forKey: .attachments) {
+            self.attachments = attachmentsData
+            fileName = attachmentsData.map { $0.fileUrl }
         } else {
+            self.attachments = nil
             fileName = nil
         }
     }

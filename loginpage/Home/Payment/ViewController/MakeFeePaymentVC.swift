@@ -89,10 +89,8 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
         
         if let amountPaymentVC = storyboard.instantiateViewController(withIdentifier: "AmountPaymentVC") as? AmountPaymentVC {
-            
-            amountPaymentVC.studentName = studentInfo?.fullName
-                        amountPaymentVC.studentId = studentInfo?.studentId
-                        amountPaymentVC.demandTotalAmount = demandAmount.text
+            amountPaymentVC.studentId = studentId
+            amountPaymentVC.groupAcademicYearId = self.groupAcademicYearId ?? ""
             
             navigationController?.pushViewController(amountPaymentVC, animated: true)
         }
@@ -197,3 +195,4 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         }
     }
 }
+
