@@ -47,6 +47,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 withIdentifier: "ViewController"
             )
         }
+        
+        window?.overrideUserInterfaceStyle = .light
 
         let nav = UINavigationController(rootViewController: rootVC)
         nav.navigationBar.isHidden = true
