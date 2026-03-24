@@ -54,6 +54,25 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
             return
         }
         
+        // 🔥 VALIDATION HERE
+        for (index, amount) in selectedAmounts {
+            
+            let demand = demands[index]
+            let balance = demand.balance ?? 0
+            let fine = demand.fine ?? 0
+            
+            if amount > balance {
+                showAlert(message: "Amount cannot exceed balance")
+                return
+            }
+            
+            if (amount + fine) > balance {
+                showAlert(message: "Amount + fine cannot exceed balance")
+                return
+            }
+        }
+        
+        // ✅ If everything valid → proceed
         let alert = UIAlertController(title: "Select Payment Mode", message: nil, preferredStyle: .actionSheet)
         
         alert.addAction(UIAlertAction(title: "Online Payment", style: .default, handler: { _ in
@@ -70,7 +89,6 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
         
         present(alert, animated: true)
     }
-    
     func showAlert(message: String, shouldPop: Bool = false) {
         let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
         
@@ -125,7 +143,7 @@ extension AmountPaymentVC {
 }
 
 extension AmountPaymentVC {
-    func buildPaymentBody(includeIdempotency: Bool) -> PaymentRequest {
+    func buildPaymentBody(includeIdempotency: Bool) -> PaymentRequest? {
         
         let allocations: [Allocation] = selectedAmounts.compactMap { (index, amount) in
             
@@ -142,11 +160,41 @@ extension AmountPaymentVC {
         
         let totalSelectedAmount = selectedAmounts.values.reduce(0, +)
         
+        // ✅ BASIC CHECKS
+        guard totalSelectedAmount > 0 else {
+            showAlert(message: "Invalid amount")
+            return nil
+        }
+
+        guard !allocations.isEmpty else {
+            showAlert(message: "No allocations selected")
+            return nil
+        }
+        
+        // 🔥 ADD YOUR VALIDATION HERE
+        for (index, amount) in selectedAmounts {
+            let demand = demands[index]
+            
+            let balance = demand.balance ?? 0
+            let fine = demand.fine ?? 0
+            
+            if amount > balance {
+                showAlert(message: "Amount cannot exceed balance")
+                return nil
+            }
+            
+            if (amount + fine) > balance {
+                showAlert(message: "Amount + fine cannot exceed balance")
+                return nil
+            }
+        }
+        
+        // ✅ FINAL OBJECT
         let paymentData = PaymentData(
             advanceAmounts: [],
             advancePayment: 0,
             allocations: allocations,
-            amount: totalSelectedAmount, // ✅ IMPORTANT
+            amount: totalSelectedAmount,
             classId: classId,
             groupAcademicYearId: groupAcademicYearId,
             idempotencyKey: includeIdempotency ? "\(Int(Date().timeIntervalSince1970))" : nil,
@@ -156,8 +204,7 @@ extension AmountPaymentVC {
         )
         
         return PaymentRequest(data: [paymentData])
-    }
-}
+    }}
 
 extension AmountPaymentVC {
     
