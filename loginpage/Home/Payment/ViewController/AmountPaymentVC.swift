@@ -25,6 +25,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
         setupUI()
         setupTable()
         fetchPaymentView()
+        enableKeyboardDismissOnTap()
     }
     
     func setupUI() {
