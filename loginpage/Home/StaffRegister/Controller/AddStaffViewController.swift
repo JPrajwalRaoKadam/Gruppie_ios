@@ -20,6 +20,10 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+        backButton.clipsToBounds = true
+        backButton.layer.masksToBounds = true
+        
         let textFields = [
             firstNameTextField,
             middleNameTextField,
@@ -47,11 +51,6 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         dropdownTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         view.addSubview(dropdownTableView)
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        backButton.layer.cornerRadius = backButton.frame.size.height / 2
     }
     
     func textField(_ textField: UITextField,
