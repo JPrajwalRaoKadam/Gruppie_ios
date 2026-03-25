@@ -295,24 +295,28 @@ extension AmountPaymentVC {
     func PEBCallback(data: [String : AnyObject]) {
         print("Easebuzz:", data)
         
-        let status = data["status"] as? String ?? ""
-        
-        if status == "success" {
+        if let paymentResponse = data["payment_response"] as? [String: AnyObject],
+           let status = paymentResponse["status"] as? String {
             
-            // ✅ Show success alert
-            DispatchQueue.main.async {
-                self.showAlert(message: "Payment Successful")
-            }
-            
-            if paymentMode == "GATEWAY" {
-                makeStudentFeePaymentRequest()
+            if status.lowercased() == "success" {
+                
+                DispatchQueue.main.async {
+                    self.showAlert(message: "Payment Successful")
+                }
+                
+                if self.paymentMode == "GATEWAY" {
+                    self.makeStudentFeePaymentRequest()
+                }
+                
+            } else {
+                DispatchQueue.main.async {
+                    self.showAlert(message: "Payment Failed or Cancelled")
+                }
             }
             
         } else {
-            
-            // ❌ Failed / Cancelled
             DispatchQueue.main.async {
-                self.showAlert(message: "Payment Failed or Cancelled")
+                self.showAlert(message: "Invalid payment response")
             }
         }
     }

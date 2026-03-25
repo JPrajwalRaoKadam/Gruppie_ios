@@ -1,178 +1,249 @@
 import UIKit
 
-class AddStaffViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
+    
+    @IBOutlet weak var firstNameTextField: UITextField!
+    @IBOutlet weak var middleNameTextField: UITextField!
+    @IBOutlet weak var lastNameTextField: UITextField!
+    @IBOutlet weak var contactNumberTextField: UITextField!
+    @IBOutlet weak var selectTypeTextField: UITextField!
+    
+    @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var addButton: UIButton!
+    
     var token: String?
     var groupId: String? = ""
-
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var segmentController: UISegmentedControl!
-    @IBOutlet weak var addButton: UIButton!
-    // Added outlet for back button
-    @IBOutlet weak var backButton: UIButton!
-
+    
+    let typeOptions = ["Teaching", "Non-Teaching"]
+    let dropdownTableView = UITableView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Configure tableView
-        tableView.layer.cornerRadius = 20
-        tableView.clipsToBounds = true
-        tableView.layer.shadowColor = UIColor.black.cgColor
-        tableView.layer.shadowOffset = CGSize(width: 0, height: 4)
-        tableView.layer.shadowOpacity = 0.3
-        tableView.layer.shadowRadius = 10
-        tableView.layer.masksToBounds = false
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = UIColor.lightGray.cgColor
-        tableView.backgroundColor = UIColor.white
-        tableView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        let textFields = [
+            firstNameTextField,
+            middleNameTextField,
+            lastNameTextField,
+            contactNumberTextField,
+            selectTypeTextField
+        ]
         
-        // Configure back button (initial setup)
-        backButton.layer.cornerRadius = backButton.frame.size.height / 2
-        backButton.clipsToBounds = true
-        
-        // Configure add button
-        addButton.layer.cornerRadius = 10
-        addButton.clipsToBounds = true
-        addButton.layer.shadowColor = UIColor.black.cgColor
-        addButton.layer.shadowOffset = CGSize(width: 0, height: 4)
-        addButton.layer.shadowOpacity = 0.3
-        addButton.layer.shadowRadius = 5
-        addButton.layer.masksToBounds = false
-        
-        print("Token: \(TokenManager.shared.getToken() ?? "No Token")")
-        print("Group ID: \(groupId ?? "No Group ID")")
-
-        // Register cell and set delegates
-        tableView.register(UINib(nibName: "AddStaff", bundle: nil), forCellReuseIdentifier: "AddStaffCell")
-        tableView.delegate = self
-        tableView.dataSource = self
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        // Update back button corner radius after layout is complete
-        backButton.layer.cornerRadius = backButton.frame.size.height / 2
-    }
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AddStaffCell", for: indexPath) as? AddStaff else {
-            return UITableViewCell()
+        textFields.forEach { tf in
+            tf?.layer.cornerRadius = 10
+            tf?.layer.masksToBounds = true
+            tf?.layer.borderWidth = 1
+            tf?.layer.borderColor = UIColor.lightGray.cgColor
+            tf?.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
+            tf?.leftViewMode = .always
+            tf?.delegate = self
         }
-        return cell
-    }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension
-    }
-
-    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 200
+        
+        dropdownTableView.delegate = self
+        dropdownTableView.dataSource = self
+        dropdownTableView.isHidden = true
+        dropdownTableView.layer.borderWidth = 1
+        dropdownTableView.layer.borderColor = UIColor.lightGray.cgColor
+        dropdownTableView.layer.cornerRadius = 8
+        dropdownTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        
+        view.addSubview(dropdownTableView)
     }
     
-    // Back button action (renamed to avoid confusion)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backButton.layer.cornerRadius = backButton.frame.size.height / 2
+    }
+    
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+        
+        guard textField == contactNumberTextField else {
+            return true
+        }
+        
+        // Allow only digits
+        let allowedCharacters = CharacterSet.decimalDigits
+        let characterSet = CharacterSet(charactersIn: string)
+        if !allowedCharacters.isSuperset(of: characterSet) {
+            return false
+        }
+        
+        // Limit to 10 digits
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else {
+            return false
+        }
+        
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        return updatedText.count <= 10
+    }
+
+    
     @IBAction func backButtonTapped(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
-
-    @IBAction func addButton(_ sender: UIButton) {
-        guard let cell = tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? AddStaff else {
-            print("Error: Unable to get AddStaff cell.")
+        
+    @IBAction func addButtonTapped(_ sender: UIButton) {
+        guard let firstName = firstNameTextField.text, !firstName.isEmpty,
+              let lastName = lastNameTextField.text, !lastName.isEmpty,
+              let contactNumber = contactNumberTextField.text, !contactNumber.isEmpty,
+              let staffType = selectTypeTextField.text, !staffType.isEmpty else {
+            showError("First Name, Last Name, Mobile Number and Staff Type are required")
             return
         }
-
-        let name = cell.name.text ?? ""
-        let country = cell.country.text ?? "IN"
-        let phone = cell.phone.text ?? ""
-        let designation = cell.designation.text ?? ""
-        let isPermanent = cell.permanent.text == "Permanent"
-
-        let staffData = StaffData(
-            countryCode: country,
-            designation: designation,
-            name: name,
-            permanent: isPermanent,
-            phone: phone
+        
+        guard contactNumber.count == 10 else {
+            showError("Contact number must be exactly 10 digits")
+            return
+        }
+        
+        print("👤 First Name:", firstName)
+        print("👤 Last Name:", lastName)
+        print("📞 Phone:", contactNumber)
+        print("🧑‍💼 Staff Type:", staffType)
+        
+        callAddStaffAPI(
+            firstName: firstName,
+            middleName: middleNameTextField.text,
+            lastName: lastName,
+            contactNumber: contactNumber,
+            
+            staffType: staffType
         )
-        let requestBody = StaffRequest(staffData: [staffData])
-
-        let type = segmentController.selectedSegmentIndex == 0 ? "teaching" : "nonteaching"
-        guard let groupId = groupId else {
-            print("Error: groupId is nil")
-            return
-        }
-
-        let apiUrl = APIManager.shared.baseURL + "groups/\(groupId)/multiple/staff/register?type=\(type)"
-        print("Making API call to: \(apiUrl)")
-
-        postStaffData(to: apiUrl, requestBody: requestBody)
     }
-
-    private func postStaffData(to url: String, requestBody: StaffRequest) {
-        guard let requestUrl = URL(string: url) else {
-            print("Error: Invalid URL - \(url)")
+        
+    func callAddStaffAPI(firstName: String, middleName: String?, lastName: String?, contactNumber: String, staffType: String) {
+        guard let token = SessionManager.useRoleToken else {
+            showError("Token missing")
             return
         }
-
-        var request = URLRequest(url: requestUrl)
+        
+        print("🔑 Token used for API:", token)
+        
+        let staffTypeFormatted = staffType.uppercased()
+        var parameters: [String: String] = [
+            "firstName": firstName,
+            "contactNumber": contactNumber,
+            "staffType": staffTypeFormatted
+        ]
+        
+        if let middleName = middleName, !middleName.isEmpty { parameters["middleName"] = middleName }
+        if let lastName = lastName, !lastName.isEmpty { parameters["lastName"] = lastName }
+        
+        let url = URL(string: "https://dev.gruppie.in/api/v1/staff/full-registration")!
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        if let token = TokenManager.shared.getToken() {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-
-        do {
-            let jsonData = try JSONEncoder().encode(requestBody)
-            print("Request Body: \(String(data: jsonData, encoding: .utf8) ?? "Error encoding")")
-            request.httpBody = jsonData
-        } catch {
-            print("Error: Failed to encode request body - \(error)")
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error: Network request failed - \(error)")
-                return
-            }
-
-            guard let data = data else {
-                print("Error: No response data received")
-                return
-            }
-
-            if let response = response as? HTTPURLResponse {
-                print("HTTP Status Code: \(response.statusCode)")
-            }
-
-            do {
-                let jsonResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                DispatchQueue.main.async {
-                    print("API Response: \(jsonResponse)")
-
-                    if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                        self.showAlert(title: "Success", message: "Staff data has been saved successfully.")
-                    } else {
-                        self.showAlert(title: "Error", message: "Failed to save staff data.")
-                    }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = createMultipartBody(parameters: parameters, boundary: boundary)
+        
+        print("🚀 Sending Add Staff Request")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ API Error:", error.localizedDescription)
+                    self.showError("Failed to add staff")
+                    return
                 }
-            } catch {
-                print("Error: Failed to parse response - \(error)")
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self.showError("Invalid server response")
+                    return
+                }
+                
+                print("🚀 HTTP Status Code:", httpResponse.statusCode)
+                
+                if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                    print("✅ Response Body:", responseString)
+                } else {
+                    print("✅ Response Body is empty")
+                }
+                
+                if (200...299).contains(httpResponse.statusCode) {
+                    self.showAlert(message: "Staff added successfully", success: true)
+                } else {
+                    self.showError("Failed to add staff. Status code: \(httpResponse.statusCode)")
+                }
             }
+        }.resume()
+    }
+    
+    func createMultipartBody(parameters: [String: String], boundary: String) -> Data {
+        var body = Data()
+        let lineBreak = "\r\n"
+        
+        for (key, value) in parameters {
+            body.append("--\(boundary + lineBreak)")
+            body.append("Content-Disposition: form-data; name=\"\(key)\"\(lineBreak + lineBreak)")
+            body.append("\(value + lineBreak)")
         }
-        task.resume()
+        
+        body.append("--\(boundary)--\(lineBreak)")
+        return body
+    }
+        
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        textField.text = ""
+        if textField == selectTypeTextField { showDropdown() } else { hideDropdown() }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) { hideDropdown() }
+    
+    func showDropdown() {
+        let textFieldFrameInView = selectTypeTextField.superview?.convert(selectTypeTextField.frame, to: self.view) ?? selectTypeTextField.frame
+        dropdownTableView.frame = CGRect(
+            x: textFieldFrameInView.origin.x,
+            y: textFieldFrameInView.origin.y + textFieldFrameInView.height,
+            width: textFieldFrameInView.width,
+            height: CGFloat(typeOptions.count * 44)
+        )
+        dropdownTableView.reloadData()
+        dropdownTableView.isHidden = false
+        self.view.bringSubviewToFront(dropdownTableView)
+    }
+    
+    func hideDropdown() { dropdownTableView.isHidden = true }
+        
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { typeOptions.count }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.text = typeOptions[indexPath.row]
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectTypeTextField.text = typeOptions[indexPath.row]
+        hideDropdown()
+        selectTypeTextField.resignFirstResponder()
+    }
+    
+    func showError(_ message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        self.present(alert, animated: true)
+    }
+         
+    func showAlert(message: String, success: Bool) {
+        let alert = UIAlertController(title: success ? "Success" : "Alert", message: message, preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            if success {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }))
+        
+        self.present(alert, animated: true)
     }
 
-    private func showAlert(title: String, message: String) {
-        DispatchQueue.main.async {
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }
+  }
+
+extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) { append(data) }
     }
 }
