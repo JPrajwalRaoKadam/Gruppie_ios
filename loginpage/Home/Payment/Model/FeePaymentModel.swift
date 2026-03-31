@@ -562,3 +562,21 @@ struct PaymentSuccessData: Decodable {
     let receiptNumber: String?
     let amount: Double?
 }
+
+struct PaymentStatusResponse: Codable {
+    let success: Bool?
+    let data: PaymentStatusData?
+}
+
+struct PaymentStatusData: Codable {
+    let transactionId: String?
+    let gatewayOrderId: String?
+    let status: String?
+    let errorMessage: String?
+    let paymentRecordId: String?
+}
+
+struct GenericResponse: Codable {
+    let success: Bool?
+    let message: String?
+}

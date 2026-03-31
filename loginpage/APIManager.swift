@@ -57,6 +57,7 @@ class APIManager {
         method: HTTPMethod,
         queryParams: [String: String]? = nil,
         body: Encodable? = nil,
+        bodyData: Data? = nil,   // ✅ NEW
         headers: [String: String]? = nil,
         completion: @escaping (Result<T, APIError>) -> Void
     ) {

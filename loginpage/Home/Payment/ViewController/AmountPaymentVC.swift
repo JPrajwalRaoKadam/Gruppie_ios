@@ -13,7 +13,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     var studentId: String?
     var bearerToken = SessionManager.useRoleToken
     var groupAcademicYearId: String = "142"
-    
+    var easebuzzResponse: [String: AnyObject]?
     var demands: [PaymentDemand] = []
     var classId: Int = 0
     var paymentMode: String = "GATEWAY"
@@ -89,17 +89,18 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
         
         present(alert, animated: true)
     }
-    func showAlert(message: String, shouldPop: Bool = false) {
+    
+    func showAlert(message: String, onOk: (() -> Void)? = nil) {
+        
         let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
         
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            if shouldPop {
-                self.navigationController?.popViewController(animated: true)
-            }
+            onOk?()
         }))
         
         present(alert, animated: true)
     }
+    
 }
 
 
@@ -296,17 +297,13 @@ extension AmountPaymentVC {
         print("Easebuzz:", data)
         
         if let paymentResponse = data["payment_response"] as? [String: AnyObject],
-           let status = paymentResponse["status"] as? String {
-            
+           let status = paymentResponse["status"] as? String,
+           let txnid = paymentResponse["txnid"] as? String {
+            self.easebuzzResponse = paymentResponse
             if status.lowercased() == "success" {
                 
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Payment Successful")
-                }
-                
-                if self.paymentMode == "GATEWAY" {
-                    self.makeStudentFeePaymentRequest()
-                }
+                // 🔥 CALL VERIFY API INSTEAD OF DIRECT SUCCESS
+                self.verifyPayment(txnId: txnid)
                 
             } else {
                 DispatchQueue.main.async {
@@ -320,6 +317,93 @@ extension AmountPaymentVC {
             }
         }
     }
+    
+    func verifyPayment(txnId: String) {
+        
+        guard let token = bearerToken else { return }
+        
+        APIManager.shared.request(
+            endpoint: "payment-gateway/status/\(txnId)",
+            method: .get,
+            queryParams: nil,
+            body: nil,
+            headers: ["Authorization": "Bearer \(token)"]
+            
+        ) { (result: Result<PaymentStatusResponse, APIManager.APIError>) in
+            
+            switch result {
+                
+            case .success(let response):
+                
+                let status = response.data?.status ?? ""
+                
+                DispatchQueue.main.async {
+                    
+                    if status == "SUCCESS" || status == "PENDING" {
+                        
+                        self.showAlert(message: "Payment Successful") {
+                            
+                            // ✅ Call confirm API AFTER OK click
+                            self.confirmPayment()
+                        }
+                        
+                    } else {
+                        self.showAlert(message: response.data?.errorMessage ?? "Payment Failed")
+                    }
+                }
+                
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.showAlert(message: "Verification Failed. Try again.")
+                }
+                print("❌ Verify API Error:", error)
+            }
+        }
+    }
+    
+    func confirmPayment() {
+        
+        guard let token = bearerToken,
+              let paymentResponse = easebuzzResponse else { return }
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: paymentResponse, options: [])
+            
+            APIManager.shared.request(
+                endpoint: "payment-gateway/confirm",
+                method: .post,
+                queryParams: nil,
+                bodyData: jsonData,   // ✅ use raw data
+                headers: [
+                    "Authorization": "Bearer \(token)",
+                    "Content-Type": "application/json"
+                ]
+            ) { (result: Result<GenericResponse, APIManager.APIError>) in
+                
+                switch result {
+                    
+                case .success(let response):
+                    DispatchQueue.main.async {
+                        print("✅ Confirm Success:", response)
+                        
+                        if self.paymentMode == "GATEWAY" {
+                            self.makeStudentFeePaymentRequest()
+                        }
+                    }
+                    
+                case .failure(let error):
+                    DispatchQueue.main.async {
+                        self.showAlert(message: "Confirm Payment Failed")
+                    }
+                    print("❌ Confirm Error:", error)
+                }
+            }
+            
+        } catch {
+            print("❌ JSON Conversion Error:", error)
+        }
+    }
+    
 }
 
 extension AmountPaymentVC: UITableViewDelegate, UITableViewDataSource {
