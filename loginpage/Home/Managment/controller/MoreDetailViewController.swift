@@ -27,6 +27,7 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
         setupUI()
         registerCells()
         preloadEditableData()
+        enableKeyboardDismissOnTap()
     }
 
     private func setupUI() {

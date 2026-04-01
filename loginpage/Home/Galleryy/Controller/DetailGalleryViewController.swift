@@ -26,14 +26,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("========== DETAIL GALLERY VIEW CONTROLLER ==========")
-        print("📱 View Controller Loaded")
-        print("🆔 Album ID: \(albumId)")
-        print("👤 Current Role: \(currentRole)")
-        print("🔑 Token exists: \(!token.isEmpty)")
-        print("📦 Attachment IDs count: \(attachmentIds.count)")
-        print("📝 Media Items Strings count: \(mediaItemsStrings.count)")
-        print("==================================================")
+        print("DetailGalleryViewController Loaded with Group ID: \(groupId), Token: \(token), and Album ID: \(albumId), currentRole : \(currentRole)")
         
         if currentRole == "parent" || currentRole == "teacher" {
             deleteButton.isHidden = true
@@ -65,14 +58,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         backButton.layer.masksToBounds = true
 
         albumName.text = albumNameString
-        
-        // Debug attachmentIds mapping
-        print("🔍 Mapping attachmentIds to mediaItemsStrings:")
-        for (index, mediaString) in mediaItemsStrings.enumerated() {
-            let attachmentId = index < attachmentIds.count ? attachmentIds[index] : nil
-            print("  Index \(index): Media: \(mediaString.prefix(50))... -> Attachment ID: \(attachmentId ?? -1)")
-        }
-        
         loadImages()
         loadVideos()
     }
@@ -402,10 +387,10 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         print("📤 Uploading \(uploadCount) NEW media files | Size: \(body.count / 1024) KB")
 
+        // MARK: - REQUEST
         var request = URLRequest(
             url: URL(string: "https://dev.gruppie.in/api/v1/gallery/attachments")!
         )
-        
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
@@ -488,6 +473,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         present(imagePicker, animated: true, completion: nil)
     }
     
+
     func createIconButton(systemName: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 28, weight: .regular)
@@ -507,6 +493,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
             print("Image saved to Photos.")
         }
+        
     }
 
     @objc func shareImageTapped() {
@@ -549,19 +536,16 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         let dispatchGroup = DispatchGroup()
         var tempMediaItems: [MediaType] = []
 
-        for (index, item) in mediaItemsStrings.enumerated() {
+        for item in mediaItemsStrings {
             let cleanedString = item
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: "\n", with: "")
 
-            print("🔍 Processing item \(index): \(cleanedString.prefix(50))...")
-            
             if cleanedString.hasPrefix("/") {
                 let fileURL = URL(fileURLWithPath: cleanedString)
                 if cleanedString.hasSuffix(".mp4") {
                     if let thumbnail = generateThumbnail(url: fileURL) {
                         tempMediaItems.append(.videoThumbnail(thumbnail, fileURL))
-                        print("✅ Loaded local video thumbnail for index \(index)")
                     } else {
                         print("❌ Failed to generate thumbnail for local video: \(cleanedString)")
                     }
@@ -569,7 +553,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
                     if let data = try? Data(contentsOf: fileURL),
                        let image = UIImage(data: data) {
                         tempMediaItems.append(.image(image))
-                        print("✅ Loaded local image for index \(index)")
                     } else {
                         print("❌ Failed to load local image from path: \(cleanedString)")
                     }
@@ -577,70 +560,69 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
                 continue
             }
 
-            // Try to decode as base64 first
             var base64ImageString = cleanedString
             if cleanedString.hasPrefix("data:image/jpeg;base64,") {
                 base64ImageString = String(cleanedString.dropFirst("data:image/jpeg;base64,".count))
-                print("📸 Found JPEG data URL for index \(index)")
             } else if cleanedString.hasPrefix("data:image/png;base64,") {
                 base64ImageString = String(cleanedString.dropFirst("data:image/png;base64,".count))
-                print("📸 Found PNG data URL for index \(index)")
             }
 
             if let image = convertBase64ToImage(base64ImageString) {
                 tempMediaItems.append(.image(image))
-                print("✅ Successfully decoded base64 image for index \(index)")
                 continue
             }
 
-            // Handle URLs
-            if cleanedString.hasPrefix("http"), let url = URL(string: cleanedString) {
-                print("🌐 Downloading from URL for index \(index): \(url)")
-                
+            if let decodedData = Data(base64Encoded: cleanedString),
+               let decodedURLString = String(data: decodedData, encoding: .utf8),
+               decodedURLString.hasPrefix("http"),
+               let url = URL(string: decodedURLString) {
+
                 dispatchGroup.enter()
-                URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+                URLSession.shared.dataTask(with: url) { data, response, error in
                     defer { dispatchGroup.leave() }
-                    
-                    guard let self = self else { return }
-                    
-                    if let error = error {
-                        print("❌ Error downloading from URL for index \(index): \(error.localizedDescription)")
-                        return
-                    }
-                    
-                    if cleanedString.hasSuffix(".mp4") {
-                        print("🎬 Processing video URL for index \(index)")
+
+                    if decodedURLString.hasSuffix(".mp4") {
                         if let thumbnail = self.generateThumbnail(url: url) {
-                            DispatchQueue.main.async {
-                                tempMediaItems.append(.videoThumbnail(thumbnail, url))
-                                print("✅ Successfully generated thumbnail for video at index \(index)")
-                            }
+                            tempMediaItems.append(.videoThumbnail(thumbnail, url))
                         } else {
-                            print("❌ Failed to generate thumbnail from video URL for index \(index)")
+                            print("❌ Failed to generate thumbnail from video URL: \(decodedURLString)")
                         }
                     } else if let data = data, let image = UIImage(data: data) {
-                        DispatchQueue.main.async {
-                            tempMediaItems.append(.image(image))
-                            print("✅ Successfully downloaded image for index \(index)")
-                        }
+                        tempMediaItems.append(.image(image))
                     } else {
-                        print("⚠️ Invalid or unsupported media format from URL for index \(index)")
+                        print("⚠️ Invalid or unsupported media format from URL: \(decodedURLString)")
                     }
                 }.resume()
                 continue
             }
 
-            print("❌ Unsupported media format for index \(index): \(cleanedString.prefix(50))...")
+            if cleanedString.hasPrefix("http"), let url = URL(string: cleanedString) {
+                dispatchGroup.enter()
+                URLSession.shared.dataTask(with: url) { data, response, error in
+                    defer { dispatchGroup.leave() }
+
+                    if cleanedString.hasSuffix(".mp4") {
+                        if let thumbnail = self.generateThumbnail(url: url) {
+                            tempMediaItems.append(.videoThumbnail(thumbnail, url))
+                        } else {
+                            print("❌ Failed to generate thumbnail from video URL: \(cleanedString)")
+                        }
+                    } else if let data = data, let image = UIImage(data: data) {
+                        tempMediaItems.append(.image(image))
+                    } else {
+                        print("⚠️ Invalid or unsupported media format from URL: \(cleanedString)")
+                    }
+                }.resume()
+                continue
+            }
+
+            print("❌ Unsupported media format or invalid string: \(cleanedString)")
         }
 
-        dispatchGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
+        dispatchGroup.notify(queue: .main) {
             self.processedMediaItems = tempMediaItems
             self.CollectionView.reloadData()
             print("✅ Finished loading all media items: \(self.processedMediaItems.count)")
-            
-            // Debug attachmentIds after loading
-            print("🔍 Attachment IDs after loading: \(self.attachmentIds)")
         }
     }
     
@@ -770,13 +752,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         }
 
         cell.isSelectedCell = selectedIndices.contains(indexPath.row)
-        
-        print("🔘 Selected indices after toggle: \(selectedIndices)")
-        print("🔍 Attachment IDs for selected indices:")
-        for selectedIndex in selectedIndices {
-            let attachmentId = selectedIndex < attachmentIds.count ? attachmentIds[selectedIndex] : nil
-            print("  Index \(selectedIndex) -> Attachment ID: \(attachmentId ?? -1)")
-        }
     }
 
     @objc func selectButtonTapped(_ sender: UIButton) {
@@ -789,8 +764,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         }
 
         CollectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-        
-        print("🔘 Selected indices after button tap: \(selectedIndices)")
     }
     
     @IBAction func deleteButtonTapped(_ sender: UIButton) {
@@ -799,31 +772,10 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             return
         }
         
-        print("🗑️ Delete button tapped")
-        print("🗑️ Delete button tapped")
-        
-        print("📊 Selected indices: \(selectedIndices)")
-        print("📦 Attachment IDs array: \(attachmentIds)")
-        print("📦 Attachment IDs count: \(attachmentIds.count)")
-        
-        // Map selected indices to attachment IDs
-        let selectedAttachmentIds: [Int] = selectedIndices.compactMap { index in
-            if index < attachmentIds.count {
-                let attachmentId = attachmentIds[index]
-                print("  Index \(index) maps to attachment ID: \(attachmentId)")
-                return attachmentId
-            } else {
-                print("  ⚠️ Index \(index) is out of bounds for attachmentIds (count: \(attachmentIds.count))")
-                return nil
-            }
-        }
-        
-        print("📋 Selected attachment IDs: \(selectedAttachmentIds)")
-        
-        let alert = UIAlertController(title: "Delete Media", message: "Do you want to delete the selected \(selectedIndices.count) item(s)?", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Delete Photo", message: "Do you want to delete the selected photo(s)?", preferredStyle: .alert)
         
         let okAction = UIAlertAction(title: "OK", style: .destructive) { _ in
-            self.deleteSelectedImages(selectedAttachmentIds: selectedAttachmentIds)
+            self.deleteSelectedImages()
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -834,14 +786,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         present(alert, animated: true, completion: nil)
     }
     
-    func deleteSelectedImages(selectedAttachmentIds: [Int]) {
-        self.token = SessionManager.useRoleToken ?? ""
-        print("========== DELETE OPERATION STARTED ==========")
-        print("🗑️ Starting delete operation")
-        print("🆔 Album ID: \(albumId)")
-        print("🔑 Token exists: \(!token.isEmpty)")
-        print("📋 Selected attachment IDs: \(selectedAttachmentIds)")
-        print("📊 Selected indices: \(selectedIndices)")
+    func deleteSelectedImages() {
 
         guard !albumId.isEmpty else {
             print("❌ albumId is empty")
@@ -855,25 +800,24 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             return
         }
 
-        guard !selectedAttachmentIds.isEmpty else {
-            print("❌ No valid attachment IDs to delete")
-            
-            // Check if we have attachment IDs at all
-            if attachmentIds.isEmpty {
-                print("ℹ️ attachmentIds array is empty. This might be the issue.")
-                print("ℹ️ If these are server URLs, attachment IDs should be provided from the previous screen.")
+        let selectedAttachmentIds: [Int] = selectedIndices.compactMap { index in
+            if index < attachmentIds.count {
+                return attachmentIds[index]
             }
-            
-            showAlert(title: "Error", message: "No valid attachment IDs found for selected items")
+            return nil
+        }
+
+        guard !selectedAttachmentIds.isEmpty else {
+            print("❌ No valid attachment IDs")
+            showAlert(title: "Error", message: "No valid items selected")
             return
         }
 
-        // Fix: Use albumId in URL, not attachmentIds
-        let urlString = "https://dev.gruppie.in/api/v1/gallery/album/\(albumId)/attachments/delete"
-        print("🌐 DELETE URL: \(urlString)")
+        let urlString = APIManager.shared.baseURL +
+            "gallery/album/\(attachmentIds)/attachments/delete"
 
         guard let url = URL(string: urlString) else {
-            print("❌ Invalid URL: \(urlString)")
+            print("❌ Invalid URL")
             showAlert(title: "Error", message: "Invalid server URL")
             return
         }
@@ -890,80 +834,72 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
-            print("📤 Request Body: \(body)")
         } catch {
-            print("❌ Failed to encode body: \(error)")
-            showAlert(title: "Error", message: "Failed to prepare request")
+            print("❌ Failed to encode body:", error)
             return
         }
 
-        print("📡 Sending DELETE request...")
+        print("📡 DELETE API:", urlString)
+        print("📤 BODY:", body)
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("❌ Network error: \(error.localizedDescription)")
+
+            if let error = error {
+                DispatchQueue.main.async {
                     self.showAlert(title: "Error", message: error.localizedDescription)
-                    return
                 }
+                return
+            }
 
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    print("❌ Invalid response type")
-                    self.showAlert(title: "Error", message: "Invalid response from server")
-                    return
+            guard let httpResponse = response as? HTTPURLResponse else {
+                DispatchQueue.main.async {
+                    self.showAlert(title: "Error", message: "Invalid response")
                 }
+                return
+            }
 
-                print("📡 Response Status Code: \(httpResponse.statusCode)")
-                
-                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                    print("📝 Server Response: \(responseString)")
-                }
+            print("📡 Status Code:", httpResponse.statusCode)
+
+            DispatchQueue.main.async {
 
                 if (200...299).contains(httpResponse.statusCode) {
-                    print("✅ Delete operation successful")
-                    
-                    // Remove items locally
+
                     let sortedIndexes = self.selectedIndices.sorted(by: >)
-                    print("🗑️ Removing items at indices: \(sortedIndexes)")
-                    
+
                     for index in sortedIndexes {
+
                         if index < self.processedMediaItems.count {
                             self.processedMediaItems.remove(at: index)
-                            print("  Removed from processedMediaItems at index \(index)")
                         }
-                        
+
                         if index < self.mediaItems.count {
                             self.mediaItems.remove(at: index)
                         }
-                        
+
                         if index < self.mediaItemsStrings.count {
                             self.mediaItemsStrings.remove(at: index)
                         }
-                        
+
                         if index < self.attachmentIds.count {
                             self.attachmentIds.remove(at: index)
-                            print("Removed from attachmentIds at index \(index)")
                         }
                     }
-                    
+
                     self.selectedIndices.removeAll()
                     self.CollectionView.reloadData()
-                    
-                    print("✅ Local data updated successfully")
-                    self.showAlert(title: "Success", message: "Media deleted successfully")
-                    
+
+                    print("✅ Successfully deleted media")
                 } else {
-                    let message = self.parseErrorMessage(from: data) ?? "Server returned \(httpResponse.statusCode)"
-                    print("❌ Delete failed: \(message)")
+                    let message = self.parseErrorMessage(from: data)
+                        ?? "Server returned \(httpResponse.statusCode)"
                     self.showAlert(title: "Error", message: message)
                 }
-                
-                print("========== DELETE OPERATION COMPLETED ==========")
             }
+
         }.resume()
     }
+
 
     private func parseErrorMessage(from data: Data?) -> String? {
         guard let data = data else { return nil }
@@ -972,9 +908,6 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
             if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                let message = json["message"] as? String {
                 return message
-            } else if let jsonArray = try JSONSerialization.jsonObject(with: data, options: []) as? [Any] {
-                print("📦 Response is an array: \(jsonArray)")
-                return "Server returned an array"
             }
         } catch {
             print("⚠️ Error parsing error message: \(error)")

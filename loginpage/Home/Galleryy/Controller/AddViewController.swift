@@ -41,6 +41,7 @@ class AddViewController: UIViewController,
             forCellWithReuseIdentifier: "CollectionViewCell"
         )
 
+        enableKeyboardDismissOnTap()
         collectionView.delegate = self
         collectionView.dataSource = self
         spinner.center = view.center
@@ -306,4 +307,3 @@ class AddViewController: UIViewController,
     }
 
 }
-

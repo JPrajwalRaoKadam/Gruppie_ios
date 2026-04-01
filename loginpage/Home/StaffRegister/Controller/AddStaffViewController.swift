@@ -23,7 +23,7 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
-        
+        enableKeyboardDismissOnTap()
         let textFields = [
             firstNameTextField,
             middleNameTextField,
