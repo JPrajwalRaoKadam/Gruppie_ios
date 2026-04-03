@@ -234,6 +234,26 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon
+        let featureId = featureIcon.id 
+
+        fetchRolePermissions(featureId: featureId) { [weak self] permissions in
+            guard let self = self else { return }
+            
+            guard let permissions = permissions else {
+                print("❌ No permissions")
+                return
+            }
+
+            // 🔐 Example checks
+            if permissions.view == true {
+                print("✅ User can view")
+            }
+
+            if permissions.fullAccess == true {
+                print("🔥 Full access granted")
+            }
+        }
+        
         switch featureIcon.name {
         case "Notes and videos":
             fetchGroupClasses {
@@ -317,6 +337,50 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
         default:
             print("No navigation configured for type: \(featureIcon.name)")
+        }
+    }
+    
+    func fetchRolePermissions(featureId: Int, completion: @escaping (PermissionDetails?) -> Void) {
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Token missing")
+            completion(nil)
+            return
+        }
+
+        let headers = ["Authorization": "Bearer \(token)"]
+        let endpoint = "role-permissions/feature/\(featureId)"
+
+        APIManager.shared.request(
+            endpoint: endpoint,
+            method: .get,
+            headers: headers
+        ) { (result: Result<RolePermissionResponse, APIManager.APIError>) in
+            
+            switch result {
+            case .success(let response):
+                DispatchQueue.main.async {
+                    
+                    print("✅ Full Response:", response)
+
+                    // 🔥 Extract dynamic data
+                    if let featureDict = response.data?.first,
+                       let roleDict = featureDict.value.first {
+                        
+                        let permissions = roleDict.value
+                        print("🔥 Permissions:", permissions)
+                        
+                        completion(permissions)
+                    } else {
+                        print("❌ No permissions found")
+                        completion(nil)
+                    }
+                }
+                
+            case .failure(let error):
+                print("❌ API Error:", error)
+                completion(nil)
+            }
         }
     }
     

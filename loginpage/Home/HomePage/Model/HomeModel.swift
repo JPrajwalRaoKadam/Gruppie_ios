@@ -53,3 +53,20 @@ struct GroupAcademicYearItem: Decodable {
     let boardAndUniversityId: String
     let academicLabel: String
 }
+
+struct RolePermissionResponse: Codable {
+    let success: Bool?
+    let message: String?
+    let data: [String: [String: PermissionDetails]]?
+}
+
+struct PermissionDetails: Codable {
+    let fullAccess: Bool?
+    let deleteStaffCategories: Bool?
+    let delete: Bool?
+    let viewStaffCategories: Bool?
+    let viewList: Bool?
+    let view: Bool?
+    let deactivate: Bool?
+    let manageStaffCategories: Bool?
+}
