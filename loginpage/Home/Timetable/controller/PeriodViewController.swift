@@ -124,7 +124,7 @@ class PeriodViewController: UIViewController {
             periodDetailVC.day = day
             periodDetailVC.classId = classId
             periodDetailVC.groupAcademicYearId = groupAcademicYearId      // ✅ Pass classId here
-            periodDetailVC.className = className ?? "Default Class"
+            periodDetailVC.className = className ?? ""
             
             navigationController?.pushViewController(periodDetailVC, animated: true)
         }
@@ -157,7 +157,7 @@ extension PeriodViewController: UITableViewDelegate, UITableViewDataSource {
             periodDetailVC.token = token
             periodDetailVC.groupId = groupId
             periodDetailVC.classId = classId
-
+            periodDetailVC.groupAcademicYearId = groupAcademicYearId      // ✅ Pass classId here
             periodDetailVC.day = day
 //            periodDetailVC.periodData = selectedPeriod
             

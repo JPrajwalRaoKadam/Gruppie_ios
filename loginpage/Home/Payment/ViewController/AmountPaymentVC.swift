@@ -18,6 +18,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     var classId: Int = 0
     var paymentMode: String = "GATEWAY"
     var selectedAmounts: [Int: Double] = [:]
+    var onPaymentSuccess: (() -> Void)?
     
     // MARK: - LIFE CYCLE
     override func viewDidLoad() {
@@ -247,7 +248,7 @@ extension AmountPaymentVC {
         
         guard let token = bearerToken else { return }
         
-        let body = buildPaymentBody(includeIdempotency: false)
+        guard let body = buildPaymentBody(includeIdempotency: false) else { return }
         
         APIManager.shared.request(
             endpoint: "fees/student-fee-payments",
@@ -261,9 +262,14 @@ extension AmountPaymentVC {
             switch result {
             case .success(let response):
                 DispatchQueue.main.async {
-                    self.showAlert(message: response.message ?? "Payment Successful")
+                    self.showAlert(message: response.message ?? "Payment Successful") {
+                        
+                        self.onPaymentSuccess?()   // 🔥 notify previous VC
+                        
+                        self.navigationController?.popViewController(animated: true)
+                    }
                     
-                    // Optional: reset UI
+                    // Optional reset (can also move inside completion)
                     self.selectedAmounts.removeAll()
                     self.updatePayButton()
                     self.payableTableView.reloadData()

@@ -1,4 +1,3 @@
-
 import UIKit
 
 class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -11,6 +10,7 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
     @IBOutlet weak var moreDetailsTableView: UITableView!
     @IBOutlet weak var customView: UIView!
     @IBOutlet weak var number: UILabel!
+    @IBOutlet weak var deleteButton: UIButton! // Add this outlet
 
     var userId: Int?
     var token: String?
@@ -31,50 +31,49 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
     }
 
     private func setupUI() {
-    editButton.layer.cornerRadius = 10
-    addUserButton.layer.cornerRadius = 10
-    customView.layer.cornerRadius = 10
-    backButton.layer.cornerRadius = backButton.frame.height / 2
-
-    moreDetailsTableView.layer.cornerRadius = 10
-    moreDetailsTableView.clipsToBounds = true
-
-    moreDetailsTableView.delegate = self
-    moreDetailsTableView.dataSource = self
-    moreDetailsTableView.separatorStyle = .none
-
-    moreDetailsTableView.rowHeight = UITableView.automaticDimension
-    moreDetailsTableView.estimatedRowHeight = 250
-}
-
+        editButton.layer.cornerRadius = 10
+        addUserButton.layer.cornerRadius = 10
+        customView.layer.cornerRadius = 10
+        backButton.layer.cornerRadius = backButton.frame.height / 2
+        deleteButton.layer.cornerRadius = 10 // Add this line
+        
+        moreDetailsTableView.layer.cornerRadius = 10
+        moreDetailsTableView.clipsToBounds = true
+        
+        moreDetailsTableView.delegate = self
+        moreDetailsTableView.dataSource = self
+        moreDetailsTableView.separatorStyle = .none
+        
+        moreDetailsTableView.rowHeight = UITableView.automaticDimension
+        moreDetailsTableView.estimatedRowHeight = 250
+    }
     
     private func registerCells() {
-
         moreDetailsTableView.register(
             UINib(nibName: "BasicInfoTableViewCell", bundle: nil),
             forCellReuseIdentifier: "BasicInfoCell"
         )
-
+        
         moreDetailsTableView.register(
             UINib(nibName: "Education2TableViewCell", bundle: nil),
             forCellReuseIdentifier: "Education2TableViewCell"
         )
-
+        
         moreDetailsTableView.register(
             UINib(nibName: "AcoountInfo2TableViewCell", bundle: nil),
             forCellReuseIdentifier: "AcoountInfo2TableViewCell"
         )
-
+        
         moreDetailsTableView.register(
             UINib(nibName: "AchievementsTableViewCell", bundle: nil),
             forCellReuseIdentifier: "AchievementsTableViewCell"
         )
-
+        
         moreDetailsTableView.register(
             UINib(nibName: "bankDetailsTableViewCell", bundle: nil),
             forCellReuseIdentifier: "bankDetailsTableViewCell"
         )
-
+        
         moreDetailsTableView.register(
             UINib(nibName: "additionalAchievementTableViewCell", bundle: nil),
             forCellReuseIdentifier: "additionalAchievementTableViewCell"
@@ -82,118 +81,112 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
     }
     
     private func openAadharFilePicker() {
-           let picker = UIDocumentPickerViewController(
-               forOpeningContentTypes: [.pdf, .image],
-               asCopy: true
-           )
-           picker.delegate = self
-           picker.allowsMultipleSelection = false
-           present(picker, animated: true)
-       }
-
-       func documentPicker(_ controller: UIDocumentPickerViewController,
-                           didPickDocumentsAt urls: [URL]) {
-
-           guard let url = urls.first else { return }
-           selectedAadharURL = url
-
-           print("✅  selected:", url.lastPathComponent)
-
-           if let indexPath = aadharIndexPath,
-              let cell = moreDetailsTableView.cellForRow(at: indexPath)
-                   as? BasicInfoTableViewCell {
-               cell.showAadharSelected()
-           }
-       }
-
-       func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-           print("⚠️ Aadhar picker cancelled")
-       }
-
-    private func openGallery() {
-            guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else { return }
-            let picker = UIImagePickerController()
-            picker.sourceType = .photoLibrary
-            picker.delegate = self
-            picker.allowsEditing = true
-            present(picker, animated: true)
+        let picker = UIDocumentPickerViewController(
+            forOpeningContentTypes: [.pdf, .image],
+            asCopy: true
+        )
+        picker.delegate = self
+        picker.allowsMultipleSelection = false
+        present(picker, animated: true)
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController,
+                        didPickDocumentsAt urls: [URL]) {
+        guard let url = urls.first else { return }
+        selectedAadharURL = url
+        print("✅ selected:", url.lastPathComponent)
+        
+        if let indexPath = aadharIndexPath,
+           let cell = moreDetailsTableView.cellForRow(at: indexPath)
+            as? BasicInfoTableViewCell {
+            cell.showAadharSelected()
         }
+    }
+    
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        print("⚠️ Aadhar picker cancelled")
+    }
+    
+    private func openGallery() {
+        guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else { return }
+        let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true)
+    }
+    
     func imagePickerController(_ picker: UIImagePickerController,
-                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-
-            picker.dismiss(animated: true)
-
-            guard let selectedImage = info[.editedImage] as? UIImage ??
-                                      info[.originalImage] as? UIImage else { return }
-
+                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true)
+        
+        guard let selectedImage = info[.editedImage] as? UIImage ??
+                info[.originalImage] as? UIImage else { return }
+        
         selectedCell?.ImageView.image = selectedImage
         selectedCell?.ImageView.contentMode = .scaleAspectFill
         selectedCell?.ImageView.clipsToBounds = true
-
-        }
-
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
-        }
-
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+    }
+    
     private func preloadEditableData() {
         guard let member = member else { return }
-
+        
         editableManagement.fullName = member.fullName
         editableManagement.mobileNumber = member.mobileNumber
         editableManagement.dateOfBirth = member.dateOfBirth ?? ""
         editableManagement.email = member.email ?? ""
         editableManagement.designation = member.professionalDetails?.designation ?? ""
     }
+    
     @IBAction func addUserButtonTapped(_ sender: UIButton) {
-
         isEditingEnabled = true
         moreDetailsTableView.reloadData()
-
+        
         guard !editableManagement.fullName.isEmpty,
               !editableManagement.mobileNumber.isEmpty else {
-
             showError("Name and Phone number are required")
             return
         }
-
+        
         print("👤 Name:", editableManagement.fullName)
         print("📞 Phone:", editableManagement.mobileNumber)
-
+        
         callAddManagementAPI()
     }
+    
     func callAddManagementAPI() {
-
         guard let token = token else {
             showError("Token missing")
             return
         }
-
+        
         let requestBody = AddManagementRequest(
             fullName: editableManagement.fullName,
             dateOfBirth: editableManagement.dateOfBirth,
             mobileNumber: editableManagement.mobileNumber
         )
-
+        
         let headers = [
             "Authorization": "Bearer \(token)"
         ]
-
+        
         print("🚀 Add User Request")
         print("Name:", editableManagement.fullName)
         print("Phone:", editableManagement.mobileNumber)
         print("DOB:", editableManagement.dateOfBirth)
-
+        
         APIManager.shared.request(
             endpoint: "management",
             method: .post,
             body: requestBody,
             headers: headers
         ) { (result: Result<AddManagementResponse, APIManager.APIError>) in
-
             DispatchQueue.main.async {
                 switch result {
-
                 case .success(let response):
                     if response.success {
                         self.showAlert(
@@ -203,7 +196,6 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
                     } else {
                         self.showError(response.message ?? "Something went wrong")
                     }
-
                 case .failure(let error):
                     print("❌ API Error:", error)
                     self.showError("Failed to add user")
@@ -211,48 +203,139 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
             }
         }
     }
-
+    
     @IBAction func backButtonTapped(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
     }
-
+    
     @IBAction func editButtonTapped(_ sender: UIButton) {
-
         if isEditingEnabled {
             callEditManagementAPI()
             return
         }
-
+        
         isEditingEnabled = true
         editButton.setTitle("Save", for: .normal)
         moreDetailsTableView.reloadData()
     }
-
     
-    func callEditManagementAPI() {
+    // MARK: - Delete Button Action
+    @IBAction func deleteButtonTapped(_ sender: UIButton) {
+        // Show confirmation alert before deleting
+        let alert = UIAlertController(
+            title: "Delete Management",
+            message: "Are you sure you want to delete this management member? This action cannot be undone.",
+            preferredStyle: .alert
+        )
         
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
+            self.callDeleteManagementAPI()
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    // MARK: - Delete API Call
+    func callDeleteManagementAPI() {
         guard let token = SessionManager.useRoleToken,
               let userId = userId else {
             showError("Token or User ID missing")
             return
         }
-
+        
+        let urlString = "https://dev.gruppie.in/api/v1/management/\(userId)"
+        guard let url = URL(string: urlString) else {
+            showError("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Show loading indicator
+        let loadingAlert = UIAlertController(title: nil, message: "Deleting...", preferredStyle: .alert)
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.style = .medium
+        loadingIndicator.startAnimating()
+        loadingAlert.view.addSubview(loadingIndicator)
+        present(loadingAlert, animated: true)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                loadingAlert.dismiss(animated: true) {
+                    if let error = error {
+                        self.showError("Delete failed: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    guard let httpResponse = response as? HTTPURLResponse else {
+                        self.showError("Invalid server response")
+                        return
+                    }
+                    
+                    print("✅ Delete Status Code:", httpResponse.statusCode)
+                    
+                    // Check if deletion was successful (200, 204)
+                    if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
+                        self.showDeleteSuccess()
+                    } else if httpResponse.statusCode == 404 {
+                        self.showError("Management member not found")
+                    } else {
+                        // Try to parse error message from response
+                        if let data = data,
+                           let errorResponse = try? JSONDecoder().decode(DeleteManagementResponse.self, from: data) {
+                            self.showError(errorResponse.message ?? "Delete failed with status: \(httpResponse.statusCode)")
+                        } else {
+                            self.showError("Delete failed with status code: \(httpResponse.statusCode)")
+                        }
+                    }
+                }
+            }
+        }.resume()
+    }
+    
+    private func showDeleteSuccess() {
+        let alert = UIAlertController(
+            title: "Success",
+            message: "Management member deleted successfully",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            // Navigate back to previous screen
+            self.navigationController?.popViewController(animated: true)
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    func callEditManagementAPI() {
+        guard let token = SessionManager.useRoleToken,
+              let userId = userId else {
+            showError("Token or User ID missing")
+            return
+        }
+        
         let url = URL(string: "https://dev.gruppie.in/api/v1/management/\(userId)")!
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
-
+        
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json, text/plain, */*", forHTTPHeaderField: "accept")
-
+        
         var body = Data()
-
+        
         func appendIfPresent(_ name: String, value: String?) {
             guard let value = value, !value.trimmingCharacters(in: .whitespaces).isEmpty else { return }
             body.appendFormField(name, value: value, boundary: boundary)
         }
-
+        
         appendIfPresent("fullName", value: editableManagement.fullName)
         appendIfPresent("gender", value: editableManagement.gender)
         appendIfPresent("dateOfBirth", value: editableManagement.dateOfBirth)
@@ -273,18 +356,18 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
         appendIfPresent("workAddress", value: editableManagement.workAddress)
         appendIfPresent("workEmail", value: editableManagement.workEmail)
         appendIfPresent("workPhoneNumber", value: editableManagement.workPhoneNo)
-
+        
         appendIfPresent("qualification", value: editableManagement.Qualification)
         appendIfPresent("universityOrBoard", value: editableManagement.Univesity)
         appendIfPresent("yearOfCompletion", value: editableManagement.yearOfCompletion)
-
+        
         appendIfPresent("accountHolderName", value: editableManagement.accountHolderName)
         appendIfPresent("bankName", value: editableManagement.bankName)
         appendIfPresent("accountNumber", value: editableManagement.accountNumber)
         appendIfPresent("branchName", value: editableManagement.branchName)
         appendIfPresent("ifscCode", value: editableManagement.IFSCCode)
         appendIfPresent("panNumber", value: editableManagement.PANNumber)
-
+        
         appendIfPresent("achievementId1", value: "631")
         appendIfPresent("title1", value: editableManagement.achievementTitle1)
         appendIfPresent("description1", value: editableManagement.achievementDescription1)
@@ -292,40 +375,39 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
         appendIfPresent("achievementId2", value: "632")
         appendIfPresent("title2", value: editableManagement.achievementTitle2)
         appendIfPresent("description2", value: editableManagement.achievementDescription2)
-
+        
         appendIfPresent("achievementId3", value: "633")
         appendIfPresent("title3", value: editableManagement.achievementTitle3)
         appendIfPresent("description3", value: editableManagement.achievementDescription3)
-
+        
         appendIfPresent("attachmentId1", value: "631")
         appendIfPresent("attachmentType1", value: editableManagement.attachment1)
         appendIfPresent("attachmentId2", value: "632")
         appendIfPresent("attachmentType2", value: editableManagement.attachment2)
         appendIfPresent("attachmentId3", value: "633")
         appendIfPresent("attachmentType3", value: editableManagement.attachment3)
-
+        
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
-
+        
         if let bodyString = String(data: request.httpBody ?? Data(), encoding: .utf8) {
             print("📦 Request Body:\n", bodyString)
         }
-
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 if let error = error {
                     self.showError(error.localizedDescription)
-
                     return
                 }
-
+                
                 if let http = response as? HTTPURLResponse {
                     print("✅ Status Code:", http.statusCode)
                 }
-
+                
                 if let data = data,
                    let result = try? JSONDecoder().decode(EditManagementResponse.self, from: data) {
-
+                    
                     if result.success {
                         self.navigationController?.popViewController(animated: true)
                     } else {
@@ -337,8 +419,8 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
             }
         }.resume()
     }
-
-  private func saveUpdatedData() {
+    
+    private func saveUpdatedData() {
         print("🔵 saveUpdatedData called")
         print("🔵 Current editableManagement values:")
         print("  fullName: '\(editableManagement.fullName)'")
@@ -356,7 +438,7 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
         print("✅ Validation passed, calling API")
         callEditManagementAPI()
     }
-
+    
     private func showError(_ message: String) {
         let alert = UIAlertController(
             title: "Error",
@@ -373,7 +455,7 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
             message: message,
             preferredStyle: .alert
         )
-
+        
         alert.addAction(
             UIAlertAction(
                 title: "OK",
@@ -384,16 +466,15 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
                 }
             }
         )
-
+        
         present(alert, animated: true)
     }
-
     
     @objc private func achievementChanged(_ textField: UITextField) {
         guard let cell = textField.superview?.superview as? AchievementsTableViewCell else {
             return
         }
-
+        
         editableManagement.achievementTitle1 = cell.Title1.text ?? ""
         editableManagement.achievementTitle2 = cell.Title2.text ?? ""
         editableManagement.achievementTitle3 = cell.Title3.text ?? ""
@@ -401,43 +482,43 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
         editableManagement.achievementDescription2 = cell.Description2.text ?? ""
         editableManagement.achievementDescription3 = cell.Description3.text ?? ""
     }
+    
     @objc private func additionalAchievementChanged(_ textField: UITextField) {
         guard let cell = textField.superview?.superview as? additionalAchievementTableViewCell else {
             return
         }
-
+        
         editableManagement.attachment1 = cell.attachment1.text ?? ""
         editableManagement.attachment2 = cell.attachment2.text ?? ""
         editableManagement.attachment3 = cell.attachment3.text ?? ""
     }
-
-
-
 }
 
-extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
 
+extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
+    
     func numberOfSections(in tableView: UITableView) -> Int {
         return 6
     }
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
-
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 0
     }
-
+    
     func tableView(_ tableView: UITableView,
                    viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView()
         view.backgroundColor = .black
         return view
     }
+    
     @objc private func bankDetailsChanged(_ textField: UITextField) {
         guard let cell = textField.superview?.superview as? bankDetailsTableViewCell else { return }
-
+        
         editableManagement.accountHolderName = cell.accountHolderName.text ?? ""
         editableManagement.bankName = cell.bankName.text ?? ""
         editableManagement.branchName = cell.branchName.text ?? ""
@@ -445,24 +526,23 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
         editableManagement.IFSCCode = cell.IFSCCode.text ?? ""
         editableManagement.PANNumber = cell.PANNumber.text ?? ""
     }
-
-
+    
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
+        
         switch indexPath.section {
-
+            
         case 0:
             let cell = tableView.dequeueReusableCell(
                 withIdentifier: "BasicInfoCell",
                 for: indexPath
             ) as! BasicInfoTableViewCell
-
+            
             if let member = member {
                 cell.populate(with: editableManagement,
                               isEditingEnabled: isEditingEnabled)
             }
-
+            
             // MARK: - Aadhar button tap callback
             cell.onUploadAadharTapped = { [weak self] in
                 guard let self = self else { return }
@@ -475,13 +555,12 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 guard let self = self, let cell = cell else { return }
                 self.selectedCell = cell
                 self.openGallery()
-                    
             }
-
+            
             // MARK: - Sync cell data back to VC
             cell.onDataChange = { [weak self] data in
                 guard let self = self else { return }
-
+                
                 self.editableManagement.fullName = data.fullName
                 self.editableManagement.gender = data.gender
                 self.editableManagement.dateOfBirth = data.dateOfBirth
@@ -496,17 +575,17 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 self.editableManagement.pincode = data.pincode
                 self.editableManagement.role = data.role
             }
-
+            
             cell.selectionStyle = .none
             return cell
-
+            
         // MARK: - Education
         case 1:
             let cell = tableView.dequeueReusableCell(
                 withIdentifier: "Education2TableViewCell",
                 for: indexPath
             ) as! Education2TableViewCell
-
+            
             cell.populate(with: editableManagement,
                           isEditingEnabled: isEditingEnabled)
             
@@ -515,24 +594,24 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 self.aadharIndexPath = indexPath
                 self.openAadharFilePicker()
             }
-
+            
             cell.onEducationChange = { [weak self] data in
                 guard let self = self else { return }
-
+                
                 self.editableManagement.Qualification = data.Qualification
                 self.editableManagement.Univesity = data.Univesity
                 self.editableManagement.yearOfCompletion = data.yearOfCompletion
             }
-
+            
             cell.selectionStyle = .none
             return cell
-
+            
         case 2:
             let cell = tableView.dequeueReusableCell(
                 withIdentifier: "AcoountInfo2TableViewCell",
                 for: indexPath
             ) as! AcoountInfo2TableViewCell
-
+            
             cell.populate(with: editableManagement,
                           isEditingEnabled: isEditingEnabled)
             
@@ -541,10 +620,10 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 self.aadharIndexPath = indexPath
                 self.openAadharFilePicker()
             }
-
+            
             cell.onAccountChange = { [weak self] data in
                 guard let self = self else { return }
-
+                
                 self.editableManagement.designation = data.designation
                 self.editableManagement.organizationName = data.organizationName
                 self.editableManagement.totalExperience = data.totalExperience
@@ -552,15 +631,15 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 self.editableManagement.workEmail = data.workEmail
                 self.editableManagement.workPhoneNo = data.workPhoneNo
             }
-
+            
             cell.selectionStyle = .none
             return cell
             
         case 3:
-                let cell = tableView.dequeueReusableCell(
-                    withIdentifier: "AchievementsTableViewCell",
-                    for: indexPath
-                ) as! AchievementsTableViewCell
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: "AchievementsTableViewCell",
+                for: indexPath
+            ) as! AchievementsTableViewCell
             
             cell.onUploadCertificate1Tapped = { [weak self] in
                 guard let self = self else { return }
@@ -577,36 +656,36 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 self.aadharIndexPath = indexPath
                 self.openAadharFilePicker()
             }
-
-                // populate existing values
-                cell.Title1.text = editableManagement.achievementTitle1
-                cell.Title2.text = editableManagement.achievementTitle2
-                cell.Title3.text = editableManagement.achievementTitle3
-                cell.Description1.text = editableManagement.achievementDescription1
-                cell.Description2.text = editableManagement.achievementDescription2
-                cell.Description3.text = editableManagement.achievementDescription3
-
-                let isEditable = isEditingEnabled
-                [cell.Title1, cell.Title2, cell.Title3,
-                 cell.Description1, cell.Description2, cell.Description3]
-                    .forEach { $0?.isUserInteractionEnabled = isEditable }
-
-                // save back to model
-                cell.Title1.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
-                cell.Title2.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
-                cell.Title3.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
-                cell.Description1.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
-                cell.Description2.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
-                cell.Description3.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
-
-                cell.selectionStyle = .none
-                return cell
             
-            case 4:
-                let cell = tableView.dequeueReusableCell(
-                    withIdentifier: "bankDetailsTableViewCell",
-                    for: indexPath
-                ) as! bankDetailsTableViewCell
+            // populate existing values
+            cell.Title1.text = editableManagement.achievementTitle1
+            cell.Title2.text = editableManagement.achievementTitle2
+            cell.Title3.text = editableManagement.achievementTitle3
+            cell.Description1.text = editableManagement.achievementDescription1
+            cell.Description2.text = editableManagement.achievementDescription2
+            cell.Description3.text = editableManagement.achievementDescription3
+            
+            let isEditable = isEditingEnabled
+            [cell.Title1, cell.Title2, cell.Title3,
+             cell.Description1, cell.Description2, cell.Description3]
+                .forEach { $0?.isUserInteractionEnabled = isEditable }
+            
+            // save back to model
+            cell.Title1.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
+            cell.Title2.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
+            cell.Title3.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
+            cell.Description1.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
+            cell.Description2.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
+            cell.Description3.addTarget(self, action: #selector(achievementChanged(_:)), for: .editingChanged)
+            
+            cell.selectionStyle = .none
+            return cell
+            
+        case 4:
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: "bankDetailsTableViewCell",
+                for: indexPath
+            ) as! bankDetailsTableViewCell
             
             cell.onUploadpassBookTapped = { [weak self] in
                 guard let self = self else { return }
@@ -618,31 +697,31 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 self.aadharIndexPath = indexPath
                 self.openAadharFilePicker()
             }
-
-                // Populate existing data
-                cell.accountHolderName.text = editableManagement.accountHolderName
-                cell.bankName.text = editableManagement.bankName
-                cell.branchName.text = editableManagement.branchName
-                cell.accountNumber.text = editableManagement.accountNumber
-                cell.IFSCCode.text = editableManagement.IFSCCode
-                cell.PANNumber.text = editableManagement.PANNumber
-
-                // Enable/disable editing
-                let isEditable = isEditingEnabled
-                [cell.accountHolderName, cell.bankName, cell.branchName,
-                 cell.accountNumber, cell.IFSCCode, cell.PANNumber]
-                    .forEach { $0?.isUserInteractionEnabled = isEditable }
-
-                // Save changes back to model
-                cell.accountHolderName.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
-                cell.bankName.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
-                cell.branchName.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
-                cell.accountNumber.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
-                cell.IFSCCode.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
-                cell.PANNumber.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
-
-                cell.selectionStyle = .none
-                return cell
+            
+            // Populate existing data
+            cell.accountHolderName.text = editableManagement.accountHolderName
+            cell.bankName.text = editableManagement.bankName
+            cell.branchName.text = editableManagement.branchName
+            cell.accountNumber.text = editableManagement.accountNumber
+            cell.IFSCCode.text = editableManagement.IFSCCode
+            cell.PANNumber.text = editableManagement.PANNumber
+            
+            // Enable/disable editing
+            let isEditable = isEditingEnabled
+            [cell.accountHolderName, cell.bankName, cell.branchName,
+             cell.accountNumber, cell.IFSCCode, cell.PANNumber]
+                .forEach { $0?.isUserInteractionEnabled = isEditable }
+            
+            // Save changes back to model
+            cell.accountHolderName.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
+            cell.bankName.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
+            cell.branchName.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
+            cell.accountNumber.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
+            cell.IFSCCode.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
+            cell.PANNumber.addTarget(self, action: #selector(bankDetailsChanged(_:)), for: .editingChanged)
+            
+            cell.selectionStyle = .none
+            return cell
             
         case 5:
             let cell = tableView.dequeueReusableCell(
@@ -665,30 +744,26 @@ extension MoreDetailViewController: UITableViewDataSource, UITableViewDelegate {
                 self.aadharIndexPath = indexPath
                 self.openAadharFilePicker()
             }
-
+            
             cell.attachment1.text = editableManagement.attachment1
             cell.attachment2.text = editableManagement.attachment2
             cell.attachment3.text = editableManagement.attachment3
-
+            
             let isEditable = isEditingEnabled
             [cell.attachment1, cell.attachment2, cell.attachment3]
                 .forEach { $0?.isUserInteractionEnabled = isEditable }
-
+            
             cell.attachment1.addTarget(self, action: #selector(additionalAchievementChanged(_:)), for: .editingChanged)
             cell.attachment2.addTarget(self, action: #selector(additionalAchievementChanged(_:)), for: .editingChanged)
             cell.attachment3.addTarget(self, action: #selector(additionalAchievementChanged(_:)), for: .editingChanged)
-
+            
             cell.selectionStyle = .none
             return cell
-
-
-
-
+            
         default:
             return UITableViewCell()
         }
     }
-
 }
 
 extension Data {
@@ -702,6 +777,7 @@ extension Data {
         append("\(value)\r\n".data(using: .utf8)!)
     }
 }
+
 extension Data {
     mutating func appendIfNotEmpty(
         _ name: String,

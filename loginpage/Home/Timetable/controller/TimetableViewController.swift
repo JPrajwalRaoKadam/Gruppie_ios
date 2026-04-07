@@ -23,7 +23,7 @@ class TimetableViewController: UIViewController {
     var daysList: [DayData] = []
     var classSummaryList: [DailyClass] = []
     var selectedDayId: Int?
-    var dailySummaryData: DailySummaryData? // ✅ Store full summary for groupAcademicYearId
+    var dailySummaryData: DailySummaryData?
 
     var isStaffSelected: Bool = false
     var isFreeTeachersSelected: Bool = false
@@ -32,9 +32,14 @@ class TimetableViewController: UIViewController {
 
     var daysVC: DaysViewController?
 
-    // ✅ Date Properties
+    // ✅ Week Selection Properties
     private var currentDate: Date = Date()
-    private let datePicker = UIDatePicker()
+    private var selectedWeekday: Int = 0 // 0 = Monday, 1 = Tuesday, etc.
+    private let calendar = Calendar.current
+    
+    // Week picker
+    private let weekPicker = UIPickerView()
+    private var weekDays: [String] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,102 +59,339 @@ class TimetableViewController: UIViewController {
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
 
-        setupDatePicker()
+        // Add refresh control
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+
+        setupWeekPicker()
         updateDateButtonTitle()
 
-        tableView.reloadData()
-        fetchDays()   // 🔥 First API call
+        print("\n========== TIMETABLE VIEW CONTROLLER LOADED ==========")
+        print("📅 Current Date: \(getFormattedDate())")
+        print("📅 Current Day: \(getCurrentDayName())")
+        
+        fetchDays()
+    }
+    
+    private func setupWeekPicker() {
+        // Get all weekdays in order (Monday to Sunday)
+        let dateFormatter = DateFormatter()
+        weekDays = dateFormatter.weekdaySymbols // Returns ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        
+        // Reorder to start from Monday
+        if let mondayIndex = weekDays.firstIndex(of: "Monday") {
+            let mondayToSunday = Array(weekDays[mondayIndex...]) + Array(weekDays[..<mondayIndex])
+            weekDays = mondayToSunday
+        }
+        
+        weekPicker.delegate = self
+        weekPicker.dataSource = self
+        
+        // Set current day
+        let currentDayName = getCurrentDayName()
+        if let selectedIndex = weekDays.firstIndex(of: currentDayName) {
+            selectedWeekday = selectedIndex
+            weekPicker.selectRow(selectedIndex, inComponent: 0, animated: false)
+        }
     }
 
+    private func getCurrentDayName() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE"
+        return dateFormatter.string(from: currentDate)
+    }
+    
+    private func getFormattedDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return dateFormatter.string(from: currentDate)
+    }
+    
+    private func updateDateButtonTitle() {
+        let selectedDayName = weekDays[selectedWeekday]
+        dateButton.setTitle(selectedDayName, for: .normal)
+    }
+
+    @objc private func refreshData() {
+        print("\n🔄 Pull-to-refresh triggered")
+        fetchDays()
+    }
+    
     func fetchDays() {
-        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
-            print("No token found in UserDefaults")
+        print("\n========== FETCHING DAYS API ==========")
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ No token found in SessionManager")
+            DispatchQueue.main.async {
+                self.tableView.refreshControl?.endRefreshing()
+                self.showErrorMessage("Authentication failed. Please login again.")
+            }
             return
         }
+        print("✅ Token retrieved: \(token.prefix(30))...")
 
-        guard let url = URL(string: "https://dev.gruppie.in/api/v1/days") else { return }
+        guard let url = URL(string: "https://dev.gruppie.in/api/v1/days") else {
+            print("❌ Invalid URL for days API")
+            return
+        }
+        print("🌐 Days API URL: \(url)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Days API Error:", error)
+                print("❌ Days API Error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.tableView.refreshControl?.endRefreshing()
+                    self.showErrorMessage("Network error: \(error.localizedDescription)")
+                }
                 return
             }
-
-            guard let data = data else { return }
+            
+            guard let data = data else {
+                print("❌ No data received from Days API")
+                DispatchQueue.main.async {
+                    self.tableView.refreshControl?.endRefreshing()
+                    self.showErrorMessage("No data received from server")
+                }
+                return
+            }
+            
+            // Print HTTP status code
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📋 HTTP Status Code: \(httpResponse.statusCode)")
+                
+                if httpResponse.statusCode == 401 {
+                    print("❌ Unauthorized - Token may be invalid or expired")
+                    DispatchQueue.main.async {
+                        self.tableView.refreshControl?.endRefreshing()
+                        self.showErrorMessage("Session expired. Please login again.")
+                    }
+                    return
+                }
+            }
+            
+            // Print raw response for debugging
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📦 Days API Response:")
+                print(jsonString)
+            }
 
             do {
                 let decoded = try JSONDecoder().decode(DaysResponse.self, from: data)
+                print("✅ Days fetched successfully: \(decoded.data.count) days")
 
                 DispatchQueue.main.async {
                     self.daysList = decoded.data
-
-                    if let firstDay = self.daysList.first {
-                        self.selectedDayId = firstDay.id
-                        self.dateButton.setTitle(firstDay.name, for: .normal)
-
-                        self.fetchDailySummary(dayId: firstDay.id) // 🔥 Call second API
+                    
+                    print("\n📅 Available Days:")
+                    for day in self.daysList {
+                        print("   Day \(day.id): \(day.name)")
                     }
+
+                    // Fetch data for selected weekday
+                    self.fetchDataForSelectedWeekday()
                 }
 
             } catch {
-                print("Days Decode Error:", error)
+                print("❌ Days Decode Error: \(error)")
+                DispatchQueue.main.async {
+                    self.tableView.refreshControl?.endRefreshing()
+                    self.showErrorMessage("Failed to parse days data")
+                }
             }
 
         }.resume()
     }
 
     func fetchDailySummary(dayId: Int) {
-        guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
-            print("No token found in UserDefaults")
+        print("\n========== FETCHING DAILY SUMMARY API ==========")
+        print("📅 Day ID: \(dayId)")
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ No token found in SessionManager")
+            DispatchQueue.main.async {
+                self.tableView.refreshControl?.endRefreshing()
+                self.showErrorMessage("Authentication failed")
+            }
             return
         }
+        print("✅ Token retrieved: \(token.prefix(30))...")
 
         let urlString = "https://dev.gruppie.in/api/v1/time-table/daily-summary?groupAcademicYearId=3&dayId=\(dayId)"
-        guard let url = URL(string: urlString) else { return }
+        print("🌐 Daily Summary API URL: \(urlString)")
+        
+        guard let url = URL(string: urlString) else {
+            print("❌ Invalid URL")
+            return
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Summary API Error:", error)
+                print("❌ Summary API Error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.tableView.refreshControl?.endRefreshing()
+                    self.showErrorMessage("Network error: \(error.localizedDescription)")
+                }
                 return
             }
 
-            guard let data = data else { return }
+            guard let data = data else {
+                print("❌ No data received from Summary API")
+                DispatchQueue.main.async {
+                    self.tableView.refreshControl?.endRefreshing()
+                    self.showErrorMessage("No data received")
+                }
+                return
+            }
 
+            // Print HTTP status code
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📋 HTTP Status Code: \(httpResponse.statusCode)")
+                
+                if httpResponse.statusCode == 401 {
+                    print("❌ Unauthorized - Token may be invalid")
+                    DispatchQueue.main.async {
+                        self.tableView.refreshControl?.endRefreshing()
+                        self.showErrorMessage("Session expired. Please login again.")
+                    }
+                    return
+                }
+                
+                if httpResponse.statusCode != 200 {
+                    print("❌ Server error: HTTP \(httpResponse.statusCode)")
+                    DispatchQueue.main.async {
+                        self.tableView.refreshControl?.endRefreshing()
+                        self.showErrorMessage("Server error: HTTP \(httpResponse.statusCode)")
+                    }
+                    return
+                }
+            }
+
+            // Print raw JSON response
             if let jsonString = String(data: data, encoding: .utf8) {
-                print("Received Daily Summary API Response:\n\(jsonString)")
+                print("\n📦 Daily Summary API Response:")
+                print("================================================")
+                let preview = jsonString.prefix(1000)
+                print(preview)
+                if jsonString.count > 1000 {
+                    print("... (truncated, total length: \(jsonString.count) characters)")
+                }
+                print("================================================")
             }
 
             do {
                 let decoded = try JSONDecoder().decode(DailySummaryAPIResponse.self, from: data)
+                print("\n✅ Daily Summary Decoded Successfully!")
+                print("📊 Response Summary:")
+                print("   - Success: \(decoded.success)")
+                print("   - Message: \(decoded.message)")
+                print("   - Group Academic Year ID: \(decoded.data.groupAcademicYearId)")
+                print("   - Day ID: \(decoded.data.dayId)")
+                print("   - Day Name: \(decoded.data.dayName)")
+                print("   - Total Classes: \(decoded.data.summary.totalClasses)")
+                print("   - Active Classes: \(decoded.data.summary.activeClasses)")
+                print("   - Total Scheduled Periods: \(decoded.data.summary.totalScheduledPeriods)")
 
                 DispatchQueue.main.async {
-                    self.dailySummaryData = decoded.data // ✅ Store full summary
+                    self.dailySummaryData = decoded.data
                     self.classSummaryList = decoded.data.classes
+                    
+                    print("\n📚 Class Summary:")
+                    for classItem in self.classSummaryList {
+                        print("   Class: \(classItem.className ?? "Unknown")")
+                        print("      - ID: \(classItem.classId)")
+                        print("      - Scheduled Periods: \(classItem.scheduledPeriods ?? 0)")
+                        print("      - Periods Count: \(classItem.periods?.count ?? 0)")
+                    }
+                    
                     self.tableView.reloadData()
+                    self.tableView.refreshControl?.endRefreshing()
                 }
 
             } catch {
+                print("❌ Summary Decode Error: \(error)")
                 if let jsonString = String(data: data, encoding: .utf8) {
-                    print("Summary Decode Error:", error)
-                    print("Received JSON:", jsonString)
+                    print("Failed JSON: \(jsonString)")
+                }
+                DispatchQueue.main.async {
+                    self.tableView.refreshControl?.endRefreshing()
+                    self.showErrorMessage("Failed to parse timetable data")
                 }
             }
 
         }.resume()
     }
+    
+    func fetchDataForSelectedWeekday() {
+        let selectedDayName = weekDays[selectedWeekday].uppercased()
+        print("\n========== FETCHING DATA FOR SELECTED WEEKDAY ==========")
+        print("📅 Selected Weekday: \(selectedDayName)")
+        
+        if let selectedDay = daysList.first(where: { $0.name == selectedDayName }) {
+            selectedDayId = selectedDay.id
+            print("✅ Found matching day: \(selectedDay.name) (ID: \(selectedDay.id))")
+            fetchDailySummary(dayId: selectedDay.id)
+        } else {
+            print("⚠️ No matching day found for: \(selectedDayName)")
+            print("Available days: \(daysList.map { $0.name }.joined(separator: ", "))")
+            showErrorMessage("No timetable available for \(selectedDayName)")
+        }
+    }
+    
+    private func showErrorMessage(_ message: String) {
+        let alert = UIAlertController(
+            title: "Error",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    private func showInfoMessage(_ message: String) {
+        let alert = UIAlertController(
+            title: "Info",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("\n========== TABLE VIEW CELL SELECTED ==========")
+        print("📊 Selected row at index: \(indexPath.row)")
+        
         let selectedClass = classSummaryList[indexPath.row]
+        print("📚 Selected Class: \(selectedClass.className ?? "Unknown")")
+        print("   Class ID: \(selectedClass.classId)")
+        print("   Periods Count: \(selectedClass.periods?.count ?? 0)")
+        
+        // Check if the class has any periods
+        let periodCount = selectedClass.periods?.count ?? 0
+        
+        if periodCount == 0 {
+            print("⚠️ No periods found for this class on the selected day")
+            showInfoMessage("No periods scheduled for \(selectedClass.className ?? "this class") on \(weekDays[selectedWeekday]).")
+            tableView.deselectRow(at: indexPath, animated: true)
+            return
+        }
 
-        guard let dailySummaryData = self.dailySummaryData else { return }
+        guard let dailySummaryData = self.dailySummaryData else {
+            print("❌ dailySummaryData is nil")
+            showErrorMessage("Unable to load timetable data")
+            return
+        }
 
         let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
         if let periodVC = storyboard.instantiateViewController(withIdentifier: "PeriodViewController") as? PeriodViewController {
@@ -161,8 +403,10 @@ class TimetableViewController: UIViewController {
             periodVC.subjects = subjects
             periodVC.day = selectedDayId ?? 0
             periodVC.classId = selectedClass.classId
-            periodVC.groupAcademicYearId = dailySummaryData.groupAcademicYearId // ✅ Correct source
+            periodVC.groupAcademicYearId = dailySummaryData.groupAcademicYearId
             periodVC.flowMode = .subject
+            periodVC.className = selectedClass.className
+            
             // Map periods
             periodVC.periods = selectedClass.periods?.map {
                 PeriodData(
@@ -180,9 +424,14 @@ class TimetableViewController: UIViewController {
                     endTime: $0.endTime
                 )
             } ?? []
+            
+            print("\n📊 Passing \(periodVC.periods.count) periods to PeriodViewController")
 
             navigationController?.pushViewController(periodVC, animated: true)
         }
+        
+        // Deselect the row after handling
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 
     override func viewDidLayoutSubviews() {
@@ -195,67 +444,67 @@ class TimetableViewController: UIViewController {
         tableView.reloadData()
     }
 
-    // ✅ Setup DatePicker
-    private func setupDatePicker() {
-        datePicker.datePickerMode = .date
-        datePicker.preferredDatePickerStyle = .wheels
-        datePicker.maximumDate = Date()
-        datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
-    }
-
-    // ✅ Update Button Title
-    private func updateDateButtonTitle() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd MMM yyyy"
-        let dateString = formatter.string(from: currentDate)
-        dateButton.setTitle(dateString, for: .normal)
-    }
-
-    // ✅ Date Changed
-    @objc private func dateChanged(_ sender: UIDatePicker) {
-        currentDate = sender.date
-        updateDateButtonTitle()
-    }
-
-    // ✅ Show DatePicker on Button Click
     @IBAction func dateButtonTapped(_ sender: UIButton) {
-        datePicker.date = currentDate
-
-        let alert = UIAlertController(title: "Select Date\n\n\n\n\n\n\n\n\n",
+        print("\n========== WEEK PICKER BUTTON TAPPED ==========")
+        
+        let alert = UIAlertController(title: "\n\n\n\n\n\n\n\n\n",
                                       message: nil,
                                       preferredStyle: .actionSheet)
-
-        datePicker.frame = CGRect(x: 0, y: 40, width: alert.view.bounds.width - 20, height: 200)
-        alert.view.addSubview(datePicker)
-
-        let doneAction = UIAlertAction(title: "Done", style: .default) { _ in
-            self.currentDate = self.datePicker.date
-            self.updateDateButtonTitle()
+        
+        // Set up the picker frame
+        weekPicker.frame = CGRect(x: 0, y: 20, width: alert.view.bounds.width - 20, height: 180)
+        weekPicker.backgroundColor = .white
+        alert.view.addSubview(weekPicker)
+        
+        let selectAction = UIAlertAction(title: "Select", style: .default) { _ in
+            let selectedRow = self.weekPicker.selectedRow(inComponent: 0)
+            if selectedRow != self.selectedWeekday {
+                self.selectedWeekday = selectedRow
+                self.updateDateButtonTitle()
+                print("📅 Selected Weekday: \(self.weekDays[selectedRow])")
+                
+                if !self.daysList.isEmpty {
+                    self.fetchDataForSelectedWeekday()
+                }
+            }
         }
-
-        alert.addAction(doneAction)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alert.addAction(selectAction)
+        alert.addAction(cancelAction)
+        
         present(alert, animated: true)
     }
 
-    // ✅ Next Date
     @IBAction func nextButtonTapped(_ sender: UIButton) {
-        if let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: currentDate) {
-            currentDate = nextDay
+        print("\n========== NEXT BUTTON TAPPED ==========")
+        if selectedWeekday < weekDays.count - 1 {
+            selectedWeekday += 1
             updateDateButtonTitle()
+            print("📅 Next Weekday: \(weekDays[selectedWeekday])")
+            
+            if !daysList.isEmpty {
+                fetchDataForSelectedWeekday()
+            }
         }
     }
 
-    // ✅ Previous Date
     @IBAction func previousButtonTapped(_ sender: UIButton) {
-        if let previousDay = Calendar.current.date(byAdding: .day, value: -1, to: currentDate) {
-            currentDate = previousDay
+        print("\n========== PREVIOUS BUTTON TAPPED ==========")
+        if selectedWeekday > 0 {
+            selectedWeekday -= 1
             updateDateButtonTitle()
+            print("📅 Previous Weekday: \(weekDays[selectedWeekday])")
+            
+            if !daysList.isEmpty {
+                fetchDataForSelectedWeekday()
+            }
         }
     }
 
     @IBAction func BackButton(_ sender: UIButton) {
+        print("\n========== BACK BUTTON TAPPED ==========")
         navigationController?.popViewController(animated: true)
     }
 }
@@ -264,6 +513,7 @@ class TimetableViewController: UIViewController {
 extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print("📊 Number of rows in table view: \(classSummaryList.count)")
         return classSummaryList.count
     }
 
@@ -278,5 +528,25 @@ extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
         cell.configureCell(with: classItem)
 
         return cell
+    }
+}
+
+// MARK: - UIPickerView Delegates
+extension TimetableViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return weekDays.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return weekDays[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+        return 50
     }
 }

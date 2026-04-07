@@ -7,8 +7,8 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
     @IBOutlet weak var addButton: UIButton!
 
     var subject: ClassSubject?
-    var classId: Int? // Add this property to receive class ID
-    var groupAcademicYearId: String? // Add this property
+    var classId: Int?
+    var groupAcademicYearId: String?
 
     // ✅ Store full student objects
     var students: [StudentSubjectStudent] = []
@@ -24,7 +24,6 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         
         backButton.layer.cornerRadius = backButton.frame.height / 2
         
-        // ✅ Add this for addButton
         addButton.layer.cornerRadius = 10
         addButton.clipsToBounds = true
         
@@ -40,6 +39,7 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         fetchStudentsFromAPI()
     }
     
+    // ✅ FIRST API – Fetch All Students for this Subject
     func fetchStudentsFromAPI() {
         guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
             print("❌ No token found")
@@ -56,11 +56,9 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
 
-        // Convert Int to String for URL
         let subjectIdString = String(subject.subjectId)
         let classIdString = String(classId)
         
-        // Use classId in the path and subjectId as the last component
         let urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classIdString)/student-mapping/subject/\(subjectIdString)"
         
         print("🌐 Fetching students from: \(urlString)")
@@ -85,40 +83,34 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
                 return
             }
             
-            // Print the raw JSON to see the structure
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("📦 Students API JSON: \(jsonString)")
             }
 
             do {
-                // First check if the response indicates an error
                 if let errorResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                    let success = errorResponse["success"] as? Bool, !success {
                     print("❌ API returned error: \(errorResponse["message"] ?? "Unknown error")")
                     DispatchQueue.main.async {
                         self.students = []
                         self.tableView.reloadData()
-                        // Still try to fetch assigned students
                         self.fetchAssignedStudents()
                     }
                     return
                 }
                 
-                // Decode the response using the updated model
                 let studentsResponse = try JSONDecoder().decode(StudentSubjectResponse.self, from: data)
                 
-                // Find the data for this specific subject - compare as Int
                 if let subjectData = studentsResponse.data.first(where: { Int($0.subjectId) == subject.subjectId }) {
                     DispatchQueue.main.async {
                         self.students = subjectData.students
                         print("✅ Loaded \(self.students.count) students for subject: \(subjectData.subjectName)")
                         
-                        // Debug: Print all student IDs to see what we have
                         for student in self.students {
                             print("👨‍🎓 Student: \(student.studentName), ID: \(student.studentId)")
                         }
                         
-                        // After loading students, fetch assigned students
+                        // ⭐ After loading students, call second API to get assigned students
                         self.fetchAssignedStudents()
                     }
                 } else {
@@ -126,7 +118,6 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
                         print("❌ No data found for subject ID: \(subject.subjectId)")
                         self.students = []
                         self.tableView.reloadData()
-                        // Still try to fetch assigned students
                         self.fetchAssignedStudents()
                     }
                 }
@@ -142,10 +133,20 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         }.resume()
     }
     
-    // ✅ Fetch students using the minimal-list API
+    // ✅ SECOND API – Fetch Assigned Students (to mark them as selected)
     func fetchAssignedStudents() {
         guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
             print("❌ No token found")
+            DispatchQueue.main.async {
+                self.originallyAssignedStudentIds = []
+                self.selectedStudentIds = []
+                self.tableView.reloadData()
+            }
+            return
+        }
+        
+        guard let subject = subject else {
+            print("❌ No subject found")
             DispatchQueue.main.async {
                 self.originallyAssignedStudentIds = []
                 self.selectedStudentIds = []
@@ -164,25 +165,12 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
         
-        // Use the passed groupAcademicYearId
-        guard let groupAcademicYearId = groupAcademicYearId else {
-            print("❌ No groupAcademicYearId found")
-            DispatchQueue.main.async {
-                self.originallyAssignedStudentIds = []
-                self.selectedStudentIds = []
-                self.tableView.reloadData()
-            }
-            return
-        }
+        // ✅ Use student-mapping endpoint
+        let subjectIdString = String(subject.subjectId)
+        let classIdString = String(classId)
+        let urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classIdString)/student-mapping/subject/\(subjectIdString)"
         
-        // Construct URL with query parameters
-        var urlComponents = URLComponents(string: "https://dev.gruppie.in/api/v1/student/minimal-list")
-        urlComponents?.queryItems = [
-            URLQueryItem(name: "classId", value: "\(classId)"),
-            URLQueryItem(name: "groupAcademicYearId", value: groupAcademicYearId)
-        ]
-        
-        guard let url = urlComponents?.url else {
+        guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")
             DispatchQueue.main.async {
                 self.originallyAssignedStudentIds = []
@@ -192,7 +180,7 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
         
-        print("🌐 Fetching students from: \(url)")
+        print("🌐 Fetching assigned students from: \(urlString)")
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -209,19 +197,8 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
                 return
             }
 
-            // Check HTTP status code
             if let httpResponse = response as? HTTPURLResponse {
                 print("📋 HTTP Status Code: \(httpResponse.statusCode)")
-                
-                if httpResponse.statusCode == 401 {
-                    print("❌ Unauthorized - Token may be invalid or expired")
-                    DispatchQueue.main.async {
-                        self.originallyAssignedStudentIds = []
-                        self.selectedStudentIds = []
-                        self.tableView.reloadData()
-                    }
-                    return
-                }
             }
 
             guard let data = data else {
@@ -234,70 +211,33 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
                 return
             }
             
-            // Print JSON for debugging
             if let jsonString = String(data: data, encoding: .utf8) {
-                print("📦 Minimal-list API JSON: \(jsonString)")
+                print("📦 Assigned Students JSON: \(jsonString)")
             }
 
             do {
-                // First check if the response is an error
-                if let errorResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let success = errorResponse["success"] as? Bool, !success {
-                    print("❌ API returned error: \(errorResponse["message"] ?? "Unknown error")")
-                    DispatchQueue.main.async {
+                let studentsResponse = try JSONDecoder().decode(StudentSubjectResponse.self, from: data)
+                
+                DispatchQueue.main.async {
+                    if let subjectData = studentsResponse.data.first(where: { Int($0.subjectId) == self.subject?.subjectId }) {
+                        let assignedStudentIds = subjectData.students.map { $0.studentId }
+                        self.originallyAssignedStudentIds = Set(assignedStudentIds)
+                        self.selectedStudentIds = self.originallyAssignedStudentIds
+                        
+                        print("✅ Originally assigned students loaded: \(self.originallyAssignedStudentIds.count) students")
+                        print("🔢 Originally Assigned Student IDs: \(self.originallyAssignedStudentIds)")
+                        print("🔢 Selected Student IDs: \(self.selectedStudentIds)")
+                    } else {
+                        print("ℹ️ No assigned students found for this subject")
                         self.originallyAssignedStudentIds = []
                         self.selectedStudentIds = []
-                        self.tableView.reloadData()
                     }
-                    return
-                }
-                
-                // Try to decode based on common response patterns
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
                     
-                    // Check if response has a "data" array (common pattern)
-                    if let dataArray = json["data"] as? [[String: Any]] {
-                        let studentIds = dataArray.compactMap { item -> String? in
-                            // Try different possible ID field names
-                            return item["studentId"] as? String ??
-                                   item["id"] as? String ??
-                                   item["userId"] as? String
-                        }
-                        
-                        DispatchQueue.main.async {
-                            self.originallyAssignedStudentIds = Set(studentIds)
-                            self.selectedStudentIds = self.originallyAssignedStudentIds
-                            print("✅ Loaded \(studentIds.count) students from minimal-list API")
-                            self.tableView.reloadData()
-                        }
-                    }
-                    // Check if response is directly an array
-                    else if let dataArray = json as? [[String: Any]] {
-                        let studentIds = dataArray.compactMap { item -> String? in
-                            return item["studentId"] as? String ??
-                                   item["id"] as? String ??
-                                   item["userId"] as? String
-                        }
-                        
-                        DispatchQueue.main.async {
-                            self.originallyAssignedStudentIds = Set(studentIds)
-                            self.selectedStudentIds = self.originallyAssignedStudentIds
-                            print("✅ Loaded \(studentIds.count) students from minimal-list API")
-                            self.tableView.reloadData()
-                        }
-                    }
-                    // No students found
-                    else {
-                        print("ℹ️ No students array found in response")
-                        DispatchQueue.main.async {
-                            self.originallyAssignedStudentIds = []
-                            self.selectedStudentIds = []
-                            self.tableView.reloadData()
-                        }
-                    }
+                    self.tableView.reloadData()
                 }
+
             } catch {
-                print("❌ JSON Decoding error:", error)
+                print("❌ Assigned Decoding error:", error)
                 DispatchQueue.main.async {
                     self.originallyAssignedStudentIds = []
                     self.selectedStudentIds = []
@@ -307,7 +247,7 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         }.resume()
     }
     
-    // ✅ POST API – Save selected student assignments
+    // ✅ POST API – Save selected student assignments (Add new and Remove existing)
     @IBAction func addButtonTapped(_ sender: UIButton) {
         guard let subject = subject else {
             print("❌ No subject found")
@@ -315,7 +255,6 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
         
-        // Debug: Print current state
         print("📊 Current State:")
         print("   originallyAssignedStudentIds: \(originallyAssignedStudentIds)")
         print("   selectedStudentIds: \(selectedStudentIds)")
@@ -338,46 +277,64 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
         
-        // For this API, we need to send the ADDED student IDs
-        let studentIdStrings = Array(addedStudentIds)
-        
-        print("📤 Sending added student IDs: \(studentIdStrings)")
-        
-        guard !studentIdStrings.isEmpty else {
-            print("⚠️ No students to add")
-            self.showAlert(message: "No new students to assign")
-            return
-        }
-        
-        // Show loading indicator
         let activityIndicator = UIActivityIndicatorView(style: .medium)
         activityIndicator.center = view.center
         activityIndicator.startAnimating()
         view.addSubview(activityIndicator)
         view.isUserInteractionEnabled = false
         
-        saveStudentAssignments(subjectId: subject.subjectId, studentIds: studentIdStrings) { success, message in
-            DispatchQueue.main.async {
-                // Remove loading indicator
-                activityIndicator.stopAnimating()
-                activityIndicator.removeFromSuperview()
-                self.view.isUserInteractionEnabled = true
-                
-                if success {
-                    self.showAlert(message: "Student assignments saved successfully!") {
-                        // Update the originally assigned IDs to match the new selection
-                        self.originallyAssignedStudentIds = self.selectedStudentIds
-                        self.dismiss(animated: true)
-                    }
-                } else {
-                    self.showAlert(message: message ?? "Failed to save assignments")
+        // Handle both add and remove operations
+        var hasError = false
+        let group = DispatchGroup()
+        
+        // Add new students
+        if !addedStudentIds.isEmpty {
+            group.enter()
+            let addedStudentIdStrings = Array(addedStudentIds)
+            print("📤 Adding student IDs: \(addedStudentIdStrings)")
+            
+            saveStudentAssignments(subjectId: subject.subjectId, studentIds: addedStudentIdStrings, action: "add") { success, message in
+                if !success {
+                    print("❌ Failed to add students: \(message ?? "Unknown error")")
+                    hasError = true
+                }
+                group.leave()
+            }
+        }
+        
+        // Remove students
+        if !removedStudentIds.isEmpty {
+            group.enter()
+            let removedStudentIdStrings = Array(removedStudentIds)
+            print("📤 Removing student IDs: \(removedStudentIdStrings)")
+            
+            saveStudentAssignments(subjectId: subject.subjectId, studentIds: removedStudentIdStrings, action: "remove") { success, message in
+                if !success {
+                    print("❌ Failed to remove students: \(message ?? "Unknown error")")
+                    hasError = true
+                }
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) {
+            activityIndicator.stopAnimating()
+            activityIndicator.removeFromSuperview()
+            self.view.isUserInteractionEnabled = true
+            
+            if hasError {
+                self.showAlert(message: "Some changes could not be saved. Please try again.")
+            } else {
+                self.showAlert(message: "Student assignments updated successfully!") {
+                    self.originallyAssignedStudentIds = self.selectedStudentIds
+                    self.dismiss(animated: true)
                 }
             }
         }
     }
     
-    // ✅ UPDATED API Call to save student assignments with new endpoint
-    func saveStudentAssignments(subjectId: Int, studentIds: [String], completion: @escaping (Bool, String?) -> Void) {
+    // ✅ Unified API Call to handle both add and remove operations
+    func saveStudentAssignments(subjectId: Int, studentIds: [String], action: String, completion: @escaping (Bool, String?) -> Void) {
         guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
             completion(false, "No token found")
             return
@@ -388,35 +345,38 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
         
-        // UPDATED: New URL with classId in the path
-        let urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classId)/student-mapping"
+        // Use different endpoints for add and remove
+        let urlString: String
+        if action == "add" {
+            urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classId)/student-mapping"
+        } else {
+            // For remove, try using POST with a different path
+            urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classId)/student-mapping/remove"
+        }
         
         guard let url = URL(string: urlString) else {
             completion(false, "Invalid URL")
             return
         }
         
-        // Convert String IDs to Int for the API
         let studentIdInts = studentIds.compactMap { Int($0) }
         
-        // UPDATED: New request body structure - removed classId, subjectId as String
         let requestBody: [String: Any] = [
             "studentIds": studentIdInts,
-            "subjectId": "\(subjectId)" // Send subjectId as String
+            "subjectId": "\(subjectId)"
         ]
         
-        // Convert request body to JSON data
         guard let jsonData = try? JSONSerialization.data(withJSONObject: requestBody, options: []) else {
             completion(false, "Failed to create request body")
             return
         }
         
-        // Print request body for debugging
         if let jsonString = String(data: jsonData, encoding: .utf8) {
-            print("📦 POST Request Body: \(jsonString)")
+            print("📦 \(action.uppercased()) Request Body: \(jsonString)")
         }
         
         var request = URLRequest(url: url)
+        // Use POST for both add and remove since DELETE is not supported
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -424,7 +384,7 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ POST API Error:", error.localizedDescription)
+                print("❌ \(action.uppercased()) API Error:", error.localizedDescription)
                 completion(false, error.localizedDescription)
                 return
             }
@@ -435,12 +395,10 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
                 return
             }
             
-            // Print response for debugging
             if let jsonString = String(data: data, encoding: .utf8) {
-                print("📦 POST Response: \(jsonString)")
+                print("📦 \(action.uppercased()) Response: \(jsonString)")
             }
             
-            // Check HTTP response status
             if let httpResponse = response as? HTTPURLResponse {
                 print("📋 HTTP Status Code: \(httpResponse.statusCode)")
                 
@@ -470,7 +428,6 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         }.resume()
     }
     
-    // ✅ Helper method to show alerts
     func showAlert(message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
@@ -492,16 +449,16 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         
         let student = students[indexPath.row]
         
-        // Display student name
         cell.name.text = student.studentName
         
-        // Configure the cell's button action
         cell.enableButton.tag = indexPath.row
         cell.enableButton.removeTarget(self, action: nil, for: .allEvents)
         cell.enableButton.addTarget(self, action: #selector(enableButtonTapped(_:)), for: .touchUpInside)
         
-        // Show green tick if selected - using studentId
-        cell.isSelectedForAssignment = selectedStudentIds.contains(student.studentId)
+        // ✅ Show green tick if selected - this will mark already assigned students
+        let isSelected = selectedStudentIds.contains(student.studentId)
+        cell.isSelectedForAssignment = isSelected
+        print("🎨 Cell for student: \(student.studentName), ID: \(student.studentId), Selected: \(isSelected)")
         
         return cell
     }
@@ -527,7 +484,6 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         
         print("   After - selectedStudentIds: \(selectedStudentIds)")
         
-        // Reload just this row to update the button appearance
         tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
     }
     

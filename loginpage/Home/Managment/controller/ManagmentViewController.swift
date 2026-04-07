@@ -47,38 +47,139 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-
         tableView.deselectRow(at: indexPath, animated: true)
-
-        guard let token = self.token else {
-            print("❌ Token not available")
-            return
-        }
-
+        
         let selectedMember = filteredMembers[indexPath.row]
-
-        let storyboard = UIStoryboard(name: "Management", bundle: nil)
-        guard let vc = storyboard.instantiateViewController(
-            withIdentifier: "MoreDetailViewController"
-        ) as? MoreDetailViewController else {
+        
+        // Directly show delete confirmation without action sheet
+        confirmDelete(member: selectedMember, at: indexPath)
+    }
+    
+    private func confirmDelete(member: ManagementMember, at indexPath: IndexPath) {
+        let alert = UIAlertController(
+            title: "Delete Member",
+            message: "Are you sure you want to delete \"\(member.fullName)\"? This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
+            self.deleteManagement(memberId: member.id, at: indexPath)
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    private func deleteManagement(memberId: Int, at indexPath: IndexPath) {
+        guard let token = self.token else {
+            showError("Token missing")
             return
         }
-
-        vc.token = token
-        vc.member = selectedMember
-        vc.userId = selectedMember.id  
-
         
+        let urlString = "https://dev.gruppie.in/api/v1/management/\(memberId)"
+        guard let url = URL(string: urlString) else {
+            showError("Invalid URL")
+            return
+        }
         
-        navigationController?.pushViewController(vc, animated: true)
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Show loading indicator
+        let loadingAlert = UIAlertController(title: nil, message: "Deleting...", preferredStyle: .alert)
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.style = .medium
+        loadingIndicator.startAnimating()
+        loadingAlert.view.addSubview(loadingIndicator)
+        present(loadingAlert, animated: true)
+        
+        print("🗑️ Deleting management ID: \(memberId)")
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                loadingAlert.dismiss(animated: true) {
+                    if let error = error {
+                        self?.showError("Delete failed: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    guard let httpResponse = response as? HTTPURLResponse else {
+                        self?.showError("Invalid server response")
+                        return
+                    }
+                    
+                    print("✅ Delete Status Code:", httpResponse.statusCode)
+                    
+                    // Check if deletion was successful
+                    if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
+                        self?.handleDeleteSuccess(at: indexPath, memberName: self?.getMemberName(at: indexPath) ?? "")
+                    } else if httpResponse.statusCode == 401 {
+                        self?.showError("Unauthorized. Please login again.")
+                    } else if httpResponse.statusCode == 404 {
+                        self?.showError("Member not found")
+                    } else {
+                        // Try to parse error message from response
+                        if let data = data,
+                           let errorResponse = try? JSONDecoder().decode(DeleteManagementResponse.self, from: data) {
+                            self?.showError(errorResponse.message ?? "Delete failed with status: \(httpResponse.statusCode)")
+                        } else {
+                            self?.showError("Delete failed with status code: \(httpResponse.statusCode)")
+                        }
+                    }
+                }
+            }
+        }.resume()
     }
+    
+    private func handleDeleteSuccess(at indexPath: IndexPath, memberName: String) {
+        // Remove from both arrays
+        let memberToRemove = filteredMembers[indexPath.row]
+        
+        // Remove from filteredMembers
+        filteredMembers.remove(at: indexPath.row)
+        
+        // Remove from managementResponse if present
+        if let indexInOriginal = managementResponse.firstIndex(where: { $0.id == memberToRemove.id }) {
+            managementResponse.remove(at: indexInOriginal)
+        }
+        
+        // Delete row from table view with animation
+        tableView.deleteRows(at: [indexPath], with: .fade)
+        
+        // Show success message
+        let successAlert = UIAlertController(
+            title: "Success",
+            message: "\(memberName) has been deleted successfully.",
+            preferredStyle: .alert
+        )
+        successAlert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(successAlert, animated: true)
+    }
+    
+    private func getMemberName(at indexPath: IndexPath) -> String {
+        guard indexPath.row < filteredMembers.count else { return "Member" }
+        return filteredMembers[indexPath.row].fullName
+    }
+    
+    private func showError(_ message: String) {
+        let alert = UIAlertController(
+            title: "Error",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
     @IBAction func addButtonTapped(_ sender: UIButton) {
-
         guard let token = self.token else {
             print("❌ Token not available")
             return
         }
-
+        
         let storyboard = UIStoryboard(name: "Management", bundle: nil)
         guard let vc = storyboard.instantiateViewController(
             withIdentifier: "MoreDetailViewController"
@@ -86,19 +187,14 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
             print("❌ Failed to instantiate MoreDetailViewController")
             return
         }
-
+        
         // Pass required data
         vc.token = token
-
-        // Since this is ADD flow, there is NO selected member
         vc.member = nil
         vc.userId = nil
-//        vc.isFromAdd = true   // optional flag (recommended)
-
+        
         navigationController?.pushViewController(vc, animated: true)
     }
-
-
     
     func fetchManagementList() {
         guard let token = UserDefaults.standard.string(forKey: "user_role_Token") else {
@@ -184,7 +280,19 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
         cell.configureCell(with: member)
         return cell
     }
-        
+    
+    // Swipe to delete functionality
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let member = filteredMembers[indexPath.row]
+            confirmDelete(member: member, at: indexPath)
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+        return "Delete"
+    }
+    
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden
         searchView.isHidden = !shouldShow
@@ -231,3 +339,4 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
         navigationController?.popViewController(animated: true)
     }
 }
+

@@ -16,7 +16,7 @@ class PeriodDetailTableViewCell: UITableViewCell {
 
     // 🔹 Configure method for binding
     func configure(dayText: String?, periodText: String?) {
-        day.text = dayText ?? "N/A"
-        noOfPeriod.text = periodText ?? "N/A"
+        day.text = dayText ?? ""
+        noOfPeriod.text = periodText ?? ""
     }
 }

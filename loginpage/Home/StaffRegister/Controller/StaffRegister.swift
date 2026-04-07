@@ -20,6 +20,10 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     var token: String?
     var groupIds = ""
     
+    // Loading states
+    private var isLoadingTeaching = false
+    private var isLoadingNonTeaching = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("Received groupId: \(groupIds)")
@@ -33,7 +37,6 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         staffRegister.delegate = self
         staffRegister.dataSource = self
         
-        
         segmentController.layer.cornerRadius = 0
         segmentController.layer.masksToBounds = false
         
@@ -45,7 +48,8 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         
         searchView.isHidden = true
         
-        loadStaff()
+        // Load initial data for first segment (Teaching)
+        loadTeachingStaff()
         
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
     }
@@ -56,9 +60,7 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         backButton.layer.cornerRadius = backButton.frame.size.width / 2
         backButton.layer.masksToBounds = true
         backButton.clipsToBounds = true
-        
     }
-    
     
     @objc func searchButtonTappedAction() {
         let shouldShow = searchView.isHidden
@@ -103,27 +105,151 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         searchTextField?.text = ""
         
         print("Segment changed to:", sender.selectedSegmentIndex)
-        staffRegister.reloadData()
+        
+        if sender.selectedSegmentIndex == 0 {
+            // Teaching Staff segment
+            if teachingStaffData.isEmpty && !isLoadingTeaching {
+                loadTeachingStaff()
+            } else {
+                staffRegister.reloadData()
+            }
+        } else {
+            // Non-Teaching Staff segment
+            if nonTeachingStaffData.isEmpty && !isLoadingNonTeaching {
+                loadNonTeachingStaff()
+            } else {
+                staffRegister.reloadData()
+            }
+        }
     }
+    
+    // MARK: - API Calls
+    
+    private func loadTeachingStaff() {
+        isLoadingTeaching = true
+        fetchStaffList(staffType: "TEACHING", page: 1, limit: 10) { [weak self] result in
+            guard let self = self else { return }
+            self.isLoadingTeaching = false
+            
+            switch result {
+            case .success(let staff):
+                self.teachingStaffData = staff
+                print("Teaching Staff Count:", self.teachingStaffData.count)
+                
+                DispatchQueue.main.async {
+                    if self.segmentController.selectedSegmentIndex == 0 {
+                        self.staffRegister.reloadData()
+                    }
+                }
+                
+            case .failure(let error):
+                print("❌ Teaching Staff API Error:", error)
+                DispatchQueue.main.async {
+                    if self.segmentController.selectedSegmentIndex == 0 {
+                        self.staffRegister.reloadData()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func loadNonTeachingStaff() {
+        isLoadingNonTeaching = true
+        fetchStaffList(staffType: "NON-TEACHING", page: 1, limit: 10) { [weak self] result in
+            guard let self = self else { return }
+            self.isLoadingNonTeaching = false
+            
+            switch result {
+            case .success(let staff):
+                self.nonTeachingStaffData = staff
+                print("Non-Teaching Staff Count:", self.nonTeachingStaffData.count)
+                
+                DispatchQueue.main.async {
+                    if self.segmentController.selectedSegmentIndex == 1 {
+                        self.staffRegister.reloadData()
+                    }
+                }
+                
+            case .failure(let error):
+                print("❌ Non-Teaching Staff API Error:", error)
+                DispatchQueue.main.async {
+                    if self.segmentController.selectedSegmentIndex == 1 {
+                        self.staffRegister.reloadData()
+                    }
+                }
+            }
+        }
+    }
+    
+    func fetchStaffList(
+        staffType: String,
+        page: Int,
+        limit: Int,
+        completion: @escaping (Result<[Staff], APIManager.APIError>) -> Void
+    ) {
+        let token = SessionManager.useRoleToken ?? ""
+        
+        let headers = [
+            "Authorization": "Bearer \(token)"
+        ]
+        
+        let queryParams = [
+            "page": "\(page)",
+            "limit": "\(limit)",
+            "staffType": staffType
+        ]
+        
+        APIManager.shared.request(
+            endpoint: "staff/registration",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { (result: Result<StaffRegistrationResponse, APIManager.APIError>) in
+            
+            switch result {
+            case .success(let response):
+                completion(.success(response.data))
+                
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - UITableView DataSource
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         if segmentController.selectedSegmentIndex == 0 {
+            if isLoadingTeaching {
+                return 1 // Show loading cell
+            }
             let data = isSearching ? filteredTeachingStaff : teachingStaffData
             return data.isEmpty ? 1 : data.count
         } else {
+            if isLoadingNonTeaching {
+                return 1 // Show loading cell
+            }
             let data = isSearching ? filteredNonTeachingStaff : nonTeachingStaffData
             return data.isEmpty ? 1 : data.count
         }
     }
     
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if segmentController.selectedSegmentIndex == 0 {
+            
+            // Show loading indicator
+            if isLoadingTeaching {
+                let cell = UITableViewCell(style: .default, reuseIdentifier: "LoadingCell")
+                cell.textLabel?.text = "Loading..."
+                cell.textLabel?.textColor = .gray
+                cell.selectionStyle = .none
+                return cell
+            }
             
             let data = isSearching ? filteredTeachingStaff : teachingStaffData
             
@@ -141,6 +267,15 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
             return cell
             
         } else {
+            
+            // Show loading indicator
+            if isLoadingNonTeaching {
+                let cell = UITableViewCell(style: .default, reuseIdentifier: "LoadingCell")
+                cell.textLabel?.text = "Loading..."
+                cell.textLabel?.textColor = .gray
+                cell.selectionStyle = .none
+                return cell
+            }
             
             let data = isSearching ? filteredNonTeachingStaff : nonTeachingStaffData
             
@@ -161,113 +296,60 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     
     private func emptyCell(_ tableView: UITableView) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "EmptyCell")
-        cell.textLabel?.text = "No Data Available"
+        
+        if segmentController.selectedSegmentIndex == 0 {
+            if isLoadingTeaching {
+                cell.textLabel?.text = "Loading teaching staff..."
+            } else {
+                cell.textLabel?.text = "No teaching staff available"
+            }
+        } else {
+            if isLoadingNonTeaching {
+                cell.textLabel?.text = "Loading non-teaching staff..."
+            } else {
+                cell.textLabel?.text = "No non-teaching staff available"
+            }
+        }
+        
         cell.textLabel?.textColor = .gray
         cell.selectionStyle = .none
         return cell
     }
-    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let selectedStaff: Staff
         
         if segmentController.selectedSegmentIndex == 0 {
-            selectedStaff = isSearching
-            ? filteredTeachingStaff[indexPath.row]
-            : teachingStaffData[indexPath.row]
+            if isLoadingTeaching { return }
+            let data = isSearching ? filteredTeachingStaff : teachingStaffData
+            guard indexPath.row < data.count else { return }
+            selectedStaff = data[indexPath.row]
         } else {
-            selectedStaff = isSearching
-            ? filteredNonTeachingStaff[indexPath.row]
-            : nonTeachingStaffData[indexPath.row]
+            if isLoadingNonTeaching { return }
+            let data = isSearching ? filteredNonTeachingStaff : nonTeachingStaffData
+            guard indexPath.row < data.count else { return }
+            selectedStaff = data[indexPath.row]
         }
         
-        navigateToStaffDetailViewController(staffId: selectedStaff.id)
+//        navigateToStaffDetailViewController(staffId: selectedStaff.id)
     }
     
-    private func navigateToStaffDetailViewController(staffId: String) {
-        
-        guard let staffDetailVC = storyboard?
-            .instantiateViewController(withIdentifier: "StaffDetailViewController")
-                as? StaffDetailViewController else {
-            print("Error: StaffDetailViewController could not be instantiated")
-            return
-        }
-        
-        staffDetailVC.staffIdValue = staffId
-        
-        navigationController?.pushViewController(staffDetailVC, animated: true)
-    }
+//    private func navigateToStaffDetailViewController(staffId: String) {
+//        guard let staffDetailVC = storyboard?
+//            .instantiateViewController(withIdentifier: "StaffDetailViewController")
+//                as? StaffDetailViewController else {
+//            print("Error: StaffDetailViewController could not be instantiated")
+//            return
+//        }
+//        
+//        staffDetailVC.staffIdValue = staffId
+//        navigationController?.pushViewController(staffDetailVC, animated: true)
+//    }
     
-    
-    private func loadStaff() {
-        fetchStaffList(page: 1, limit: 10) { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let staff):
-                
-                self.staffList = staff
-                
-                // ✅ Split staff based on staffType
-                self.teachingStaffData = staff.filter {
-                    $0.staffType?.uppercased() == "TEACHING"
-                }
-                
-                self.nonTeachingStaffData = staff.filter {
-                    $0.staffType?.uppercased() == "NON-TEACHING"
-                }
-                
-                print("Teaching:", self.teachingStaffData.count)
-                print("Non-Teaching:", self.nonTeachingStaffData.count)
-                
-                DispatchQueue.main.async {
-                    self.staffRegister.reloadData()
-                }
-                
-            case .failure(let error):
-                print("❌ Staff API Error:", error)
-            }
-        }
-    }
-    
-    
-    func fetchStaffList(
-        page: Int,
-        limit: Int,
-        completion: @escaping (Result<[Staff], APIManager.APIError>) -> Void
-    ) {
-        
-        let token = SessionManager.useRoleToken ?? ""
-        
-        let headers = [
-            "Authorization": "Bearer \(token)"
-        ]
-        
-        let queryParams = [
-            "page": "\(page)",
-            "limit": "\(limit)"
-        ]
-        
-        APIManager.shared.request(
-            endpoint: "staff/registration",
-            method: .get,
-            queryParams: queryParams,
-            headers: headers
-        ) { (result: Result<StaffRegistrationResponse, APIManager.APIError>) in
-            
-            switch result {
-            case .success(let response):
-                completion(.success(response.data))
-                
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
+    // MARK: - Search Methods
     
     func filterMembers(textField: String) {
-        
         if textField.isEmpty {
             isSearching = false
             staffRegister.reloadData()
@@ -293,7 +375,8 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let searchText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
+        let currentText = textField.text ?? ""
+        let searchText = (currentText as NSString).replacingCharacters(in: range, with: string)
         filterMembers(textField: searchText)
         return true
     }

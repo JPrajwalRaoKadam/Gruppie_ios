@@ -198,3 +198,8 @@ struct MutableProfessionalDetails {
         self.designation = details?.designation
     }
 }
+struct DeleteManagementResponse: Codable {
+    let success: Bool?
+    let message: String?
+    let statusCode: Int?
+}

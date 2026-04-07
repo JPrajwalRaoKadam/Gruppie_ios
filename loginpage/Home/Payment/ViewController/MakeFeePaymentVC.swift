@@ -43,6 +43,11 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         fetchStudentFeeSummary()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchStudentFeeSummary()
+    }
+    
     // MARK: - UI Setup
     func setupUI() {
         
@@ -89,8 +94,14 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
         
         if let amountPaymentVC = storyboard.instantiateViewController(withIdentifier: "AmountPaymentVC") as? AmountPaymentVC {
+            
             amountPaymentVC.studentId = studentId
             amountPaymentVC.groupAcademicYearId = self.groupAcademicYearId ?? ""
+            
+            // 🔥 ADD THIS
+            amountPaymentVC.onPaymentSuccess = { [weak self] in
+                self?.fetchStudentFeeSummary()
+            }
             
             navigationController?.pushViewController(amountPaymentVC, animated: true)
         }
