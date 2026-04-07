@@ -127,13 +127,38 @@ extension rolesViewController: UICollectionViewDelegate, UICollectionViewDataSou
         return cell
     }
 
+//    func collectionView(_ collectionView: UICollectionView,
+//                        didSelectItemAt indexPath: IndexPath) {
+//
+//        let selectedRole = roles[indexPath.row]
+//
+//        // Save role token
+//        UserDefaults.standard.set(selectedRole.token, forKey: "user_role_Token")
+//
+//        dismiss(animated: true) {
+//
+//            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//            let homeVC = storyboard.instantiateViewController(
+//                withIdentifier: "HomeVC"
+//            ) as! HomeVC
+//
+//            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//               let window = windowScene.windows.first {
+//
+//                let nav = UINavigationController(rootViewController: homeVC)
+//                window.rootViewController = nav
+//                window.makeKeyAndVisible()
+//            }
+//        }
+//    }
     func collectionView(_ collectionView: UICollectionView,
                         didSelectItemAt indexPath: IndexPath) {
 
         let selectedRole = roles[indexPath.row]
 
-        // Save role token
+        // Save token
         UserDefaults.standard.set(selectedRole.token, forKey: "user_role_Token")
+        UserDefaults.standard.set(selectedRole.roleName, forKey: "role_name")
 
         dismiss(animated: true) {
 
@@ -141,6 +166,9 @@ extension rolesViewController: UICollectionViewDelegate, UICollectionViewDataSou
             let homeVC = storyboard.instantiateViewController(
                 withIdentifier: "HomeVC"
             ) as! HomeVC
+
+            // ✅ PASS ROLE NAME HERE
+            homeVC.roleName = selectedRole.roleName   // 👈 important
 
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first {

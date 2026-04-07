@@ -4,7 +4,8 @@ import SDWebImage
 class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllIconsTableViewCellDelegate,FeedPageNavigationDelegate, HomePageNavigationDelegate, MoreNavigationDelegate, DashboardNavigationDelegate {
     
     var groupName: String?
-    var Role: String?
+    var roleName: String?
+    var fullAccess: Bool = false
     
     var indexPath: IndexPath?
     var name: String?
@@ -62,6 +63,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         CustomTabManager.shared.mDelegate = self
         CustomTabManager.shared.dbDelegate = self
         enableKeyboardDismissOnTap()
+        print("roleName in rolesvc\(roleName)")
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -101,7 +104,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                     // ✅ Set labels
                     self.groupName = response.groupName
                     self.groupId = response.groupId
-                    self.Role = response.role
+                    self.roleName = response.role
                     self.shortNameLabel.text = response.groupName
 
                     print("✅ Home loaded:", self.feature.count)
@@ -133,6 +136,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("ViewController with identifier 'feedVC' not found.")
             return
         }
+        feedVC.groupAcademicYearResponse = self.groupAcademicYearResponse
         feedVC.feedSource = .normalFeed
         feedVC.currentRole = self.currentRole
         self.navigationController?.pushViewController(feedVC, animated: true)
@@ -234,7 +238,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     
     func didSelectIcon(_ featureIcon: FeatureIcon) {
         self.featureIcon = featureIcon
-        let featureId = featureIcon.id 
+        let featureId = featureIcon.id
 
         fetchRolePermissions(featureId: featureId) { [weak self] permissions in
             guard let self = self else { return }
@@ -244,6 +248,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 return
             }
 
+            self.fullAccess = permissions.fullAccess ?? false
             // 🔐 Example checks
             if permissions.view == true {
                 print("✅ User can view")
@@ -361,7 +366,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             case .success(let response):
                 DispatchQueue.main.async {
                     
-                    print("✅ Full Response:", response)
+                     print("✅ Full Response:", response)
 
                     // 🔥 Extract dynamic data
                     if let featureDict = response.data?.first,
@@ -549,6 +554,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
         if let attendanceVC = storyboard.instantiateViewController(withIdentifier: "AttendanceVC") as? AttendanceVC {
             attendanceVC.groupClasses = groupClass  // Pass the group classes data
+//            attendanceVC.roleName = roleName
             attendanceVC.groupAcademicYearResponse = self.groupAcademicYearResponse
             print("📚 Passing \(groupClass.count) group classes to AttendanceVC")
             navigationController?.pushViewController(attendanceVC, animated: true)
@@ -857,7 +863,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             print("❌ Failed to instantiate FeedViewController")
             return
         }
-
+        feedVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+        feedVC.fullAccess = self.fullAccess
         feedVC.feedSource = .noticeBoard   // ✅ IMPORTANT
         navigationController?.pushViewController(feedVC, animated: true)
     }
@@ -917,11 +924,11 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 //                print("Token or Group ID is missing")
 //                return
 //            }
-//            
+//
 //            let teachingURL = APIManager.shared.baseURL + "groups/\(groupId)/staff/get?type=teaching"
 //            let dispatchGroup = DispatchGroup()
 //            var teachingStaff: [Staff] = []
-//            
+//
 //            dispatchGroup.enter()
 //            fetchStaffData(from: teachingURL, token: token) { staff in
 //                teachingStaff = staff
@@ -994,24 +1001,24 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 //            completion([])
 //            return
 //        }
-//        
+//
 //        var request = URLRequest(url: url)
 //        request.httpMethod = "GET"
 //        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//        
+//
 //        URLSession.shared.dataTask(with: request) { data, _, error in
 //            if let error = error {
 //                print("Error fetching staff data: \(error.localizedDescription)")
 //                completion([])
 //                return
 //            }
-//            
+//
 //            guard let data = data else {
 //                print("No data received.")
 //                completion([])
 //                return
 //            }
-//            
+//
 //            do {
 //                let decoder = JSONDecoder()
 //                let responseModel = try decoder.decode(StaffResponse.self, from: data)

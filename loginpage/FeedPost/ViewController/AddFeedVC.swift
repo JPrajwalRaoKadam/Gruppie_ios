@@ -29,6 +29,7 @@ class AddFeedVC: UIViewController,
     var selectedMediaMimeType: String?
     var selectedMediaFileName: String?
     var isConverting = false
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
     
     var selectedIndexPath: IndexPath?
     
@@ -102,6 +103,14 @@ class AddFeedVC: UIViewController,
             return
         }
         
+        if postName.count < 5 || (postDescription ?? "").count < 10 {
+            showAlert(
+                title: "Invalid Input",
+                message: "Title must be at least 5 characters and Description must be at least 10 characters"
+            )
+            return
+        }
+        
         guard let selectedIndexPath else {
             showAlert(title: "Error", message: "Select team")
             return
@@ -123,17 +132,20 @@ class AddFeedVC: UIViewController,
     
     private func submitPost(token: String, selectedIndexPath: IndexPath) {
         showLoading()
+        guard let groupAcademicYearId =
+                groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+            print("❌ groupAcademicYearId not available")
+            return
+        }
         
         // Base params
         var params: [String: String] = [
             "postType": "team",
-            "classId": "12",
-            "fromUserId": "1",
-            "toUserId": "40",
             "title": postName,
             "body": postDescription ?? "",
             "shareInternal": "true",
-            "shareExternal": "false"
+            "shareExternal": "false",
+            "groupAcademicYearId": groupAcademicYearId
         ]
         
         // Set post type based on selection
@@ -767,3 +779,4 @@ extension OutputStream {
         }
     }
 }
+

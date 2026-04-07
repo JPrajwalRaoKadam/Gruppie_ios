@@ -34,7 +34,8 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     var feedPosts: [FeedPost] = []
     var feedSource: FeedSource = .normalFeed
     var teamId: String?
-    
+    var fullAccess: Bool?
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,9 +46,20 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
         if case .normalFeed = feedSource {
             setupTabBar()
         }
+
+        if fullAccess == true ||
+           (SessionManager.role_name == "ADMIN" || SessionManager.role_name == "SUPER_ADMIN") {
+            
+            bottomLeftButton.isHidden = false  // ✅ Show
+            
+        } else {
+            bottomLeftButton.isHidden = true   // ❌ Hide for all other cases
+        }
+
         loadInitialData()
     }
     
@@ -127,6 +139,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     @IBAction func addFeedAction(_ sender: Any) {
         let vc = AddFeedVC.create(feedSource: feedSource)
+        vc.groupAcademicYearResponse = self.groupAcademicYearResponse
         navigationController?.pushViewController(vc, animated: true)
     }
     

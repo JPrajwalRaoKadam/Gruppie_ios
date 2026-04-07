@@ -17,6 +17,10 @@ struct SessionManager {
         return UserDefaults.standard.string(forKey: "user_role_Token")
     }
     
+    static var role_name: String? {
+            return UserDefaults.standard.string(forKey: "role_name")
+    }
+    
     static var isLoggedIn: Bool {
         return authToken != nil
     }
