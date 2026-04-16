@@ -81,14 +81,14 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     @IBAction func payButtonAction(_ sender: Any) {
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
            if let amountPaymentVC = storyboard.instantiateViewController(withIdentifier: "AmountPaymentVC") as? AmountPaymentVC {
-               amountPaymentVC.feePaymentData = self.feePaymentData
+//               amountPaymentVC.feePaymentData = self.feePaymentData
                amountPaymentVC.groupID = self.groupId
                amountPaymentVC.teamID = self.teamId
                amountPaymentVC.userID = self.userId
                amountPaymentVC.studentName = feePaymentData?.name
                amountPaymentVC.customerMobileNo = feePaymentData?.phone
-               amountPaymentVC.demandTotalAmount = self.demandAmount.text
-               amountPaymentVC.dueAmpount = self.overdueAmount.text
+//               amountPaymentVC.demandTotalAmount = self.demandAmount.text
+//               amountPaymentVC.dueAmpount = self.overdueAmount.text
                navigationController?.pushViewController(amountPaymentVC, animated: true)
            }
     }

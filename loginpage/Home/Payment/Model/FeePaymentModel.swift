@@ -353,3 +353,27 @@ struct EasebuzzPaymentResponse: Codable {
     let redirectionUrl: String
     let data: String
 }
+
+struct SplitPaymentModel: Codable {
+    let amount: String
+    let merchantId: String
+}
+
+struct DueResponseModel: Codable {
+    let userId: String?
+    let teamId: String?
+    let feeData: [DueFeeData]?
+}
+
+struct DueFeeData: Codable {
+    let feeTitle: String?
+    let dueAmount: Double?
+    let totalFee: Double?
+    let bankData: [DueBankData]?
+}
+
+struct DueBankData: Codable {
+    let merchantId: String?
+    let totalFee: Double?
+    let totalBalance: Double?
+}
