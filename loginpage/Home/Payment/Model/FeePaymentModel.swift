@@ -580,3 +580,19 @@ struct GenericResponse: Codable {
     let success: Bool?
     let message: String?
 }
+
+struct StudentListResponse: Codable {
+    let success: Bool?
+    let message: String?
+    let data: [StudentListItem]
+}
+
+struct StudentListItem: Codable {
+    let studentId: String
+    let groupClassId: String
+    let className: String
+    let name: String
+    let gender: String?
+    let dateOfBirth: String?
+    let mobileNumber: String?
+}

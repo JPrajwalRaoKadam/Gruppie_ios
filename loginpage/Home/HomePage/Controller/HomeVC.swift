@@ -24,6 +24,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     var userId:String = ""
     var featureIcons: [FeatureIcon] = []
     public var groupClasses: [GroupClass] = []
+    var feeGroupClasses: [FeeGroupClass] = []
     public var pagination: Pagination?
     var groupAcademicYearResponse: GroupAcademicYearResponse?
     
@@ -240,6 +241,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         self.featureIcon = featureIcon
         let featureId = featureIcon.id
 
+        // 🔐 Fetch permissions
         fetchRolePermissions(featureId: featureId) { [weak self] permissions in
             guard let self = self else { return }
             
@@ -249,7 +251,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
 
             self.fullAccess = permissions.fullAccess ?? false
-            // 🔐 Example checks
+
             if permissions.view == true {
                 print("✅ User can view")
             }
@@ -259,23 +261,36 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             }
         }
         
+        // 🚀 Navigation handling
         switch featureIcon.name {
-        case "Notes and videos":
-            fetchGroupClasses {
-                self.navigateToNotes_Videos(groupClass: self.groupClasses)
-            }
+            
+        // ✅ COMMON HANDLER (NO DUPLICATE API CALLS)
+        case "Notes and videos",
+             "Classroom Communication",
+             "Student Register",
+             "Subject Register",
+             "Students Attendance",
+             "Homework or Assignment",
+             "fee":
+            
+            handleGroupClassNavigation(featureName: featureIcon.name)
+            
+            
         case "Staff Diary":
-//            fetchStaffDataAndNavigate()
             break
+            
         case "Calendar":
             navigateToCalendarViewController()
+            
         case "Management Register":
             navigateToManagementViewController()
+            
         case "Staff Register":
             navigateToStaffRegister()
-//            fetchStaffDataAndNavigate()
+            
         case "Staff Attendance":
-                navigateToStaffAttendance()
+            navigateToStaffAttendance()
+            
         case "Feed Back":
             switch currentRole?.lowercased() {
             case "parent":
@@ -284,64 +299,143 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                 navigateToFeedBackViewController()
             case "teacher":
                 print("❌ Invalid role")
-                return
             default:
                 print("❌ Invalid or missing role")
-                return
             }
-        case  "Classroom Communication":
-            fetchGroupClasses {
-                self.navigateToRlassroomCommunication(groupClass: self.groupClasses)
-            }
+            
         case "Notice Board":
             navigateToNoticeBoard()
-        case "Student Register":
-            fetchGroupClasses {
-                self.navigateToStudentRegister(groupClasses: self.groupClasses)
-            }
+            
         case "Student Diary":
             fetchSubjectDataAndNavigate()
             fetchStudentDataAndNavigate()
-        case "Subject Register":
-            fetchGroupClasses {
-                self.navigateToSubjectRegister(groupClass: self.groupClasses)
-            }
+            
         case "Marks Card":
             fetchSubjectDataAndNavigate()
+            
         case "Gallery":
             navigateToGalleryViewController()
-        case "Students Attendance":
-            fetchGroupClasses {
-                self.navigateToAttendanceViewController(groupClass: self.groupClasses)
-                   }
-        case "Homework or Assignment":
-            fetchGroupClasses {
-                self.navigateToHomeworkViewController(groupClass: self.groupClasses)
-                   }
+            
         case "Syllabus Tracker":
             fetchSubjectDataAndNavigate()
+            
         case "Time Table", "Timetable":
             navigateToTimeTable()
+            
         case "Fee":
-                self.navigateToFeesNew()
+            if SessionManager.role_name == "STUDENT" {
+                
+                fetchFeeUserClasses { [weak self] classes in
+                    guard let self = self else { return }
+                    
+                    guard let classes = classes else {
+                        print("❌ No user classes")
+                        return
+                    }
+                    
+                    self.feeGroupClasses = classes
+                    navigateToFeesNew(groupClass: feeGroupClasses)
+                    self.tableView.reloadData()
+                }
+                
+            } else {
+                navigateToFeesNew()
+            }
+            
         case "Notes & Videos":
-                   fetchSubjectDataAndNavigate()
+            fetchSubjectDataAndNavigate()
+            
         case "Marks Card New":
             fetchSubjectDataAndNavigate()
+            
         case "Bus Register":
             navigateToBusRegister()
+            
         case "Gate Management":
             navigateToGateManagement()
+            
         case "Gate Pass":
             if currentRole == "admin" {
                 navigateToGatePass()
             } else if currentRole == "parent" {
                 navigateToStatusApprove()
             } else {
-                print("No navigation configured for role: \(currentRole ?? "nil")")
+                print("❌ No navigation configured for role: \(currentRole ?? "nil")")
             }
+            
         default:
-            print("No navigation configured for type: \(featureIcon.name)")
+            print("❌ No navigation configured for type: \(featureIcon.name)")
+        }
+    }
+    
+    func navigateBasedOnFeature(featureName: String) {
+        
+        switch featureName {
+            
+        case "Notes and videos":
+            navigateToNotes_Videos(groupClass: groupClasses)
+            
+        case "Classroom Communication":
+            navigateToRlassroomCommunication(groupClass: groupClasses)
+            
+        case "Student Register":
+            navigateToStudentRegister(groupClasses: groupClasses)
+            
+        case "Subject Register":
+            navigateToSubjectRegister(groupClass: groupClasses)
+            
+        case "Students Attendance":
+            navigateToAttendanceViewController(groupClass: groupClasses)
+            
+        case "Homework or Assignment":
+            navigateToHomeworkViewController(groupClass: groupClasses)
+            
+        default:
+            print("⚠️ No navigation mapped for \(featureName)")
+        }
+    }
+    
+    func handleGroupClassNavigation(featureName: String) {
+        
+        // ✅ If already loaded → skip API
+        if !groupClasses.isEmpty {
+            navigateBasedOnFeature(featureName: featureName)
+            return
+        }
+        
+        // ✅ STUDENT → use fetchRoleGroupClasses
+        if SessionManager.role_name == "STUDENT" {
+            
+            fetchRoleGroupClasses { [weak self] (classes: [GroupClass]?) in
+                guard let self = self else { return }
+                
+                guard let classes = classes else {
+                    print("❌ No classes (Student API)")
+                    return
+                }
+                
+                print("🎓 Student Classes:", classes.count)
+                
+                self.groupClasses = classes
+                self.navigateBasedOnFeature(featureName: featureName)
+            }
+            
+        } else {
+            
+            // ✅ OTHER ROLES → normal API
+            fetchGroupClasses { [weak self] (classes: [GroupClass]?) in
+                guard let self = self else { return }
+                
+                guard let classes = classes else {
+                    print("❌ No classes")
+                    return
+                }
+                
+                print("🏫 Classes:", classes.count)
+                
+                self.groupClasses = classes
+                self.navigateBasedOnFeature(featureName: featureName)
+            }
         }
     }
     
@@ -390,23 +484,123 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     
-    private func fetchGroupClasses(completion: @escaping () -> Void) {
+    private func fetchGroupClasses(
+        completion: @escaping ([GroupClass]?) -> Void
+    ) {
         APIManager.shared.getGroupClasses(page: 1, limit: 10) { [weak self] result in
             guard let self = self else { return }
 
             switch result {
             case .success(let response):
-                // ✅ Save data locally
+                
                 self.groupClasses = response.data
                 self.pagination = response.pagination
-
-                print("Saved Classes:", self.groupClasses.count)
-                print("Saved Pagination:", self.pagination ?? "nil")
-
-                completion() // ✅ Notify caller that data is ready
-
+                
+                print("✅ Saved Classes:", self.groupClasses.count)
+                
+                completion(self.groupClasses)   // ✅ RETURN DATA
+                
             case .failure(let error):
-                print("API Error:", error)
+                print("❌ API Error:", error)
+                completion(nil)
+            }
+        }
+    }
+    
+    func fetchRoleGroupClasses(
+        page: Int = 1,
+        limit: Int = 200,
+        types: String = "regular,admission",
+        completion: @escaping ([GroupClass]?) -> Void
+    ) {
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Token missing")
+            completion(nil)
+            return
+        }
+        
+        let headers = ["Authorization": "Bearer \(token)"]
+        
+        let encodedTypes = types.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        
+        let endpoint = "group-class?page=\(page)&limit=\(limit)&types=\(encodedTypes)"
+        
+        APIManager.shared.request(
+            endpoint: endpoint,
+            method: .get,
+            headers: headers
+        ) { (result: Result<GroupClassResponse, APIManager.APIError>) in
+            
+            switch result {
+            case .success(let response):
+                DispatchQueue.main.async {
+                    
+                    print("✅ Full Response:", response)
+                    
+                    let classes = response.data   // ✅ No optional binding
+                    
+                    completion(classes)
+                }
+                
+            case .failure(let error):
+                print("❌ API Error:", error)
+                completion(nil)
+            }
+        }
+    }
+    
+    func loadRoleGroupClasses() {
+        
+        fetchGroupClasses { [weak self] classes in
+            guard let self = self else { return }
+            
+            guard let classes = classes else {
+                print("❌ No classes received")
+                return
+            }
+            
+            self.groupClasses = classes
+            self.tableView.reloadData()
+        }
+    }
+    
+    func fetchFeeUserClasses(
+        completion: @escaping ([FeeGroupClass]?) -> Void
+    ) {
+        
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Token missing")
+            completion(nil)
+            return
+        }
+        
+        guard let groupAcademicYearId =
+                groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+            print("❌ groupAcademicYearId missing")
+            completion(nil)
+            return
+        }
+        
+        let endpoint = "group-class/user-classes?groupAcademicYearId=\(groupAcademicYearId)"
+        
+        APIManager.shared.request(
+            endpoint: endpoint,
+            method: .get,
+            headers: ["Authorization": "Bearer \(token)"]
+        ) { (result: Result<UserClassResponse, APIManager.APIError>) in
+            
+            switch result {
+                
+            case .success(let response):
+                DispatchQueue.main.async {
+                    print("✅ User Classes:", response.data.count)
+                    completion(response.data)
+                }
+                
+            case .failure(let error):
+                print("❌ API Error:", error)
+                completion(nil)
             }
         }
     }
@@ -491,13 +685,6 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
                     print("Failed to instantiate SyllabusTrackerVC")
                 }
             }
-    
-    func navigateToFeesNew() {
-        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "PaymentClassListingVC") as! PaymentClassListingVC
-        vc.groupAcademicYearResponse = self.groupAcademicYearResponse
-        self.navigationController?.pushViewController(vc, animated: true)
-    }
     
     func navigateToTimeTable(staffDetails: [Staff]) {
         let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
@@ -723,7 +910,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 //                            self.navigateToNotes_Videos(subjects: subjects, teamIds: teamIds)
                             break
                         case "Students Attendance":
-                            self.fetchGroupClasses {
+                            self.fetchGroupClasses {_ in 
                                        self.navigateToAttendanceViewController(groupClass: self.groupClasses)
                                    }
                         case "Marks Card New":
@@ -878,6 +1065,27 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
         subjectRegisterVC.groupClasses = groupClass
         
         self.navigationController?.pushViewController(subjectRegisterVC, animated: true)
+    }
+    
+    func navigateToFeesNew(groupClass: [FeeGroupClass]? = nil) {
+        
+        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
+        
+        guard let vc = storyboard.instantiateViewController(
+            withIdentifier: "PaymentClassListingVC"
+        ) as? PaymentClassListingVC else {
+            print("❌ Failed to instantiate PaymentClassListingVC")
+            return
+        }
+        
+        vc.groupAcademicYearResponse = self.groupAcademicYearResponse
+        
+        // ✅ Pass only if available
+        if let groupClass = groupClass {
+            vc.groupClasses = groupClass
+        }
+        
+        navigationController?.pushViewController(vc, animated: true)
     }
     
 //    func navigateToMarksCard(subjects: [SubjectData], teamIds: [String]) {

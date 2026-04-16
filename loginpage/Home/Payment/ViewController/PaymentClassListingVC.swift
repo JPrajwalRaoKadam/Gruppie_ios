@@ -1,10 +1,3 @@
-//
-//  PaymentClassListingVC.swift
-//  loginpage
-//
-//  Created by Prajwal rao Kadam J on 06/02/25.
-//
-
 import UIKit
 
 class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -25,17 +18,19 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     var currentRole: String?
     var groupAcademicYearResponse: GroupAcademicYearResponse?
     
-    var classwiseData: [ClasswiseFeeData] = []
+    var groupClasses: [FeeGroupClass] = []   // 🔥 fallback data
+    var classwiseData: [ClasswiseFeeData] = [] // 🔥 primary data
     var feeTotals: FeeTotals?
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
-        fetchClasswiseFeeDetails()
+        if SessionManager.role_name != "STUDENT" {
+            fetchClasswiseFeeDetails()
+        }
     }
-    
+
     // MARK: - Setup UI
     private func setupUI() {
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
@@ -63,7 +58,7 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         
         guard let groupAcademicYearId =
                 groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
-            print("❌ groupAcademicYearId not available from GroupAcademicYearResponse")
+            print("❌ groupAcademicYearId not available")
             return
         }
         
@@ -80,18 +75,25 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             case .success(let response):
                 print("✅ Classwise Fee Response:", response)
                 
-                self.classwiseData = response.data
-                self.feeTotals = response.totals
-                
-                self.updateTotalsUI()
-                self.classTableView.reloadData()
+                DispatchQueue.main.async {
+                    self.classwiseData = response.data
+                    self.feeTotals = response.totals
+                    
+                    self.updateTotalsUI()
+                    self.classTableView.reloadData()
+                }
                 
             case .failure(let error):
                 print("❌ API Error:", error)
+                
+                // 🔥 fallback UI reload
+                DispatchQueue.main.async {
+                    self.classTableView.reloadData()
+                }
             }
         }
     }
-    
+
     // MARK: - Update Totals
     func updateTotalsUI() {
         demandAmount.text = "₹ \(feeTotals?.totalDemand ?? 0)"
@@ -102,18 +104,23 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         overdueAmount.text = "₹ 0"
         fineAmount.text = "₹ 0"
     }
-    
-    // MARK: - Back Button
-    @IBAction func backButtonAction(_ sender: Any) {
-        self.navigationController?.popViewController(animated: true)
+
+    // MARK: - Helper
+    func isUsingClasswiseData() -> Bool {
+        return !classwiseData.isEmpty
     }
-    
+
     // MARK: - TableView DataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return classwiseData.count
+        
+        if isUsingClasswiseData() {
+            return classwiseData.count
+        } else {
+            return groupClasses.count
+        }
     }
-    
+
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
@@ -124,43 +131,84 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             return UITableViewCell()
         }
         
-        let item = classwiseData[indexPath.row]
+        if isUsingClasswiseData() {
+            
+            // ✅ PRIMARY DATA
+            let item = classwiseData[indexPath.row]
+            
+            cell.nameLabel.text = item.className
+            cell.Demand.text = "₹ \(item.demand)"
+            cell.Collected.text = "₹ \(item.collection)"
+            cell.Balance.text = "₹ \(item.balance)"
+            
+            cell.iconImageView.image = cell.generateImage(from: item.className)
+            cell.configurePayment(with: item)
+            
+        } else {
+            
+            // 🔥 FALLBACK DATA
+            let item = groupClasses[indexPath.row]
+            
+            cell.nameLabel.text = item.name
+            cell.Demand.text = "-"
+            cell.Collected.text = "-"
+            cell.Balance.text = "-"
+            
+            cell.iconImageView.image = cell.generateImage(from: item.name)
+        }
         
-        cell.nameLabel.text = item.className
-        cell.Demand.text = "₹ \(item.demand)"
-        cell.Collected.text = "₹ \(item.collection)"
-        cell.Balance.text = "₹ \(item.balance)"
-        
-        cell.iconImageView.image = cell.generateImage(from: item.className)
-        cell.configurePayment(with: item)
         return cell
     }
-    
+
     // MARK: - TableView Selection
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         navigateToStudentListing(at: indexPath)
     }
+
+    // MARK: - Navigation
     
     private func navigateToStudentListing(at indexPath: IndexPath) {
-        
-        let selectedClass = classwiseData[indexPath.row]
         
         let storyboard = UIStoryboard(name: "Payment", bundle: nil)
         
         if let studentListingVC = storyboard.instantiateViewController(
             withIdentifier: "StudentListingVC"
         ) as? StudentListingVC {
+            
             guard let groupAcademicYearId =
                     groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
-                print("❌ groupAcademicYearId not available from GroupAcademicYearResponse")
+                print("❌ groupAcademicYearId not available")
                 return
             }
+            
             studentListingVC.groupAcademicYearId = groupAcademicYearId
-            studentListingVC.selectedClassName = selectedClass.className
-            studentListingVC.classId = selectedClass.classId
-            studentListingVC.selectedClass = selectedClass
+            studentListingVC.groupAcademicYearResponse = groupAcademicYearResponse
+            
+            // ✅ FIXED: common handling
+            if isUsingClasswiseData() {
+                
+                let selectedClass = classwiseData[indexPath.row]
+                
+                studentListingVC.selectedClassName = selectedClass.className
+                studentListingVC.classId = selectedClass.classId
+                studentListingVC.selectedClass = selectedClass
+                
+            } else {
+                
+                let selectedClass = groupClasses[indexPath.row]
+                
+                studentListingVC.selectedClassName = selectedClass.name
+                studentListingVC.classId = selectedClass.id
+                // ❌ don't pass selectedClass if type mismatch
+            }
+            
             self.navigationController?.pushViewController(studentListingVC, animated: true)
         }
+    }
+
+    // MARK: - Back
+    @IBAction func backButtonAction(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
     }
 }

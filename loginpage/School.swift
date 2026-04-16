@@ -94,6 +94,25 @@ struct GroupClass: Decodable {
     let students: [Student]
 }
 
+struct UserClassResponse: Decodable {
+    let success: Bool
+    let message: String
+    let data: [FeeGroupClass]   // ✅ DIRECT ARRAY
+}
+
+struct FeeGroupClass: Decodable {
+    let id: String
+    let name: String
+    let classType: String?
+    let groupAcademicYearId: String?
+    
+    // 🔥 make optional
+    let courseId: String?
+    let course: Course?
+    let academicYear: AcademicYear?
+    let students: [Student]?
+}
+
 // MARK: - Course
 struct Course: Decodable {
     let id: String
