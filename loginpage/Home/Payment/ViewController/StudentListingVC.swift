@@ -14,6 +14,8 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     @IBOutlet weak var overAllAmountView: UIView!
     @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var customContainerView: UIView!
+    @IBOutlet weak var navView: UIView!
+    @IBOutlet weak var tableTopConstraint: NSLayoutConstraint!
     
     // MARK: - Properties
     var groupAcademicYearId: String?
@@ -67,6 +69,15 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         studentTableView.delegate = self
         studentTableView.dataSource = self
+        
+        if isStudentRole() {
+            customContainerView.isHidden = true
+
+            tableTopConstraint.constant = 0
+
+            // attach to navView bottom
+            studentTableView.topAnchor.constraint(equalTo: navView.bottomAnchor).isActive = true
+        }
         
         studentTableView.register(
             UINib(nibName: "ClassesTableViewCell", bundle: nil),
@@ -187,15 +198,17 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             for: indexPath
         ) as! ClassesTableViewCell
         
+        
+        
         if isStudentRole() {
             
             // 🔥 STUDENT LIST
             let student = students[indexPath.row]
             
             cell.nameLabel.text = student.name
-            cell.Demand.text = "-"
-            cell.Collected.text = "-"
-            cell.Balance.text = "-"
+            cell.Demand.isHidden = true
+            cell.Collected.isHidden = true
+            cell.Balance.isHidden = true
             
             cell.iconImageView.image = cell.generateImage(from: student.name)
             

@@ -12,7 +12,9 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var fineAmount: UILabel!
     @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var customContainerView: UIView!
-
+    @IBOutlet weak var navView: UIView!
+    @IBOutlet weak var tableTopConstraint: NSLayoutConstraint!
+    
     // MARK: - Properties
     var groupId: String?
     var currentRole: String?
@@ -41,6 +43,15 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         
         classTableView.delegate = self
         classTableView.dataSource = self
+        
+        if SessionManager.role_name == "STUDENT" {
+            customContainerView.isHidden = true
+
+            tableTopConstraint.constant = 0
+
+            // attach to navView bottom
+            classTableView.topAnchor.constraint(equalTo: navView.bottomAnchor).isActive = true
+        }
         
         classTableView.register(
             UINib(nibName: "ClassesTableViewCell", bundle: nil),
@@ -130,7 +141,11 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
         ) as? ClassesTableViewCell else {
             return UITableViewCell()
         }
-        
+        if SessionManager.role_name == "STUDENT" {
+            cell.Demand.isHidden = true
+            cell.Collected.isHidden = true
+            cell.Balance.isHidden = true
+        }
         if isUsingClasswiseData() {
             
             // ✅ PRIMARY DATA
