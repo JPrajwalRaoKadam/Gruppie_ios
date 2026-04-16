@@ -47,7 +47,7 @@ struct FeedPost: Decodable {
 
     let createdAt: String?
     let updatedAt: String?
-    let fromUser: FeedUser
+    let fromUser: FeedUser?
     let toUser: FeedUser?
     let team: FeedTeam?
 

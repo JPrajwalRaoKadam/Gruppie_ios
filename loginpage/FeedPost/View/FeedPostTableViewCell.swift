@@ -67,7 +67,9 @@ final class FeedPostTableViewCell: UITableViewCell {
     // MARK: - Configure
     func configure(with post: FeedPost) {
         firstDescriptionLabel.text = post.team?.name
-        adminLabel.text = post.fromUser.name
+        adminLabel.text = post.fromUser?.name?.isEmpty == false
+            ? post.fromUser?.name
+            : "Unknown"
         descriptionLabel.text = post.body
         timingLabel.text = formatDate(post.createdAt ?? "")
         noOfLikes.text = "\(post.likeCount)"

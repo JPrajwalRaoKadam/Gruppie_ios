@@ -236,7 +236,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
             ]
             
         case .normalFeed:
-            endpoint = "posts"
+            endpoint = "feed-view"
             queryParams = [
                 "page": "\(page)",
                 "limit": "\(limit)"
@@ -580,34 +580,6 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
                     
                 case .failure(let error):
                     print("❌ Failed to fetch posts for update: \(error)")
-                    completion(nil)
-                }
-            }
-        )
-    }
-
-    // Remove the separate fetchAllPostsAndFind method since we've combined it
-    
-    private func fetchAllPostsAndFind(postId: Int, completion: @escaping (FeedPost?) -> Void) {
-        guard let token = SessionManager.useRoleToken else {
-            completion(nil)
-            return
-        }
-        
-        let headers = ["Authorization": "Bearer \(token)"]
-        let queryParams = ["limit": "50"] // Fetch more posts to find the specific one
-        
-        APIManager.shared.request(
-            endpoint: "posts",
-            method: .get,
-            queryParams: queryParams,
-            headers: headers,
-            completion: { (result: Result<FeedResponse, APIManager.APIError>) in
-                switch result {
-                case .success(let response):
-                    let updatedPost = response.data.first(where: { $0.postId == String(postId) })
-                    completion(updatedPost)
-                case .failure:
                     completion(nil)
                 }
             }
