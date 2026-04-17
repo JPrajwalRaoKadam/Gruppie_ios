@@ -370,10 +370,29 @@ struct DueFeeData: Codable {
     let dueAmount: Double?
     let totalFee: Double?
     let bankData: [DueBankData]?
+
+    // ✅ ADD THESE (optional → safe decoding)
+    let categoryId: String?
+    let categoryName: String?
+    let feeId: String?
+    let fineAmount: Double?
+    let gruppieCategory: Bool?
+    let payableAmount: Double?
+    let teamId: String?
+    let totalAmountPaid: Double?
+    let totalBalanceAmount: Double?
+    let totalConcessionAmount: Double?
+    let concessionAmount: Double?
+    let concessionList: [Concession]?
 }
 
 struct DueBankData: Codable {
+    let accountId: String?
+    let bankAccountNumber: String?
+    let bankAddress: String?
+    let bankBranch: String?
+    let bankName: String?
     let merchantId: String?
-    let totalFee: Double?
     let totalBalance: Double?
+    let totalFee: Double?
 }
