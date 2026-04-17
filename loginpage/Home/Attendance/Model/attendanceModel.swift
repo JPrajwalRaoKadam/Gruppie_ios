@@ -297,3 +297,35 @@ struct CommonSuccessResponse: Decodable {
     let success: Bool
     let message: String
 }
+
+
+
+struct StudentClassResponse: Codable {
+    let success: Bool
+    let message: String
+    let data: [GroupClass1]
+}
+
+struct GroupClass1: Codable {
+    let id: String
+    let name: String
+    let classType: String
+    let groupAcademicYearId: String
+}
+
+
+struct StudentListResponse: Codable {
+    let success: Bool
+    let message: String
+    let data: [StudentListItem]
+}
+
+struct StudentListItem: Codable {
+    let studentId: String
+    let groupClassId: String
+    let className: String
+    let name: String
+    let gender: String
+    let dateOfBirth: String?
+    let mobileNumber: String?
+}

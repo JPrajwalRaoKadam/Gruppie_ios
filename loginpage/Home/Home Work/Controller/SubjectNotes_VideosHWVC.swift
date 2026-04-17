@@ -149,24 +149,24 @@ extension SubjectNotes_VideosHWVC: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 
-   // func tableView(_ tableView: UITableView,
-//                   didSelectRowAt indexPath: IndexPath) {
-//
-//        let selectedSubject = subjects[indexPath.row]
-//
-//        let storyboard = UIStoryboard(name: "Notes_VideosVC", bundle: nil)
-//
-//        if let subDetailsVC = storyboard.instantiateViewController(
-//            withIdentifier: "SubDetailsVC"
-//        ) as? SubDetailsVC {
-//
-//            subDetailsVC.className = self.clsName
-//            subDetailsVC.classId = classId
-//            subDetailsVC.subjectId = String(selectedSubject.subjectId)
-//            subDetailsVC.subjectName = selectedSubject.subjectName
-//            subDetailsVC.groupAcademicYearResponse = self.groupAcademicYearResponse
-//
-//            self.navigationController?.pushViewController(subDetailsVC, animated: true)
-//        }
-//    }
+    func tableView(_ tableView: UITableView,
+                   didSelectRowAt indexPath: IndexPath) {
+
+        let selectedSubject = subjects[indexPath.row]
+
+        let storyboard = UIStoryboard(name: "HomeWork", bundle: nil)
+
+        if let homeworkDetailVC = storyboard.instantiateViewController(
+            withIdentifier: "HomeworkDetailVC"
+        ) as? HomeworkDetailVC {
+
+            homeworkDetailVC.className = self.clsName
+            homeworkDetailVC.classId = classId
+            homeworkDetailVC.subjectId = String(selectedSubject.subjectId)
+            homeworkDetailVC.subjectName = selectedSubject.subjectName
+            homeworkDetailVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+
+            self.navigationController?.pushViewController(homeworkDetailVC, animated: true)
+        }
+    }
 }

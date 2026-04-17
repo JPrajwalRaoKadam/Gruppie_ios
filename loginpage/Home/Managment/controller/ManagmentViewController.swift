@@ -76,7 +76,7 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
             return
         }
         
-        let urlString = "https://dev.gruppie.in/api/v1/management/\(memberId)"
+        let urlString = "https://backend.gc2.co.in/api/v1/management/\(memberId)"
         guard let url = URL(string: urlString) else {
             showError("Invalid URL")
             return

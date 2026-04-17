@@ -17,6 +17,9 @@ class AttendanceVC: UIViewController {
     @IBOutlet weak var curDate: UIButton!
     
    var groupClasses: [GroupClass] = []
+    var groupClassesforStudent: [GroupClass1] = []
+   var roleName: String?
+   var fullAccess: Bool?
    var groupAcademicYearResponse: GroupAcademicYearResponse?
    var attendanceSettingsResponse: AttendanceSettingsAllResponse?
    var groupAcademicYearId: String?
@@ -40,7 +43,7 @@ class AttendanceVC: UIViewController {
        
         if let response = groupAcademicYearResponse {
                print("✅ groupAcademicYearResponse received")
-
+               print("roleName in attendancevc\(roleName),  fullAccess: \(fullAccess)")
                print("Group name :", response.data.groupInfo.groupName)
                print("Short name :", response.data.groupInfo.shortName)
                print("Academic years count :", response.data.academicYears.count)
@@ -54,13 +57,64 @@ class AttendanceVC: UIViewController {
                print("❌ groupAcademicYearResponse is nil")
            }
         
+        if fullAccess == false && roleName == "STUDENT" {
+              fetchStudentClasses()   // 👈 CALL API
+          } else {
+              fetchAttendanceData()  // existing API
+          }
+        
+        if fullAccess == false && roleName == "STUDENT" {
+            setting.isHidden = true
+        }
+        
         setCurrentDate()
-        fetchAttendanceData()
         enableKeyboardDismissOnTap()
         fetchAttendanceSettingsAll()
 
         
     }
+    
+    func fetchStudentClasses() {
+        
+        guard let roleToken = SessionManager.useRoleToken else {
+            print("❌ Token missing")
+            return
+        }
+        
+        guard let groupAcademicYearId =
+            groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+            print("❌ groupAcademicYearId missing")
+            return
+        }
+        
+        let headers = [
+            "Authorization": "Bearer \(roleToken)"
+        ]
+        
+        let queryParams = [
+            "groupAcademicYearId": groupAcademicYearId
+        ]
+        
+        APIManager.shared.request(
+            endpoint: "group-class/user-classes",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { (result: Result<StudentClassResponse, APIManager.APIError>) in
+            
+            switch result {
+            case .success(let response):
+                print("✅ Student Classes:", response.data)
+                
+                self.groupClassesforStudent = response.data   // ✅ FIXED
+                self.TableView.reloadData()
+                
+            case .failure(let error):
+                print("❌ Error:", error)
+            }
+        }
+    }
+    
 
  func fetchAttendanceData() {
      
@@ -219,7 +273,12 @@ class AttendanceVC: UIViewController {
             curDate.setTitle(currentDate, for: .normal)
             
             print("Selected Date: \(currentDate ?? "")")
-            fetchAttendanceData()
+            if fullAccess == false && roleName == "STUDENT" {
+                  fetchStudentClasses()   // 👈 CALL API
+              } else {
+                  fetchAttendanceData()  // existing API
+              }
+            
         } else {
             print("Cannot go beyond today's date")
         }
@@ -237,7 +296,11 @@ class AttendanceVC: UIViewController {
             curDate.setTitle(currentDate, for: .normal)
             
             print("Selected Date: \(currentDate ?? "")")
-            fetchAttendanceData()
+            if fullAccess == false && roleName == "STUDENT" {
+                  fetchStudentClasses()   // 👈 CALL API
+              } else {
+                  fetchAttendanceData()  // existing API
+              }
         }
     }
     
@@ -317,7 +380,11 @@ class AttendanceVC: UIViewController {
             
             print("Selected Date: \(selectedDate)")
             
-            fetchAttendanceData() // Fetch data for the selected date
+            if fullAccess == false && roleName == "STUDENT" {
+                  fetchStudentClasses()   // 👈 CALL API
+              } else {
+                  fetchAttendanceData()  // existing API
+              }
             
             if let backgroundView = sender.superview?.superview {
                 backgroundView.removeFromSuperview()
@@ -339,11 +406,18 @@ class AttendanceVC: UIViewController {
 }
 
 extension AttendanceVC: UITableViewDataSource, UITableViewDelegate {
+    
+    // MARK: - Number of Rows
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return attendanceClasses.count
+        
+        if fullAccess == false && roleName == "STUDENT" {
+            return groupClassesforStudent.count   // ✅ FIXED
+        } else {
+            return attendanceClasses.count
+        }
     }
     
-    
+    // MARK: - Cell For Row
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
@@ -352,83 +426,95 @@ extension AttendanceVC: UITableViewDataSource, UITableViewDelegate {
             for: indexPath
         ) as! AttendanceTableViewCell
         
-        let item = attendanceClasses[indexPath.row]
-        cell.classLabel.text = item.className
-        
-        if item.sessions.isEmpty {
+        // ✅ STUDENT FLOW
+        if fullAccess == false && roleName == "STUDENT" {
+            
+            let item = groupClassesforStudent[indexPath.row]   // ✅ FIXED
+            
+            cell.classLabel.text = item.name
             cell.periodLabel.text = ""
+            
+            cell.img.image = nil
+            cell.fallbackLabel.isHidden = false
+            cell.showFallbackImage(for: item.name)
+            
         } else {
             
-            let periodText = item.sessions
-                .sorted { $0.sessionNumber < $1.sessionNumber }
-                .map { session in
-                    "P\(session.sessionNumber): \(session.presentStudents)/\(item.totalStudents)"
-                }
-                .joined(separator: ",  ")
+            // ✅ NORMAL FLOW (Teacher/Admin)
+            let item = attendanceClasses[indexPath.row]
             
-            cell.periodLabel.text = periodText
+            cell.classLabel.text = item.className
+            
+            if item.sessions.isEmpty {
+                cell.periodLabel.text = ""
+            } else {
+                
+                let periodText = item.sessions
+                    .sorted { $0.sessionNumber < $1.sessionNumber }
+                    .map { session in
+                        "P\(session.sessionNumber): \(session.presentStudents)/\(item.totalStudents)"
+                    }
+                    .joined(separator: ",  ")
+                
+                cell.periodLabel.text = periodText
+            }
+            
+            cell.img.image = nil
+            cell.fallbackLabel.isHidden = false
+            cell.showFallbackImage(for: item.className)
         }
-        cell.img.image = nil
-        cell.fallbackLabel.isHidden = false
-        cell.showFallbackImage(for: item.className)
         
         return cell
     }
+    
+    // MARK: - Did Select Row
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let selectedClass = attendanceClasses[indexPath.row]
-        
-        let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
-        
-        guard let studentVC = storyboard
-            .instantiateViewController(withIdentifier: "StudentVC") as? StudentVC else {
-            print("❌ Could not instantiate StudentVC")
-            return
+        // ✅ STUDENT FLOW
+        if fullAccess == false && roleName == "STUDENT" {
+            
+            let selectedClass = groupClassesforStudent[indexPath.row]
+            print("📚 Selected Student Class:", selectedClass.name)
+            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+            
+            guard let studentVC = storyboard
+                .instantiateViewController(withIdentifier: "StudentVC") as? StudentVC else {
+                print("❌ Could not instantiate StudentVC")
+                return
+            }
+            
+            studentVC.classId = selectedClass.id
+            studentVC.className = selectedClass.name
+            studentVC.fullAccess = self.fullAccess
+            studentVC.roleName = self.roleName
+            studentVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+            studentVC.attendanceSettingsResponse = self.attendanceSettingsResponse
+            
+            navigationController?.pushViewController(studentVC, animated: true)
+            
+        } else {
+            
+            // ✅ NORMAL FLOW
+            let selectedClass = attendanceClasses[indexPath.row]
+            
+            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
+            
+            guard let studentVC = storyboard
+                .instantiateViewController(withIdentifier: "StudentVC") as? StudentVC else {
+                print("❌ Could not instantiate StudentVC")
+                return
+            }
+            
+            studentVC.classId = selectedClass.classId
+            studentVC.className = selectedClass.className
+            studentVC.groupAcademicYearResponse = self.groupAcademicYearResponse
+            studentVC.attendanceSettingsResponse = self.attendanceSettingsResponse
+            
+            navigationController?.pushViewController(studentVC, animated: true)
         }
-        
-        studentVC.classId = selectedClass.classId
-        studentVC.className = selectedClass.className
-        studentVC.groupAcademicYearResponse = self.groupAcademicYearResponse
-        studentVC.attendanceSettingsResponse = self.attendanceSettingsResponse
-
-        navigationController?.pushViewController(studentVC, animated: true)
     }
-    //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    //        if currentRole == "teacher" || currentRole == "parent" {
-    //            // Navigate to subject-specific attendance view for teachers
-    //            let selectedSubject = subjects[indexPath.row]
-    //            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
-    //            if let StudentVC = storyboard.instantiateViewController(withIdentifier: "StudentVC") as? StudentVC {
-    //                StudentVC.currentDate = currentDate
-    //               // StudentVC.groupId = groupId
-    //                let subject = subjects[indexPath.row]
-    //                StudentVC.teamId = subject.teamId
-    //                StudentVC.className = subject.name
-    ////                StudentVC.attendanceData = self.attendanceData
-    //  //             StudentVC.selectedClassnumberOfTimeAttendance = Int(selectedAttendance.numberOfTimeAttendance)
-    //                navigationController?.pushViewController(StudentVC, animated: true)
-    //            } else {
-    //                print("❌ Could not instantiate SubjectAttendanceVC")
-    //            }
-    //        } else if currentRole == "admin" {
-    //            // Navigate to student list for selected class
-    //            let selectedAttendance = attendanceData[indexPath.row]
-    //            let storyboard = UIStoryboard(name: "Attendance", bundle: nil)
-    //            if let StudentVC = storyboard.instantiateViewController(withIdentifier: "StudentVC") as? StudentVC {
-    //               // StudentVC.groupId = groupId
-    //                StudentVC.teamId = selectedAttendance.teamId
-    //                StudentVC.currentDate = currentDate
-    //                StudentVC.className = selectedAttendance.name
-    //                StudentVC.attendanceData = self.attendanceData
-    //                StudentVC.selectedClassnumberOfTimeAttendance = Int(selectedAttendance.numberOfTimeAttendance)
-    //                navigationController?.pushViewController(StudentVC, animated: true)
-    //            } else {
-    //                print("❌ Could not instantiate StudentVC")
-    //            }
-    //        } else {
-    //
-    //        }
-    //    }
+    
+    // MARK: - Row Height
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
     }

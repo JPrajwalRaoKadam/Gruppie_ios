@@ -244,7 +244,7 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
             return
         }
         
-        let urlString = "https://dev.gruppie.in/api/v1/management/\(userId)"
+        let urlString = "https://backend.gc2.co.in/api/v1/management/\(userId)"
         guard let url = URL(string: urlString) else {
             showError("Invalid URL")
             return
@@ -320,7 +320,7 @@ class MoreDetailViewController: UIViewController, UIDocumentPickerDelegate, UIIm
             return
         }
         
-        let url = URL(string: "https://dev.gruppie.in/api/v1/management/\(userId)")!
+        let url = URL(string: "https://backend.gc2.co.in/api/v1/management/\(userId)")!
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         

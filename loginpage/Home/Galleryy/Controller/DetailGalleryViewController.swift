@@ -389,7 +389,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         // MARK: - REQUEST
         var request = URLRequest(
-            url: URL(string: "https://dev.gruppie.in/api/v1/gallery/attachments")!
+            url: URL(string: "https://backend.gc2.co.in/api/v1/gallery/attachments")!
         )
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

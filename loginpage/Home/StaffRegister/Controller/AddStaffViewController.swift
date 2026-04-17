@@ -130,7 +130,7 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         if let middleName = middleName, !middleName.isEmpty { parameters["middleName"] = middleName }
         if let lastName = lastName, !lastName.isEmpty { parameters["lastName"] = lastName }
         
-        let url = URL(string: "https://dev.gruppie.in/api/v1/staff/full-registration")!
+        let url = URL(string: "https://backend.gc2.co.in/api/v1/staff/full-registration")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

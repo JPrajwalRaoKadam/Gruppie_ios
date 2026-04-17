@@ -131,7 +131,7 @@ class TimetableViewController: UIViewController {
         }
         print("✅ Token retrieved: \(token.prefix(30))...")
 
-        guard let url = URL(string: "https://dev.gruppie.in/api/v1/days") else {
+        guard let url = URL(string: "https://backend.gc2.co.in/api/v1/days") else {
             print("❌ Invalid URL for days API")
             return
         }
@@ -222,7 +222,7 @@ class TimetableViewController: UIViewController {
         }
         print("✅ Token retrieved: \(token.prefix(30))...")
 
-        let urlString = "https://dev.gruppie.in/api/v1/time-table/daily-summary?groupAcademicYearId=3&dayId=\(dayId)"
+        let urlString = "https://backend.gc2.co.in/api/v1/time-table/daily-summary?groupAcademicYearId=3&dayId=\(dayId)"
         print("🌐 Daily Summary API URL: \(urlString)")
         
         guard let url = URL(string: urlString) else {

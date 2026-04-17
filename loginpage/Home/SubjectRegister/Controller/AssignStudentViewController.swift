@@ -59,7 +59,7 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         let subjectIdString = String(subject.subjectId)
         let classIdString = String(classId)
         
-        let urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classIdString)/student-mapping/subject/\(subjectIdString)"
+        let urlString = "https://backend.gc2.co.in/api/v1/subject-register/class/\(classIdString)/student-mapping/subject/\(subjectIdString)"
         
         print("🌐 Fetching students from: \(urlString)")
         
@@ -168,7 +168,7 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         // ✅ Use student-mapping endpoint
         let subjectIdString = String(subject.subjectId)
         let classIdString = String(classId)
-        let urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classIdString)/student-mapping/subject/\(subjectIdString)"
+        let urlString = "https://backend.gc2.co.in/api/v1/subject-register/class/\(classIdString)/student-mapping/subject/\(subjectIdString)"
         
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")
@@ -348,10 +348,10 @@ class AssignStudentViewController: UIViewController, UITableViewDelegate, UITabl
         // Use different endpoints for add and remove
         let urlString: String
         if action == "add" {
-            urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classId)/student-mapping"
+            urlString = "https://backend.gc2.co.in/api/v1/subject-register/class/\(classId)/student-mapping"
         } else {
             // For remove, try using POST with a different path
-            urlString = "https://dev.gruppie.in/api/v1/subject-register/class/\(classId)/student-mapping/remove"
+            urlString = "https://backend.gc2.co.in/api/v1/subject-register/class/\(classId)/student-mapping/remove"
         }
         
         guard let url = URL(string: urlString) else {

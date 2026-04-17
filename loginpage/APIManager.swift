@@ -20,7 +20,7 @@ class APIManager {
     enum Server: String, CaseIterable {
 //        case gcc = "https://gcc.gruppie.in/api/v1/"
 //        case gcc6 = "https://gcc6.gruppie.in/api/v1/"
-        case newServer = "https://dev.gruppie.in/api/v1/"
+        case newServer = "https://backend.gc2.co.in/api/v1/"
         
         var priority: Int {
             switch self {

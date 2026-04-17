@@ -1,0 +1,476 @@
+//
+//  HomeworkDetailVC.swift
+//  loginpage
+//
+//  Created by apple on 02/04/26.
+//
+
+import UIKit
+import PDFKit
+
+class HomeworkDetailVC: UIViewController,SubDetailsCellDelegate {
+
+        @IBOutlet weak var bcbutton: UIButton!
+        @IBOutlet weak var classsubjName: UILabel!
+        @IBOutlet weak var subTableView: UITableView!
+        @IBOutlet weak var addButton: UIButton!
+
+        var classId: String = ""
+        var subjectId: String = ""
+        var subjectName: String = ""
+        var className: String = ""
+
+        var groupAcademicYearResponse: GroupAcademicYearResponse?
+    var homeworkList: [AssignmentItem] = []
+
+        var shouldRefreshData = false
+
+        override func viewDidLoad() {
+            super.viewDidLoad()
+
+            subTableView.layer.cornerRadius = 10
+            bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
+            bcbutton.clipsToBounds = true
+
+            subTableView.delegate = self
+            subTableView.dataSource = self
+
+            print("classId:", classId)
+            print("subjectId:", subjectId)
+
+            if let groupAcademicYearId = groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId {
+                print("groupAcademicYearId:", groupAcademicYearId)
+            }
+
+            classsubjName.text = "\(subjectName) - (\(className))"
+
+            subTableView.register(UINib(nibName: "SubDetailsTableViewCell", bundle: nil),
+                                  forCellReuseIdentifier: "SubDetailsTableViewCell")
+
+            fetchHomework()
+            enableKeyboardDismissOnTap()
+        }
+
+        override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+
+            if shouldRefreshData {
+                fetchHomework()
+                shouldRefreshData = false
+            }
+        }
+        
+        func didTapDelete(at cell: SubDetailsTableViewCell) {
+
+            guard let indexPath = subTableView.indexPath(for: cell) else { return }
+
+            let note = homeworkList[indexPath.row]
+
+            //guard let noteId = note.noteId else { return }
+
+           // showDeleteAlert(noteId: noteId)
+        }
+//        func showDeleteAlert(noteId: String) {
+//
+//            let alert = UIAlertController(
+//                title: "Delete Note",
+//                message: "Are you sure you want to delete this note?",
+//                preferredStyle: .alert
+//            )
+//
+//            let cancel = UIAlertAction(title: "Cancel", style: .cancel)
+//
+//            let delete = UIAlertAction(title: "Delete", style: .destructive) { _ in
+//                self.deleteNote(noteId: noteId)
+//            }
+//
+//            alert.addAction(cancel)
+//            alert.addAction(delete)
+//
+//            present(alert, animated: true)
+//        }
+    
+//        func deleteNote(noteId: String) {
+//            
+//            guard let token = SessionManager.useRoleToken else {
+//                print("❌ Token missing")
+//                return
+//            }
+//
+//            let endpoint = "notes/\(noteId)"
+//
+//            APIManager.shared.request(
+//                endpoint: endpoint,
+//                method: .delete,
+//                headers: ["Authorization": "Bearer \(token)"]
+//            ) { (result: Result<DeleteNoteResponse, APIManager.APIError>) in
+//
+//                switch result {
+//
+//                case .success(let response):
+//
+//                    print("✅ Delete Success:", response)
+//
+//                    self.showMessage(response.message ?? "Note deleted successfully")
+//
+//                    self.fetchNotes()
+//
+//                case .failure(let error):
+//
+//                    print("❌ Delete Error:", error)
+//                }
+//            }
+//        }
+    func fetchHomework() {
+        
+        guard let roleToken = SessionManager.useRoleToken else {
+            print("❌ Token missing")
+            return
+        }
+
+        let queryParams: [String: String] = [
+            "classId": classId,
+            "subjectId": subjectId
+        ]
+
+        APIManager.shared.request(
+            endpoint: "getAssignments",
+            method: .get,
+            queryParams: queryParams,
+            headers: ["Authorization": "Bearer \(roleToken)"]
+        ) { (result: Result<AssignmentsResponse, APIManager.APIError>) in
+
+            switch result {
+
+            case .success(let response):
+
+                print("✅ Homework Response:", response)
+
+                let allData = response.data?.data ?? []
+
+                self.homeworkList = allData.filter {
+                    $0.classId == self.classId &&
+                    $0.subjectId == self.subjectId
+                }
+
+                DispatchQueue.main.async {
+                    self.subTableView.reloadData()
+                }
+
+            case .failure(let error):
+                print("❌ API Error:", error)
+            }
+        }
+    }
+        func showMessage(_ message: String) {
+
+            let alert = UIAlertController(
+                title: "Success",
+                message: message,
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+
+            present(alert, animated: true)
+        }
+        
+   
+        // MARK: - Buttons
+
+        @IBAction func backButton(_ sender: Any) {
+            navigationController?.popViewController(animated: true)
+        }
+
+        @IBAction func addButton(_ sender: Any) {
+            navigateToAddChapter()
+        }
+
+        func navigateToAddChapter() {
+
+            let storyboard = UIStoryboard(name: "HomeWork", bundle: nil)
+
+            if let vc = storyboard.instantiateViewController(withIdentifier: "AddHomeworkVC") as? AddHomeworkVC {
+
+                vc.subjectId = subjectId
+                vc.classId = classId
+                vc.groupAcademicYearResponse = self.groupAcademicYearResponse
+                navigationController?.pushViewController(vc, animated: true)
+            }
+        }
+    }
+
+    // MARK: - TableView
+
+    extension HomeworkDetailVC: UITableViewDelegate, UITableViewDataSource {
+        
+        func formatDate(_ isoDate: String) -> String {
+            
+            let isoFormatter = ISO8601DateFormatter()
+            isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            
+            if let date = isoFormatter.date(from: isoDate) {
+                
+                let displayFormatter = DateFormatter()
+                displayFormatter.dateFormat = "MMM d, yyyy"
+                
+                return displayFormatter.string(from: date)
+            }
+            
+            return ""
+        }
+
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return homeworkList.count
+        }
+
+        func tableView(_ tableView: UITableView,
+                       cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: "SubDetailsTableViewCell",
+                for: indexPath) as? SubDetailsTableViewCell else {
+                return UITableViewCell()
+            }
+
+            let topic = homeworkList[indexPath.row]
+
+            cell.topicName.text = topic.assignmentType ?? "-"
+            cell.descriptions.text = topic.description ?? "-"
+           // cell.createdOn.text = formatDate(topic.createdAt ?? "")
+            cell.delegate = self
+            // Date format
+            if let createdAt = topic.createdAt {
+
+                let isoFormatter = ISO8601DateFormatter()
+
+                if let date = isoFormatter.date(from: createdAt) {
+
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "dd-MM-yyyy"
+
+                    cell.createdOn.text = formatter.string(from: date)
+                }
+            }
+
+            // Remove previous views
+            cell.datacontainer.subviews.forEach { $0.removeFromSuperview() }
+
+            guard let firstAttachment = topic.attachmentLinks?.first,
+                  let fileUrl = firstAttachment.fileUrl,
+                  let url = URL(string: fileUrl) else {
+
+                let label = UILabel(frame: cell.datacontainer.bounds)
+                label.text = "No Attachment"
+                label.textAlignment = .center
+                cell.datacontainer.addSubview(label)
+                return cell
+            }
+
+            let fileExtension = url.pathExtension.lowercased()
+
+            switch fileExtension {
+
+            case "png", "jpg", "jpeg":
+
+                let imageView = UIImageView(frame: cell.datacontainer.bounds)
+                imageView.contentMode = .scaleAspectFit
+                imageView.clipsToBounds = true
+                imageView.load(url: fileUrl)
+
+                cell.datacontainer.addSubview(imageView)
+
+            case "mp4", "mov":
+
+                let label = UILabel(frame: cell.datacontainer.bounds)
+                label.text = "🎥 Video: \(url.lastPathComponent)"
+                label.textAlignment = .center
+                label.textColor = .systemRed
+
+                cell.datacontainer.addSubview(label)
+
+            case "mp3", "wav":
+
+                let label = UILabel(frame: cell.datacontainer.bounds)
+                label.text = "🎵 Audio: \(url.lastPathComponent)"
+                label.textAlignment = .center
+                label.textColor = .systemGreen
+
+                cell.datacontainer.addSubview(label)
+
+            case "pdf":
+
+                let imageView = UIImageView(image: UIImage(named: "defaultpdf"))
+                imageView.frame = cell.datacontainer.bounds
+                imageView.contentMode = .scaleAspectFit
+
+                cell.datacontainer.addSubview(imageView)
+
+            default:
+
+                let label = UILabel(frame: cell.datacontainer.bounds)
+                label.text = "📎 File: \(url.lastPathComponent)"
+                label.textAlignment = .center
+
+                cell.datacontainer.addSubview(label)
+            }
+
+            return cell
+        }
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+            let note = homeworkList[indexPath.row]
+
+            guard let attachments = note.attachmentLinks, !attachments.isEmpty else {
+                print("❌ No attachments")
+                return
+            }
+
+            if attachments.count > 1 {
+               // showAttachmentPicker(attachments: attachments)
+            } else {
+               // openInPlayer(attachment: attachments[0])
+            }
+        }
+        func showAttachmentPicker(attachments: [AttachmentLink]) {
+
+            let alert = UIAlertController(title: "Select File", message: nil, preferredStyle: .actionSheet)
+
+            for attachment in attachments {
+
+                let fileName = attachment.fileName ?? "File"
+
+                let action = UIAlertAction(title: fileName, style: .default) { _ in
+                    self.openInPlayer(attachment: attachment)
+                }
+
+                alert.addAction(action)
+            }
+
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+            present(alert, animated: true)
+        }
+        func openInPlayer(attachment: AttachmentLink) {
+
+            guard let fileUrl = attachment.fileUrl else { return }
+
+            let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+
+            guard let vc = storyboard.instantiateViewController(
+                withIdentifier: "VideoPlayerVC"
+            ) as? VideoPlayerVC else {
+                print("❌ VideoPlayerVC not found")
+                return
+            }
+
+            vc.mediaURL = fileUrl
+            vc.fileType = attachment.fileType // 👈 IMPORTANT
+            navigationController?.pushViewController(vc, animated: true)
+        }
+        
+        func openMedia(fileUrl: String) {
+
+            guard let url = URL(string: fileUrl) else { return }
+
+            let fileExtension = url.pathExtension.lowercased()
+
+            switch fileExtension {
+
+            case "png", "jpg", "jpeg":
+                openImage(url: url)
+
+            case "mp4", "mov":
+                openVideo(url: url)
+
+            case "pdf":
+                openPDF(url: url)
+
+            default:
+                UIApplication.shared.open(url)
+            }
+        }
+        func openImage(url: URL) {
+
+            let vc = UIViewController()
+            let imageView = UIImageView(frame: vc.view.bounds)
+
+            imageView.contentMode = .scaleAspectFit
+            imageView.clipsToBounds = true
+
+            vc.view.addSubview(imageView)
+
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                if let data = data {
+                    DispatchQueue.main.async {
+                        imageView.image = UIImage(data: data)
+                    }
+                }
+            }.resume()
+
+            navigationController?.pushViewController(vc, animated: true)
+        }
+        func openVideo(url: URL) {
+
+            let storyboard = UIStoryboard(name: "Feeds", bundle: nil)
+
+            if let vc = storyboard.instantiateViewController(withIdentifier: "VideoPlayerVC") as? VideoPlayerVC {
+
+                vc.mediaURL = url.absoluteString
+                navigationController?.pushViewController(vc, animated: true)
+            }
+        }
+        
+        func openPDF(url: URL) {
+
+            let pdfVC = UIViewController()
+            let pdfView = PDFView(frame: pdfVC.view.bounds)
+
+            pdfView.autoScales = true
+            pdfVC.view.addSubview(pdfView)
+
+            if let document = PDFDocument(url: url) {
+                pdfView.document = document
+            } else {
+                print("❌ Failed to load PDF")
+            }
+
+            navigationController?.pushViewController(pdfVC, animated: true)
+        }
+        
+        func didTapDownload(at cell: SubDetailsTableViewCell) {
+
+            guard let indexPath = subTableView.indexPath(for: cell) else { return }
+
+            let note = homeworkList[indexPath.row]
+
+            guard let fileUrl = note.attachmentLinks?.first?.fileUrl,
+                  let url = URL(string: fileUrl) else {
+                print("❌ Invalid URL")
+                return
+            }
+
+            UIApplication.shared.open(url)
+        }
+    }
+
+    // MARK: - Image Loader
+
+// MARK: - Image Loader
+//extension UIImageView {
+//
+//    func load(url: String) {
+//
+//        guard let imageURL = URL(string: url) else { return }
+//
+//        URLSession.shared.dataTask(with: imageURL) { data, _, _ in
+//
+//            if let data = data {
+//                DispatchQueue.main.async {
+//                    self.image = UIImage(data: data)
+//                }
+//            }
+//
+//        }.resume()
+//    }
+//}

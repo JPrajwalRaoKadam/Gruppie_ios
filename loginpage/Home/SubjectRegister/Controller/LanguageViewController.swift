@@ -75,7 +75,7 @@ class LanguageViewController: UIViewController, UITableViewDelegate, UITableView
             return
         }
         
-        let urlString = "https://dev.gruppie.in/api/v1/subject-register?groupAcademicYearId=\(groupAcademicYearId)&classId=\(classId)&page=1&limit=20"
+        let urlString = "https://backend.gc2.co.in/api/v1/subject-register?groupAcademicYearId=\(groupAcademicYearId)&classId=\(classId)&page=1&limit=20"
         
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")

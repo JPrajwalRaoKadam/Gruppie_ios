@@ -580,7 +580,7 @@ class AddFeedVC: UIViewController,
                                   completion: @escaping (Result<String, Error>) -> Void) {
         
         let boundary = "Boundary-\(UUID().uuidString)"
-        let url = URL(string: "https://dev.gruppie.in/api/v1/posts")!
+        let url = URL(string: "https://backend.gc2.co.in/api/v1/posts")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -653,7 +653,7 @@ class AddFeedVC: UIViewController,
                                  completion: @escaping (Result<String, Error>) -> Void) {
         
         let boundary = "Boundary-\(UUID().uuidString)"
-        let url = URL(string: "https://dev.gruppie.in/api/v1/posts")!
+        let url = URL(string: "https://backend.gc2.co.in/api/v1/posts")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

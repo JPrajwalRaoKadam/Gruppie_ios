@@ -8,10 +8,14 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
     @IBOutlet weak var studentTBL: UITableView!
     @IBOutlet weak var currDate: UIButton!
     @IBOutlet weak var DoneButton: UIButton!
+    @IBOutlet weak var threeDots: UIButton!
     
     var classId: String?
     var className: String?
+    var fullAccess: Bool?
+    var roleName: String?
     var minimalStudents: [StudentMinimal] = []
+    var studentList: [StudentListItem] = []
     var groupAcademicYearResponse: GroupAcademicYearResponse?
     var attendanceSettingsResponse: AttendanceSettingsAllResponse?
     var attendanceSessions: [AttendanceSessionDetail] = []
@@ -58,11 +62,21 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
         // Display the class name in the label
         name.text = className != nil ? "Attendance - (\(className!))" : "No Class Name"
         print("Received attendanceData no of numberOfTimeAttendance: \(selectedClassnumberOfTimeAttendance)")
-        
         self.groupAcademicYearId =
             groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId
+        
+        if fullAccess == false && roleName == "STUDENT" {
+            fetchStudentListForStudent()   // ✅ NEW API
+        } else {
+            fetchMinimalStudentList()      // ✅ OLD API
+        }
+        
+        if fullAccess == false && roleName == "STUDENT" {
+            DoneButton.isHidden = true
+            threeDots.isHidden = true
+        }
+
         setCurrentDate()
-        fetchMinimalStudentList()
         enableKeyboardDismissOnTap()
         fetchClassAttendanceSettings()
         fetchAttendanceSessions()
@@ -90,6 +104,53 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
 
         print("✅ AttendanceSettingsAllResponse received in StudentVC")
         dump(response)
+    }
+    
+    func fetchStudentListForStudent() {
+
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Token missing")
+            return
+        }
+
+        guard let classId = classId,
+              let groupAcademicYearId = groupAcademicYearId else {
+            print("❌ Missing classId or groupAcademicYearId")
+            return
+        }
+
+        let endpoint = "group-class/\(classId)/students"
+
+        let headers = [
+            "Authorization": "Bearer \(token)"
+        ]
+
+        let queryParams = [
+            "groupAcademicYearId": groupAcademicYearId
+        ]
+
+        APIManager.shared.request(
+            endpoint: endpoint,
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { (result: Result<StudentListResponse, APIManager.APIError>) in
+
+            switch result {
+
+            case .success(let response):
+
+                self.studentList = response.data
+                print("✅ Student List:", response.data)
+
+                DispatchQueue.main.async {
+                    self.studentTBL.reloadData()
+                }
+
+            case .failure(let error):
+                print("❌ Student list error:", error)
+            }
+        }
     }
     
 //    func fetchMinimalStudentList() 
@@ -565,7 +626,12 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
                     print("📩 Response: \(responseBody)")
                 }
                 DispatchQueue.main.async {
-                    self.fetchMinimalStudentList() // Or reload UI
+                    //self.fetchMinimalStudentList() // Or reload UI
+                    if self.fullAccess == false && self.roleName == "STUDENT" {
+                        self.fetchStudentListForStudent()   // ✅ NEW API
+                    } else {
+                        self.fetchMinimalStudentList()      // ✅ OLD API
+                    }
                 }
             }
         }.resume()
@@ -734,7 +800,11 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
 
             if httpResponse.statusCode == 200 {
                 DispatchQueue.main.async {
-                    self.fetchMinimalStudentList() // Or reload UI
+                    if self.fullAccess == false && self.roleName == "STUDENT" {
+                        self.fetchStudentListForStudent()   // ✅ NEW API
+                    } else {
+                        self.fetchMinimalStudentList()      // ✅ OLD API
+                    }
             
                     print("✅ Holiday marked successfully")
                     // You can show success alert or reload data if needed
@@ -956,7 +1026,11 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
             currDate.setTitle(currentDate, for: .normal)
             
             print("Selected Date: \(currentDate ?? "")")
-            fetchMinimalStudentList()
+            if self.fullAccess == false && self.roleName == "STUDENT" {
+                self.fetchStudentListForStudent()   // ✅ NEW API
+            } else {
+                self.fetchMinimalStudentList()      // ✅ OLD API
+            }
            // fetchStudentData()
         }
     }
@@ -974,7 +1048,11 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
             currDate.setTitle(currentDate, for: .normal)
             
             print("Selected Date: \(currentDate ?? "")")
-            fetchMinimalStudentList()
+            if fullAccess == false && roleName == "STUDENT" {
+                fetchStudentListForStudent()   // ✅ NEW API
+            } else {
+                fetchMinimalStudentList()      // ✅ OLD API
+            }
            // fetchStudentData()
         } else {
             print("Cannot go beyond today's date")
@@ -1049,7 +1127,11 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
             
             
             print("Selected Date: \(selectedDate)")
-            fetchMinimalStudentList()
+            if fullAccess == false && roleName == "STUDENT" {
+                fetchStudentListForStudent()   // ✅ NEW API
+            } else {
+                fetchMinimalStudentList()      // ✅ OLD API
+            }
             
            // fetchStudentData() // Fetch data for the selected date
             
@@ -1079,7 +1161,11 @@ extension StudentVC: UIViewControllerTransitioningDelegate, UITableViewDataSourc
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return minimalStudents.count
+        if fullAccess == false && roleName == "STUDENT" {
+               return studentList.count
+           } else {
+               return minimalStudents.count
+           }
     }
 
     func tableView(_ tableView: UITableView,
@@ -1092,54 +1178,38 @@ extension StudentVC: UIViewControllerTransitioningDelegate, UITableViewDataSourc
             return UITableViewCell()
         }
 
-        let student = minimalStudents[indexPath.row]
+        if fullAccess == false && roleName == "STUDENT" {
 
-        // Name
-        cell.studentName.text = student.fullName
-        cell.student = student
-        cell.delegate = self
+            let student = studentList[indexPath.row]
 
-        // Roll number
-        if let roll = student.rollNumber, !roll.isEmpty {
-            cell.rollNo.text = "Roll No: \(roll)"
-        } else {
-            cell.rollNo.text = "Roll No: -"
-        }
+            cell.studentName.text = student.name
+            cell.rollNo.text = "Class: \(student.className)"
 
-        // Reset image (important for reuse)
-        cell.images.image = nil
-        cell.fallback.isHidden = true
+            cell.images.image = nil
+            cell.showFallbackImage(for: student.name)
+            cell.fallback.isHidden = false
 
-        // Profile image
-        if let urlString = student.profilePhoto,
-           !urlString.isEmpty,
-           let url = URL(string: urlString) {
-
-            URLSession.shared.dataTask(with: url) { data, _, _ in
-                guard let data = data,
-                      let img = UIImage(data: data) else {
-
-                    DispatchQueue.main.async {
-                        cell.showFallbackImage(for: student.fullName)
-                        cell.fallback.isHidden = false
-                    }
-                    return
-                }
-
-                DispatchQueue.main.async {
-                    cell.images.image = img
-                    cell.fallback.isHidden = true
-                }
-            }.resume()
+            cell.attenStatusStackView.isHidden = true
 
         } else {
+
+            let student = minimalStudents[indexPath.row]
+
+            cell.studentName.text = student.fullName
+
+            if let roll = student.rollNumber, !roll.isEmpty {
+                cell.rollNo.text = "Roll No: \(roll)"
+            } else {
+                cell.rollNo.text = "Roll No: -"
+            }
+
+            cell.images.image = nil
             cell.showFallbackImage(for: student.fullName)
             cell.fallback.isHidden = false
+
+            cell.attenStatusStackView.isHidden = true
         }
 
-        // ✅ IMPORTANT:
-        // This screen uses StudentMinimal (no attendance info)
-        cell.attenStatusStackView.isHidden = true
         return cell
     }
 

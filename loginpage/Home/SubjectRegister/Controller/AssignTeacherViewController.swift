@@ -46,7 +46,7 @@ class AssignTeacherViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
 
-        guard let url = URL(string: "https://dev.gruppie.in/api/v1/staff/registration") else {
+        guard let url = URL(string: "https://backend.gc2.co.in/api/v1/staff/registration") else {
             print("Invalid URL")
             return
         }
@@ -102,7 +102,7 @@ class AssignTeacherViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
 
-        let urlString = "https://dev.gruppie.in/api/v1/subject-register/staff-mapping/subject/\(subjectId)"
+        let urlString = "https://backend.gc2.co.in/api/v1/subject-register/staff-mapping/subject/\(subjectId)"
         
         guard let url = URL(string: urlString) else {
             print("Invalid assigned staff URL")
@@ -233,7 +233,7 @@ class AssignTeacherViewController: UIViewController, UITableViewDelegate, UITabl
             return
         }
         
-        guard let url = URL(string: "https://dev.gruppie.in/api/v1/subject-register/staff-mapping") else {
+        guard let url = URL(string: "https://backend.gc2.co.in/api/v1/subject-register/staff-mapping") else {
             completion(false, "Invalid URL")
             return
         }

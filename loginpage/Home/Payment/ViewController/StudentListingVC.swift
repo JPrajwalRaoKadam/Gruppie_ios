@@ -24,9 +24,8 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     var selectedClass: ClasswiseFeeData?
     var groupAcademicYearResponse: GroupAcademicYearResponse?
     
-    // 🔥 BOTH DATA SOURCES
-    var studentFees: [StudentFeeSummary] = []      // For Admin/Parent
-    var students: [StudentListItem] = []           // For Student role
+    var studentFees: [StudentFeeSummary] = []
+    var students: [StudentListItemModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -34,18 +33,16 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         setupUI()
         
-        if SessionManager.role_name == "STUDENT" {
-            overAllAmountView.isHidden = true   // 🔥 hide totals
+        if isStudentRole() {
+            overAllAmountView.isHidden = true
             
-            fetchStudents(classId: classId ?? "") { [weak self] students in
+            fetchStudents(classId: classId ?? "") { [weak self] (students: [StudentListItemModel]?) in
                 guard let self = self else { return }
                 
                 guard let students = students else {
                     print("❌ No students")
                     return
                 }
-                
-                print("👨‍🎓 Students Count:", students.count)
                 
                 self.students = students
                 self.studentTableView.reloadData()
@@ -72,10 +69,7 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         if isStudentRole() {
             customContainerView.isHidden = true
-
             tableTopConstraint.constant = 0
-
-            // attach to navView bottom
             studentTableView.topAnchor.constraint(equalTo: navView.bottomAnchor).isActive = true
         }
         
@@ -85,12 +79,11 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         )
     }
     
-    // MARK: - Helpers
     func isStudentRole() -> Bool {
         return SessionManager.role_name == "STUDENT"
     }
     
-    // MARK: - Update Totals
+    // MARK: - Totals
     func updateUI() {
         demandAmount.text = formatAmount(selectedClass?.demand)
         concessionAmount.text = formatAmount(selectedClass?.concession)
@@ -132,7 +125,6 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         ) { (result: Result<StudentFeeSummaryResponse, APIManager.APIError>) in
             
             switch result {
-                
             case .success(let response):
                 DispatchQueue.main.async {
                     self.studentFees = response.data
@@ -149,7 +141,7 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     // MARK: - API: Student List
     func fetchStudents(
         classId: String,
-        completion: @escaping ([StudentListItem]?) -> Void
+        completion: @escaping ([StudentListItemModel]?) -> Void
     ) {
         
         guard let token = SessionManager.useRoleToken,
@@ -166,13 +158,12 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             endpoint: endpoint,
             method: .get,
             headers: ["Authorization": "Bearer \(token)"]
-        ) { (result: Result<StudentListResponse, APIManager.APIError>) in
+        ) { (result: Result<StudentListResponseModel, APIManager.APIError>) in
             
             switch result {
-                
             case .success(let response):
                 DispatchQueue.main.async {
-                    completion(response.data)
+                    completion(response.data) // ✅ NO FORCE CAST
                 }
                 
             case .failure(let error):
@@ -183,10 +174,8 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     // MARK: - TableView
-    
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-        
         return isStudentRole() ? students.count : studentFees.count
     }
     
@@ -198,11 +187,7 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             for: indexPath
         ) as! ClassesTableViewCell
         
-        
-        
         if isStudentRole() {
-            
-            // 🔥 STUDENT LIST
             let student = students[indexPath.row]
             
             cell.nameLabel.text = student.name
@@ -213,8 +198,6 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             cell.iconImageView.image = cell.generateImage(from: student.name)
             
         } else {
-            
-            // 🔥 FEE SUMMARY
             let student = studentFees[indexPath.row]
             
             cell.nameLabel.text = student.studentName ?? "-"
@@ -227,36 +210,20 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     func tableView(_ tableView: UITableView,
                    didSelectRowAt indexPath: IndexPath) {
         
-        if isStudentRole() {
+        let storyboard = UIStoryboard(name: "Payment", bundle: nil)
+        
+        if let vc = storyboard.instantiateViewController(
+            withIdentifier: "MakeFeePaymentVC"
+        ) as? MakeFeePaymentVC {
             
-            let student = students[indexPath.row]
-            print("👨‍🎓 Selected Student:", student.studentId)
-            
-            if let makeFeePaymentVC = storyboard?.instantiateViewController(
-                withIdentifier: "MakeFeePaymentVC"
-            ) as? MakeFeePaymentVC {
-                
-                makeFeePaymentVC.studentId = student.studentId
-                makeFeePaymentVC.groupAcademicYearId = groupAcademicYearId
-                
-                navigationController?.pushViewController(makeFeePaymentVC, animated: true)
+            if isStudentRole() {
+                vc.studentId = students[indexPath.row].studentId
+            } else {
+                vc.studentId = studentFees[indexPath.row].studentId
             }
             
-        } else {
-            
-            let student = studentFees[indexPath.row]
-            
-            let storyboard = UIStoryboard(name: "Payment", bundle: nil)
-            
-            if let makeFeePaymentVC = storyboard.instantiateViewController(
-                withIdentifier: "MakeFeePaymentVC"
-            ) as? MakeFeePaymentVC {
-                
-                makeFeePaymentVC.studentId = student.studentId
-                makeFeePaymentVC.groupAcademicYearId = groupAcademicYearId
-                
-                navigationController?.pushViewController(makeFeePaymentVC, animated: true)
-            }
+            vc.groupAcademicYearId = groupAcademicYearId
+            navigationController?.pushViewController(vc, animated: true)
         }
     }
 }

@@ -143,7 +143,7 @@ class CommentsVC: UIViewController {
     private func fetchCommentsWithFallback() {
         guard let postId = postID else { return }
         
-        guard let url = URL(string: "https://dev.gruppie.in/api/v1/post/\(postId)/comments") else {
+        guard let url = URL(string: "https://backend.gc2.co.in/api/v1/post/\(postId)/comments") else {
             return
         }
         
