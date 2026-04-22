@@ -116,7 +116,7 @@
 
             guard let token = SessionManager.useRoleToken else { return }
 
-            let urlString = "https://dev.gruppie.in/api/v1/createAssignment"
+            let urlString = "https://backend.gc2.co.in/api/v1/createAssignment"
 
             guard let url = URL(string: urlString) else { return }
 

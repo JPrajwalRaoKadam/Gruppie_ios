@@ -173,25 +173,25 @@ class ManagementViewController: UIViewController, UITableViewDelegate, UITableVi
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
-    
     @IBAction func addButtonTapped(_ sender: UIButton) {
         guard let token = self.token else {
             print("❌ Token not available")
+            showError("Token missing. Please login again.")
             return
         }
         
         let storyboard = UIStoryboard(name: "Management", bundle: nil)
         guard let vc = storyboard.instantiateViewController(
-            withIdentifier: "MoreDetailViewController"
-        ) as? MoreDetailViewController else {
-            print("❌ Failed to instantiate MoreDetailViewController")
+            withIdentifier: "AddSingleManagement"
+        ) as? AddSingleManagement else {
+            print("❌ Failed to instantiate AddSingleManagement")
+            showError("Unable to open add member screen")
             return
         }
         
         // Pass required data
         vc.token = token
-        vc.member = nil
-        vc.userId = nil
+        vc.groupIds = self.groupIds // Pass groupIds if needed
         
         navigationController?.pushViewController(vc, animated: true)
     }
