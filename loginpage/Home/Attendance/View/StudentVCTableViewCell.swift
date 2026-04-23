@@ -48,6 +48,11 @@ protocol StudentCellDelegate: AnyObject {
             }
         }
         
+        override func prepareForReuse() {
+            super.prepareForReuse()
+            checkButton.isSelected = true
+        }
+        
         func setAttendanceVisibility(isHidden: Bool) {
             //attenStatus.isHidden = isHidden
             attenStatusStackView.isHidden = isHidden

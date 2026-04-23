@@ -3,10 +3,15 @@
 //  loginpage
 //
 //  Created by apple on 07/04/25.
+//
+
+protocol AttendanceSubmitDelegate: AnyObject {
+    func didSubmitAttendanceSuccessfully()
+}
 
 import UIKit
 
-class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSource {
+class AbsentStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     var groupAcademicYearResponse: GroupAcademicYearResponse?
     var classId: String?
     var attendanceSettingsId: String?
@@ -34,6 +39,8 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
     var currDate: String?
     var currentDate: String?
     
+    weak var delegate: AttendanceSubmitDelegate?
+    
     @IBOutlet weak var DoneButton: UIButton!
     @IBOutlet weak var abtableview: UITableView!
     
@@ -41,21 +48,19 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         super.viewDidLoad()
         checkPeriodOnLoad()
         DispatchQueue.main.async {
-              self.abtableview.reloadData()
-              self.checkPeriodOnLoad()
-          }
-        DoneButton.layer.cornerRadius =  10
+            self.abtableview.reloadData()
+            self.checkPeriodOnLoad()
+        }
+        DoneButton.layer.cornerRadius = 10
         DoneButton.layer.masksToBounds = true
         DoneButton.clipsToBounds = true
         abtableview.dataSource = self
         abtableview.delegate = self
         abtableview.register(UINib(nibName: "AbsentStudentTableViewCell", bundle: nil), forCellReuseIdentifier: "AbsentStudentTableViewCell")
-        abtableview.register(UINib(nibName: "SubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "SubjectTableViewCell")
-//        abtableview.register(UINib(nibName: "PeriodTableViewCell", bundle: nil), forCellReuseIdentifier: "PeriodTableViewCell")
         abtableview.register(UINib(nibName: "A2SubjectTableViewCell", bundle: nil), forCellReuseIdentifier: "A2SubjectTableViewCell")
         abtableview.register(UINib(nibName: "A3PeriodTableViewCell", bundle: nil), forCellReuseIdentifier: "A3PeriodTableViewCell")
         print("Received attendanceData @ absent: \(attendanceData)")
-        print("Absent Students ab: \(absentList)") // Debug print
+        print("Absent Students ab: \(absentList)")
         print("teamId ab: \(teamId)")
         print("groupId ab: \(groupId)")
         print("stuId Ab: \(uncheckedStudentsIds)")
@@ -68,15 +73,15 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         print("✅ sessionDate :", sessionDate as Any)
         print("✅ presentStudentIds array count =", presentStudentIds.count)
 
-            for id in presentStudentIds {
-                print("👉 present student id =", id)
-            }
+        for id in presentStudentIds {
+            print("👉 present student id =", id)
+        }
         fetchSubjectRegister()
         enableKeyboardDismissOnTap()
-      }
+    }
+    
     func checkPeriodOnLoad() {
         if (numberOfTimeAttendance ?? 0) == 0 {
-            
             let alert = UIAlertController(
                 title: "Warning",
                 message: "No periods available, attendance cannot be taken",
@@ -98,9 +103,10 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
             dismiss(animated: true)
         }
     }
-      func numberOfSections(in tableView: UITableView) -> Int {
-          return 3
-      }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 3
+    }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView()
@@ -137,11 +143,10 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         return 40
     }
 
-
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0:
-            return absentList.count // Only one cell that contains a nested tableView of absentees
+            return absentList.count
         case 1:
             return subjectList.count
         case 2:
@@ -151,114 +156,82 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         }
     }
 
-      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch indexPath.section {
+        case 0:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "AbsentStudentTableViewCell", for: indexPath) as! AbsentStudentTableViewCell
+            let name = absentList[indexPath.row]
+            cell.configure(name: name)
+            return cell
 
-          switch indexPath.section {
-          case 0:
-              let cell = tableView.dequeueReusableCell(withIdentifier: "AbsentStudentTableViewCell", for: indexPath) as! AbsentStudentTableViewCell
-              let name = absentList[indexPath.row]
-               cell.configure(name: name)
-              return cell
+        case 1:
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: "A2SubjectTableViewCell",
+                for: indexPath
+            ) as! A2SubjectTableViewCell
 
-          case 1:
+            let subject = subjectList[indexPath.row]
 
-              let cell = tableView.dequeueReusableCell(
-                  withIdentifier: "A2SubjectTableViewCell",
-                  for: indexPath
-              ) as! A2SubjectTableViewCell
+            cell.SubjectsName.text = subject.subjectName
+            cell.subjectId = String(subject.subjectId)
 
-              let subject = subjectList[indexPath.row]
+            cell.checkButton.isSelected = (indexPath == selectedSubjectIndex)
 
-              cell.SubjectsName.text = subject.subjectName
-              cell.subjectId = String(subject.subjectId)
+            cell.onCheckButtonTapped = { [weak self] subjectId, isSelected in
+                guard let self = self else { return }
 
-              cell.checkButton.isSelected = (indexPath == selectedSubjectIndex)
-
-              cell.onCheckButtonTapped = { [weak self] subjectId, isSelected in
-                  guard let self = self else { return }
-
-                  if isSelected {
-
-                      if let old = self.selectedSubjectIndex, old != indexPath {
-                          self.selectedSubjectIndex = indexPath
-                          self.abtableview.reloadRows(at: [old, indexPath], with: .none)
-                      } else {
-                          self.selectedSubjectIndex = indexPath
-                          self.abtableview.reloadRows(at: [indexPath], with: .none)
-                      }
-
-                      // ✅ store single subject id for next API
-                      self.subID = subjectId
-                      print("✅ Selected subjectId =", subjectId)
-
-                  } else {
-
-                      self.selectedSubjectIndex = nil
-                      self.subID = nil
-                      self.abtableview.reloadRows(at: [indexPath], with: .none)
-
-                  }
-              }
-
-              return cell
-
-              
-//          case 2:
-//              let cell = tableView.dequeueReusableCell(withIdentifier: "A3PeriodTableViewCell", for: indexPath) as! A3PeriodTableViewCell
-//              cell.delegate = self
-//              cell.PeriodName.text = "Period \(indexPath.row + 1)"
-//              self.absentList
-//              return cell
-//          default:
-//              let cell = UITableViewCell()
-//              cell.selectionStyle = .none
-//                 return cell
-          case 2:
-              let cell = tableView.dequeueReusableCell(withIdentifier: "A3PeriodTableViewCell", for: indexPath) as! A3PeriodTableViewCell
-              cell.delegate = self
-              cell.PeriodName.text = "Period \(indexPath.row + 1)"
-              
-              // Check button state based on selectedPeriodIndex
-              cell.checkButton.isSelected = (indexPath == selectedPeriodIndex)
-              
-              return cell
-
-          default:
-              return UITableViewCell()
-          }
-      }
-    
-    
-    @IBAction func DoneButton(_ sender: Any) {
-        if let selectedId = subID {
-              print("🎯 Selected subject ID: \(selectedId)")
-              // You can use selectedId in your API call here
-          } else {
-              print("⚠️ No subject selected.")
-          }
-        if let period = selectedPeriodNumber {
-               print("🕒 Selected Period Number: \(period)")
-               // Use this period for your API call
-           } else {
-               print("⚠️ No period selected.")
-           }
-        callAttendanceSessionsAPI()
-       // self.dismiss(animated: true, completion: nil) // ✅ Dismiss view controller
-        // In AbsentStudentVC, when dismissing (after done button is pressed)
-        dismiss(animated: true) {
-            // Notify StudentVC to reset checkboxes
-            if let studentVC = self.presentingViewController as? StudentVC {
-                studentVC.resetAllCheckboxes()
+                if isSelected {
+                    if let old = self.selectedSubjectIndex, old != indexPath {
+                        self.selectedSubjectIndex = indexPath
+                        self.abtableview.reloadRows(at: [old, indexPath], with: .none)
+                    } else {
+                        self.selectedSubjectIndex = indexPath
+                        self.abtableview.reloadRows(at: [indexPath], with: .none)
+                    }
+                    
+                    self.subID = subjectId
+                    print("✅ Selected subjectId =", subjectId)
+                } else {
+                    self.selectedSubjectIndex = nil
+                    self.subID = nil
+                    self.abtableview.reloadRows(at: [indexPath], with: .none)
+                }
             }
+            return cell
+            
+        case 2:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "A3PeriodTableViewCell", for: indexPath) as! A3PeriodTableViewCell
+            cell.delegate = self
+            cell.PeriodName.text = "Period \(indexPath.row + 1)"
+            cell.checkButton.isSelected = (indexPath == selectedPeriodIndex)
+            return cell
+
+        default:
+            return UITableViewCell()
         }
     }
     
-   func fetchSubjectRegister() {
+    @IBAction func DoneButton(_ sender: Any) {
+        // Validate selections before making API call
+        guard subID != nil else {
+            showToast(message: "Please select a subject")
+            return
+        }
         
-       guard let token = SessionManager.useRoleToken else {
-           print("❌ Role token missing")
-           return
-       }
+        guard selectedPeriodNumber != nil else {
+            showToast(message: "Please select a period")
+            return
+        }
+        
+        // Call API with validation passed
+        callAttendanceSessionsAPI()
+    }
+    
+    func fetchSubjectRegister() {
+        guard let token = SessionManager.useRoleToken else {
+            print("❌ Role token missing")
+            return
+        }
 
         guard let classId = classId,
               let groupAcademicYearId = groupAcademicYearId else {
@@ -283,31 +256,23 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
             queryParams: queryParams,
             headers: headers
         ) { (result: Result<SubjectRegisterResponse1, APIManager.APIError>) in
-
             switch result {
-
             case .success(let response):
-
-                // flatten all groups into single list
                 let subjects = response.data.subjectGroups.flatMap { $0.subjects }
-
                 self.subjectList = subjects
-
                 print("✅ Class :", response.data.class.className)
                 print("✅ Total subjects :", subjects.count)
-
+                
                 for s in subjects {
                     print("Subject :", s.subjectName, " id :", s.subjectId)
                 }
-
+                
                 DispatchQueue.main.async {
                     self.abtableview.reloadData()
                 }
-
+                
             case .failure(let error):
-
                 print("❌ subject api error :", error)
-
                 if case .decodingError = error {
                     print("❌ Decoding failed – check subject models")
                 }
@@ -316,9 +281,9 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
     }
     
     func callAttendanceSessionsAPI() {
-
         guard let token = SessionManager.useRoleToken else {
             print("❌ Role token missing")
+            showToast(message: "Authentication failed")
             return
         }
 
@@ -333,15 +298,16 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
             print("❌ Missing required values")
             print("➡️ currentDate =", currentDate as Any)
             print("➡️ sessionDate =", self.sessionDate as Any)
+            showToast(message: "Missing required information")
             return
         }
 
-        let absentString  = uncheckedStudentsIds.joined(separator: ",")
+        let absentString = uncheckedStudentsIds.joined(separator: ",")
         let presentString = presentStudentIds.joined(separator: ",")
 
         let body: [String: Any] = [
             "sessionNumber": period,
-            "sessionDate": sessionDate,   // ✅ now never null
+            "sessionDate": sessionDate,
             "attendance": [
                 ["Present": presentString],
                 ["absent": absentString],
@@ -362,13 +328,27 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("❌ Network error: \(error)")
+                DispatchQueue.main.async {
+                    self.showToast(message: "Network error. Please try again.")
+                }
+                return
+            }
 
             if let http = response as? HTTPURLResponse {
                 print("✅ Status code :", http.statusCode)
             }
 
-            guard let data else { return }
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.showToast(message: "No response from server")
+                }
+                return
+            }
 
             if let json = String(data: data, encoding: .utf8) {
                 print("📥 attendance-sessions response :", json)
@@ -377,21 +357,30 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
             do {
                 let result = try JSONDecoder().decode(CommonSuccessResponse.self, from: data)
 
-                if result.success {
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    if result.success {
+                        // Show success toast and then dismiss
+                        self.showToast(message: result.message) {
+                            // Notify delegate before dismissing
+                            self.delegate?.didSubmitAttendanceSuccessfully()
+                            // Dismiss the view controller
+                            self.dismiss(animated: true)
+                        }
+                    } else {
+                        // Show error toast without dismissing
                         self.showToast(message: result.message)
                     }
                 }
-
             } catch {
                 print("❌ decode error :", error)
+                DispatchQueue.main.async {
+                    self.showToast(message: "Failed to submit attendance. Please try again.")
+                }
             }
-
         }.resume()
     }
     
     func convertToAPIDate(_ input: String) -> String? {
-
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "dd-MM-yyyy"
 
@@ -405,50 +394,48 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         return outputFormatter.string(from: date)
     }
     
-    func showToast(message: String) {
+    func showToast(message: String, completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            let label = UILabel()
+            label.text = message
+            label.textColor = .white
+            label.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+            label.textAlignment = .center
+            label.font = .systemFont(ofSize: 14)
+            label.numberOfLines = 0
+            label.layer.cornerRadius = 10
+            label.clipsToBounds = true
 
-        let label = UILabel()
-        label.text = message
-        label.textColor = .white
-        label.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-        label.textAlignment = .center
-        label.font = .systemFont(ofSize: 14)
-        label.numberOfLines = 0
-        label.layer.cornerRadius = 10
-        label.clipsToBounds = true
+            let width = self.view.frame.width - 40
+            let height: CGFloat = 50
+            label.frame = CGRect(x: 20,
+                                  y: self.view.frame.height - 120,
+                                  width: width,
+                                  height: height)
 
-        let width = view.frame.width - 40
-        label.frame = CGRect(x: 20,
-                              y: view.frame.height - 120,
-                              width: width,
-                              height: 40)
+            self.view.addSubview(label)
 
-        view.addSubview(label)
+            UIView.animate(withDuration: 0.3, animations: {
+                label.alpha = 1.0
+            })
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            label.removeFromSuperview()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                UIView.animate(withDuration: 0.3, animations: {
+                    label.alpha = 0.0
+                }) { _ in
+                    label.removeFromSuperview()
+                    completion?()
+                }
+            }
         }
     }
-
 }
+
 extension AbsentStudentVC: A3PeriodTableViewCellDelegate {
-//    func didTogglePeriodSelection(cell: A3PeriodTableViewCell, isSelected: Bool) {
-//        guard let indexPath = abtableview.indexPath(for: cell) else { return }
-//
-//        print("Period at section \(indexPath.section), row \(indexPath.row) is now \(isSelected ? "selected" : "deselected")")
-//
-//        // Example: store selected periods
-//        if isSelected {
-//            print("✅ Save this period selection")
-//        } else {
-//            print("❌ Remove this period selection")
-//        }
-//    }
     func didTogglePeriodSelection(cell: A3PeriodTableViewCell, isSelected: Bool) {
         guard let indexPath = abtableview.indexPath(for: cell) else { return }
 
         if isSelected {
-            // Deselect previously selected cell
             if let previousIndex = selectedPeriodIndex, previousIndex != indexPath {
                 selectedPeriodIndex = indexPath
                 selectedPeriodNumber = indexPath.row + 1
@@ -459,18 +446,11 @@ extension AbsentStudentVC: A3PeriodTableViewCellDelegate {
                 abtableview.reloadRows(at: [indexPath], with: .none)
             }
             print("✅ Selected Period: \(selectedPeriodNumber ?? -1)")
-
         } else {
-            // If the user taps to deselect the already selected period
             selectedPeriodIndex = nil
             selectedPeriodNumber = nil
             abtableview.reloadRows(at: [indexPath], with: .none)
             print("❌ Deselected Period")
         }
     }
-
 }
-
-
-
-            
