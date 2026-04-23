@@ -82,6 +82,7 @@ class StudentVC: UIViewController, StudentCellDelegate, EditAttendanceDelegate {
         fetchAttendanceSessions()
         
     }
+    
     // Add this method to StudentVC
     func resetAllCheckboxes() {
         // Clear the unchecked students arrays
@@ -1184,7 +1185,7 @@ extension StudentVC: UIViewControllerTransitioningDelegate, UITableViewDataSourc
 
             cell.studentName.text = student.name
             cell.rollNo.text = "Class: \(student.className)"
-
+            cell.checkButton.isHidden = (fullAccess == false && roleName == "STUDENT")
             cell.images.image = nil
             cell.showFallbackImage(for: student.name)
             cell.fallback.isHidden = false

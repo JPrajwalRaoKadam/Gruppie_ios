@@ -62,6 +62,10 @@ struct RolePermissionResponse: Codable {
 
 struct PermissionDetails: Codable {
     let fullAccess: Bool?
+    let viewAll: Bool?
+    let viewSelf: Bool?
+    let markAttendance: Bool?
+    let editAttendance: Bool?
     let deleteStaffCategories: Bool?
     let delete: Bool?
     let viewStaffCategories: Bool?

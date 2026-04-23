@@ -18,8 +18,9 @@ protocol StudentCellDelegate: AnyObject {
         @IBOutlet weak var images: UIImageView!
         @IBOutlet weak var fallback: UILabel!
         @IBOutlet weak var attenStatusStackViewWidth: NSLayoutConstraint!
-        var student: StudentMinimal?
         
+        var isStudentRole: Bool = false
+        var student: StudentMinimal?
         var userId: String?
         
         // MARK: - Data
@@ -34,6 +35,7 @@ protocol StudentCellDelegate: AnyObject {
         weak var delegate: StudentCellDelegate?
         override func awakeFromNib() {
             super.awakeFromNib()
+            checkButton.isHidden = isStudentRole
             btnStyles()
             setupCheckButton(initiallySelected: true)
             attenStatusStackView.spacing = 8
@@ -160,6 +162,10 @@ protocol StudentCellDelegate: AnyObject {
             button.backgroundColor = color
             button.widthAnchor.constraint(equalToConstant: 20).isActive = true
             button.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        }
+        
+        func configureRole(isStudent: Bool) {
+            checkButton.isHidden = isStudent
         }
 
     }

@@ -29,6 +29,30 @@ class AttendanceVC: UIViewController {
        
     override func viewDidLoad() {
         super.viewDidLoad()
+        setCurrentDate()
+
+        let group = DispatchGroup()
+
+        if fullAccess == false && roleName == "STUDENT" {
+            
+            group.enter()
+            fetchStudentClasses {
+                group.leave()
+            }
+            
+        } else {
+            
+            group.enter()
+            fetchAttendanceData {
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            print("✅ API completed based on role")
+            self.TableView.reloadData()
+        }
+        
         bcbutton.layer.cornerRadius = bcbutton.frame.size.width / 2
         bcbutton.clipsToBounds = true
         midview.layer.cornerRadius = 10
@@ -57,135 +81,221 @@ class AttendanceVC: UIViewController {
                print("❌ groupAcademicYearResponse is nil")
            }
         
-        if fullAccess == false && roleName == "STUDENT" {
-              fetchStudentClasses()   // 👈 CALL API
-          } else {
-              fetchAttendanceData()  // existing API
-          }
-        
-        if fullAccess == false && roleName == "STUDENT" {
-            setting.isHidden = true
-        }
-        
+//        if fullAccess == false && roleName == "STUDENT" {
+//              fetchStudentClasses()   // 👈 CALL API
+//          } else {
+//              fetchAttendanceData()  // existing API
+//          }
+
         setCurrentDate()
         enableKeyboardDismissOnTap()
         fetchAttendanceSettingsAll()
-
-        
     }
     
-    func fetchStudentClasses() {
-        
+//    func fetchStudentClasses() {
+//        
+//        guard let roleToken = SessionManager.useRoleToken else {
+//            print("❌ Token missing")
+//            return
+//        }
+//        
+//        guard let groupAcademicYearId =
+//            groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+//            print("❌ groupAcademicYearId missing")
+//            return
+//        }
+//        
+//        let headers = [
+//            "Authorization": "Bearer \(roleToken)"
+//        ]
+//        
+//        let queryParams = [
+//            "groupAcademicYearId": groupAcademicYearId
+//        ]
+//        
+//        APIManager.shared.request(
+//            endpoint: "group-class/user-classes",
+//            method: .get,
+//            queryParams: queryParams,
+//            headers: headers
+//        ) { (result: Result<StudentClassResponse, APIManager.APIError>) in
+//            
+//            switch result {
+//            case .success(let response):
+//                print("✅ Student Classes:", response.data)
+//                
+//                self.groupClassesforStudent = response.data   // ✅ FIXED
+//                self.TableView.reloadData()
+//                
+//            case .failure(let error):
+//                print("❌ Error:", error)
+//            }
+//        }
+//    }
+    func fetchStudentClasses(completion: @escaping () -> Void) {
+
         guard let roleToken = SessionManager.useRoleToken else {
             print("❌ Token missing")
+            completion()
             return
         }
-        
+
         guard let groupAcademicYearId =
             groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
             print("❌ groupAcademicYearId missing")
+            completion()
             return
         }
-        
-        let headers = [
-            "Authorization": "Bearer \(roleToken)"
-        ]
-        
-        let queryParams = [
-            "groupAcademicYearId": groupAcademicYearId
-        ]
-        
+
+        let headers = ["Authorization": "Bearer \(roleToken)"]
+        let queryParams = ["groupAcademicYearId": groupAcademicYearId]
+
         APIManager.shared.request(
             endpoint: "group-class/user-classes",
             method: .get,
             queryParams: queryParams,
             headers: headers
         ) { (result: Result<StudentClassResponse, APIManager.APIError>) in
-            
+
             switch result {
             case .success(let response):
                 print("✅ Student Classes:", response.data)
-                
-                self.groupClassesforStudent = response.data   // ✅ FIXED
-                self.TableView.reloadData()
-                
+                self.groupClassesforStudent = response.data
+
             case .failure(let error):
                 print("❌ Error:", error)
             }
+
+            completion() // ✅ IMPORTANT
         }
     }
     
 
- func fetchAttendanceData() {
-     
-     guard let roleToken = SessionManager.useRoleToken else {
-         print("❌ Role token missing")
-         return
-     }
+// func fetchAttendanceData() {
+//     
+//     guard let roleToken = SessionManager.useRoleToken else {
+//         print("❌ Role token missing")
+//         return
+//     }
+//
+//     guard let groupAcademicYearId =
+//             groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+//         print("❌ groupAcademicYearId not available from GroupAcademicYearResponse")
+//         return
+//     }
+//
+//
+//     let inputFormatter = DateFormatter()
+//     inputFormatter.dateFormat = "dd-MM-yyyy"
+//
+//     guard let selected = currentDate,
+//           let date = inputFormatter.date(from: selected) else {
+//         print("Invalid date")
+//         return
+//     }
+//
+//     let outputFormatter = DateFormatter()
+//     outputFormatter.dateFormat = "yyyy-MM-dd"
+//     let apiDate = outputFormatter.string(from: date)
+//
+//     let headers = [
+//         "Authorization": "Bearer \(roleToken)"   // ✅ fixed here
+//     ]
+//
+//     let queryParams = [
+//         "groupAcademicYearId": groupAcademicYearId,
+//         "sessionDate": apiDate
+//     ]
+//
+//     APIManager.shared.request(
+//         endpoint: "attendance-summary",
+//         method: .get,
+//         queryParams: queryParams,
+//         headers: headers
+//     ) { (result: Result<AttendanceSummaryResponse, APIManager.APIError>) in
+//
+//         switch result {
+//
+//         case .success(let response):
+//
+//             self.attendanceClasses = response.data.classes
+//             self.groupAcademicYearId = response.data.groupAcademicYearId
+//             
+//             print("Academic Year    :", response.data.groupAcademicYearId)
+//             print("Success :", response.success)
+//             print("Message :", response.message)
+//             print("Date :", response.data.date)
+//
+//             for item in response.data.classes {
+//                 print("ClassId :", item.classId)
+//                 print("ClassName :", item.className)
+//                 print("Total Students :", item.totalStudents)
+//                 print("Sessions count :", item.sessions.count)
+//                 print("--------------")
+//             }
+//
+//             self.TableView.reloadData()
+//
+//         case .failure(let error):
+//             print("❌ Attendance summary error :", error)
+//         }
+//     }
+// }
+    func fetchAttendanceData(completion: @escaping () -> Void) {
 
-     guard let groupAcademicYearId =
-             groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
-         print("❌ groupAcademicYearId not available from GroupAcademicYearResponse")
-         return
-     }
+        guard let roleToken = SessionManager.useRoleToken else {
+            print("❌ Role token missing")
+            completion()
+            return
+        }
 
+        guard let groupAcademicYearId =
+                groupAcademicYearResponse?.data.academicYears.first?.groupAcademicYearId else {
+            print("❌ groupAcademicYearId not available")
+            completion()
+            return
+        }
 
-     let inputFormatter = DateFormatter()
-     inputFormatter.dateFormat = "dd-MM-yyyy"
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "dd-MM-yyyy"
 
-     guard let selected = currentDate,
-           let date = inputFormatter.date(from: selected) else {
-         print("Invalid date")
-         return
-     }
+        guard let selected = currentDate,
+              let date = inputFormatter.date(from: selected) else {
+            print("Invalid date")
+            completion()
+            return
+        }
 
-     let outputFormatter = DateFormatter()
-     outputFormatter.dateFormat = "yyyy-MM-dd"
-     let apiDate = outputFormatter.string(from: date)
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy-MM-dd"
+        let apiDate = outputFormatter.string(from: date)
 
-     let headers = [
-         "Authorization": "Bearer \(roleToken)"   // ✅ fixed here
-     ]
+        let headers = ["Authorization": "Bearer \(roleToken)"]
 
-     let queryParams = [
-         "groupAcademicYearId": groupAcademicYearId,
-         "sessionDate": apiDate
-     ]
+        let queryParams = [
+            "groupAcademicYearId": groupAcademicYearId,
+            "sessionDate": apiDate
+        ]
 
-     APIManager.shared.request(
-         endpoint: "attendance-summary",
-         method: .get,
-         queryParams: queryParams,
-         headers: headers
-     ) { (result: Result<AttendanceSummaryResponse, APIManager.APIError>) in
+        APIManager.shared.request(
+            endpoint: "attendance-summary",
+            method: .get,
+            queryParams: queryParams,
+            headers: headers
+        ) { (result: Result<AttendanceSummaryResponse, APIManager.APIError>) in
 
-         switch result {
+            switch result {
+            case .success(let response):
+                self.attendanceClasses = response.data.classes
+                self.groupAcademicYearId = response.data.groupAcademicYearId
 
-         case .success(let response):
+            case .failure(let error):
+                print("❌ Attendance summary error :", error)
+            }
 
-             self.attendanceClasses = response.data.classes
-             self.groupAcademicYearId = response.data.groupAcademicYearId
-             
-             print("Academic Year    :", response.data.groupAcademicYearId)
-             print("Success :", response.success)
-             print("Message :", response.message)
-             print("Date :", response.data.date)
-
-             for item in response.data.classes {
-                 print("ClassId :", item.classId)
-                 print("ClassName :", item.className)
-                 print("Total Students :", item.totalStudents)
-                 print("Sessions count :", item.sessions.count)
-                 print("--------------")
-             }
-
-             self.TableView.reloadData()
-
-         case .failure(let error):
-             print("❌ Attendance summary error :", error)
-         }
-     }
- }
+            completion() // ✅ IMPORTANT
+        }
+    }
     
     func fetchAttendanceSettingsAll() {
         
@@ -274,10 +384,18 @@ class AttendanceVC: UIViewController {
             
             print("Selected Date: \(currentDate ?? "")")
             if fullAccess == false && roleName == "STUDENT" {
-                  fetchStudentClasses()   // 👈 CALL API
-              } else {
-                  fetchAttendanceData()  // existing API
-              }
+                       fetchStudentClasses {
+                           DispatchQueue.main.async {
+                               self.TableView.reloadData()
+                           }
+                       }
+                   } else {
+                       fetchAttendanceData {
+                           DispatchQueue.main.async {
+                               self.TableView.reloadData()
+                           }
+                       }
+                   }
             
         } else {
             print("Cannot go beyond today's date")
@@ -297,10 +415,18 @@ class AttendanceVC: UIViewController {
             
             print("Selected Date: \(currentDate ?? "")")
             if fullAccess == false && roleName == "STUDENT" {
-                  fetchStudentClasses()   // 👈 CALL API
-              } else {
-                  fetchAttendanceData()  // existing API
-              }
+                       fetchStudentClasses {
+                           DispatchQueue.main.async {
+                               self.TableView.reloadData()
+                           }
+                       }
+                   } else {
+                       fetchAttendanceData {
+                           DispatchQueue.main.async {
+                               self.TableView.reloadData()
+                           }
+                       }
+                   }
         }
     }
     
@@ -381,10 +507,18 @@ class AttendanceVC: UIViewController {
             print("Selected Date: \(selectedDate)")
             
             if fullAccess == false && roleName == "STUDENT" {
-                  fetchStudentClasses()   // 👈 CALL API
-              } else {
-                  fetchAttendanceData()  // existing API
-              }
+                       fetchStudentClasses {
+                           DispatchQueue.main.async {
+                               self.TableView.reloadData()
+                           }
+                       }
+                   } else {
+                       fetchAttendanceData {
+                           DispatchQueue.main.async {
+                               self.TableView.reloadData()
+                           }
+                       }
+                   }
             
             if let backgroundView = sender.superview?.superview {
                 backgroundView.removeFromSuperview()

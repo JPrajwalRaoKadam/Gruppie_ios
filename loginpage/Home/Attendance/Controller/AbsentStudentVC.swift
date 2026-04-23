@@ -39,6 +39,11 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        checkPeriodOnLoad()
+        DispatchQueue.main.async {
+              self.abtableview.reloadData()
+              self.checkPeriodOnLoad()
+          }
         DoneButton.layer.cornerRadius =  10
         DoneButton.layer.masksToBounds = true
         DoneButton.clipsToBounds = true
@@ -69,7 +74,30 @@ class AbsentStudentVC: UIViewController,UITableViewDelegate, UITableViewDataSour
         fetchSubjectRegister()
         enableKeyboardDismissOnTap()
       }
-
+    func checkPeriodOnLoad() {
+        if (numberOfTimeAttendance ?? 0) == 0 {
+            
+            let alert = UIAlertController(
+                title: "Warning",
+                message: "No periods available, attendance cannot be taken",
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                self.goBack()
+            }))
+            
+            present(alert, animated: true)
+        }
+    }
+    
+    func goBack() {
+        if let nav = navigationController {
+            nav.popViewController(animated: true)
+        } else {
+            dismiss(animated: true)
+        }
+    }
       func numberOfSections(in tableView: UITableView) -> Int {
           return 3
       }
