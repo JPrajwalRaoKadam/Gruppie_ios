@@ -157,7 +157,7 @@ class PeriodDetailViewController: UIViewController {
         print("✅ Token retrieved: \(token.prefix(30))...")
         
         // Build API URL
-        let apiUrlString = "https://backend.gc2.co.in/api/v1/time-table/schedule?classId=\(classId)&groupAcademicYearId=\(yearId)"
+        let apiUrlString = "https://dev.gruppie.in/api/v1/time-table/schedule?classId=\(classId)&groupAcademicYearId=\(yearId)"
         print("🌐 API URL: \(apiUrlString)")
         
         guard let url = URL(string: apiUrlString) else {

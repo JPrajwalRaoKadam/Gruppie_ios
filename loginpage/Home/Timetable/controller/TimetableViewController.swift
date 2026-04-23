@@ -1,5 +1,165 @@
 import UIKit
 
+// MARK: - Custom Day Picker ViewController
+class DayPickerViewController: UIViewController {
+    
+    private let pickerView = UIPickerView()
+    private let titleLabel = UILabel()
+    private let doneButton = UIButton(type: .system)
+    private let cancelButton = UIButton(type: .system)
+    private let containerView = UIView()
+    
+    var weekDays: [String] = []
+    var selectedDay: Int = 0
+    var onDaySelected: ((Int) -> Void)?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+        setupPicker()
+    }
+    
+    private func setupUI() {
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        
+        // Container view
+        containerView.backgroundColor = .white
+        containerView.layer.cornerRadius = 20
+        containerView.layer.masksToBounds = true
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(containerView)
+        
+        // Title
+        titleLabel.text = "Select Day"
+        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        titleLabel.textAlignment = .center
+        titleLabel.textColor = .black
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(titleLabel)
+        
+        // Buttons
+        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.setTitleColor(.systemRed, for: .normal)
+        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(cancelButton)
+        
+        doneButton.setTitle("Done", for: .normal)
+        doneButton.setTitleColor(.systemBlue, for: .normal)
+        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        doneButton.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
+        doneButton.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(doneButton)
+        
+        // Picker View
+        pickerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(pickerView)
+        
+        // Separators
+        let topSeparator = UIView()
+        topSeparator.backgroundColor = UIColor.lightGray.withAlphaComponent(0.3)
+        topSeparator.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(topSeparator)
+        
+        let bottomSeparator = UIView()
+        bottomSeparator.backgroundColor = UIColor.lightGray.withAlphaComponent(0.3)
+        bottomSeparator.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(bottomSeparator)
+        
+        // Constraints
+        NSLayoutConstraint.activate([
+            containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            containerView.widthAnchor.constraint(equalToConstant: 320),
+            containerView.heightAnchor.constraint(equalToConstant: 300),
+            
+            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            titleLabel.heightAnchor.constraint(equalToConstant: 30),
+            
+            cancelButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
+            cancelButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            cancelButton.widthAnchor.constraint(equalToConstant: 70),
+            cancelButton.heightAnchor.constraint(equalToConstant: 30),
+            
+            doneButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
+            doneButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            doneButton.widthAnchor.constraint(equalToConstant: 70),
+            doneButton.heightAnchor.constraint(equalToConstant: 30),
+            
+            topSeparator.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 15),
+            topSeparator.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            topSeparator.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            topSeparator.heightAnchor.constraint(equalToConstant: 1),
+            
+            pickerView.topAnchor.constraint(equalTo: topSeparator.bottomAnchor, constant: 10),
+            pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            pickerView.heightAnchor.constraint(equalToConstant: 180),
+            
+            bottomSeparator.topAnchor.constraint(equalTo: pickerView.bottomAnchor, constant: 10),
+            bottomSeparator.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            bottomSeparator.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            bottomSeparator.heightAnchor.constraint(equalToConstant: 1)
+        ])
+        
+        // Add tap gesture to dismiss
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    private func setupPicker() {
+        pickerView.delegate = self
+        pickerView.dataSource = self
+        pickerView.selectRow(selectedDay, inComponent: 0, animated: false)
+    }
+    
+    @objc private func cancelTapped() {
+        dismiss(animated: true)
+    }
+    
+    @objc private func doneTapped() {
+        let selectedRow = pickerView.selectedRow(inComponent: 0)
+        onDaySelected?(selectedRow)
+        dismiss(animated: true)
+    }
+    
+    @objc private func backgroundTapped() {
+        dismiss(animated: true)
+    }
+}
+
+// MARK: - UIPickerView Delegates for DayPickerViewController
+extension DayPickerViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return weekDays.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+        let label = UILabel()
+        label.text = weekDays[row]
+        label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        label.textAlignment = .center
+        label.textColor = row == pickerView.selectedRow(inComponent: 0) ? .systemBlue : .black
+        return label
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+        return 50
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        pickerView.reloadComponent(0)
+    }
+}
+
+// MARK: - Main TimetableViewController
 class TimetableViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
@@ -38,7 +198,6 @@ class TimetableViewController: UIViewController {
     private let calendar = Calendar.current
     
     // Week picker
-    private let weekPicker = UIPickerView()
     private var weekDays: [String] = []
 
     override func viewDidLoad() {
@@ -64,7 +223,7 @@ class TimetableViewController: UIViewController {
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         tableView.refreshControl = refreshControl
 
-        setupWeekPicker()
+        setupWeekDays()
         updateDateButtonTitle()
 
         print("\n========== TIMETABLE VIEW CONTROLLER LOADED ==========")
@@ -74,7 +233,7 @@ class TimetableViewController: UIViewController {
         fetchDays()
     }
     
-    private func setupWeekPicker() {
+    private func setupWeekDays() {
         // Get all weekdays in order (Monday to Sunday)
         let dateFormatter = DateFormatter()
         weekDays = dateFormatter.weekdaySymbols // Returns ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -85,14 +244,10 @@ class TimetableViewController: UIViewController {
             weekDays = mondayToSunday
         }
         
-        weekPicker.delegate = self
-        weekPicker.dataSource = self
-        
         // Set current day
         let currentDayName = getCurrentDayName()
         if let selectedIndex = weekDays.firstIndex(of: currentDayName) {
             selectedWeekday = selectedIndex
-            weekPicker.selectRow(selectedIndex, inComponent: 0, animated: false)
         }
     }
 
@@ -131,7 +286,7 @@ class TimetableViewController: UIViewController {
         }
         print("✅ Token retrieved: \(token.prefix(30))...")
 
-        guard let url = URL(string: "https://backend.gc2.co.in/api/v1/days") else {
+        guard let url = URL(string: "https://dev.gruppie.in/api/v1/days") else {
             print("❌ Invalid URL for days API")
             return
         }
@@ -222,7 +377,7 @@ class TimetableViewController: UIViewController {
         }
         print("✅ Token retrieved: \(token.prefix(30))...")
 
-        let urlString = "https://backend.gc2.co.in/api/v1/time-table/daily-summary?groupAcademicYearId=3&dayId=\(dayId)"
+        let urlString = "https://dev.gruppie.in/api/v1/time-table/daily-summary?groupAcademicYearId=3&dayId=\(dayId)"
         print("🌐 Daily Summary API URL: \(urlString)")
         
         guard let url = URL(string: urlString) else {
@@ -447,17 +602,14 @@ class TimetableViewController: UIViewController {
     @IBAction func dateButtonTapped(_ sender: UIButton) {
         print("\n========== WEEK PICKER BUTTON TAPPED ==========")
         
-        let alert = UIAlertController(title: "\n\n\n\n\n\n\n\n\n",
-                                      message: nil,
-                                      preferredStyle: .actionSheet)
+        let dayPickerVC = DayPickerViewController()
+        dayPickerVC.weekDays = weekDays
+        dayPickerVC.selectedDay = selectedWeekday
+        dayPickerVC.modalPresentationStyle = .overFullScreen
+        dayPickerVC.modalTransitionStyle = .crossDissolve
         
-        // Set up the picker frame
-        weekPicker.frame = CGRect(x: 0, y: 20, width: alert.view.bounds.width - 20, height: 180)
-        weekPicker.backgroundColor = .white
-        alert.view.addSubview(weekPicker)
-        
-        let selectAction = UIAlertAction(title: "Select", style: .default) { _ in
-            let selectedRow = self.weekPicker.selectedRow(inComponent: 0)
+        dayPickerVC.onDaySelected = { [weak self] selectedRow in
+            guard let self = self else { return }
             if selectedRow != self.selectedWeekday {
                 self.selectedWeekday = selectedRow
                 self.updateDateButtonTitle()
@@ -469,12 +621,7 @@ class TimetableViewController: UIViewController {
             }
         }
         
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        
-        alert.addAction(selectAction)
-        alert.addAction(cancelAction)
-        
-        present(alert, animated: true)
+        present(dayPickerVC, animated: true)
     }
 
     @IBAction func nextButtonTapped(_ sender: UIButton) {
@@ -528,25 +675,5 @@ extension TimetableViewController: UITableViewDelegate, UITableViewDataSource {
         cell.configureCell(with: classItem)
 
         return cell
-    }
-}
-
-// MARK: - UIPickerView Delegates
-extension TimetableViewController: UIPickerViewDelegate, UIPickerViewDataSource {
-    
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return weekDays.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return weekDays[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-        return 50
     }
 }
