@@ -16,6 +16,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     var attachmentIds: [Int] = []
     var processedMediaItems: [MediaType] = []
     var currentRole: String = ""
+    var fullAccess: Bool?
     var groupId: String = ""
     var token: String = ""
     var albumId: String = ""
@@ -30,11 +31,17 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         
         // Hide addButton and deleteButton ONLY for student role
         // Show for all other roles (admin, superAdmin, parent, teacher, etc.)
-        let isStudent = currentRole.lowercased() == "student"
-        addButton.isHidden = isStudent
-        deleteButton.isHidden = isStudent
         
-        print("Is Student: \(isStudent)")
+        if fullAccess == false {
+            addButton.isHidden = true
+            deleteButton.isHidden = true
+        }
+        
+//        let roleToCheck = currentRole.uppercased()
+//        addButton.isHidden = ["STUDENT", "TEACHER"].contains(roleToCheck)
+//        deleteButton.isHidden = ["STUDENT", "TEACHER"].contains(roleToCheck)
+        
+//        print("Is Student: \(roleToCheck)")
         print("Add button is hidden: \(addButton.isHidden)")
         print("Delete button is hidden: \(deleteButton.isHidden)")
 

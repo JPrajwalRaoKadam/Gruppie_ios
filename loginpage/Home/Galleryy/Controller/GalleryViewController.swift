@@ -25,10 +25,15 @@ class GalleryViewController: UIViewController {
         print("Current Role in GalleryVC: '\(roleName)'  .....  \(fullAccess)")
         
         // Hide addButton ONLY for student role, show for all other roles
-        let roleToCheck = roleName?.uppercased()
-        addButton.isHidden = ["STUDENT", "STAFF", "TEACHER"].contains(roleToCheck)
         
-        print("Role to check: '\(roleToCheck)'")
+        if fullAccess == false {
+            addButton.isHidden = true
+        }
+        
+//        let roleToCheck = roleName?.uppercased()
+//        addButton.isHidden = ["STUDENT", "TEACHER"].contains(roleToCheck)
+        
+//        print("Role to check: '\(roleToCheck)'")
         print("Add button is hidden: \(addButton.isHidden)")
 
         collectionView.layer.cornerRadius = 10
@@ -66,8 +71,13 @@ class GalleryViewController: UIViewController {
         
         // Double-check button visibility when view appears
         // Hide addButton ONLY for student role, show for all other roles
-        let roleToCheck = roleName?.uppercased()
-        addButton.isHidden = ["STUDENT", "STAFF", "TEACHER"].contains(roleToCheck)
+        
+        if fullAccess == false {
+            addButton.isHidden = true
+        }
+        
+//        let roleToCheck = roleName?.uppercased()
+//        addButton.isHidden = ["STUDENT", "TEACHER"].contains(roleToCheck)
         print("viewWillAppear - Add button is hidden: \(addButton.isHidden)")
     }
 
@@ -328,6 +338,7 @@ extension GalleryViewController: UICollectionViewDelegate,
             detailVC.albumNameString = album.albumName
             detailVC.mediaItemsStrings = album.fileName ?? []
             detailVC.token = self.token
+            detailVC.fullAccess = self.fullAccess
             detailVC.currentRole = self.roleName ?? ""  // ✅ Role is passed to detail VC
             
             print("📤 Navigating to DetailGalleryViewController with role: \(self.roleName)")
