@@ -772,7 +772,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
             if let galleryVC = storyboard.instantiateViewController(withIdentifier: "GalleryViewController") as? GalleryViewController {
                 galleryVC.token = TokenManager.shared.getToken() ?? ""
-                galleryVC.currentRole = self.currentRole ?? ""
+                galleryVC.roleName = roleName
+                galleryVC.fullAccess = self.fullAccess
                 print("Navigating to GalleryViewController with:")
 
                 navigationController?.pushViewController(galleryVC, animated: true)

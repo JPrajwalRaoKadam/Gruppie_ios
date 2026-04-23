@@ -28,13 +28,15 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         super.viewDidLoad()
         print("DetailGalleryViewController Loaded with Group ID: \(groupId), Token: \(token), and Album ID: \(albumId), currentRole : \(currentRole)")
         
-        if currentRole == "parent" || currentRole == "teacher" {
-            deleteButton.isHidden = true
-            addButton.isHidden = true
-        } else if currentRole == "admin" {
-            deleteButton.isHidden = false
-            addButton.isHidden = false
-        }
+        // Hide addButton and deleteButton ONLY for student role
+        // Show for all other roles (admin, superAdmin, parent, teacher, etc.)
+        let isStudent = currentRole.lowercased() == "student"
+        addButton.isHidden = isStudent
+        deleteButton.isHidden = isStudent
+        
+        print("Is Student: \(isStudent)")
+        print("Add button is hidden: \(addButton.isHidden)")
+        print("Delete button is hidden: \(deleteButton.isHidden)")
 
         print("Number of images in album: \(mediaItemsStrings.count)")
         
@@ -389,7 +391,7 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         // MARK: - REQUEST
         var request = URLRequest(
-            url: URL(string: "https://backend.gc2.co.in/api/v1/gallery/attachments")!
+            url: URL(string: "https://dev.gruppie.in/api/v1/gallery/attachments")!
         )
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -724,7 +726,8 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
 
         let item = processedMediaItems[indexPath.row]
 
-        switch item {         case .image(let image):
+        switch item {
+        case .image(let image):
             cell.imageView.image = image
         case .videoThumbnail(let thumbnail, _):
             cell.imageView.image = thumbnail
