@@ -133,27 +133,39 @@ class passwordViewController: UIViewController {
             headers: headers
         ) { (result: Result<LoginResponse, APIManager.APIError>) in
             
-            switch result {
+           switch result {
                 
             case .success(let response):
                 if response.success == true, let token = response.token {
 
                     UserDefaults.standard.set(token, forKey: "login_token")
                     UserDefaults.standard.set(self.phoneData?.phone, forKey: "loggedInPhone")
-
-                    // ✅ THIS LINE FIXES YOUR ISSUE
                     UserDefaults.standard.set(true, forKey: "isLoggedIn")
 
                     UserDefaults.standard.synchronize()
-
                     self.switchToHome()
+
                 } else {
-                    print("⚠️ Login failed:", response.message ?? "Unknown error")
+                    // ❗ API returned failure (wrong password / number)
+                    DispatchQueue.main.async {
+                        self.showAlert(
+                            title: "Login Failed",
+                            message: response.message ?? "Invalid credentials"
+                        )
+                    }
                 }
-                
+
             case .failure(let error):
-                // Print error
+
                 print("❌ Login API Error:", error)
+
+                // ❗ Network / server error
+                DispatchQueue.main.async {
+                    self.showAlert(
+                        title: "Error",
+                        message: "Invalid credentials or network issue"
+                    )
+                }
             }
         }
     }
