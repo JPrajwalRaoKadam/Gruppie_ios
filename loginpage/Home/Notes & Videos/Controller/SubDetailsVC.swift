@@ -11,6 +11,8 @@ class SubDetailsVC: UIViewController, SubDetailsCellDelegate {
     var subjectId: String = ""
     var subjectName: String = ""
     var className: String = ""
+    var roleName: String?
+    var fullAccess: Bool?
 
     var groupAcademicYearResponse: GroupAcademicYearResponse?
     var notesList: [NoteItem] = []
@@ -26,6 +28,10 @@ class SubDetailsVC: UIViewController, SubDetailsCellDelegate {
 
         subTableView.delegate = self
         subTableView.dataSource = self
+        
+        if fullAccess == false {
+            addButton.isHidden = true
+        }
 
         print("classId:", classId)
         print("subjectId:", subjectId)

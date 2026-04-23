@@ -117,7 +117,7 @@ class AddChapterVC: UIViewController, UIImagePickerControllerDelegate & UINaviga
 
         guard let token = SessionManager.useRoleToken else { return }
 
-        let urlString = "https://backend.gc2.co.in/api/v1/notes"
+        let urlString = "https://dev.gruppie.in/api/v1/notes"
 
         guard let url = URL(string: urlString) else { return }
 

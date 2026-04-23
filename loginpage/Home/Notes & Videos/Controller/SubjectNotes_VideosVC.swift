@@ -22,6 +22,8 @@ class SubjectNotes_VideosVC: UIViewController, AddSubNotesDelegate {
     var clsName: String = ""
     var classId: String = ""
     var subjectId: String = ""
+    var roleName: String?
+    var fullAccess: Bool?
 
     // Direct API model
     var subjects: [SubjectRegisterSubjectDetail] = []
@@ -36,6 +38,10 @@ class SubjectNotes_VideosVC: UIViewController, AddSubNotesDelegate {
 
         subTableView.delegate = self
         subTableView.dataSource = self
+        
+        if fullAccess == false {
+            plusButton.isHidden = true
+        }
 
         subTableView.register(
             UINib(nibName: "SubjectNotes_videosTableViewCell", bundle: nil),
@@ -175,6 +181,7 @@ extension SubjectNotes_VideosVC: UITableViewDelegate, UITableViewDataSource {
             subDetailsVC.classId = classId
             subDetailsVC.subjectId = String(selectedSubject.subjectId)
             subDetailsVC.subjectName = selectedSubject.subjectName
+            subDetailsVC.roleName = self.roleName
             subDetailsVC.groupAcademicYearResponse = self.groupAcademicYearResponse
 
             self.navigationController?.pushViewController(subDetailsVC, animated: true)

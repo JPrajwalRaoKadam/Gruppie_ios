@@ -9,14 +9,15 @@ import UIKit
 
 class Notes_VideosVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    var className: String = ""
-    var groupClasses: [GroupClass] = []
-    var groupAcademicYearResponse: GroupAcademicYearResponse?
-    var currentRole: String?
-    
     @IBOutlet weak var bcbutton: UIButton!
     @IBOutlet weak var Notes_Video: UILabel!
     @IBOutlet weak var Notes_videosTV: UITableView!
+    
+    var className: String = ""
+    var groupClasses: [GroupClass] = []
+    var groupAcademicYearResponse: GroupAcademicYearResponse?
+    var roleName: String?
+    var fullAccess: Bool?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,6 +65,8 @@ extension Notes_VideosVC {
         if let subjectNotesVC = storyboard.instantiateViewController(withIdentifier: "SubjectNotes_VideosVC") as? SubjectNotes_VideosVC {
             subjectNotesVC.clsName = self.className
             subjectNotesVC.classId = classId
+            subjectNotesVC.roleName = self.roleName
+            subjectNotesVC.fullAccess = self.fullAccess
             subjectNotesVC.groupAcademicYearResponse = self.groupAcademicYearResponse
             print("✅ Selected teamId: \(classId)")
             self.navigationController?.pushViewController(subjectNotesVC, animated: true)

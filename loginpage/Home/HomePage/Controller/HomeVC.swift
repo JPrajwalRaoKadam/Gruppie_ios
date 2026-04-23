@@ -665,6 +665,8 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
             if let Notes_VideosVC = storyboard.instantiateViewController(withIdentifier: "Notes_VideosVC") as? Notes_VideosVC {
                     navigationController?.pushViewController(Notes_VideosVC, animated: true)
                 Notes_VideosVC.groupClasses = groupClass
+                Notes_VideosVC.roleName = roleName
+                Notes_VideosVC.fullAccess = self.fullAccess
                 Notes_VideosVC.groupAcademicYearResponse = self.groupAcademicYearResponse
                 } else {
                     print("Failed to instantiate SyllabusTrackerVC")
