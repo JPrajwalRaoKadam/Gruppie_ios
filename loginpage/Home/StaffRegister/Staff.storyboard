@@ -19,69 +19,79 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nV0-eu-XED">
-                                <rect key="frame" x="36" y="156" width="340" height="50"/>
+                                <rect key="frame" x="37" y="156" width="340" height="50"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Pesonal Information" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AFe-De-xp3">
                                         <rect key="frame" x="8" y="15" width="181" height="20"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
                                 <color key="backgroundColor" red="0.9606168866" green="0.95324307679999998" blue="0.9372524619" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="340" id="TDT-Y1-W6V"/>
-                                    <constraint firstAttribute="height" constant="50" id="srb-No-8GA"/>
+                                    <constraint firstAttribute="width" constant="340" id="hf2-cI-egZ"/>
+                                    <constraint firstAttribute="height" constant="50" id="utI-0v-8PE"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aU9-gy-D7S">
-                                <rect key="frame" x="37" y="768" width="340" height="50"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="340" id="ZuG-NO-XsV"/>
-                                    <constraint firstAttribute="height" constant="50" id="n06-uS-9yB"/>
-                                </constraints>
-                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="ADD"/>
-                                <connections>
-                                    <action selector="addButtonTapped:" destination="TLt-Ds-ecf" eventType="touchUpInside" id="78z-fc-qYm"/>
-                                </connections>
-                            </button>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="KW4-Hi-ynp">
-                                <rect key="frame" x="37" y="221" width="340" height="258"/>
+                                <rect key="frame" x="37" y="216" width="340" height="281"/>
                                 <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="      First Name" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="L0k-nb-m1T">
-                                        <rect key="frame" x="0.0" y="0.0" width="340" height="40.5"/>
-                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="First Name*" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="L0k-nb-m1T">
+                                        <rect key="frame" x="0.0" y="0.0" width="340" height="45"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="45" id="t6g-bz-LbB"/>
+                                        </constraints>
+                                        <color key="textColor" systemColor="systemGray2Color"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="      Middle Name" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P8z-Lt-Keh">
-                                        <rect key="frame" x="0.0" y="54.5" width="340" height="40.5"/>
-                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Middle Name" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P8z-Lt-Keh">
+                                        <rect key="frame" x="0.0" y="59" width="340" height="45"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="45" id="cnJ-lC-IGG"/>
+                                        </constraints>
+                                        <color key="textColor" systemColor="systemGray2Color"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="      Last Name" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="SuR-Qv-JnO">
-                                        <rect key="frame" x="0.0" y="109" width="340" height="40"/>
-                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Last Name" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="SuR-Qv-JnO">
+                                        <rect key="frame" x="0.0" y="118" width="340" height="45"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="45" id="GIa-5O-RO5"/>
+                                        </constraints>
+                                        <color key="textColor" systemColor="systemGray2Color"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="      Contact Number" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="eMY-1k-j4N">
-                                        <rect key="frame" x="0.0" y="163" width="340" height="40.5"/>
-                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Contact Number*" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="eMY-1k-j4N">
+                                        <rect key="frame" x="0.0" y="177" width="340" height="45"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="45" id="g2J-IO-e3Q"/>
+                                        </constraints>
+                                        <color key="textColor" systemColor="systemGray2Color"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="      Select Type" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="5ya-WW-glb">
-                                        <rect key="frame" x="0.0" y="217.5" width="340" height="40.5"/>
-                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Select Staff Type" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="5ya-WW-glb">
+                                        <rect key="frame" x="0.0" y="236" width="340" height="45"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="45" id="BwJ-uG-PCI"/>
+                                        </constraints>
+                                        <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
                                 </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="281" id="4m1-th-XGv"/>
+                                </constraints>
                             </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LJE-Ze-DH0" userLabel="topView">
                                 <rect key="frame" x="0.0" y="96" width="414" height="50"/>
@@ -102,7 +112,7 @@
                                             <action selector="backButtonTapped:" destination="TLt-Ds-ecf" eventType="touchUpInside" id="DWa-4C-zNS"/>
                                         </connections>
                                     </button>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Add Staff" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Aj-Tq-js7">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Add User" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Aj-Tq-js7">
                                         <rect key="frame" x="65" y="15" width="150" height="20"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="150" id="U6i-ZR-VAj"/>
@@ -124,23 +134,36 @@
                                     <constraint firstAttribute="bottom" secondItem="129-3x-5q8" secondAttribute="bottom" constant="5" id="r0J-Yq-phc"/>
                                 </constraints>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aU9-gy-D7S">
+                                <rect key="frame" x="43" y="780" width="328" height="48"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="017-gq-Pga"/>
+                                    <constraint firstAttribute="width" constant="328" id="H4x-s3-0Df"/>
+                                </constraints>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Add Staff"/>
+                                <connections>
+                                    <action selector="addButtonTapped:" destination="TLt-Ds-ecf" eventType="touchUpInside" id="78z-fc-qYm"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="BAF-I8-Uui"/>
                         <color key="backgroundColor" red="0.9606168866" green="0.95324307679999998" blue="0.9372524619" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
-                            <constraint firstItem="BAF-I8-Uui" firstAttribute="trailing" secondItem="KW4-Hi-ynp" secondAttribute="trailing" constant="37" id="1kc-bO-V2W"/>
-                            <constraint firstItem="nV0-eu-XED" firstAttribute="top" secondItem="owu-Ez-umA" secondAttribute="top" constant="156" id="6Gh-9b-KeJ"/>
-                            <constraint firstItem="aU9-gy-D7S" firstAttribute="top" secondItem="KW4-Hi-ynp" secondAttribute="bottom" constant="289" id="9H0-hN-LgB"/>
                             <constraint firstItem="LJE-Ze-DH0" firstAttribute="leading" secondItem="BAF-I8-Uui" secondAttribute="leading" id="9Uf-qQ-nCC"/>
-                            <constraint firstItem="aU9-gy-D7S" firstAttribute="leading" secondItem="BAF-I8-Uui" secondAttribute="leading" constant="37" id="C6p-t5-Ckl"/>
+                            <constraint firstItem="nV0-eu-XED" firstAttribute="top" secondItem="LJE-Ze-DH0" secondAttribute="bottom" constant="10" id="BLX-rm-pCg"/>
+                            <constraint firstItem="BAF-I8-Uui" firstAttribute="trailing" secondItem="aU9-gy-D7S" secondAttribute="trailing" constant="43" id="GUp-b4-h69"/>
+                            <constraint firstItem="aU9-gy-D7S" firstAttribute="leading" secondItem="BAF-I8-Uui" secondAttribute="leading" constant="43" id="I4U-z1-8aQ"/>
                             <constraint firstItem="LJE-Ze-DH0" firstAttribute="top" secondItem="BAF-I8-Uui" secondAttribute="top" id="PiM-8M-bhM"/>
-                            <constraint firstItem="BAF-I8-Uui" firstAttribute="trailing" secondItem="nV0-eu-XED" secondAttribute="trailing" constant="38" id="Qao-n9-8Ht"/>
-                            <constraint firstItem="nV0-eu-XED" firstAttribute="leading" secondItem="BAF-I8-Uui" secondAttribute="leading" constant="36" id="UTg-fd-TRo"/>
-                            <constraint firstItem="KW4-Hi-ynp" firstAttribute="top" secondItem="nV0-eu-XED" secondAttribute="bottom" constant="15" id="VF1-uQ-frb"/>
-                            <constraint firstItem="KW4-Hi-ynp" firstAttribute="leading" secondItem="BAF-I8-Uui" secondAttribute="leading" constant="37" id="aG1-QX-PNa"/>
                             <constraint firstItem="LJE-Ze-DH0" firstAttribute="trailing" secondItem="BAF-I8-Uui" secondAttribute="trailing" id="b3d-tY-6GS"/>
-                            <constraint firstItem="BAF-I8-Uui" firstAttribute="bottom" secondItem="aU9-gy-D7S" secondAttribute="bottom" constant="10" id="gJ5-ow-XYN"/>
-                            <constraint firstItem="BAF-I8-Uui" firstAttribute="trailing" secondItem="aU9-gy-D7S" secondAttribute="trailing" constant="37" id="i4E-AT-JVO"/>
+                            <constraint firstItem="nV0-eu-XED" firstAttribute="leading" secondItem="BAF-I8-Uui" secondAttribute="leading" constant="37" id="fY7-NQ-RUl"/>
+                            <constraint firstItem="BAF-I8-Uui" firstAttribute="trailing" secondItem="KW4-Hi-ynp" secondAttribute="trailing" constant="37" id="sFo-2t-093"/>
+                            <constraint firstItem="BAF-I8-Uui" firstAttribute="trailing" secondItem="nV0-eu-XED" secondAttribute="trailing" constant="37" id="suY-lU-sle"/>
+                            <constraint firstItem="aU9-gy-D7S" firstAttribute="bottom" secondItem="BAF-I8-Uui" secondAttribute="bottom" id="tk6-q6-LZP"/>
+                            <constraint firstItem="KW4-Hi-ynp" firstAttribute="top" secondItem="nV0-eu-XED" secondAttribute="bottom" constant="10" id="xLU-Di-ILW"/>
+                            <constraint firstItem="KW4-Hi-ynp" firstAttribute="leading" secondItem="BAF-I8-Uui" secondAttribute="leading" constant="37" id="ya3-Hp-79q"/>
                         </constraints>
                     </view>
                     <connections>
@@ -491,6 +514,9 @@
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray2Color">
+            <color red="0.68235294117647061" green="0.68235294117647061" blue="0.69803921568627447" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

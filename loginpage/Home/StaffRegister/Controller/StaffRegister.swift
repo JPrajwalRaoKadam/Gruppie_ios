@@ -54,6 +54,10 @@ class StaffRegister: UIViewController, UITableViewDataSource, UITableViewDelegat
         searchButton.addTarget(self, action: #selector(searchButtonTappedAction), for: .touchUpInside)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        loadTeachingStaff()
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // Configure backButton to have circular corners

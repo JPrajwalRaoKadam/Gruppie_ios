@@ -1,6 +1,6 @@
 import UIKit
 
-class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
+class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource {
     
     @IBOutlet weak var firstNameTextField: UITextField!
     @IBOutlet weak var middleNameTextField: UITextField!
@@ -17,6 +17,9 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
     let typeOptions = ["Teaching", "Non-Teaching"]
     let dropdownTableView = UITableView()
     
+    // ✅ ADDED: Picker
+    let pickerView = UIPickerView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -24,6 +27,7 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
         enableKeyboardDismissOnTap()
+        
         let textFields = [
             firstNameTextField,
             middleNameTextField,
@@ -36,11 +40,24 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
             tf?.layer.cornerRadius = 10
             tf?.layer.masksToBounds = true
             tf?.layer.borderWidth = 1
-            tf?.layer.borderColor = UIColor.lightGray.cgColor
+            tf?.layer.borderColor = UIColor.white.cgColor
             tf?.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
             tf?.leftViewMode = .always
             tf?.delegate = self
         }
+        
+        // ✅ ADDED: Picker setup
+        pickerView.delegate = self
+        pickerView.dataSource = self
+        selectTypeTextField.inputView = pickerView
+        selectTypeTextField.tintColor = .clear // hide cursor
+        
+        // ✅ ADDED: Toolbar
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneTapped))
+        toolbar.setItems([doneButton], animated: false)
+        selectTypeTextField.inputAccessoryView = toolbar
         
         dropdownTableView.delegate = self
         dropdownTableView.dataSource = self
@@ -49,26 +66,35 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         dropdownTableView.layer.borderColor = UIColor.lightGray.cgColor
         dropdownTableView.layer.cornerRadius = 8
         dropdownTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        dropdownTableView.isUserInteractionEnabled = true
         
         view.addSubview(dropdownTableView)
+    }
+    
+    // ✅ ADDED: Done button
+    @objc func doneTapped() {
+        selectTypeTextField.resignFirstResponder()
     }
     
     func textField(_ textField: UITextField,
                    shouldChangeCharactersIn range: NSRange,
                    replacementString string: String) -> Bool {
         
+        // ✅ ADDED: Disable typing for selectTypeTextField
+        if textField == selectTypeTextField {
+            return false
+        }
+        
         guard textField == contactNumberTextField else {
             return true
         }
         
-        // Allow only digits
         let allowedCharacters = CharacterSet.decimalDigits
         let characterSet = CharacterSet(charactersIn: string)
         if !allowedCharacters.isSuperset(of: characterSet) {
             return false
         }
         
-        // Limit to 10 digits
         let currentText = textField.text ?? ""
         guard let stringRange = Range(range, in: currentText) else {
             return false
@@ -78,6 +104,46 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         return updatedText.count <= 10
     }
 
+    // ✅ ADDED: Prevent dropdown, use picker
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField == selectTypeTextField {
+            hideDropdown() // stop old dropdown
+        } else {
+            textField.text = ""
+            textField.textColor = .black
+            hideDropdown()
+        }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField.state.isEmpty {
+            firstNameTextField.placeholder = "First Name *"
+            middleNameTextField.placeholder = "Middle Name"
+            lastNameTextField.placeholder = "Last Name"
+            contactNumberTextField.placeholder = "Contact Number *"
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.hideDropdown()
+        }
+    }
+    
+    // ✅ ADDED: Picker DataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return typeOptions.count
+    }
+    
+    // ✅ ADDED: Picker Delegate
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return typeOptions[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        selectTypeTextField.text = typeOptions[row]
+    }
     
     @IBAction func backButtonTapped(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
@@ -85,10 +151,9 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         
     @IBAction func addButtonTapped(_ sender: UIButton) {
         guard let firstName = firstNameTextField.text, !firstName.isEmpty,
-              let lastName = lastNameTextField.text, !lastName.isEmpty,
               let contactNumber = contactNumberTextField.text, !contactNumber.isEmpty,
               let staffType = selectTypeTextField.text, !staffType.isEmpty else {
-            showError("First Name, Last Name, Mobile Number and Staff Type are required")
+            showError("First Name, Mobile Number and Staff Type are required")
             return
         }
         
@@ -97,28 +162,20 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
             return
         }
         
-        print("👤 First Name:", firstName)
-        print("👤 Last Name:", lastName)
-        print("📞 Phone:", contactNumber)
-        print("🧑‍💼 Staff Type:", staffType)
-        
         callAddStaffAPI(
             firstName: firstName,
             middleName: middleNameTextField.text,
-            lastName: lastName,
+            lastName: lastNameTextField.text,
             contactNumber: contactNumber,
-            
             staffType: staffType
         )
     }
-        
+    
     func callAddStaffAPI(firstName: String, middleName: String?, lastName: String?, contactNumber: String, staffType: String) {
         guard let token = SessionManager.useRoleToken else {
             showError("Token missing")
             return
         }
-        
-        print("🔑 Token used for API:", token)
         
         let staffTypeFormatted = staffType.uppercased()
         var parameters: [String: String] = [
@@ -139,12 +196,9 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.httpBody = createMultipartBody(parameters: parameters, boundary: boundary)
         
-        print("🚀 Sending Add Staff Request")
-        
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 if let error = error {
-                    print("❌ API Error:", error.localizedDescription)
                     self.showError("Failed to add staff")
                     return
                 }
@@ -152,14 +206,6 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
                 guard let httpResponse = response as? HTTPURLResponse else {
                     self.showError("Invalid server response")
                     return
-                }
-                
-                print("🚀 HTTP Status Code:", httpResponse.statusCode)
-                
-                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                    print("✅ Response Body:", responseString)
-                } else {
-                    print("✅ Response Body is empty")
                 }
                 
                 if (200...299).contains(httpResponse.statusCode) {
@@ -184,13 +230,6 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         body.append("--\(boundary)--\(lineBreak)")
         return body
     }
-        
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        textField.text = ""
-        if textField == selectTypeTextField { showDropdown() } else { hideDropdown() }
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) { hideDropdown() }
     
     func showDropdown() {
         let textFieldFrameInView = selectTypeTextField.superview?.convert(selectTypeTextField.frame, to: self.view) ?? selectTypeTextField.frame
@@ -205,9 +244,13 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
         self.view.bringSubviewToFront(dropdownTableView)
     }
     
-    func hideDropdown() { dropdownTableView.isHidden = true }
-        
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { typeOptions.count }
+    func hideDropdown() {
+        dropdownTableView.isHidden = true
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return typeOptions.count
+    }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
@@ -218,28 +261,27 @@ class AddStaffViewController: UIViewController, UITextFieldDelegate, UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectTypeTextField.text = typeOptions[indexPath.row]
         hideDropdown()
-        selectTypeTextField.resignFirstResponder()
+        tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+    func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {}
     
     func showError(_ message: String) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         self.present(alert, animated: true)
     }
-         
+    
     func showAlert(message: String, success: Bool) {
         let alert = UIAlertController(title: success ? "Success" : "Alert", message: message, preferredStyle: .alert)
-        
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
             if success {
                 self.navigationController?.popViewController(animated: true)
             }
-        }))
-        
+        })
         self.present(alert, animated: true)
     }
-
-  }
+}
 
 extension Data {
     mutating func append(_ string: String) {
