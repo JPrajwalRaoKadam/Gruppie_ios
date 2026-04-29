@@ -73,6 +73,9 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
         
+        // ✅ SHOW LOADER
+        LoaderManager.shared.show()
+        
         APIManager.shared.request(
             endpoint: "fees/classwise-fee-details",
             method: .get,
@@ -81,26 +84,25 @@ class PaymentClassListingVC: UIViewController, UITableViewDelegate, UITableViewD
             headers: ["Authorization": "Bearer \(token)"]
         ) { (result: Result<ClasswiseFeeResponse, APIManager.APIError>) in
             
+            // ✅ HIDE LOADER (ALWAYS)
+            LoaderManager.shared.hide()
+            
             switch result {
                 
             case .success(let response):
                 print("✅ Classwise Fee Response:", response)
                 
-                DispatchQueue.main.async {
-                    self.classwiseData = response.data
-                    self.feeTotals = response.totals
-                    
-                    self.updateTotalsUI()
-                    self.classTableView.reloadData()
-                }
+                self.classwiseData = response.data
+                self.feeTotals = response.totals
+                
+                self.updateTotalsUI()
+                self.classTableView.reloadData()
                 
             case .failure(let error):
                 print("❌ API Error:", error)
                 
                 // 🔥 fallback UI reload
-                DispatchQueue.main.async {
-                    self.classTableView.reloadData()
-                }
+                self.classTableView.reloadData()
             }
         }
     }

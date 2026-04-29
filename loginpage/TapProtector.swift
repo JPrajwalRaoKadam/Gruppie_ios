@@ -103,3 +103,109 @@ extension UIViewController {
     }
 }
 
+import UIKit
+import ObjectiveC.runtime
+
+extension UITableView {
+
+    static let swizzleReload: Void = {
+        let original = class_getInstanceMethod(UITableView.self, #selector(reloadData))
+        let swizzled = class_getInstanceMethod(UITableView.self, #selector(swizzled_reloadData))
+        method_exchangeImplementations(original!, swizzled!)
+    }()
+
+    @objc private func swizzled_reloadData() {
+        self.swizzled_reloadData() // original reloadData
+
+        DispatchQueue.main.async {
+            self.checkEmpty()
+        }
+    }
+
+    private func checkEmpty() {
+        guard let dataSource = self.dataSource else { return }
+
+        let sections = dataSource.numberOfSections?(in: self) ?? 1
+        var isEmpty = true
+
+        for section in 0..<sections {
+            let rows = dataSource.tableView(self, numberOfRowsInSection: section)
+            if rows > 0 {
+                isEmpty = false
+                break
+            }
+        }
+
+        if isEmpty {
+            setEmptyMessage()
+        } else {
+            restore()
+        }
+    }
+
+    private func setEmptyMessage(_ message: String = "No Data Available") {
+        let label = UILabel()
+        label.text = message
+        label.textAlignment = .center
+        label.textColor = .lightGray
+        label.numberOfLines = 0
+        self.backgroundView = label
+        self.separatorStyle = .none
+    }
+
+    private func restore() {
+        self.backgroundView = nil
+        self.separatorStyle = .singleLine
+    }
+}
+
+extension UICollectionView {
+
+    static let swizzleReload: Void = {
+        let original = class_getInstanceMethod(UICollectionView.self, #selector(reloadData))
+        let swizzled = class_getInstanceMethod(UICollectionView.self, #selector(swizzled_reloadData))
+        method_exchangeImplementations(original!, swizzled!)
+    }()
+
+    @objc private func swizzled_reloadData() {
+        self.swizzled_reloadData()
+
+        DispatchQueue.main.async {
+            self.checkEmpty()
+        }
+    }
+
+    private func checkEmpty() {
+        guard let dataSource = self.dataSource else { return }
+
+        let sections = dataSource.numberOfSections?(in: self) ?? 1
+        var isEmpty = true
+
+        for section in 0..<sections {
+            let items = dataSource.collectionView(self, numberOfItemsInSection: section)
+            if items > 0 {
+                isEmpty = false
+                break
+            }
+        }
+
+        if isEmpty {
+            setEmptyMessage()
+        } else {
+            restore()
+        }
+    }
+
+    private func setEmptyMessage(_ message: String = "No Data Available") {
+        let label = UILabel(frame: bounds)
+        label.text = message
+        label.textAlignment = .center
+        label.textColor = .lightGray
+        label.numberOfLines = 0
+        self.backgroundView = label
+    }
+
+    private func restore() {
+        self.backgroundView = nil
+    }
+}

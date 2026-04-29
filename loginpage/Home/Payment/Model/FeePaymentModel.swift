@@ -60,8 +60,34 @@ struct Meta: Codable {
 }
 
 struct StudentFeeSummaryDetailResponse: Codable {
-    let success: Bool?
+    let success: BoolOrInt?
     let data: StudentFeeSummaryDetail?
+}
+
+enum BoolOrInt: Codable {
+    case bool(Bool)
+    case int(Int)
+
+    var value: Bool {
+        switch self {
+        case .bool(let b): return b
+        case .int(let i): return i == 1
+        }
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let bool = try? container.decode(Bool.self) {
+            self = .bool(bool)
+        } else if let int = try? container.decode(Int.self) {
+            self = .int(int)
+        } else {
+            throw DecodingError.typeMismatch(BoolOrInt.self,
+                DecodingError.Context(codingPath: decoder.codingPath,
+                debugDescription: "Invalid type"))
+        }
+    }
 }
 
 struct StudentFeeSummaryDetail: Codable {
@@ -104,7 +130,7 @@ struct FeeDetail: Codable {
     let payable: Double?
     let fine: Double?
     let paidFine: Double?
-    let fineRuleId: String?
+    let fineRuleId: Int?   // ✅ FIXED
     let hasInstalments: Bool?
 }
 

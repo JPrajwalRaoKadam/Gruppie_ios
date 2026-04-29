@@ -50,17 +50,21 @@ class rolesViewController: UIViewController {
 
         let headers = ["Authorization": "Bearer \(token)"]
 
+        LoaderManager.shared.show()   // ✅ START
+
         APIManager.shared.request(
             endpoint: "user-role",
             method: .get,
             headers: headers
         ) { (result: Result<UserRoleResponse, APIManager.APIError>) in
 
+            LoaderManager.shared.hide()   // ✅ STOP
+
             switch result {
             case .success(let response):
                 self.roles = response.data
                 self.rolesCollectionView.reloadData()
-//                self.configureSheetHeight()
+                self.configureSheetHeight()
 
                 // Save first role token (optional default)
                 if let firstToken = response.data.first?.token {

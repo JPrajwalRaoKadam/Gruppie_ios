@@ -169,8 +169,14 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             return
         }
         
+        // ✅ SHOW LOADER
+        LoaderManager.shared.show()
+        view.isUserInteractionEnabled = false
+        
+        let endpoint = "fees/students/\(studentId)/fee-summary"
+        
         APIManager.shared.request(
-            endpoint: "fees/students/\(studentId)/fee-summary",
+            endpoint: endpoint,
             method: .get,
             queryParams: [
                 "groupAcademicYearId": groupAcademicYearId
@@ -180,30 +186,72 @@ class MakeFeePaymentVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             
         ) { (result: Result<StudentFeeSummaryDetailResponse, APIManager.APIError>) in
             
+            // ✅ HIDE LOADER
+            LoaderManager.shared.hide()
+            self.view.isUserInteractionEnabled = true
+            
             switch result {
                 
             case .success(let response):
                 
-                print("✅ Student Fee Summary:", response)
+                // 🔍 PRINT SUCCESS RESPONSE
+                print("✅ Decoded Response:", response)
                 
-                DispatchQueue.main.async {
-                    
-                    let data = response.data
-                    
-                    self.studentInfo = data?.student
-                    self.breakdown = data?.breakdown
-                    self.feeDetails = data?.feeDetails ?? []
-                    self.paidDetails = data?.paidDetails ?? []
-                    self.installments = data?.installments ?? []
-                    
-                    self.updateUI()
-                    self.paymentTableView.reloadData()
-                }
+                let data = response.data
+                
+                self.studentInfo = data?.student
+                self.breakdown = data?.breakdown
+                self.feeDetails = data?.feeDetails ?? []
+                self.paidDetails = data?.paidDetails ?? []
+                self.installments = data?.installments ?? []
+                
+                self.updateUI()
+                self.paymentTableView.reloadData()
                 
             case .failure(let error):
+                
                 print("❌ API Error:", error)
+                
+                // ⚠️ IMPORTANT: GET RAW RESPONSE (TEMP DEBUG)
+                self.printRawResponse(
+                    endpoint: endpoint,
+                    token: token,
+                    groupAcademicYearId: groupAcademicYearId
+                )
             }
         }
+    }
+    
+    private func printRawResponse(endpoint: String, token: String, groupAcademicYearId: String) {
+        
+        var components = URLComponents(string: APIManager.shared.baseURL + endpoint)!
+        components.queryItems = [
+            URLQueryItem(name: "groupAcademicYearId", value: groupAcademicYearId)
+        ]
+        
+        guard let url = components.url else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            
+            if let error = error {
+                print("❌ Raw API Error:", error)
+                return
+            }
+            
+            guard let data = data else {
+                print("❌ No raw data")
+                return
+            }
+            
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📦 RAW RESPONSE:\n\(jsonString)")
+            }
+            
+        }.resume()
     }
 }
 

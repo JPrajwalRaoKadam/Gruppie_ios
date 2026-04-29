@@ -113,6 +113,9 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             return
         }
         
+        LoaderManager.shared.show()                      // ✅ START
+        view.isUserInteractionEnabled = false
+        
         APIManager.shared.request(
             endpoint: "fees/student-fee-demands/summary",
             method: .get,
@@ -124,13 +127,14 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             headers: ["Authorization": "Bearer \(token)"]
         ) { (result: Result<StudentFeeSummaryResponse, APIManager.APIError>) in
             
+            LoaderManager.shared.hide()            // ✅ STOP
+            self.view.isUserInteractionEnabled = true
+            
             switch result {
             case .success(let response):
-                DispatchQueue.main.async {
-                    self.studentFees = response.data
-                    self.studentTableView.reloadData()
-                    self.updateUI()
-                }
+                self.studentFees = response.data
+                self.studentTableView.reloadData()
+                self.updateUI()
                 
             case .failure(let error):
                 print("❌ API Error:", error)
@@ -154,17 +158,21 @@ class StudentListingVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         let endpoint = "group-class/\(classId)/students?groupAcademicYearId=\(groupAcademicYearId)"
         
+        LoaderManager.shared.show()                        // ✅ START
+        view.isUserInteractionEnabled = false
+        
         APIManager.shared.request(
             endpoint: endpoint,
             method: .get,
             headers: ["Authorization": "Bearer \(token)"]
         ) { (result: Result<StudentListResponseModel, APIManager.APIError>) in
             
+            LoaderManager.shared.hide()           // ✅ STOP
+            self.view.isUserInteractionEnabled = true
+            
             switch result {
             case .success(let response):
-                DispatchQueue.main.async {
-                    completion(response.data) // ✅ NO FORCE CAST
-                }
+                completion(response.data)
                 
             case .failure(let error):
                 print("❌ API Error:", error)

@@ -76,6 +76,7 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
     }
     
     private func fetchHomeData() {
+        
         guard let token = SessionManager.useRoleToken else {
             print("❌ Role token missing")
             return
@@ -83,38 +84,43 @@ class HomeVC: UIViewController, UITableViewDelegate, UITableViewDataSource, AllI
 
         let headers = ["Authorization": "Bearer \(token)"]
 
+        // ✅ SHOW LOADER
+        LoaderManager.shared.show()
+        view.isUserInteractionEnabled = false
+
         APIManager.shared.request(
             endpoint: "home/services",
             method: .get,
             headers: headers
         ) { (result: Result<HomeResponse, APIManager.APIError>) in
 
+            // ✅ HIDE LOADER (ALWAYS)
+            LoaderManager.shared.hide()
+            self.view.isUserInteractionEnabled = true
+
             switch result {
             case .success(let response):
-                DispatchQueue.main.async {
 
-                    self.homeData = response
-                    self.feature = response.features
+                self.homeData = response
+                self.feature = response.features
 
-                    // ✅ Flatten all icons
-                    self.featureIcons = response.features.flatMap { $0.featureIcons }
+                // ✅ Flatten all icons
+                self.featureIcons = response.features.flatMap { $0.featureIcons }
 
-                    // ✅ Extract image URLs
-                    self.imageUrls = self.featureIcons.map { $0.logoUrl }
+                // ✅ Extract image URLs
+                self.imageUrls = self.featureIcons.map { $0.logoUrl }
 
-                    // ✅ Set labels
-                    self.groupName = response.groupName
-                    self.groupId = response.groupId
-                    self.roleName = response.role
-                    self.shortNameLabel.text = response.groupName
+                // ✅ Set labels
+                self.groupName = response.groupName
+                self.groupId = response.groupId
+                self.roleName = response.role
+                self.shortNameLabel.text = response.groupName
 
-                    print("✅ Home loaded:", self.feature.count)
-                    print("✅ Total icons:", self.featureIcons.count)
-                    print("✅ Image URLs:", self.imageUrls.count)
+                print("✅ Home loaded:", self.feature.count)
+                print("✅ Total icons:", self.featureIcons.count)
+                print("✅ Image URLs:", self.imageUrls.count)
 
-                    self.tableView.reloadData()
-                }
-
+                self.tableView.reloadData()
 
             case .failure(let error):
                 print("❌ Home API Error:", error)

@@ -90,6 +90,9 @@ extension AmountPaymentVC {
         
         let academicYearId = groupAcademicYearId.isEmpty ? "142" : groupAcademicYearId
         
+        LoaderManager.shared.show()
+        view.isUserInteractionEnabled = false
+        
         APIManager.shared.request(
             endpoint: "fees/students/\(studentId)/payment-view",
             method: .get,
@@ -97,15 +100,18 @@ extension AmountPaymentVC {
             body: nil,
             headers: ["Authorization": "Bearer \(token)"]
         ) { (result: Result<PaymentViewResponse, APIManager.APIError>) in
+            
+            LoaderManager.shared.hide()
+            self.view.isUserInteractionEnabled = true
+            
             switch result {
             case .success(let response):
-                DispatchQueue.main.async {
-                    let data = response.data
-                    self.demands = data?.demands ?? []
-                    self.studentNameLabel.text = data?.student?.fullName
-                    self.classId = Int(data?.student?.classId ?? "0") ?? 0
-                    self.payableTableView.reloadData()
-                }
+                let data = response.data
+                self.demands = data?.demands ?? []
+                self.studentNameLabel.text = data?.student?.fullName
+                self.classId = Int(data?.student?.classId ?? "0") ?? 0
+                self.payableTableView.reloadData()
+                
             case .failure(let error):
                 print("❌ API Error:", error)
             }
@@ -119,6 +125,8 @@ extension AmountPaymentVC {
         guard let token = bearerToken else { return }
         guard let body = buildPaymentBody(includeIdempotency: true) else { return }
         
+        LoaderManager.shared.show()
+        
         APIManager.shared.request(
             endpoint: "payment-gateway/initiate",
             method: .post,
@@ -126,13 +134,14 @@ extension AmountPaymentVC {
             body: body,
             headers: ["Authorization": "Bearer \(token)"]
         ) { (result: Result<PaymentGatewayResponse, APIManager.APIError>) in
+            
+            LoaderManager.shared.hide()
+            
             switch result {
             case .success(let response):
                 if let redirectUrl = response.data?.redirectUrl {
                     let token = redirectUrl.components(separatedBy: "/pay/").last ?? ""
-                    DispatchQueue.main.async {
-                        self.startEasebuzz(token: token)
-                    }
+                    self.startEasebuzz(token: token)
                 }
             case .failure(let error):
                 print("❌ Gateway Error:", error)
@@ -179,24 +188,19 @@ extension AmountPaymentVC {
             showAlert(message: "Missing payment response")
             return
         }
+
+        LoaderManager.shared.show()
         
-        // Create a clean dictionary without any NSNull values
         var cleanResponse: [String: Any] = [:]
         for (key, value) in paymentResponse {
             if !(value is NSNull) {
                 cleanResponse[key] = value
             }
         }
-        
+
         do {
-            // Use .withoutEscapingSlashes for cleaner JSON
-            let jsonData = try JSONSerialization.data(withJSONObject: cleanResponse, options: [])
-            
-            // Debug print
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("📤 Sending to confirm endpoint:", jsonString)
-            }
-            
+            let jsonData = try JSONSerialization.data(withJSONObject: cleanResponse)
+
             APIManager.shared.request(
                 endpoint: "payment-gateway/confirm",
                 method: .post,
@@ -208,34 +212,19 @@ extension AmountPaymentVC {
                 ]
             ) { (result: Result<GenericResponse, APIManager.APIError>) in
                 
+                LoaderManager.shared.hide()
+                
                 switch result {
-                case .success(let response):
-                    DispatchQueue.main.async {
-                        print("✅ Confirm Response:", response)
-                        
-                        if response.success == true {
-                            // After confirm succeeds, verify payment
-                            self.verifyPayment(txnId: txnId)
-                        } else {
-                            // If confirm fails, still try to verify and record payment
-                            print("⚠️ Confirm failed but continuing with verification")
-                            self.verifyPayment(txnId: txnId)
-                        }
-                    }
+                case .success:
+                    self.verifyPayment(txnId: txnId)
                     
-                case .failure(let error):
-                    print("❌ Confirm Error:", error)
-                    DispatchQueue.main.async {
-                        // Even if confirm fails, try to verify and record payment
-                        print("⚠️ Confirm error but continuing with verification")
-                        self.verifyPayment(txnId: txnId)
-                    }
+                case .failure:
+                    self.verifyPayment(txnId: txnId)
                 }
             }
-            
+
         } catch {
-            print("❌ JSON Error:", error)
-            // Even if JSON fails, try to verify and record payment
+            LoaderManager.shared.hide()
             verifyPayment(txnId: txnId)
         }
     }
@@ -243,30 +232,30 @@ extension AmountPaymentVC {
     func verifyPayment(txnId: String) {
         guard let token = bearerToken else { return }
         
+        LoaderManager.shared.show()
+        
         APIManager.shared.request(
             endpoint: "payment-gateway/status/\(txnId)",
             method: .get,
-            queryParams: nil,
-            body: nil,
             headers: ["Authorization": "Bearer \(token)"]
         ) { (result: Result<PaymentStatusResponse, APIManager.APIError>) in
+            
+            LoaderManager.shared.hide()
+            
             switch result {
             case .success(let response):
                 let status = response.data?.status ?? ""
-                DispatchQueue.main.async {
-                    if status == "SUCCESS" || status == "PENDING" {
-                        self.showAlert(message: "Payment Successful") {
-                            // Record the fee payment
-                            self.makeStudentFeePaymentRequest()
-                        }
-                    } else {
-                        self.showAlert(message: response.data?.errorMessage ?? "Payment Failed")
+                
+                if status == "SUCCESS" || status == "PENDING" {
+                    self.showAlert(message: "Payment Successful") {
+                        self.makeStudentFeePaymentRequest()
                     }
+                } else {
+                    self.showAlert(message: response.data?.errorMessage ?? "Payment Failed")
                 }
+                
             case .failure:
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Verification Failed")
-                }
+                self.showAlert(message: "Verification Failed")
             }
         }
     }
@@ -312,29 +301,29 @@ extension AmountPaymentVC {
         guard let token = bearerToken else { return }
         guard let body = buildPaymentBody(includeIdempotency: false) else { return }
         
+        LoaderManager.shared.show()
+        
         APIManager.shared.request(
             endpoint: "fees/student-fee-payments",
             method: .post,
-            queryParams: nil,
             body: body,
             headers: ["Authorization": "Bearer \(token)"]
         ) { (result: Result<PaymentSuccessResponse, APIManager.APIError>) in
+            
+            LoaderManager.shared.hide()
+            
             switch result {
             case .success(let response):
-                DispatchQueue.main.async {
-                    self.showAlert(message: response.message ?? "Payment Successful") {
-                        self.onPaymentSuccess?()
-                        self.navigationController?.popViewController(animated: true)
-                    }
-                    self.selectedAmounts.removeAll()
-                    self.updatePayButton()
-                    self.payableTableView.reloadData()
+                self.showAlert(message: response.message ?? "Payment Successful") {
+                    self.onPaymentSuccess?()
+                    self.navigationController?.popViewController(animated: true)
                 }
-            case .failure(let error):
-                print("❌ Payment Error:", error)
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Payment Failed")
-                }
+                self.selectedAmounts.removeAll()
+                self.updatePayButton()
+                self.payableTableView.reloadData()
+                
+            case .failure:
+                self.showAlert(message: "Payment Failed")
             }
         }
     }
@@ -347,20 +336,32 @@ extension AmountPaymentVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "PayablesTableViewCell", for: indexPath) as! PayablesTableViewCell
-        let demand = demands[indexPath.row]
-        cell.configureCell(isChecked: false, demand: demand)
         
-        cell.amountChanged = { [weak self] amount, isChecked in
+        let demand = demands[indexPath.row]
+        
+        let isChecked = selectedAmounts[indexPath.row] != nil
+        
+        cell.configureCell(
+            isChecked: isChecked,
+            demand: demand,
+            indexPath: indexPath
+        )
+
+        cell.amountChanged = { [weak self] indexPath, amount, isChecked in
+            
             guard let self = self else { return }
+            
             if isChecked {
                 self.selectedAmounts[indexPath.row] = amount
             } else {
                 self.selectedAmounts.removeValue(forKey: indexPath.row)
             }
+            
             self.updatePayButton()
         }
-        
+
         return cell
     }
     

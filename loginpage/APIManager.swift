@@ -18,14 +18,11 @@ class APIManager {
     static let shared = APIManager()
     
     enum Server: String, CaseIterable {
-//        case gcc = "https://gcc.gruppie.in/api/v1/"
-//        case gcc6 = "https://gcc6.gruppie.in/api/v1/"
+//        case newServer = "https://dev.gruppie.in/api/v1/"
         case newServer = "https://backend.gc2.co.in/api/v1/"
-        
         var priority: Int {
             switch self {
-//            case .gcc: return 0
-//            case .gcc6: return 1
+
             case .newServer: return 0
             }
         }
@@ -57,7 +54,7 @@ class APIManager {
         method: HTTPMethod,
         queryParams: [String: String]? = nil,
         body: Encodable? = nil,
-        bodyData: Data? = nil,   // ✅ NEW
+        bodyData: Data? = nil,
         headers: [String: String]? = nil,
         completion: @escaping (Result<T, APIError>) -> Void
     ) {
@@ -276,4 +273,41 @@ class APIProdManager {
     let baseURL = "https://prod.gruppie.in/api/v1/"
     
     private init() {} // Prevents others from creating another instance
+}
+
+import UIKit
+
+class LoaderManager {
+    
+    static let shared = LoaderManager()
+    
+    private var loaderView: UIView?
+    
+    private init() {}
+    
+    func show() {
+        guard let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) else { return }
+        
+        // Prevent multiple loaders
+        if loaderView != nil { return }
+        
+        let bgView = UIView(frame: window.bounds)
+        bgView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.center = bgView.center
+        activityIndicator.startAnimating()
+        
+        bgView.addSubview(activityIndicator)
+        window.addSubview(bgView)
+        
+        loaderView = bgView
+    }
+    
+    func hide() {
+        DispatchQueue.main.async {
+            self.loaderView?.removeFromSuperview()
+            self.loaderView = nil
+        }
+    }
 }

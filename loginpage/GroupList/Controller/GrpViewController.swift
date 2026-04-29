@@ -203,23 +203,30 @@ class GrpViewController: UIViewController, UICollectionViewDelegate, UICollectio
             "Authorization": "Bearer \(authToken)"
         ]
         
+        // ✅ SHOW LOADER
+        LoaderManager.shared.show()
+        
         APIManager.shared.request(
             endpoint: "groups",
             method: .get,
             headers: headers
         ) { (result: Result<GroupsResponsee, APIManager.APIError>) in
             
-            switch result {
+            DispatchQueue.main.async {
                 
-            case .success(let response):
-                print("✅ API Status:", response.status)
-                print("Response123  \(response)")
+                // ✅ HIDE LOADER
+                LoaderManager.shared.hide()
                 
-                completion(response.data)
-                
-            case .failure(let error):
-                print("❌ API failed:", error)
-                completion([])
+                switch result {
+                    
+                case .success(let response):
+                    print("✅ API Status:", response.status)
+                    completion(response.data)
+                    
+                case .failure(let error):
+                    print("❌ API failed:", error)
+                    completion([])
+                }
             }
         }
     }
