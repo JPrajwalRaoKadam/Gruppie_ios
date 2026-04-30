@@ -14,7 +14,7 @@ class PayablesTableViewCell: UITableViewCell {
     @IBOutlet weak var payableFeild: UITextField!
     
     var indexPath: IndexPath?
-    var amountChanged: ((IndexPath, Double, Bool) -> Void)?
+    var amountChanged: ((IndexPath, Double, Double, Bool) -> Void)?
     
     private var isChecked: Bool = false
     private var balanceAmount: Double = 0
@@ -111,7 +111,11 @@ class PayablesTableViewCell: UITableViewCell {
 
     private func notifyAmountChange() {
         guard let indexPath = indexPath else { return }
-        amountChanged?(indexPath, currentTotal(), isChecked)
+        
+        let fine = Double(fineFeild.text ?? "") ?? 0
+        let total = currentTotal()
+        
+        amountChanged?(indexPath, total, fine, isChecked)
     }
 
     private func currentTotal() -> Double {

@@ -20,6 +20,7 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
     var paymentMode: String = "GATEWAY"
     var selectedAmounts: [Int: Double] = [:]
     var onPaymentSuccess: (() -> Void)?
+    var selectedFines: [Int: Double] = [:]
     
     // MARK: - LIFE CYCLE
     override func viewDidLoad() {
@@ -55,10 +56,8 @@ class AmountPaymentVC: UIViewController, PayWithEasebuzzCallback {
         for (index, amount) in selectedAmounts {
             let demand = demands[index]
             let balance = demand.balance ?? 0
-            let fine = demand.fine ?? 0
-            
-            if amount > balance || (amount + fine) > balance {
-                showAlert(message: "Invalid amount selected")
+            if amount > balance {
+                showAlert(message: "Total amount exceeds balance")
                 return
             }
         }
@@ -349,14 +348,15 @@ extension AmountPaymentVC: UITableViewDelegate, UITableViewDataSource {
             indexPath: indexPath
         )
 
-        cell.amountChanged = { [weak self] indexPath, amount, isChecked in
-            
+        cell.amountChanged = { [weak self] indexPath, amount, fine, isChecked in
             guard let self = self else { return }
             
             if isChecked {
                 self.selectedAmounts[indexPath.row] = amount
+                self.selectedFines[indexPath.row] = fine
             } else {
                 self.selectedAmounts.removeValue(forKey: indexPath.row)
+                self.selectedFines.removeValue(forKey: indexPath.row)
             }
             
             self.updatePayButton()
