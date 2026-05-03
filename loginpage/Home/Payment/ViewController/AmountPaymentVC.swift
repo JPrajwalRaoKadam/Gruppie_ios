@@ -263,7 +263,15 @@ extension AmountPaymentVC {
         let allocations: [Allocation] = selectedAmounts.compactMap { index, amount in
             let demand = demands[index]
             guard let id = Int(demand.studentFeeDemandId ?? "") else { return nil }
-            return Allocation(amount: amount, fineAmount: demand.fine ?? 0, studentFeeDemandId: id)
+            
+            let fine = selectedFines[index] ?? 0
+            let feeOnly = amount - fine   // extract fee part
+            
+            return Allocation(
+                amount: feeOnly,      // ✅ only fee
+                fineAmount: fine,     // ✅ only user-entered fine
+                studentFeeDemandId: id
+            )
         }
         
         let totalSelectedAmount = selectedAmounts.values.reduce(0, +)

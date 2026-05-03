@@ -48,16 +48,40 @@ class DetailTableViewCell: UITableViewCell {
         whatsAppImageView.addGestureRecognizer(whatsAppTapGesture)
         whatsAppImageView.isUserInteractionEnabled = true
     }
+  //  func configure(with student: StudentRegistration) {
+//
+//        nameLabel.text = student.firstName
+//        designationLabel.text = student.fatherName ?? "N/A"
+//
+//        // Profile image (if available later)
+//        iconImageView.image = nil
+//        iconImageView.backgroundColor = UIColor.systemBlue
+//
+//        let firstLetter = String(student.firstName.prefix(1)).uppercased()
+//        imageLabel.text = firstLetter
+//        imageLabel.isHidden = false
+//    }
     func configure(with student: StudentRegistration) {
         
-        nameLabel.text = student.firstName
-        designationLabel.text = student.fatherName ?? "N/A"
+        // ✅ Safely build full name
+        let first = student.firstName
+        let middle = student.middleName ?? ""
+        let last = student.lastName ?? ""
+        
+        // Combine and remove extra spaces
+        let fullName = [first, middle, last]
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+        
+        nameLabel.text = fullName
+        
+        designationLabel.text = student.fatherName ?? ""
 
-        // Profile image (if available later)
+        // Profile placeholder
         iconImageView.image = nil
         iconImageView.backgroundColor = UIColor.systemBlue
 
-        let firstLetter = String(student.firstName.prefix(1)).uppercased()
+        let firstLetter = String(first.prefix(1)).uppercased()
         imageLabel.text = firstLetter
         imageLabel.isHidden = false
     }

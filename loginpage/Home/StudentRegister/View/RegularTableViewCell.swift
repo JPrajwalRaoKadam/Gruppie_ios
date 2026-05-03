@@ -27,11 +27,14 @@ class RegularTableViewCell: UITableViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        iconImageView.layer.cornerRadius = iconImageView.frame.height / 2
-        imageLabel.layer.cornerRadius = imageLabel.frame.height / 2
         
         whatsAppImageView.layer.cornerRadius = whatsAppImageView.frame.height / 2
         callImageView.layer.cornerRadius = callImageView.frame.height / 2
+        
+        iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
+        iconImageView.clipsToBounds = true
+        imageLabel.layer.cornerRadius = imageLabel.frame.width / 2
+        imageLabel.clipsToBounds = true
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -55,6 +58,7 @@ class RegularTableViewCell: UITableViewCell {
 //        imageLabel.textColor = .black
 //        
 //    }
+    
     private func setupUI() {
         iconImageView.layer.cornerRadius = iconImageView.frame.width / 2
         iconImageView.clipsToBounds = true
@@ -75,33 +79,25 @@ class RegularTableViewCell: UITableViewCell {
         whatsAppImageView.addGestureRecognizer(whatsAppTapGesture)
         whatsAppImageView.isUserInteractionEnabled = true
     }
-
-//    func configure(name: String, designation: Int, icon: UIImage?, phoneNumber: String) {
-//        nameLabel.text = name
-//        designationLabel.text = "Students: \(designation)"
-//
-//        if let image = icon {
-//            iconImageView.image = image
-//            imageLabel.isHidden = true
-//        } else {
-//            iconImageView.image = nil
-//            imageLabel.text = String(name.prefix(1)).uppercased()
-//            imageLabel.textColor = .black // Better contrast
-//            imageLabel.font = UIFont.boldSystemFont(ofSize: 17)
-//            imageLabel.textAlignment = .center
-//            imageLabel.isHidden = false
-//        }
-//                setNeedsLayout()
-//    }
-    func configure(name: String, studentCount: Int) {
+    
+    func configure(name: String, studentCount: Int, icon: UIImage? = nil) {
+        
         nameLabel.text = name
         designationLabel.text = "Students: \(studentCount)"
-
-        iconImageView.image = UIImage(named: "default_profile")
-        imageLabel.isHidden = true
+        
+        if let image = icon {
+            iconImageView.image = image
+            imageLabel.isHidden = true
+        } else {
+            iconImageView.image = nil
+            iconImageView.backgroundColor = UIColor.systemBlue
+            
+            let firstLetter = String(name.prefix(1)).uppercased()
+            imageLabel.text = firstLetter
+            imageLabel.isHidden = false
+        }
     }
-
-
+    
     @objc private func callTapped() {
         print("Call button tapped")
     }

@@ -10,10 +10,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Add Student View Controller-->
+        <!--Addnew StudentVC-->
         <scene sceneID="qAn-D7-7kb">
             <objects>
-                <viewController storyboardIdentifier="AddStudentViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="M1r-g0-s0a" customClass="AddStudentViewController" customModule="loginpage" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AddnewStudentVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="M1r-g0-s0a" customClass="AddnewStudentVC" customModule="loginpage" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="mXe-d5-QDm">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -33,7 +33,7 @@
                                             <imageReference key="image" image="arrow.backward" catalog="system" symbolScale="medium"/>
                                         </state>
                                         <connections>
-                                            <action selector="BackButton:" destination="M1r-g0-s0a" eventType="touchUpInside" id="TlQ-bX-X13"/>
+                                            <action selector="backButton:" destination="M1r-g0-s0a" eventType="touchUpInside" id="Wfq-el-Mjp"/>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Add Student" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GaC-1l-LQD">
@@ -65,16 +65,14 @@
                                 <rect key="frame" x="198" y="766" width="180" height="48"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="48" id="9xX-SV-leo"/>
-                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="180" id="aFT-Yy-8ul"/>
-                                    <constraint firstAttribute="height" constant="48" id="awp-TB-h5G"/>
-                                    <constraint firstAttribute="width" constant="180" id="cpn-J6-6uI"/>
+                                    <constraint firstAttribute="height" constant="48" id="UNV-sl-rkg"/>
+                                    <constraint firstAttribute="width" constant="180" id="WwC-IQ-QeI"/>
                                 </constraints>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                 <state key="normal" title="ADD"/>
                                 <connections>
-                                    <action selector="addButtonAction:" destination="M1r-g0-s0a" eventType="touchUpInside" id="NwB-KK-Rx4"/>
+                                    <action selector="addButtonTapped:" destination="M1r-g0-s0a" eventType="touchUpInside" id="hyL-47-mMW"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -83,19 +81,19 @@
                         <constraints>
                             <constraint firstItem="tiB-bO-49Y" firstAttribute="top" secondItem="cnq-OM-14V" secondAttribute="bottom" constant="15" id="2iD-5e-1R9"/>
                             <constraint firstItem="cnq-OM-14V" firstAttribute="leading" secondItem="dA9-mV-Qmf" secondAttribute="leading" id="6ll-6W-mvo"/>
+                            <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="Fbz-O6-egz" secondAttribute="trailing" constant="15" id="8J2-5Z-anp"/>
                             <constraint firstItem="tiB-bO-49Y" firstAttribute="bottom" secondItem="dA9-mV-Qmf" secondAttribute="bottom" constant="-26" id="Dml-F9-tmw"/>
+                            <constraint firstAttribute="bottom" secondItem="Fbz-O6-egz" secondAttribute="bottom" constant="38" id="MM6-FV-OCL"/>
                             <constraint firstItem="cnq-OM-14V" firstAttribute="top" secondItem="dA9-mV-Qmf" secondAttribute="top" id="Pk3-mA-xRC"/>
                             <constraint firstItem="tiB-bO-49Y" firstAttribute="leading" secondItem="dA9-mV-Qmf" secondAttribute="leading" constant="15" id="Tjr-aK-jwh"/>
                             <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="cnq-OM-14V" secondAttribute="trailing" id="X7k-Le-LWT"/>
-                            <constraint firstItem="Fbz-O6-egz" firstAttribute="top" secondItem="tiB-bO-49Y" secondAttribute="bottom" constant="8" id="fbR-p5-J9m"/>
                             <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="tiB-bO-49Y" secondAttribute="trailing" constant="15" id="rio-rS-Eud"/>
-                            <constraint firstItem="dA9-mV-Qmf" firstAttribute="trailing" secondItem="Fbz-O6-egz" secondAttribute="trailing" constant="15" id="vsF-tQ-d0G"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="TableView" destination="tiB-bO-49Y" id="22E-xm-Wvi"/>
                         <outlet property="addButton" destination="Fbz-O6-egz" id="I6M-cg-xei"/>
                         <outlet property="backButton" destination="VQB-Wo-Mg3" id="0Vj-27-ynS"/>
+                        <outlet property="tableView" destination="tiB-bO-49Y" id="D7k-Ol-GoC"/>
                     </connections>
                 </viewController>
                 <navigationItem id="gOW-a6-Xev"/>

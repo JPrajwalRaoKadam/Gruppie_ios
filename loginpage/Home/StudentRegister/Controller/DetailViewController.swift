@@ -198,9 +198,13 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
 
     private func navigateToAddStudentViewController() {
         let storyboard = UIStoryboard(name: "Student", bundle: nil)
-        if let addStudentVC = storyboard.instantiateViewController(withIdentifier: "AddStudentViewController") as? AddStudentViewController {
+        if let addStudentVC = storyboard.instantiateViewController(withIdentifier: "AddnewStudentVC") as? AddnewStudentVC {
             addStudentVC.classId = self.classId
             addStudentVC.newStudentDetails = self.studentDetails
+            // ✅ Callback
+                addStudentVC.onStudentAdded = { [weak self] in
+                    self?.fetchStudentList()  // 🔄 reload API
+                }
             self.navigationController?.pushViewController(addStudentVC, animated: true)
         }
     }
