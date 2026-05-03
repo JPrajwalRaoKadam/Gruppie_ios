@@ -1003,43 +1003,43 @@ extension StudentVC: AttendanceSubmitDelegate {
         }
     }
     
-    func showToast(message: String) {
-        // Prevent multiple toasts from showing simultaneously
-        guard !isShowingToast else { return }
-        isShowingToast = true
-        
-        let toastLabel = UILabel()
-        toastLabel.text = message
-        toastLabel.textAlignment = .center
-        toastLabel.font = UIFont.systemFont(ofSize: 14)
-        toastLabel.textColor = .white
-        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-        toastLabel.alpha = 0
-        toastLabel.numberOfLines = 0
-        toastLabel.layer.cornerRadius = 8
-        toastLabel.clipsToBounds = true
-
-        let maxWidth = self.view.frame.size.width - 40
-        let size = toastLabel.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-        
-        toastLabel.frame = CGRect(
-            x: 20,
-            y: self.view.frame.size.height - 100,
-            width: maxWidth,
-            height: size.height + 20
-        )
-
-        self.view.addSubview(toastLabel)
-
-        UIView.animate(withDuration: 0.5, animations: {
-            toastLabel.alpha = 1.0
-        }) { _ in
-            UIView.animate(withDuration: 0.5, delay: 2.0, options: .curveEaseOut, animations: {
-                toastLabel.alpha = 0.0
-            }) { _ in
-                toastLabel.removeFromSuperview()
-                self.isShowingToast = false
-            }
-        }
-    }
+//    func showToast(message: String) {
+//        // Prevent multiple toasts from showing simultaneously
+//        guard !isShowingToast else { return }
+//        isShowingToast = true
+//        
+//        let toastLabel = UILabel()
+//        toastLabel.text = message
+//        toastLabel.textAlignment = .center
+//        toastLabel.font = UIFont.systemFont(ofSize: 14)
+//        toastLabel.textColor = .white
+//        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+//        toastLabel.alpha = 0
+//        toastLabel.numberOfLines = 0
+//        toastLabel.layer.cornerRadius = 8
+//        toastLabel.clipsToBounds = true
+//
+//        let maxWidth = self.view.frame.size.width - 40
+//        let size = toastLabel.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+//        
+//        toastLabel.frame = CGRect(
+//            x: 20,
+//            y: self.view.frame.size.height - 100,
+//            width: maxWidth,
+//            height: size.height + 20
+//        )
+//
+//        self.view.addSubview(toastLabel)
+//
+//        UIView.animate(withDuration: 0.5, animations: {
+//            toastLabel.alpha = 1.0
+//        }) { _ in
+//            UIView.animate(withDuration: 0.5, delay: 2.0, options: .curveEaseOut, animations: {
+//                toastLabel.alpha = 0.0
+//            }) { _ in
+//                toastLabel.removeFromSuperview()
+//                self.isShowingToast = false
+//            }
+//        }
+//    }
 }

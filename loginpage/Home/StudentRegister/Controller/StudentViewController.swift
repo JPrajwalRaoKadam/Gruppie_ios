@@ -256,14 +256,14 @@ class StudentViewController: UIViewController, UITableViewDelegate, UITableViewD
         enableKeyboardDismissOnTap()
         
         // Add tap gesture to dismiss keyboard and handle selection properly
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+//        tapGesture.cancelsTouchesInView = false
+//        view.addGestureRecognizer(tapGesture)
     }
     
-    @objc func dismissKeyboard() {
-        view.endEditing(true)
-    }
+//    @objc func dismissKeyboard() {
+//        view.endEditing(true)
+//    }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
