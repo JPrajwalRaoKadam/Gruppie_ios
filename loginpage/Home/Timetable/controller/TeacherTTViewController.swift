@@ -15,7 +15,6 @@ class TeacherTTViewController: UIViewController {
     let weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     
     var expandedSections: Set<Int> = []
-    
     var allPeriods: [String] = []
     var subjectNames: [String] = []
     var teacherNames: [String] = []

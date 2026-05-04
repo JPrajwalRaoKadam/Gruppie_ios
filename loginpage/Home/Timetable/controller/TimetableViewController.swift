@@ -52,11 +52,9 @@ class DayPickerViewController: UIViewController {
         doneButton.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(doneButton)
         
-        // Picker View
         pickerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(pickerView)
         
-        // Separators
         let topSeparator = UIView()
         topSeparator.backgroundColor = UIColor.lightGray.withAlphaComponent(0.3)
         topSeparator.translatesAutoresizingMaskIntoConstraints = false
@@ -67,7 +65,6 @@ class DayPickerViewController: UIViewController {
         bottomSeparator.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(bottomSeparator)
         
-        // Constraints
         NSLayoutConstraint.activate([
             containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -199,6 +196,30 @@ class TimetableViewController: UIViewController {
     
     // Week picker
     private var weekDays: [String] = []
+    
+    // MARK: - Loader Properties
+    let loaderContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        view.isHidden = true
+        return view
+    }()
+    
+    let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
+    let loaderLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Loading timetable..."
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        label.textAlignment = .center
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -225,6 +246,9 @@ class TimetableViewController: UIViewController {
 
         setupWeekDays()
         updateDateButtonTitle()
+        
+        // Setup loader
+        setupLoader()
 
         print("\n========== TIMETABLE VIEW CONTROLLER LOADED ==========")
         print("📅 Current Date: \(getFormattedDate())")
@@ -233,12 +257,43 @@ class TimetableViewController: UIViewController {
         fetchDays()
     }
     
-    private func setupWeekDays() {
-        // Get all weekdays in order (Monday to Sunday)
-        let dateFormatter = DateFormatter()
-        weekDays = dateFormatter.weekdaySymbols // Returns ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    // MARK: - Setup Loader Function
+    func setupLoader() {
+        loaderContainer.frame = view.bounds
+        loaderContainer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
-        // Reorder to start from Monday
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        loaderLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        loaderContainer.addSubview(activityIndicator)
+        loaderContainer.addSubview(loaderLabel)
+        view.addSubview(loaderContainer)
+        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: loaderContainer.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: loaderContainer.centerYAnchor, constant: -10),
+            
+            loaderLabel.centerXAnchor.constraint(equalTo: loaderContainer.centerXAnchor),
+            loaderLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 10)
+        ])
+    }
+    
+    // MARK: - Show Loader Function
+    func showLoader(_ show: Bool, message: String = "Loading timetable...") {
+        DispatchQueue.main.async {
+            self.loaderLabel.text = message
+            self.loaderContainer.isHidden = !show
+            if show {
+                self.activityIndicator.startAnimating()
+            } else {
+                self.activityIndicator.stopAnimating()
+            }
+        }
+    }
+    
+    private func setupWeekDays() {
+        let dateFormatter = DateFormatter()
+        weekDays = dateFormatter.weekdaySymbols
         if let mondayIndex = weekDays.firstIndex(of: "Monday") {
             let mondayToSunday = Array(weekDays[mondayIndex...]) + Array(weekDays[..<mondayIndex])
             weekDays = mondayToSunday
@@ -276,10 +331,14 @@ class TimetableViewController: UIViewController {
     func fetchDays() {
         print("\n========== FETCHING DAYS API ==========")
         
+        // Show loader when fetching days
+        showLoader(true, message: "Loading days...")
+        
         guard let token = SessionManager.useRoleToken else {
             print("❌ No token found in SessionManager")
             DispatchQueue.main.async {
                 self.tableView.refreshControl?.endRefreshing()
+                self.showLoader(false)
                 self.showErrorMessage("Authentication failed. Please login again.")
             }
             return
@@ -288,6 +347,7 @@ class TimetableViewController: UIViewController {
 
         guard let url = URL(string: "https://backend.gc2.co.in/api/v1/days") else {
             print("❌ Invalid URL for days API")
+            showLoader(false)
             return
         }
         print("🌐 Days API URL: \(url)")
@@ -302,6 +362,7 @@ class TimetableViewController: UIViewController {
                 print("❌ Days API Error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.tableView.refreshControl?.endRefreshing()
+                    self.showLoader(false)
                     self.showErrorMessage("Network error: \(error.localizedDescription)")
                 }
                 return
@@ -311,12 +372,12 @@ class TimetableViewController: UIViewController {
                 print("❌ No data received from Days API")
                 DispatchQueue.main.async {
                     self.tableView.refreshControl?.endRefreshing()
+                    self.showLoader(false)
                     self.showErrorMessage("No data received from server")
                 }
                 return
             }
             
-            // Print HTTP status code
             if let httpResponse = response as? HTTPURLResponse {
                 print("📋 HTTP Status Code: \(httpResponse.statusCode)")
                 
@@ -324,6 +385,7 @@ class TimetableViewController: UIViewController {
                     print("❌ Unauthorized - Token may be invalid or expired")
                     DispatchQueue.main.async {
                         self.tableView.refreshControl?.endRefreshing()
+                        self.showLoader(false)
                         self.showErrorMessage("Session expired. Please login again.")
                     }
                     return
@@ -356,6 +418,7 @@ class TimetableViewController: UIViewController {
                 print("❌ Days Decode Error: \(error)")
                 DispatchQueue.main.async {
                     self.tableView.refreshControl?.endRefreshing()
+                    self.showLoader(false)
                     self.showErrorMessage("Failed to parse days data")
                 }
             }
@@ -367,10 +430,14 @@ class TimetableViewController: UIViewController {
         print("\n========== FETCHING DAILY SUMMARY API ==========")
         print("📅 Day ID: \(dayId)")
         
+        // Show loader with specific message for fetching timetable
+        showLoader(true, message: "Loading timetable...")
+        
         guard let token = SessionManager.useRoleToken else {
             print("❌ No token found in SessionManager")
             DispatchQueue.main.async {
                 self.tableView.refreshControl?.endRefreshing()
+                self.showLoader(false)
                 self.showErrorMessage("Authentication failed")
             }
             return
@@ -382,6 +449,7 @@ class TimetableViewController: UIViewController {
         
         guard let url = URL(string: urlString) else {
             print("❌ Invalid URL")
+            showLoader(false)
             return
         }
 
@@ -395,6 +463,7 @@ class TimetableViewController: UIViewController {
                 print("❌ Summary API Error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.tableView.refreshControl?.endRefreshing()
+                    self.showLoader(false)
                     self.showErrorMessage("Network error: \(error.localizedDescription)")
                 }
                 return
@@ -404,6 +473,7 @@ class TimetableViewController: UIViewController {
                 print("❌ No data received from Summary API")
                 DispatchQueue.main.async {
                     self.tableView.refreshControl?.endRefreshing()
+                    self.showLoader(false)
                     self.showErrorMessage("No data received")
                 }
                 return
@@ -417,6 +487,7 @@ class TimetableViewController: UIViewController {
                     print("❌ Unauthorized - Token may be invalid")
                     DispatchQueue.main.async {
                         self.tableView.refreshControl?.endRefreshing()
+                        self.showLoader(false)
                         self.showErrorMessage("Session expired. Please login again.")
                     }
                     return
@@ -426,6 +497,7 @@ class TimetableViewController: UIViewController {
                     print("❌ Server error: HTTP \(httpResponse.statusCode)")
                     DispatchQueue.main.async {
                         self.tableView.refreshControl?.endRefreshing()
+                        self.showLoader(false)
                         self.showErrorMessage("Server error: HTTP \(httpResponse.statusCode)")
                     }
                     return
@@ -471,6 +543,8 @@ class TimetableViewController: UIViewController {
                     
                     self.tableView.reloadData()
                     self.tableView.refreshControl?.endRefreshing()
+                    // Hide loader after data is loaded
+                    self.showLoader(false)
                 }
 
             } catch {
@@ -480,6 +554,7 @@ class TimetableViewController: UIViewController {
                 }
                 DispatchQueue.main.async {
                     self.tableView.refreshControl?.endRefreshing()
+                    self.showLoader(false)
                     self.showErrorMessage("Failed to parse timetable data")
                 }
             }
@@ -499,6 +574,7 @@ class TimetableViewController: UIViewController {
         } else {
             print("⚠️ No matching day found for: \(selectedDayName)")
             print("Available days: \(daysList.map { $0.name }.joined(separator: ", "))")
+            showLoader(false)
             showErrorMessage("No timetable available for \(selectedDayName)")
         }
     }
@@ -551,7 +627,6 @@ class TimetableViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
         if let periodVC = storyboard.instantiateViewController(withIdentifier: "PeriodViewController") as? PeriodViewController {
 
-            // ✅ Pass all the data
             periodVC.groupId = groupId
             periodVC.token = token
             periodVC.teamIds = teamIds

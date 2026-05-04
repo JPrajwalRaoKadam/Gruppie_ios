@@ -126,7 +126,7 @@ class AddnewStudentVC: UIViewController, PersonalInfocellDelegate {
         
         print("📤 student-registration payload =", payload)
         
-        let urlString = "https://dev.gruppie.in/api/v1/student/full-registration"
+        let urlString = "https://backend.gc2.co.in/api/v1/student/full-registration"
         
         var request = URLRequest(url: URL(string: urlString)!)
         request.httpMethod = "POST"

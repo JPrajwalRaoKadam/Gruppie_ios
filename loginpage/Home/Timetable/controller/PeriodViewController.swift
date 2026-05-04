@@ -19,7 +19,7 @@ class PeriodViewController: UIViewController {
     var subjects: [SubjectData] = []
     var day: Int = 0
     var periods: [PeriodData] = []
-    var className: String? // new property to hold the class name
+    var className: String?
     var flowMode : subjectsView = .subject
     
     
@@ -32,22 +32,19 @@ class PeriodViewController: UIViewController {
                 case .days:
                     addButton.isHidden = true
                 }
-        // Set delegates and datasource
+
         tableView.delegate = self
         tableView.dataSource = self
         
-        // Register tableview cell nib
         let nib = UINib(nibName: "PeriodTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "PeriodTableViewCell")
         
-        // UI styling
         tableView.layer.cornerRadius = 10
         tableView.layer.masksToBounds = true
         backButton.layer.cornerRadius = backButton.frame.size.height / 2
         backButton.clipsToBounds = true
         backButton.layer.masksToBounds = true
         
-        // Debug print received data
         print("✅ Received Data in PeriodViewController:")
         print("✅ classId:\(classId)")
         print("✅ groupAcademicYearId:\(groupAcademicYearId)")
@@ -57,7 +54,6 @@ class PeriodViewController: UIViewController {
         print("Token: \(token)")
         print("Periods count: \(periods.count)")
         
-        // Print the full periods array as JSON for complete console output
         if !periods.isEmpty {
             do {
                 let jsonData = try JSONEncoder().encode(periods)
@@ -114,16 +110,16 @@ class PeriodViewController: UIViewController {
         }
         task.resume()
     }
+    
     @IBAction func addButtonTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
         if let periodDetailVC = storyboard.instantiateViewController(withIdentifier: "PeriodDetailViewController") as? PeriodDetailViewController {
             
-            // Pass all required data
             periodDetailVC.token = token
             periodDetailVC.groupId = groupId
             periodDetailVC.day = day
             periodDetailVC.classId = classId
-            periodDetailVC.groupAcademicYearId = groupAcademicYearId      // ✅ Pass classId here
+            periodDetailVC.groupAcademicYearId = groupAcademicYearId
             periodDetailVC.className = className ?? ""
             
             navigationController?.pushViewController(periodDetailVC, animated: true)
@@ -142,7 +138,7 @@ extension PeriodViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         let periodData = periods[indexPath.row]
-        cell.configure(with: periodData) // ✅ Use the new configure method
+        cell.configure(with: periodData)
         
         return cell
     }
@@ -153,11 +149,10 @@ extension PeriodViewController: UITableViewDelegate, UITableViewDataSource {
         let storyboard = UIStoryboard(name: "Timetable", bundle: nil)
         if let periodDetailVC = storyboard.instantiateViewController(withIdentifier: "PeriodDetailViewController") as? PeriodDetailViewController {
             
-            // Pass all required data
             periodDetailVC.token = token
             periodDetailVC.groupId = groupId
             periodDetailVC.classId = classId
-            periodDetailVC.groupAcademicYearId = groupAcademicYearId      // ✅ Pass classId here
+            periodDetailVC.groupAcademicYearId = groupAcademicYearId
             periodDetailVC.day = day
 //            periodDetailVC.periodData = selectedPeriod
             

@@ -17,6 +17,23 @@ class GalleryViewController: UIViewController {
     var totalPages = 1
 
     let spinner = UIActivityIndicatorView(style: .large)
+    
+    // Add a loading view to show while albums are loading
+    let loadingView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.systemBackground
+        view.isHidden = true
+        return view
+    }()
+    
+    let loadingLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Loading albums..."
+        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .gray
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,7 +80,10 @@ class GalleryViewController: UIViewController {
         collectionView.addGestureRecognizer(longPressGesture)
 
         setupLoadingSpinner()
-        fetchAlbumList(page: currentPage)
+        setupLoadingView()
+        
+        // Call load function to start loading albums
+        loadAlbums()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -90,14 +110,72 @@ class GalleryViewController: UIViewController {
         spinner.center = view.center
         view.addSubview(spinner)
     }
+    
+    func setupLoadingView() {
+        loadingView.frame = view.bounds
+        loadingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        loadingLabel.frame = CGRect(x: 0, y: 0, width: 200, height: 50)
+        loadingLabel.center = loadingView.center
+        loadingView.addSubview(loadingLabel)
+        view.addSubview(loadingView)
+    }
+    
+    // MARK: - Load Function
+    func loadAlbums() {
+        // Show loading state
+        showLoadingState(true)
+        
+        // Reset pagination
+        currentPage = 1
+        totalPages = 1
+        albums = []
+        collectionView.reloadData()
+        
+        // Start fetching from first page
+        fetchAlbumList(page: currentPage)
+    }
+    
+    func showLoadingState(_ isLoading: Bool) {
+        if isLoading {
+            loadingView.isHidden = false
+            collectionView.isHidden = true
+            addButton.isEnabled = false
+        } else {
+            loadingView.isHidden = true
+            collectionView.isHidden = false
+            addButton.isEnabled = true
+        }
+    }
+    
+    // MARK: - Optional Loading Cell Methods (Commented out due to AlbumData initializer issue)
+    // If you want to use loading cells, you'll need to either:
+    // 1. Make AlbumData initializer with default values, or
+    // 2. Create a separate loading cell type
+    
+    /*
+    func showLoadingCell() {
+        // This requires AlbumData to have an initializer with default values
+        // Uncomment and modify based on your AlbumData structure
+        let loadingCellIndex = albums.count
+        // albums.append(AlbumData(albumId: "", albumName: "Loading...", fileName: []))
+        // collectionView.insertItems(at: [IndexPath(item: loadingCellIndex, section: 0)])
+    }
+    
+    func removeLoadingCell() {
+        if let lastAlbum = albums.last, lastAlbum.albumName == "Loading..." {
+            albums.removeLast()
+            collectionView.deleteItems(at: [IndexPath(item: albums.count, section: 0)])
+        }
+    }
+    */
 
     func fetchAlbumList(page: Int) {
         guard !isLoading else { return }
 
         guard let token = SessionManager.useRoleToken else {
             print("Token\(token) ")
-
             print("❌ Token missing")
+            showLoadingState(false)
             return
         }
         self.token = token
@@ -109,6 +187,7 @@ class GalleryViewController: UIViewController {
         guard let url = URL(string: apiUrlString) else {
             print("❌ Invalid URL:", apiUrlString)
             isLoading = false
+            showLoadingState(false)
             return
         }
 
@@ -127,22 +206,34 @@ class GalleryViewController: UIViewController {
 
             if let error = error {
                 print("❌ Network Error:", error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.showLoadingState(false)
+                }
                 return
             }
 
             guard let httpResponse = response as? HTTPURLResponse else {
                 print("❌ Invalid response")
+                DispatchQueue.main.async {
+                    self.showLoadingState(false)
+                }
                 return
             }
 
             print("📡 Status Code:", httpResponse.statusCode)
             guard (200...299).contains(httpResponse.statusCode) else {
                 print("❌ API failed with status:", httpResponse.statusCode)
+                DispatchQueue.main.async {
+                    self.showLoadingState(false)
+                }
                 return
             }
 
             guard let data = data else {
                 print("❌ No data received")
+                DispatchQueue.main.async {
+                    self.showLoadingState(false)
+                }
                 return
             }
 
@@ -159,6 +250,8 @@ class GalleryViewController: UIViewController {
                     if page == 1 {
                         self.albums = response.data
                         self.collectionView.reloadData()
+                        // Hide loading view when data is loaded
+                        self.showLoadingState(false)
                     } else {
                         let startIndex = self.albums.count
                         self.albums.append(contentsOf: response.data)
@@ -175,6 +268,9 @@ class GalleryViewController: UIViewController {
 
             } catch {
                 print("❌ Decoding Error:", error)
+                DispatchQueue.main.async {
+                    self.showLoadingState(false)
+                }
             }
 
 
@@ -262,6 +358,18 @@ class GalleryViewController: UIViewController {
             
         }.resume()
     }
+    
+    // Optional: Add refresh control
+    func addRefreshControl() {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshAlbums), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+    }
+    
+    @objc func refreshAlbums() {
+        loadAlbums()
+        collectionView.refreshControl?.endRefreshing()
+    }
 
     @IBAction func BackButton(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
@@ -327,6 +435,9 @@ extension GalleryViewController: UICollectionViewDelegate,
                         didSelectItemAt indexPath: IndexPath) {
 
         let album = albums[indexPath.item]
+        
+        // Check if it's a loading cell (if you implement loading cells)
+        // guard album.albumName != "Loading..." else { return }
 
         let storyboard = UIStoryboard(name: "Gallery", bundle: nil)
 
@@ -353,7 +464,7 @@ extension GalleryViewController: UICollectionViewDelegate,
         let contentHeight = collectionView.contentSize.height
 
         if position > contentHeight - scrollView.frame.height * 1.5 {
-            if currentPage < totalPages {
+            if currentPage < totalPages && !isLoading {
                 currentPage += 1
                 fetchAlbumList(page: currentPage)
             }

@@ -23,12 +23,44 @@ class PeriodDetailViewController: UIViewController {
     var token: String = ""
     var groupId: String = ""
     var day: Int = 0
+    
+    // MARK: - Loader Properties
+    let loaderContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        view.isHidden = true
+        return view
+    }()
+    
+    let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
+    let loaderLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Loading schedule..."
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        label.textAlignment = .center
+        return label
+    }()
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
         print("\n========== PERIOD DETAIL VIEW CONTROLLER LOADED ==========")
+        
+        // Hide contentView at start
+        if contentView != nil {
+            contentView.isHidden = true
+            print("✅ contentView has been hidden")
+        } else {
+            print("❌ contentView outlet is nil")
+        }
         
         // Verify outlets
         verifyOutlets()
@@ -74,6 +106,9 @@ class PeriodDetailViewController: UIViewController {
             print("✅ TableView setup complete")
         }
 
+        // Setup loader
+        setupLoader()
+        
         // Print received data
         print("\n📊 Received Data in PeriodDetailViewController:")
         print("   - classId: \(classId ?? "nil")")
@@ -84,6 +119,40 @@ class PeriodDetailViewController: UIViewController {
 
         // Fetch schedule from API
         fetchSchedule()
+    }
+    
+    // MARK: - Setup Loader Function
+    func setupLoader() {
+        loaderContainer.frame = view.bounds
+        loaderContainer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        loaderLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        loaderContainer.addSubview(activityIndicator)
+        loaderContainer.addSubview(loaderLabel)
+        view.addSubview(loaderContainer)
+        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: loaderContainer.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: loaderContainer.centerYAnchor, constant: -10),
+            
+            loaderLabel.centerXAnchor.constraint(equalTo: loaderContainer.centerXAnchor),
+            loaderLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 10)
+        ])
+    }
+    
+    // MARK: - Show Loader Function
+    func showLoader(_ show: Bool, message: String = "Loading schedule...") {
+        DispatchQueue.main.async {
+            self.loaderLabel.text = message
+            self.loaderContainer.isHidden = !show
+            if show {
+                self.activityIndicator.startAnimating()
+            } else {
+                self.activityIndicator.stopAnimating()
+            }
+        }
     }
     
     private func verifyOutlets() {
@@ -131,9 +200,13 @@ class PeriodDetailViewController: UIViewController {
     func fetchSchedule() {
         print("\n========== FETCHING SCHEDULE API ==========")
         
+        // Show loader
+        showLoader(true, message: "Loading schedule...")
+        
         // Validate required parameters
         guard let classId = classId else {
             print("❌ Error: classId is nil")
+            showLoader(false)
             showErrorMessage("Class ID is missing")
             return
         }
@@ -141,6 +214,7 @@ class PeriodDetailViewController: UIViewController {
         
         guard let yearId = groupAcademicYearId else {
             print("❌ Error: groupAcademicYearId is nil")
+            showLoader(false)
             showErrorMessage("Academic Year ID is missing")
             return
         }
@@ -150,6 +224,7 @@ class PeriodDetailViewController: UIViewController {
         guard let savedToken = UserDefaults.standard.string(forKey: "user_role_Token"), !savedToken.isEmpty else {
             print("❌ Error: No token found in UserDefaults")
             print("   Key 'user_role_Token' not found or empty")
+            showLoader(false)
             showErrorMessage("Authentication token not found")
             return
         }
@@ -162,6 +237,7 @@ class PeriodDetailViewController: UIViewController {
         
         guard let url = URL(string: apiUrlString) else {
             print("❌ Invalid URL: \(apiUrlString)")
+            showLoader(false)
             showErrorMessage("Invalid API URL")
             return
         }
@@ -178,6 +254,7 @@ class PeriodDetailViewController: UIViewController {
             if let error = error {
                 print("❌ Network Error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
+                    self.showLoader(false)
                     self.showErrorMessage("Network error: \(error.localizedDescription)")
                 }
                 return
@@ -190,6 +267,7 @@ class PeriodDetailViewController: UIViewController {
                 if httpResponse.statusCode == 401 {
                     print("❌ Unauthorized - Token may be invalid or expired")
                     DispatchQueue.main.async {
+                        self.showLoader(false)
                         self.showErrorMessage("Session expired. Please login again.")
                     }
                     return
@@ -198,6 +276,7 @@ class PeriodDetailViewController: UIViewController {
                 if httpResponse.statusCode != 200 {
                     print("❌ Server error: HTTP \(httpResponse.statusCode)")
                     DispatchQueue.main.async {
+                        self.showLoader(false)
                         self.showErrorMessage("Server error: HTTP \(httpResponse.statusCode)")
                     }
                     return
@@ -208,6 +287,7 @@ class PeriodDetailViewController: UIViewController {
             guard let data = data else {
                 print("❌ No data received from API")
                 DispatchQueue.main.async {
+                    self.showLoader(false)
                     self.showErrorMessage("No data received from server")
                 }
                 return
@@ -235,6 +315,7 @@ class PeriodDetailViewController: UIViewController {
                 guard let responseData = decoded.data else {
                     print("❌ Response data is nil")
                     DispatchQueue.main.async {
+                        self.showLoader(false)
                         self.showErrorMessage("No schedule data available")
                         self.tableView?.reloadData()
                     }
@@ -292,6 +373,8 @@ class PeriodDetailViewController: UIViewController {
                     self.daySchedules = sortedSchedules
                     print("\n✅ Updating UI with \(self.daySchedules.count) days")
                     self.tableView?.reloadData()
+                    // Hide loader after data is loaded
+                    self.showLoader(false)
                     
                     if self.daySchedules.isEmpty {
                         print("⚠️ No schedules found for this class")
@@ -320,6 +403,7 @@ class PeriodDetailViewController: UIViewController {
                 }
                 
                 DispatchQueue.main.async {
+                    self.showLoader(false)
                     self.showErrorMessage("Failed to parse schedule data")
                     self.tableView?.reloadData()
                 }
@@ -381,7 +465,7 @@ extension PeriodDetailViewController: UITableViewDelegate, UITableViewDataSource
         print("\n========== DAY SELECTED ==========")
         
         let selectedDay = daySchedules[indexPath.row]
-        print("📅 Selected Day: \(selectedDay.dayName)")
+//        print("📅 Selected Day: \(selectedDay.dayName}")
         print("   Periods count: \(selectedDay.periods.count)")
         
         let storyboard = UIStoryboard(name: "Timetable", bundle: nil)

@@ -24,6 +24,30 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     var selectedIndices: [Int] = []
     var mediaItems: [UIImage] = []
     var mediaItemsStrings: [String] = []
+    
+    // MARK: - Loader Properties
+    let loaderContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        view.isHidden = true
+        return view
+    }()
+    
+    let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
+    let loaderLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Loading media..."
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        label.textAlignment = .center
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,8 +91,46 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         backButton.layer.masksToBounds = true
 
         albumName.text = albumNameString
+        
+        // Setup loader
+        setupLoader()
+        
         loadImages()
         loadVideos()
+    }
+    
+    // MARK: - Setup Loader Function
+    func setupLoader() {
+        loaderContainer.frame = view.bounds
+        loaderContainer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        loaderLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        loaderContainer.addSubview(activityIndicator)
+        loaderContainer.addSubview(loaderLabel)
+        view.addSubview(loaderContainer)
+        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: loaderContainer.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: loaderContainer.centerYAnchor, constant: -10),
+            
+            loaderLabel.centerXAnchor.constraint(equalTo: loaderContainer.centerXAnchor),
+            loaderLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 10)
+        ])
+    }
+    
+    // MARK: - Show Loader Function
+    func showLoader(_ show: Bool, message: String = "Loading media...") {
+        DispatchQueue.main.async {
+            self.loaderLabel.text = message
+            self.loaderContainer.isHidden = !show
+            if show {
+                self.activityIndicator.startAnimating()
+            } else {
+                self.activityIndicator.stopAnimating()
+            }
+        }
     }
 
     
@@ -542,6 +604,9 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
     }
     
     func loadImages() {
+        // Show loader when starting to load images
+        showLoader(true, message: "Loading images...")
+        
         let dispatchGroup = DispatchGroup()
         var tempMediaItems: [MediaType] = []
 
@@ -631,6 +696,8 @@ class DetailGalleryViewController: UIViewController, UIImagePickerControllerDele
         dispatchGroup.notify(queue: .main) {
             self.processedMediaItems = tempMediaItems
             self.CollectionView.reloadData()
+            // Hide loader when all images are loaded
+            self.showLoader(false)
             print("✅ Finished loading all media items: \(self.processedMediaItems.count)")
         }
     }
